@@ -2,7 +2,7 @@
 
 ## Le pitch
 
-Un roguelite de cartes de survie zombie. Le jour, tu fortifies ta maison avec des cartes : barricades, survivants armés, pièges, objets. La nuit, la horde sort des bois et attaque en temps réel. Survis 10 nuits jusqu'à l'arrivée des secours.
+Un roguelite de cartes de survie zombie, **sans fin**. Le jour, tu fortifies ta maison avec des cartes : barricades, survivants armés, pièges, objets. La nuit, la horde sort des bois et attaque en temps réel. Il n'y a pas de secours : le but est de survivre une nuit de plus, encore et encore. Le joueur doit toujours se sentir en détresse.
 
 Public visé : grand public, fans de survie zombie (Project Zomboid, They Are Billions) et de roguelites courts.
 Plateformes visées : Steam (PC) puis mobile.
@@ -13,12 +13,12 @@ Plateformes visées : Steam (PC) puis mobile.
 2. **Jour** : tu pioches 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos) et tu en joues 2 (le Café en donne une de plus).
 3. **Nuit** : les zombies apparaissent sur l'anneau extérieur (les bois) et marchent vers la maison. Tes unités attaquent automatiquement. Les zombies frappent tout ce qui bloque leur chemin. Le bouton du bas passe la nuit en vitesse ×2.
 4. **Aube** :
-   - après les nuits 3, 6 et 8, tu choisis 1 relique parmi 3 ;
-   - tu choisis 1 carte parmi 3 (ou aucune) : elle arrive **d'office dans ta main du lendemain**, puis rejoint ton deck ;
+   - toutes les 5 nuits, tu choisis 1 relique parmi 3 ;
+   - tu choisis 1 carte parmi 3 (ou aucune), tirées selon leur rareté : elle arrive **d'office dans ta main du lendemain**, puis rejoint ton deck ;
    - au troc, tu dépenses ta ferraille (réparer, acheter, améliorer, jeter).
-5. Après 10 nuits (la dernière avec le Colosse) : victoire. Si la maison tombe à 0 PV : défaite.
+5. La partie continue jusqu'à ce que la maison tombe à 0 PV. Le Colosse attaque toutes les 10 nuits.
 
-Score : nombre de zombies éliminés, avec un record sauvegardé.
+Score : nombre de nuits survécues, avec un record sauvegardé (et le nombre de zombies éliminés).
 
 ## La sauvegarde
 
@@ -39,50 +39,52 @@ Score : nombre de zombies éliminés, avec un record sauvegardé.
 
 Il y a 40 cartes. Le deck de départ ne contient que les 8 cartes du personnage : les autres se gagnent à l'aube ou s'achètent au troc. Les unités posées restent en place d'une nuit à l'autre et gardent leurs dégâts. Poser une carte sur une case occupée remplace l'unité.
 
-| Carte | Type | PV | Effet |
-|---|---|---|---|
-| Barricade | Défense | 6 | Planches clouées : bloque les zombies, 6 PV |
-| Épave | Défense | 12 | Carcasse de voiture : bloque, 12 PV |
-| Clôture | Défense | 5 | Clôture électrique : bloque, 5 PV, 1 dégât à chaque zombie qui la frappe |
-| Sacs de sable | Défense | 5 | Bloque, 5 PV, ne perd jamais plus de 1 PV par coup |
-| Porte blindée | Défense | 15 | Bloque, 15 PV, seulement sur une case collée à l’abri |
-| Mur de pneus | Défense | 8 | Bloque, 8 PV, laisse une flaque d’essence en tombant |
-| Tireur | Tireur | 3 | 1 dégât par tour, portée 2 |
-| Sniper | Tireur | 2 | 3 dégâts tous les 2 tours, portée illimitée |
-| Fusil à pompe | Tireur | 4 | 2 dégâts à tous les zombies autour de lui |
-| Arbalète | Tireur | 3 | Tous les 2 tours, 2 dégâts à 2 zombies différents, portée 3 |
-| Lance-flammes | Tireur | 4 | 1 dégât au contact et enflamme le zombie : 1 dégât par tour pendant 3 tours |
-| Mitrailleuse | Tireur | 3 | 3 tirs de 1 dégât par tour, portée 2, s’enraye 1 tour sur 3 |
-| Cocktails | Tireur | 2 | Tous les 3 tours, un cocktail sur le groupe le plus serré : 2 dégâts et feu, portée 3 |
-| Gamin | Tireur | 1 | Lance-pierre : 2 tirs de 1 dégât par tour, portée 2, mais 1 seul PV |
-| Bûcheron | Corps à corps | 5 | 2 dégâts par tour au corps à corps, 5 PV |
-| Chien | Corps à corps | 3 | Mord 2 fois par tour au corps à corps |
-| Policier | Corps à corps | 4 | 1 dégât au contact et repousse le zombie d’une case |
-| Boucher | Corps à corps | 4 | 2 dégâts au contact, récupère 1 PV à chaque zombie tué |
-| Moine | Corps à corps | 6 | 1 dégât à tous les zombies autour de lui, 6 PV |
-| Infirmière | Soutien | 2 | Soigne 1 PV à une unité voisine tous les 2 tours |
-| Projecteur | Soutien | 2 | Les unités autour font +1 dégât |
-| Radio | Soutien | 2 | Tant qu'elle tient, tu pioches 1 carte de plus chaque jour |
-| Cuisinier | Soutien | 2 | À chaque aube, l’abri récupère 1 PV |
-| Mécanicien | Soutien | 3 | Répare 1 PV à une défense voisine à chaque tour |
-| Sirène | Soutien | 4 | Les zombies à 2 cases ou moins marchent vers elle au lieu de l’abri |
-| Chef de groupe | Soutien | 3 | Tous les 3 tours, les unités autour attaquent une fois de plus |
-| Panneau solaire | Soutien | 2 | Projecteurs et clôtures marchent pendant une coupure, clôtures à 2 dégâts |
-| Piège à loup | Piège | 1 | Le premier zombie qui marche dessus subit 5 dégâts |
-| Essence | Piège | 1 | Flaque enflammée : 2 dégâts par tour aux zombies dessus, s'éteint à l'aube |
-| Mine | Piège | 1 | Explose au passage : 6 dégâts sur la case et autour |
-| Barbelés | Piège | 1 | Ne bloque pas : 1 dégât et ralentit chaque zombie qui passe, reste en place |
-| Fosse à pieux | Piège | 4 | 3 dégâts à chaque zombie qui tombe dedans, casse après 4 zombies |
-| Bonbonne de gaz | Piège | 1 | Bloque. Explose quand un zombie la frappe : 5 dégâts sur la case et autour |
-| Fumigène | Piège | 1 | Le premier zombie qui passe libère la fumée : les zombies autour sont perdus 3 tours |
-| Appât | Piège | 3 | Viande crue : 3 zombies s’arrêtent 3 tours pour manger |
-| Dynamite | Piège | 1 | Explose au 8ᵉ tour de la nuit : 8 dégâts sur la case et autour |
-| Conserves | Objet | – | Utilise-la sur l'abri : +3 PV |
-| Outils | Objet | – | Utilise-les sur l'abri : toutes tes unités récupèrent 3 PV |
-| Trousse de secours | Objet | – | Utilise-la sur une de tes unités blessées : elle récupère tous ses PV |
-| Café | Objet | – | Utilise-le sur l’abri : il ne compte pas, et tu joues 1 carte de plus aujourd’hui |
-| Carte routière | Objet | – | Utilise-la sur l’abri : regarde les 3 prochaines cartes de ta pioche et prends-en une |
-| Fusée de détresse | Objet | – | Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté |
+Rareté : à chaque tirage (aube, troc), une carte est commune à 67 %, rare à 27 %, épique à 6 %. Les cartes les plus puissantes sont épiques.
+
+| Carte | Type | Rareté | PV | Effet |
+|---|---|---|---|---|
+| Barricade | Défense | Commune | 6 | Planches clouées : bloque les zombies, 6 PV |
+| Épave | Défense | Rare | 12 | Carcasse de voiture : bloque, 12 PV |
+| Clôture | Défense | Commune | 5 | Clôture électrique : bloque, 5 PV, 1 dégât à chaque zombie qui la frappe |
+| Sacs de sable | Défense | Commune | 5 | Bloque, 5 PV, ne perd jamais plus de 1 PV par coup |
+| Porte blindée | Défense | Épique | 15 | Bloque, 15 PV, seulement sur une case collée à l’abri |
+| Mur de pneus | Défense | Rare | 8 | Bloque, 8 PV, laisse une flaque d’essence en tombant |
+| Tireur | Tireur | Commune | 3 | 1 dégât par tour, portée 2 |
+| Sniper | Tireur | Rare | 2 | 3 dégâts tous les 2 tours, portée illimitée |
+| Fusil à pompe | Tireur | Épique | 4 | 2 dégâts à tous les zombies autour de lui |
+| Arbalète | Tireur | Rare | 3 | Tous les 2 tours, 2 dégâts à 2 zombies différents, portée 3 |
+| Lance-flammes | Tireur | Rare | 4 | 1 dégât au contact et enflamme le zombie : 1 dégât par tour pendant 3 tours |
+| Mitrailleuse | Tireur | Épique | 3 | 3 tirs de 1 dégât par tour, portée 2, s’enraye 1 tour sur 3 |
+| Cocktails | Tireur | Épique | 2 | Tous les 3 tours, un cocktail sur le groupe le plus serré : 2 dégâts et feu, portée 3 |
+| Gamin | Tireur | Commune | 1 | Lance-pierre : 2 tirs de 1 dégât par tour, portée 2, mais 1 seul PV |
+| Bûcheron | Corps à corps | Commune | 5 | 2 dégâts par tour au corps à corps, 5 PV |
+| Chien | Corps à corps | Commune | 3 | Mord 2 fois par tour au corps à corps |
+| Policier | Corps à corps | Commune | 4 | 1 dégât au contact et repousse le zombie d’une case |
+| Boucher | Corps à corps | Rare | 4 | 2 dégâts au contact, récupère 1 PV à chaque zombie tué |
+| Moine | Corps à corps | Rare | 6 | 1 dégât à tous les zombies autour de lui, 6 PV |
+| Infirmière | Soutien | Commune | 2 | Soigne 1 PV à une unité voisine tous les 2 tours |
+| Projecteur | Soutien | Rare | 2 | Les unités autour font +1 dégât |
+| Radio | Soutien | Rare | 2 | Tant qu'elle tient, tu pioches 1 carte de plus chaque jour |
+| Cuisinier | Soutien | Rare | 2 | À chaque aube, l’abri récupère 1 PV |
+| Mécanicien | Soutien | Rare | 3 | Répare 1 PV à une défense voisine à chaque tour |
+| Sirène | Soutien | Épique | 4 | Les zombies à 2 cases ou moins marchent vers elle au lieu de l’abri |
+| Chef de groupe | Soutien | Épique | 3 | Tous les 3 tours, les unités autour attaquent une fois de plus |
+| Panneau solaire | Soutien | Épique | 2 | Projecteurs et clôtures marchent pendant une coupure, clôtures à 2 dégâts |
+| Piège à loup | Piège | Commune | 1 | Le premier zombie qui marche dessus subit 5 dégâts |
+| Essence | Piège | Commune | 1 | Flaque enflammée : 2 dégâts par tour aux zombies dessus, s'éteint à l'aube |
+| Mine | Piège | Rare | 1 | Explose au passage : 6 dégâts sur la case et autour |
+| Barbelés | Piège | Commune | 1 | Ne bloque pas : 1 dégât et ralentit chaque zombie qui passe, reste en place |
+| Fosse à pieux | Piège | Rare | 4 | 3 dégâts à chaque zombie qui tombe dedans, casse après 4 zombies |
+| Bonbonne de gaz | Piège | Épique | 1 | Bloque. Explose quand un zombie la frappe : 5 dégâts sur la case et autour |
+| Fumigène | Piège | Commune | 1 | Le premier zombie qui passe libère la fumée : les zombies autour sont perdus 3 tours |
+| Appât | Piège | Commune | 3 | Viande crue : 3 zombies s’arrêtent 3 tours pour manger |
+| Dynamite | Piège | Épique | 1 | Explose au 8ᵉ tour de la nuit : 8 dégâts sur la case et autour |
+| Conserves | Objet | Commune | – | Utilise-la sur l'abri : +3 PV |
+| Outils | Objet | Commune | – | Utilise-les sur l'abri : toutes tes unités récupèrent 3 PV |
+| Trousse de secours | Objet | Rare | – | Utilise-la sur une de tes unités blessées : elle récupère tous ses PV |
+| Café | Objet | Épique | – | Utilise-le sur l’abri : il ne compte pas, et tu joues 1 carte de plus aujourd’hui |
+| Carte routière | Objet | Rare | – | Utilise-la sur l’abri : regarde les 3 prochaines cartes de ta pioche et prends-en une |
+| Fusée de détresse | Objet | Rare | – | Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté |
 
 Règles détaillées :
 - « Autour » désigne les 8 cases voisines.
@@ -107,23 +109,28 @@ Règles détaillées :
 | Hurleur | 4 | avance tous les 2 tours | 1 | appelle 2 rôdeurs en mourant |
 | Le Colosse | 40 | avance tous les 3 tours | 2 | boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir |
 
-Les PV des zombies augmentent de 10 % par nuit (nuit 10 : +90 %).
-Les zombies apparaissent de façon échelonnée pendant la nuit, à une position aléatoire de la forêt (d'un seul côté après une Fusée de détresse). Le Colosse arrive au 10ᵉ tour de la nuit 10.
+Les PV des zombies augmentent de 7 % par nuit jusqu'à la nuit 10, puis de 12 % par nuit.
+Les zombies apparaissent de façon échelonnée pendant la nuit, à une position aléatoire de la forêt (d'un seul côté après une Fusée de détresse). Les Colosses arrivent à partir du 10ᵉ tour des nuits 10, 20, 30…
 
 ## Les vagues
 
-| Nuit | Rôdeur | Coureur | Gonflé | Chien zombie | Rampant | Cracheur | Blindé | Hurleur | Le Colosse |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 2 | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 3 | 5 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 0 |
-| 4 | 6 | 2 | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
-| 5 | 6 | 2 | 1 | 1 | 1 | 1 | 1 | 0 | 0 |
-| 6 | 7 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 0 |
-| 7 | 7 | 3 | 1 | 2 | 1 | 1 | 1 | 1 | 0 |
-| 8 | 7 | 3 | 2 | 2 | 2 | 1 | 1 | 1 | 0 |
-| 9 | 8 | 3 | 2 | 2 | 2 | 2 | 1 | 1 | 0 |
-| 10 | 8 | 4 | 2 | 3 | 2 | 2 | 2 | 1 | 1 |
+Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque type (+1 rôdeur, +0,6 coureur, +0,4 gonflé, chien, rampant et blindé, +0,3 cracheur, +0,25 hurleur), et un Colosse de plus toutes les 10 nuits.
+
+| Nuit | Rôdeur | Coureur | Gonflé | Chien zombie | Rampant | Cracheur | Blindé | Hurleur | Le Colosse | PV des zombies |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | ×1.00 |
+| 2 | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | ×1.07 |
+| 3 | 6 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | ×1.14 |
+| 4 | 6 | 2 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | ×1.21 |
+| 5 | 7 | 2 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | ×1.28 |
+| 6 | 7 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | ×1.35 |
+| 7 | 8 | 3 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | ×1.42 |
+| 8 | 8 | 3 | 2 | 2 | 2 | 1 | 1 | 1 | 0 | ×1.49 |
+| 9 | 8 | 3 | 2 | 2 | 2 | 1 | 1 | 1 | 0 | ×1.56 |
+| 10 | 9 | 4 | 2 | 2 | 2 | 2 | 2 | 1 | 1 | ×1.63 |
+| 15 | 14 | 7 | 4 | 4 | 4 | 4 | 4 | 2 | 0 | ×2.23 |
+| 20 | 19 | 10 | 6 | 6 | 6 | 5 | 6 | 4 | 2 | ×2.83 |
+| 30 | 29 | 16 | 10 | 10 | 10 | 8 | 10 | 6 | 3 | ×4.03 |
 
 ## Les personnages
 
@@ -136,7 +143,7 @@ Les zombies apparaissent de façon échelonnée pendant la nuit, à une position
 
 ## Les reliques
 
-Une relique reste active toute la partie. On en choisit 1 parmi 3 après les nuits 3, 6 et 8.
+Une relique reste active toute la partie. On en choisit 1 parmi 3 toutes les 5 nuits : c'est rare et ça doit compter.
 
 | Relique | Effet |
 |---|---|
@@ -147,21 +154,21 @@ Une relique reste active toute la partie. On en choisit 1 parmi 3 après les nui
 | Caisse de clous | Tes défenses ont +3 PV |
 | Adrénaline | Tes unités au corps à corps font +1 dégât |
 | Groupe électrogène | Plus de coupure de courant, clôtures à 2 dégâts |
-| Aimant | +4 ferraille à chaque aube |
+| Aimant | +3 ferraille à chaque aube |
 
 ## La ferraille, le troc et les améliorations
 
-- Chaque zombie éliminé rapporte 1 ferraille, le Colosse 15.
+- Chaque zombie éliminé rapporte 1 ferraille, le Colosse 15. Les prix sont élevés : il faut économiser plusieurs nuits pour un achat important.
 - À chaque aube, le troc propose :
 
 | Action | Coût | Effet |
 |---|---|---|
-| Réparer l’abri | 6 | +3 PV à l’abri |
-| Acheter une carte | 5 | Une carte au choix parmi 2, ajoutée au deck |
-| Améliorer une carte | 8 | Toutes tes cartes de ce type sont améliorées |
-| Jeter une carte | 4 | Retire une carte de ton deck |
+| Réparer l’abri | 15 | +3 PV à l’abri |
+| Acheter une carte | 12 | Une carte au choix parmi 2, ajoutée au deck |
+| Améliorer une carte | 25 (+15 par amélioration déjà faite) | Toutes tes cartes de ce type sont améliorées. Plus cher à chaque fois |
+| Jeter une carte | 10 | Retire une carte de ton deck |
 
-- Une amélioration vaut pour toutes les cartes de ce type, y compris celles déjà posées. Le nom prend un « + ». Effet selon la carte : +1 dégât (unités qui attaquent), +2 dégâts (pièges qui explosent ou blessent), +4 PV (défenses), +2 PV (soutien), +1 tour (fumigène, appât), +2 PV soignés (Conserves, Outils).
+- Une amélioration vaut pour toutes les cartes de ce type, y compris celles déjà posées, pour toute la partie. Le nom prend un « + ». Elle coûte 25, puis 40, 55… : c'est un investissement rare. Effet selon la carte : +1 dégât (unités qui attaquent), +2 dégâts (pièges qui explosent ou blessent), +4 PV (défenses), +2 PV (soutien), +1 tour (fumigène, appât), +2 PV soignés (Conserves, Outils).
 
 ## Les événements
 
@@ -180,8 +187,9 @@ Chaque nuit après la première a 80 % de chances d'avoir un événement (20 % d
 
 L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot pose ses cartes en testant toutes les possibilités sur une nuit simulée, puis joue la vraie nuit avec un autre tirage aléatoire.
 
-- Le bot joue le Survivant, prend une carte au hasard à l'aube, une relique au hasard, et dépense sa ferraille (réparer si l'abri est à 6 PV ou moins, sinon améliorer).
-- Résultat actuel : environ 45 à 50 % de victoires pour le bot (47 % sur 200 parties). Un humain fait moins bien.
+- Le bot joue le Survivant, prend une carte au hasard à l'aube, une relique au hasard, et dépense sa ferraille (réparer si l'abri est à 5 PV ou moins, sinon améliorer). Il joue jusqu'à la chute de l'abri.
+- Cible : le bot tombe en moyenne vers la nuit 9-10, environ 10 % des parties dépassent la nuit 15, presque aucune la nuit 20.
+- Résultat actuel (200 parties) : chute en moyenne à la nuit 9,6, médiane 10, 55 % atteignent la nuit 10, 11 % la nuit 15, 4 % la nuit 20. Un humain fait moins bien.
 - Les deux premières nuits sont volontairement plus faciles pour l'apprentissage.
 - Un placement au hasard perd généralement dès la nuit 2 : le placement doit compter.
 
@@ -203,6 +211,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Deck de départ réduit à 8 cartes par personnage : avec 40 cartes, un deck complet dès le départ rendrait les parties toutes pareilles.
 - La carte choisie à l'aube arrive d'office dans la main du lendemain (demande d'Amine).
 - Une seule monnaie (la ferraille) pour le troc : plusieurs ressources seraient trop lourdes sur petit écran.
+- Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 ## Les questions ouvertes
 

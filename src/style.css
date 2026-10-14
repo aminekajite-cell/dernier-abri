@@ -87,4 +87,12 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .shopi:disabled{opacity:.4;cursor:default}
 .shopi .cost{flex-direction:row;align-items:center;gap:3px;color:var(--lantern);font-weight:700;font-size:15px;flex:none}
 .deck.pickable .dk{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:8px 10px;text-align:left}
+:root{--r-rare:#6fb3ff;--r-epic:#c58bff}
+.card.r-rare,.pick.r-rare{border-color:color-mix(in srgb,var(--r-rare) 55%,var(--line))}
+.card.r-epic,.pick.r-epic{border-color:color-mix(in srgb,var(--r-epic) 70%,var(--line));box-shadow:0 0 10px color-mix(in srgb,var(--r-epic) 25%,transparent)}
+.pick{position:relative}
+.rt{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 5px;align-self:center}
+.rt.rare{color:var(--r-rare);border:1px solid var(--r-rare)}
+.rt.epic{color:var(--r-epic);border:1px solid var(--r-epic)}
+.dk .rt{display:inline-block;margin-right:6px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}

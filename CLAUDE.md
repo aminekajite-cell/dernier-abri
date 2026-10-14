@@ -1,7 +1,7 @@
 # Dernier Abri
 
 Roguelite de cartes de survie zombie, pensé d'abord pour le téléphone, avec une sortie visée sur Steam et mobile.
-Le jour, le joueur pose des cartes autour de sa maison. La nuit, la horde attaque en temps réel et la défense se joue toute seule.
+Le jour, le joueur pose des cartes autour de sa maison. La nuit, la horde attaque en temps réel et la défense se joue toute seule. La survie est sans fin : le score est le nombre de nuits survécues.
 
 Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant toute modification de règles.
 
@@ -31,7 +31,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 ## Règles de travail
 
 - Garde la séparation moteur / rendu : une règle de jeu va dans `engine.js`, jamais dans `game.js`.
-- Après toute modification de règles, de cartes, de zombies ou de vagues, lance `node tools/simulate.js` et donne le taux de victoire du bot. Cible actuelle : 45 à 50 % pour le bot.
+- Après toute modification de règles, de cartes, de zombies ou de vagues, lance `node tools/simulate.js` et donne la nuit moyenne de chute du bot. Cible actuelle : chute vers la nuit 9-10, environ 10 % des parties au-delà de la nuit 15.
 - Après chaque changement visible, teste le jeu en largeur téléphone et vérifie qu'il n'y a aucune erreur dans la console.
 - La boucle d'affichage ne doit jamais s'arrêter sur une erreur : chaque élément est dessiné dans un bloc protégé. Évite les API de canvas récentes sans solution de secours (exemple : `roundRect`, déjà remplacé si absent).
 - Mets à jour `docs/GAME_DESIGN.md` quand une décision de conception change.

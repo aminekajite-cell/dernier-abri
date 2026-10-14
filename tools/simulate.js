@@ -1,13 +1,14 @@
-// Simulation d'équilibrage : un bot joue G parties en choisissant à chaque pose
+// Simulation d'équilibrage (survie sans fin) : un bot joue G parties en choisissant à chaque pose
 // la carte et la case qui maximisent le résultat de la nuit (avec une graine différente de la vraie nuit).
 // Il part avec le deck du survivant, prend une carte au hasard à chaque aube (elle arrive dans sa main du lendemain),
-// une relique au hasard aux nuits prévues, et dépense sa ferraille (réparer si l'abri est bas, sinon améliorer).
+// une relique au hasard toutes les 5 nuits, et dépense sa ferraille (réparer si l'abri est bas, sinon améliorer).
+// Il joue jusqu'à la chute de l'abri (au plus MAXN nuits) : on mesure la nuit où il tombe.
 // Usage : node tools/simulate.js [vagues_json] [poses_par_jour=2] [parties=150] [hausse_pv_par_nuit=0.1] [personnage=surv]
-// Cible actuelle : environ 45-50 % de victoires pour le bot (un humain fait moins bien).
+// Cible actuelle : le bot tombe en moyenne vers la nuit 9-10, rarement après la nuit 15 (un humain fait moins bien).
 const Z=require('../src/engine.js');
 if(process.argv[2])Z.WAVES=JSON.parse(process.argv[2]);
 if(process.argv[5])Z.HPS=+process.argv[5];
-const BONUS=+(process.argv[3]||2)-2,G=+(process.argv[4]||150),CH=process.argv[6]||'surv';
+const MAXN=40,BONUS=+(process.argv[3]||2)-2,G=+(process.argv[4]||150),CH=process.argv[6]||'surv';
 const mk=s=>()=>(s=(s*16807)%2147483647)/2147483647;
 const sh=a=>Z.shuffle(a);
 const clone=o=>JSON.parse(JSON.stringify(o));
@@ -26,17 +27,17 @@ function game(){
    Z.place(st,hand[best.h],best.i);disc.push(hand[best.h]);hand.splice(best.h,1)}
   disc.push(...hand);
   Z.runNight(st,mk(1+Math.floor(Math.random()*1e9)));Z.endNight(st);
-  if(st.shelter<=0)return st.night;
-  if(st.night>=10)return 11;
-  if(Z.RELIC_NIGHTS.includes(st.night)){const r=Z.relicChoices(st);if(r.length)Z.addRelic(st,pick(r))}
+  if(st.shelter<=0||st.night>=MAXN)return st.night;
+  if(Z.relicNight(st.night)){const r=Z.relicChoices(st);if(r.length)Z.addRelic(st,pick(r))}
   nextCard=pick(Z.draftChoices());
   for(;;){
-   if(st.shelter<=6&&Z.pay(st,'heal'))continue;
+   if(st.shelter<=5&&Z.pay(st,'heal'))continue;
    const deck=[...new Set([...draw,...disc])].filter(t=>Z.UPGRADABLE.includes(t)&&!st.upg[t]);
-   if(deck.length&&st.scrap>=Z.SHOP.upgrade.cost){Z.pay(st,'upgrade');Z.upgrade(st,pick(deck));continue}
+   if(deck.length&&st.scrap>=Z.shopCost(st,'upgrade')){Z.pay(st,'upgrade');Z.upgrade(st,pick(deck));continue}
    break}
   Z.newDay(st,Math.random);
  }
 }
-let w=0,s=0;for(let k=0;k<G;k++){const r=game();if(r===11)w++;s+=Math.min(r,10)}
-console.log('Victoires',(w/G*100).toFixed(0)+'%','Nuit moyenne atteinte',(s/G).toFixed(1));
+const R=[];for(let k=0;k<G;k++)R.push(game());R.sort((a,b)=>a-b);
+const pct=n=>(R.filter(r=>r>=n).length/G*100).toFixed(0)+'%';
+console.log('Nuit de la chute : moyenne',(R.reduce((a,b)=>a+b,0)/G).toFixed(1),'· médiane',R[G>>1],'· atteint la nuit 5 :',pct(5),'· nuit 10 :',pct(10),'· nuit 15 :',pct(15),'· nuit 20 :',pct(20));

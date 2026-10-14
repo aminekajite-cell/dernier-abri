@@ -1,6 +1,8 @@
 // Moteur du jeu : règles pures, sans DOM. Utilisé par le jeu (navigateur) et par tools/simulate.js (Node).
 const Z=(()=>{
- const N=7,C=24,MAXS=10;let HPS=.1;
+ const N=7,C=24,MAXS=10;let HPS=.07,HPS2=.12;
+ // PV des zombies : +7 % par nuit jusqu'à la nuit 10, puis +12 % par nuit
+ const hpMult=n=>1+HPS*(Math.min(n,10)-1)+HPS2*Math.max(0,n-10);
  const U={
   // défenses
   bar:{n:'Barricade',cat:'wall',hp:6,block:1,v:'6 PV',d:'Planches clouées : bloque les zombies, 6 PV'},
@@ -72,17 +74,21 @@ const Z=(()=>{
   {id:'coupure',n:'Coupure de courant',d:'Projecteurs et clôtures inactifs'},
   {id:'sprint',n:'Horde affamée',d:'Les rôdeurs deviennent des coureurs'}
  ];
+ // nuits 1 à 10, puis chaque nuit ajoute GROW zombies de chaque type (survie sans fin)
  let WAVES={
-  walk: [3,4,5,6,6,7,7,7,8,8],
+  walk: [3,4,6,6,7,7,8,8,8,9],
   run:  [0,0,1,2,2,2,3,3,3,4],
   fat:  [0,0,1,1,1,1,1,2,2,2],
-  zdog: [0,0,0,1,1,1,2,2,2,3],
+  zdog: [0,0,0,1,1,1,1,2,2,2],
   crawl:[0,0,1,1,1,1,1,2,2,2],
-  spit: [0,0,0,0,1,1,1,1,2,2],
+  spit: [0,0,0,0,1,1,1,1,1,2],
   armor:[0,0,0,0,1,1,1,1,1,2],
-  howl: [0,0,0,0,0,1,1,1,1,1],
-  boss: [0,0,0,0,0,0,0,0,0,1]
+  howl: [0,0,0,0,0,1,1,1,1,1]
  };
+ let GROW={walk:1,run:.6,fat:.4,zdog:.4,crawl:.4,spit:.3,armor:.4,howl:.25};
+ // le Colosse arrive toutes les 10 nuits (1 la nuit 10, 2 la nuit 20…)
+ const bossCount=n=>n%10===0?n/10:0;
+ function waveCount(k,n){if(k==='boss')return bossCount(n);const t=WAVES[k]||[];if(n<=t.length)return t[n-1]||0;return Math.round((t[t.length-1]||0)+(GROW[k]||0)*(n-t.length))}
  const RELICS={
   lunette:{n:'Lunette de visée',d:'Tes tireurs ont +1 portée'},
   pieges:{n:'Manuel du trappeur',d:'Tes pièges font +2 dégâts'},
@@ -91,9 +97,10 @@ const Z=(()=>{
   clous:{n:'Caisse de clous',d:'Tes défenses ont +3 PV'},
   rage:{n:'Adrénaline',d:'Tes unités au corps à corps font +1 dégât'},
   groupe:{n:'Groupe électrogène',d:'Plus de coupure de courant, clôtures à 2 dégâts'},
-  aimant:{n:'Aimant',d:'+4 ferraille à chaque aube'}
+  aimant:{n:'Aimant',d:'+3 ferraille à chaque aube'}
  };
- const RELIC_NIGHTS=[3,6,8];
+ // une relique toutes les 5 nuits
+ const relicNight=n=>n%5===0;
  const CHARS={
   surv:{n:'Le survivant',d:'Un deck équilibré, sans bonus. Idéal pour apprendre.',deck:['bar','bar','car','gun','gun','axe','trap','food'],relic:null},
   cop:{n:'La policière',d:'Tireurs. Commence avec la Lunette de visée (+1 portée).',deck:['bar','fen','gun','gun','snp','cop','lamp','food'],relic:'lunette'},
@@ -101,11 +108,18 @@ const Z=(()=>{
   nurse:{n:'L’infirmière',d:'Soins. Commence avec la Marmite de soupe (+1 PV à l’aube).',deck:['bar','car','gun','axe','med','food','rep','kit'],relic:'soupe'}
  };
  const SHOP={
-  heal:{n:'Réparer l’abri',d:'+3 PV à l’abri',cost:6},
-  buy:{n:'Acheter une carte',d:'Une carte au choix parmi 2, ajoutée au deck',cost:5},
-  upgrade:{n:'Améliorer une carte',d:'Toutes tes cartes de ce type sont améliorées',cost:8},
-  remove:{n:'Jeter une carte',d:'Retire une carte de ton deck',cost:4}
+  heal:{n:'Réparer l’abri',d:'+3 PV à l’abri',cost:15},
+  buy:{n:'Acheter une carte',d:'Une carte au choix parmi 2, ajoutée au deck',cost:12},
+  upgrade:{n:'Améliorer une carte',d:'Toutes tes cartes de ce type sont améliorées. Plus cher à chaque fois',cost:25,more:15},
+  remove:{n:'Jeter une carte',d:'Retire une carte de ton deck',cost:10}
  };
+ const shopCost=(st,k)=>SHOP[k].cost+(SHOP[k].more||0)*Object.keys(st.upg||{}).length;
+ // rareté : les cartes puissantes sortent rarement à l'aube et au troc
+ const RARITY={com:{n:'Commune',w:67},rare:{n:'Rare',w:27},epic:{n:'Épique',w:6}};
+ const RAR={};
+ 'bar fen sand gun kid axe dog cop med trap fire wire smoke bait food rep'.split(' ').forEach(t=>RAR[t]='com');
+ 'car tire snp xbow flame butch monk lamp radio cook mech mine spike kit flare roadmap'.split(' ').forEach(t=>RAR[t]='rare');
+ 'door sht mg molo siren lead solar gas dyn coffee'.split(' ').forEach(t=>RAR[t]='epic');
  const SIDES=['le nord','le sud','l’ouest','l’est'];
  const rc=i=>[Math.floor(i/N),i%N],idx=(r,c)=>r*N+c;
  const isEdge=i=>{const[r,c]=rc(i);return r===0||r===N-1||c===0||c===N-1};
@@ -152,8 +166,11 @@ const Z=(()=>{
  function upgrade(st,t){st.upg[t]=1;touch(st)}
  function addRelic(st,r){if(!st.relics.includes(r))st.relics.push(r);touch(st)}
  function relicChoices(st,rnd=Math.random,n=3){return shuffle(Object.keys(RELICS).filter(r=>!st.relics.includes(r)),rnd).slice(0,n)}
- function draftChoices(rnd=Math.random,n=3){return shuffle([...KEYS],rnd).slice(0,n)}
- function pay(st,k){const c=SHOP[k].cost;if(st.scrap<c)return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(MAXS,st.shelter+3);return true}
+ function draftChoices(rnd=Math.random,n=3){const out=[];
+  while(out.length<n){let r=rnd()*100,rr='com';for(const k in RARITY){if(r<RARITY[k].w){rr=k;break}r-=RARITY[k].w}
+   const pool=KEYS.filter(t=>RAR[t]===rr&&!out.includes(t));if(pool.length)out.push(pool[Math.floor(rnd()*pool.length)])}
+  return out}
+ function pay(st,k){const c=shopCost(st,k);if(st.scrap<c)return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(MAXS,st.shelter+3);return true}
 
  /* ---------- pose des cartes ---------- */
  function canPlace(st,t,i){const D=U[t];
@@ -171,17 +188,18 @@ const Z=(()=>{
   if(t==='flare')st.side=Math.floor(rnd()*4)}
 
  /* ---------- la nuit ---------- */
- function waveList(st){const n=st.night-1,e=st.event.id,w={};
-  for(const k of ZK){let v=(WAVES[k]||[])[n]||0;if(e==='lune'&&k!=='boss')v=Math.round(v*1.5);w[k]=v}
+ function waveList(st){const e=st.event.id,w={};
+  for(const k of ZK){let v=waveCount(k,st.night);if(e==='lune'&&k!=='boss')v=Math.round(v*1.5);w[k]=v}
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
- function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*(1+HPS*(st.night-1)));const z={id:++st.zid,k,pos,hp,max:hp,cd:T.spd};st.z.push(z);return z}
+ function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night));const z={id:++st.zid,k,pos,hp,max:hp,cd:T.spd};st.z.push(z);return z}
  function startNight(st,rnd){const w=waveList(st),list=[];
   for(const k of ZK)if(k!=='boss')for(let j=0;j<w[k];j++)list.push(k);
   shuffle(list,rnd);
   const edges=st.side>=0?EDGES.filter(i=>sideOf(i)===st.side):EDGES;
   st.pending=list.map((k,j)=>({k,at:1+Math.floor(j*1.3),pos:edges[Math.floor(rnd()*edges.length)]}));
-  for(let j=0;j<w.boss;j++)st.pending.push({k:'boss',at:10,pos:edges[Math.floor(rnd()*edges.length)]});
+  for(let j=0;j<w.boss;j++)st.pending.push({k:'boss',at:10+j*12,pos:edges[Math.floor(rnd()*edges.length)]});
+  st.cap=Math.max(90,st.pending.reduce((m,p)=>Math.max(m,p.at),0)+60);
   st.z=[];st.tick=0}
  const power=st=>st.event.id!=='coupure'||st.relics.includes('groupe')||has(st,'solar');
  const lampB=(st,i,pow)=>pow?around(i).reduce((s,j)=>s+(st.grid[j]&&st.grid[j].t==='lamp'?stat(st,'lamp').buff:0),0):0;
@@ -245,17 +263,17 @@ const Z=(()=>{
    if(T.howl){ev.push({i:z.pos,k:'howl'});for(let k=0;k<T.howl;k++)spawn(st,'walk',z.pos)}}}
   st.z=st.z.filter(z=>z.hp>0);
   const boss=st.z.some(z=>ZT[z.k].boss)||st.pending.some(p=>p.k==='boss');
-  const done=(!st.pending.length&&!st.z.length)||st.shelter<=0||st.tick>(boss?200:90);
+  const done=(!st.pending.length&&!st.z.length)||st.shelter<=0||st.tick>(st.cap||90)+(boss?110:0);
   return{ev,done};
  }
  // l'aube : l'essence s'éteint, les soins et la ferraille de l'aube s'appliquent
  function endNight(st){st.grid.forEach((u,i)=>{if(u&&u.t==='fire')st.grid[i]=null});st.z=[];st.side=-1;
   if(st.shelter<=0)return{heal:0,scrap:0};
   const h=st.grid.filter(u=>u&&u.t==='cook').length+(st.relics.includes('soupe')?1:0),before=st.shelter;
-  st.shelter=Math.min(MAXS,st.shelter+h);const s=st.relics.includes('aimant')?4:0;st.scrap+=s;
+  st.shelter=Math.min(MAXS,st.shelter+h);const s=st.relics.includes('aimant')?3:0;st.scrap+=s;
   return{heal:st.shelter-before,scrap:s}}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
- return{N,C,MAXS,U,KEYS,ZT,ZK,EVENTS,RELICS,RELIC_NIGHTS,CHARS,SHOP,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},get WAVES(){return WAVES},set WAVES(v){WAVES=v},
+ return{N,C,MAXS,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
   rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,playsPerDay};
 })();
 if(typeof module!=='undefined')module.exports=Z;
