@@ -99,9 +99,23 @@ const Z=(()=>{
   molotov:{n:'Molotov',cat:'react',react:'cell',v:'Feu zone',d:'Pendant la nuit : 2 dégâts sur la case visée et autour, et les zombies y brûlent 4 tours'},
   horn:{n:'Klaxon',cat:'react',react:'any',v:'Recul',d:'Pendant la nuit : tous les zombies reculent d’une case'},
   rush:{n:'Adrénaline',cat:'react',react:'any',v:'×2',d:'Pendant la nuit : tes unités attaquent deux fois pendant 3 tours'},
-  flare:{n:'Fusée de détresse',cat:'item',instant:1,flare:1,v:'1 côté',d:'Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté'}
+  flare:{n:'Fusée de détresse',cat:'item',instant:1,flare:1,v:'1 côté',d:'Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté'},
+  // évolutions secrètes : jamais dans le deck, elles naissent de deux cartes précises posées côte à côte (voir EVO)
+  k9squad:{n:'Brigade canine',cat:'melee',hp:8,block:1,rng:1,dmg:2,every:1,hits:2,stun:1,push:1,evo:1,v:'2 ×2 · Étourdit',d:'Un policier et son chien : 2 morsures de 2 dégâts par tour, qui étourdissent et repoussent'},
+  nightsnp:{n:'Tireur de nuit',cat:'shoot',hp:4,block:1,rng:9,dmg:3,every:1,evo:1,v:'3 · P∞',d:'Un sniper et son projecteur : 3 dégâts à chaque tour, portée illimitée'},
+  heavyflame:{n:'Lance-flammes lourd',cat:'shoot',hp:7,block:1,rng:2,dmg:2,every:1,aoe:1,ignite:3,evo:1,v:'Feu zone · P2',d:'2 dégâts à tous les zombies à 2 cases, qui brûlent ensuite 3 tours'},
+  fortin:{n:'Fortin',cat:'wall',hp:26,block:1,rng:1,dmg:2,every:1,evo:1,v:'26 PV · 2',d:'Épave blindée de planches : bloque, 26 PV, et frappe les zombies au contact'},
+  autogun:{n:'Tourelle automatique',cat:'shoot',hp:7,block:1,rng:3,dmg:1,every:1,hits:3,evo:1,v:'1 ×3 · P3',d:'Montée par le mécanicien : 3 tirs de 1 dégât par tour, portée 3'},
+  slaughter:{n:'Équarrisseur',cat:'melee',hp:9,block:1,rng:1,dmg:3,every:1,aoe:1,feed:1,evo:1,v:'3 zone · Soin',d:'3 dégâts à tous les zombies autour, récupère 1 PV par zombie tué'},
+  canteen:{n:'Cantine de campagne',cat:'help',hp:6,block:1,heal:2,hfast:1,cook:2,evo:1,v:'Soin 2 · +2 abri',d:'Soigne 2 PV à une unité voisine à chaque tour, et l’abri récupère 2 PV à chaque aube'},
+  gang:{n:'Bande de gamins',cat:'shoot',hp:5,block:1,rng:2,dmg:1,every:1,hits:4,evo:1,v:'1 ×4 · P2',d:'Toute la classe au lance-pierre : 4 tirs de 1 dégât par tour, portée 2'},
+  saint:{n:'Le Saint',cat:'melee',hp:10,block:1,rng:1,dmg:2,every:1,aoe:1,bless:1,evo:1,v:'2 zone · Protège',d:'2 dégâts à tous les zombies autour, et ses voisins survivent une fois à un coup fatal'},
+  tracker:{n:'Traqueur',cat:'shoot',hp:5,block:1,rng:4,dmg:2,every:1,hits:2,distinct:1,evo:1,v:'2 ×2 · P4',d:'À chaque tour, 2 dégâts à 2 zombies différents, portée 4'}
  };
- const KEYS=Object.keys(U);
+ // les évolutions ne sont jamais tirées : elles restent hors des cartes jouables
+ const KEYS=Object.keys(U).filter(t=>!U[t].evo);
+ const EVO={k9squad:['cop','dog'],nightsnp:['snp','lamp'],heavyflame:['flame','gas'],fortin:['car','bar'],autogun:['gun','mech'],slaughter:['axe','butch'],canteen:['med','cook'],gang:['kid','teacher'],saint:['monk','priest'],tracker:['xbow','hunter']};
+ const EVO_KEYS=Object.keys(EVO);
  // survivants nommés : chaque humain ou chien posé reçoit un prénom et un trait, compte ses victimes, et meurt pour de bon
  const HUMANS='gun snp sht xbow flame mg molo kid axe cop butch monk med cook mech lead riot swat pharma priest stretch hunter pitch teacher vigile carp'.split(' ');
  const NAMES='Marco Léa Karim Sofia Hugo Nadia Bruno Inès Yanis Chloé Malik Julie Théo Amira Victor Lina Samir Emma Rachid Zoé Paul Yasmine Louis Clara Mehdi Sarah Hector Nora Igor Maya Omar Jade Gaston Lou Bilal Rose Kenji Alice Driss Margot'.split(' ');
@@ -116,8 +130,15 @@ const Z=(()=>{
   aguerri:{n:'Aguerri',d:'+1 dégât après 10 zombies tués',att:1}
  };
  const named=t=>HUMANS.includes(t)||t==='dog'||t==='k9'||t==='dogs'||!!(U[t]&&U[t].chief);
- const maxHp=(st,u)=>Math.max(1,stat(st,u.t).hp+((TRAITS[u.trait]||{}).hpB||0));
- const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)};
+ // PV max : la version dorée (fusion) a deux fois plus de PV, chaque niveau défensif ajoute 3 PV
+ const maxHp=(st,u)=>Math.max(1,stat(st,u.t).hp*(u.gold?2:1)+((TRAITS[u.trait]||{}).hpB||0)+(u.lvD||0)*3);
+ const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)+(u.lvA||0)+(u.gold?1:0)};
+ // niveaux : tous les 20 zombies tués, l'unité gagne un niveau, offensif (+1 dégât) ou défensif (+3 PV max et soin complet)
+ const LVL=20;
+ const lvPending=u=>u?Math.floor((u.kills||0)/LVL)-(u.lvA||0)-(u.lvD||0):0;
+ const lvReady=st=>st.grid.findIndex(u=>u&&U[u.t].block&&lvPending(u)>0);
+ function levelUp(st,i,kind){const u=st.grid[i];if(!u||lvPending(u)<=0)return false;
+  if(kind==='atk')u.lvA=(u.lvA||0)+1;else{u.lvD=(u.lvD||0)+1;u.hp=maxHp(st,u)}return true}
  // énergie : chaque jour on a ENERGY points, chaque carte coûte de 0 à 3 selon sa puissance
  const ENERGY=4,HAND_MAX=8;
  const COST={riot:2,k9:1,barrier:2,swat:3,mortar:3,sentry:2,clay:2,bunker:3,pharma:2,hospital:3,priest:2,stretch:1,brasero:2,firetrap:1,net:1,bear:2,hunter:2,dogs:2,pitch:2,scare:1,turret:2,workshop:3,modwall:2,tesla:3,teacher:2,market:2,vigile:1,carp:2,tear:1,napalm:2,air:3,chief_police:3,chief_mil:3,chief_care:3,chief_pyro:3,chief_trap:3,chief_farm:3,chief_tech:3,chief_comm:3,coffee:0,grenade:1,shot:1,patch:1,molotov:2,horn:2,rush:2};
@@ -373,7 +394,7 @@ const Z=(()=>{
  /* ---------- pose des cartes ---------- */
  // déplacer une de ses unités : une fois par jour, vers une case libre où elle pourrait être posée
  function canMove(st,a,b){const u=st.grid[a];return !st.moved&&!!u&&a!==b&&!st.grid[b]&&canPlace(st,u.t,b)}
- function move(st,a,b){if(!canMove(st,a,b))return false;st.grid[b]=st.grid[a];st.grid[a]=null;st.moved=1;return true}
+ function move(st,a,b){if(!canMove(st,a,b))return false;st.grid[b]=st.grid[a];st.grid[a]=null;st.moved=1;return merge(st,b)||true}
  function canPlace(st,t,i){const D=U[t];if(D.react)return false;
   if(D.onUnit)return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<maxHp(st,st.grid[i]));
   if(D.instant)return i===C;
@@ -387,7 +408,26 @@ const Z=(()=>{
    u.name=D.chief?U[t].n:list[Math.floor(rnd()*list.length)];
    const tr=Object.keys(TRAITS).filter(k=>(!TRAITS[k].att||D.dmg)&&(!TRAITS[k].far||(D.rng||0)>1));
    u.trait=tr[Math.floor(rnd()*tr.length)];u.kills=0;u.hp=maxHp(st,u)}
-  st.grid[i]=u}
+  st.grid[i]=u;return free?null:merge(st,i)}
+ /* ---------- fusion et évolutions ----------
+    Fusion : 3 unités normales du même type sur la carte fusionnent en une version dorée (PV ×2, +1 dégât ou +1 soin).
+    Les 2 unités absorbées rendent leur carte à la défausse : elles pourront être tirées de nouveau.
+    Évolution : deux cartes précises posées côte à côte deviennent une unité unique (EVO). Ses 2 cartes reviennent quand elle tombe. */
+ const basic=u=>!!u&&!u.gold&&!U[u.t].evo;
+ const evoOf=(a,b)=>EVO_KEYS.find(k=>{const[x,y]=EVO[k];return(a===x&&b===y)||(a===y&&b===x)});
+ const canFuse=t=>{const D=U[t];return !!D.block&&!D.evo&&!D.chief&&D.cat!=='trap'};
+ // l'unité qui reste garde le prénom, le trait et les niveaux du plus aguerri, et cumule les victimes
+ function absorb(u,others){const all=[u,...others],best=all.filter(v=>v.name).sort((a,b)=>(b.kills||0)-(a.kills||0))[0];
+  if(best&&best!==u){u.name=best.name;u.trait=best.trait;u.saved=best.saved}
+  u.kills=all.reduce((s,v)=>s+(v.kills||0),0);u.lvA=Math.max(...all.map(v=>v.lvA||0));u.lvD=Math.max(...all.map(v=>v.lvD||0))}
+ function merge(st,i){const u=st.grid[i];if(!basic(u))return null;
+  for(const j of around(i)){const v=st.grid[j];if(!basic(v))continue;const k=evoOf(u.t,v.t);if(!k)continue;
+   const from=[u.t,v.t];u.src=[u,v].filter(w=>!w.gen).map(w=>w.t);delete u.gen;absorb(u,[v]);v.absorbed=1;st.grid[j]=null;u.t=k;u.hp=maxHp(st,u);
+   return{k:'evo',i,j,t:k,from}}
+  if(!canFuse(u.t))return null;
+  const same=st.grid.map((v,j)=>j!==i&&basic(v)&&v.t===u.t?j:-1).filter(j=>j>=0).sort((a,b)=>cheb(a,i)-cheb(b,i));
+  if(same.length<2)return null;const js=same.slice(0,2);absorb(u,js.map(j=>st.grid[j]));js.forEach(j=>{st.grid[j]=null});u.gold=1;u.hp=maxHp(st,u);
+  return{k:'fuse',i,t:u.t,from:js}}
  // une unité tombe : un survivant nommé rejoint le mémorial (sauf s'il est Increvable et n'a pas encore utilisé sa chance)
  function lose(st,j,u,ev){if(u.trait==='increvable'&&!u.saved){u.hp=1;u.saved=1;ev.push({i:j,k:'saved',name:u.name});return false}
   if(U[u.t].block&&!u.blessed&&around(j).some(k=>st.grid[k]&&U[st.grid[k].t].bless)){u.hp=1;u.blessed=1;ev.push({i:j,k:'saved',name:u.name||U[u.t].n});return false}
@@ -464,8 +504,8 @@ const Z=(()=>{
     const reps=1+(st.tick%3===0&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].lead)?1:0)+(st.rushT>0?1:0);
     const rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&famOf(u.t)==='police'?1:0)),dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+(fl.mil&&famOf(u.t)==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}
-   if(D.heal&&(D.hfast||st.tick%2===0)){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0));ev.push({i,k:'heal'})}}
-   if(D.mech&&!D.mechAll){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j]));if(ns.length){const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0));ev.push({i:ns[0],k:'heal'})}}
+   if(D.heal&&(D.hfast||st.tick%2===0)){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0)+(u.gold?1:0));ev.push({i,k:'heal'})}}
+   if(D.mech&&!D.mechAll){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j]));if(ns.length){const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0)+(u.gold?1:0));ev.push({i:ns[0],k:'heal'})}}
    if(D.healAll&&st.tick%2===0)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].block&&v.hp<maxHp(st,v)){v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.care?1:0));ev.push({i:j,k:'heal'})}});
    if(D.mechAll)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].cat==='wall'&&v.hp<maxHp(st,v)){v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.tech>=2?1:0));ev.push({i:j,k:'heal'})}});
    if(D.aura&&st.tick%2===0)alive().filter(z=>cheb(z.pos,i)<=1).forEach(z=>{hit(st,z,1+(fl.pyro?1:0),ev,i,1);z.burnT=Math.max(z.burnT||0,2)});
@@ -484,7 +524,7 @@ const Z=(()=>{
     const u2=st.grid[n2];if(u2&&U[u2.t].block){strike(st,z,n2,u2,ev,true,pow);continue}}
    z.pos=n;enter(st,z,n,u,ev)
   }
-  for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;if(!z.bit){const T=ZT[z.k];st.kills++;st.scrap+=T.boss?15:1;
+  for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;if(!z.bit){const T=ZT[z.k];st.kills++;st.scrap+=T.boss?15:1;ev.push({i:z.pos,k:'die',zid:z.id,boss:!!T.boss});
    if(fl.pyro>=2&&(z.burnT>0||z.inFire)){st.z.filter(o=>o.hp>0&&o!==z&&cheb(o.pos,z.pos)<=1).forEach(o=>hit(st,o,2,ev,-1,1));ev.push({i:z.pos,k:'boom'})}
    if(mc(st,'putride'))around(z.pos).forEach(j=>{const u=st.grid[j];if(u&&U[u.t].block){u.hp--;ev.push({i:j,txt:'−1',k:'bite',zid:z.id});if(u.hp<=0)lose(st,j,u,ev)}});
    if(T.howl){ev.push({i:z.pos,k:'howl'});for(let k=0;k<T.howl;k++)spawn(st,'walk',z.pos)}}}
@@ -497,7 +537,7 @@ const Z=(()=>{
  function endNight(st){st.grid.forEach((u,i)=>{if(u&&u.t==='fire')st.grid[i]=null;else if(u&&u.trait==='coriace'&&u.hp>0)u.hp=Math.min(maxHp(st,u),u.hp+1)});st.z=[];st.side=-1;
   if(st.shelter<=0)return{heal:0,scrap:0};
   const fl=famLevels(st),T=TIERS[st.tier]||TIERS.base;
-  const h=st.grid.filter(u=>u&&u.t==='cook').length+(st.relics.includes('soupe')?1:0)+(fl.comm?1:0),before=st.shelter;
+  const h=st.grid.reduce((a,u)=>a+(u&&U[u.t].cook||0),0)+(st.relics.includes('soupe')?1:0)+(fl.comm?1:0),before=st.shelter;
   if(fl.care>=2)st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+2)});
   st.shelter=Math.min(maxS(st),st.shelter+h);
   st.grid.forEach((u,i)=>{if(u&&U[u.t].carp)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].cat==='wall')v.hp=Math.min(maxHp(st,v),v.hp+U[u.t].carp)})});
@@ -516,10 +556,10 @@ const Z=(()=>{
   if(t==='tear'){al().filter(z=>cheb(z.pos,i)<=1).forEach(z=>z.cd+=3);ev.push({i,k:'smoke'})}
   if(t==='air'){al().forEach(z=>hit(st,z,4,ev,-1,1));ev.push({i:C,k:'air'})}
   if(t==='napalm'){around(i).concat(i).forEach(j=>{if(!isEdge(j)&&j!==C&&!st.grid[j])st.grid[j]={t:'fire',hp:1,gen:1}});al().filter(z=>cheb(z.pos,i)<=1).forEach(z=>{hit(st,z,1,ev,-1,1);z.burnT=Math.max(z.burnT||0,3)});ev.push({i,k:'molo',src:C})}
-  for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;st.kills++;st.scrap+=ZT[z.k].boss?15:1}
+  for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;st.kills++;st.scrap+=ZT[z.k].boss?15:1;ev.push({i:z.pos,k:'die',zid:z.id,boss:!!ZT[z.k].boss})}
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
  return{N,C,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,EVO,EVO_KEYS,merge,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

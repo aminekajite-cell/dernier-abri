@@ -42,6 +42,9 @@ const SFX=(()=>{
   ui:t=>tone(t,.05,{f:660,vol:.12,type:'triangle'}),
   dawn:t=>{[392,494,587,784].forEach((f,k)=>tone(t+k*.12,.6,{f,vol:.12,type:'triangle'}))},
   mutate:t=>{tone(t,1.2,{f:110,f2:70,type:'sawtooth',vol:.12,attack:.2});tone(t,1.2,{f:117,f2:73,type:'sawtooth',vol:.1,attack:.2})},
+  fuse:t=>{[330,440,554,660,880].forEach((f,k)=>tone(t+k*.06,.35,{f,vol:.13,type:'triangle'}));noise(t+.25,.4,{f:5000,q:2,vol:.08})},
+  evo:t=>{[262,330,392].forEach(f=>{tone(t,1.1,{f,f2:f*2,vol:.09,type:'sawtooth',attack:.3});tone(t,1.1,{f:f*1.01,f2:f*2.02,vol:.07,type:'triangle',attack:.3})});noise(t+.8,.6,{f:6000,q:3,vol:.1})},
+  lvl:t=>{[523,659,784,1047].forEach((f,k)=>tone(t+k*.09,.4,{f,vol:.13,type:'square'}))},
   death:t=>{[330,262,196].forEach((f,k)=>tone(t+k*.25,.5,{f,vol:.12,type:'triangle'}))}
  };
  function play(name,gap=.06){

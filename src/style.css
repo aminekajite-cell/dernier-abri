@@ -147,3 +147,7 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .dk .qty button.buy{width:auto;padding:0 8px;font-size:12px;font-weight:700;color:var(--lantern);border-color:var(--lantern)}
 .dk .qty b{font-variant-numeric:tabular-nums;min-width:28px;text-align:center}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
+
+/* fusion (doré) et évolution (violet) dans la fiche d'unité */
+.info b.gold{color:#f2c23d}
+.info b.evo{color:#c58cff}

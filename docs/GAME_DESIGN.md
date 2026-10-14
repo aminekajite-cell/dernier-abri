@@ -205,6 +205,32 @@ C'est l'identité du jeu : on s'attache à ses survivants, et on les perd.
 | Coriace | récupère 1 PV à chaque aube |
 | Aguerri | +1 dégât après 10 zombies tués (seulement pour les unités qui attaquent) |
 
+## Fusion, évolutions et niveaux
+
+Inspiré de *Super Auto Pets*, *Vampire Survivors* et *Rogue Tower* : les unités grandissent pendant la partie.
+
+- **Fusion** : dès que 3 unités normales du même type sont sur la carte (à la pose de la 3ᵉ), elles fusionnent en une version dorée ★ sur la case de la dernière posée. PV ×2, +1 dégât (ou +1 soin, +1 réparation). Les 2 unités absorbées rendent leur carte à la défausse : elles peuvent être tirées de nouveau. L'unité dorée garde le prénom, le trait et les niveaux du survivant le plus aguerri, et cumule les victimes. Pas de fusion pour les pièges, les chefs, les évolutions, ni une unité déjà dorée (un seul palier). Une pose gratuite (événement de l'aube, départ du lieu) ne déclenche pas de fusion.
+- **Évolutions secrètes** : deux cartes précises posées (ou déplacées) côte à côte se transforment en une unité unique ✦. Ces unités ne sont jamais dans un deck ni tirées. Elles apparaissent dans la Collection une fois découvertes (sauvegardé dans `abri-meta.evo`). Quand l'évolution tombe, ses 2 cartes d'origine reviennent dans la défausse. L'évolution passe avant la fusion.
+
+| Évolution | Cartes | Effet |
+|---|---|---|
+| Brigade canine | Policier + Chien | 2 ×2 dégâts, étourdit et repousse, 8 PV |
+| Tireur de nuit | Sniper + Projecteur | 3 dégâts à chaque tour, portée illimitée |
+| Lance-flammes lourd | Lance-flammes + Bonbonne de gaz | 2 dégâts et feu à tous les zombies à 2 cases |
+| Fortin | Épave + Barricade | bloque, 26 PV, 2 dégâts au contact |
+| Tourelle automatique | Tireur + Mécanicien | 3 tirs de 1, portée 3 |
+| Équarrisseur | Bûcheron + Boucher | 3 dégâts en zone, se soigne en tuant |
+| Cantine de campagne | Infirmière + Cuisinier | soigne 2 par tour, +2 PV à l'abri à l'aube |
+| Bande de gamins | Gamin + Institutrice | 4 tirs de 1, portée 2 |
+| Le Saint | Moine + Prêtre | 2 dégâts en zone, protège ses voisins d'un coup fatal |
+| Traqueur | Arbalète + Chasseur | 2 dégâts à 2 zombies par tour, portée 4 |
+
+- **Niveaux** : tous les 20 zombies tués (20, 40, 60…), une unité gagne un niveau. À l'aube, le joueur choisit : offensif (+1 dégât) ou défensif (+3 PV max et soin complet). Le niveau est affiché sur l'unité (N1, N2…).
+
+## Le retour visuel
+
+Sensations inspirées de *Balatro* et *Vampire Survivors* : compteur de victimes de la nuit en haut à gauche, « Triple ! » ou « Carnage ×N » quand 3 zombies ou plus meurent d'un coup, gros chiffres jaunes pour les coups de 4 dégâts ou plus, secousse de l'écran selon la force (explosion, frappe aérienne, mort du Colosse), ralenti à la mort du Colosse, chiffres de l'aube qui défilent.
+
 ## Les zombies
 
 Les zombies sont peu nombreux mais coriaces : ils doivent arriver jusqu'aux défenses, pas mourir à la lisière du bois.
@@ -407,6 +433,8 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Zombies deux fois plus coriaces mais 40 % moins nombreux (Amine : « les zombies meurent avant d'atteindre mes unités »). Avant, seuls 26 % arrivaient au contact.
 - Mutations de la horde toutes les 4 nuits plutôt qu'une gestion de nourriture ou de munitions (demande d'Amine : garder le jeu fun et simple). Elles répondent au problème de l'« armée de tireurs » invincible dès la nuit 5.
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
+
+- Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
 
 ## Les questions ouvertes
 
