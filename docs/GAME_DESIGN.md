@@ -127,6 +127,15 @@ Chaque unité appartient au plus à une faction. Plus il y a d'unités d'une mê
 
 Tous les paliers sont à 3 et 5 unités.
 
+**Solidarité** : chaque voisin (les 8 cases autour) de la même faction donne +1 dégât, ou +1 soin, ou +1 réparation, au plus +2. Un trait pointillé relie les voisins solidaires sur la carte.
+
+**Riposte du corps à corps** : une unité de corps à corps frappée au contact rend aussitôt le coup (ses dégâts habituels). Le corps à corps a aussi été renforcé : Bûcheron 7 PV / 3 dégâts, Chien 5 PV, Policier 6 PV / 2, Boucher 6 PV / 3, Moine 8 PV / 2 en zone, Agent anti-émeute 11 PV / 2, Chien policier 6 PV, Meute 7 PV, Fermier à la fourche 7 PV / 3, La Fermière 11 PV. Le Lance-flammes passe à portée 2 et 5 PV.
+
+**Chaque faction peut se défendre seule** (au moins 3 combattants) :
+- ⛑️ Soignants : Ambulancier (8 PV, 1 dégât et recul), Médecin de garde (pistolet, portée 2, se soigne), Infirmier costaud (2 dégâts, soigne ses voisins quand il tue, rare), et La Doctoresse frappe au scalpel (2 dégâts). Palier 1 : soins +1 et +1 dégât.
+- ⚡ Bricoleurs : Cloueur (2 tirs de 1, portée 2), et L'Ingénieur tire 2 clous par tour. Palier 1 : +1 dégât à tous les bricoleurs (plus seulement les clôtures).
+- 🏠 Communauté : Garde champêtre (2 dégâts tous les 2 tours, portée 3), et Le Maire tire (2 dégâts, portée 2). Palier 1 : +1 portée aux tireurs de la Communauté.
+
 ### Cartes de l'extension « factions » (31 cartes)
 
 Pour que chaque faction ait de quoi remplir un deck, 28 unités et 3 réactions ont été ajoutées (à débloquer dans la collection) :
@@ -437,6 +446,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Solidarité entre voisins de même faction, riposte et renfort du corps à corps, combattants pour les Soignants, les Bricoleurs et la Communauté (Amine : des factions ne pouvaient pas se défendre, le corps à corps était injouable).
 - Frénésie meurtrière dès la nuit 8 et fusions à plusieurs étoiles (demande d'Amine : difficulté toujours croissante, mais le joueur garde une chance dans les longues parties).
 
 ## Les questions ouvertes
