@@ -101,4 +101,5 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .rt.rare{color:var(--r-rare);border:1px solid var(--r-rare)}
 .rt.epic{color:var(--r-epic);border:1px solid var(--r-epic)}
 .dk .rt{display:inline-block;margin-right:6px}
+.panel p.ver{text-align:center;font-size:11px;opacity:.6}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}

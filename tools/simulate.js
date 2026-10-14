@@ -1,7 +1,7 @@
 // Simulation d'équilibrage (survie sans fin) : un bot joue G parties en choisissant à chaque pose
 // la carte et la case qui maximisent le résultat de la nuit (avec une graine différente de la vraie nuit).
 // Il part avec le deck du survivant, et à chaque aube choisit comme un joueur la carte qui l'aide le plus
-// (il teste chacune des 3 sur la nuit suivante ; elle arrive dans sa main du lendemain). La horde mute toutes les 3 nuits.
+// (il teste chacune des 3 sur la nuit suivante ; elle arrive dans sa main du lendemain). La horde mute toutes les 4 nuits.
 // une relique au hasard toutes les 5 nuits, et dépense sa ferraille (réparer si l'abri est bas, sinon améliorer).
 // Il joue jusqu'à la chute de l'abri (au plus MAXN nuits) : on mesure la nuit où il tombe.
 // Usage : node tools/simulate.js [vagues_json] [poses_par_jour=2] [parties=150] [hausse_pv_par_nuit=0.1] [personnage=surv]

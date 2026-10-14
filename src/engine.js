@@ -55,15 +55,15 @@ const Z=(()=>{
  };
  const KEYS=Object.keys(U);
  const ZT={
-  walk:{n:'Rôdeur',hp:6,spd:2,dmg:1,info:'lent'},
-  run:{n:'Coureur',hp:4,spd:1,dmg:1,info:'rapide'},
-  fat:{n:'Gonflé',hp:16,spd:3,dmg:2,info:'très lent, 2 dégâts par coup'},
-  zdog:{n:'Chien zombie',hp:2,spd:1,dmg:1,info:'rapide et fragile'},
-  crawl:{n:'Rampant',hp:4,spd:2,dmg:1,crawl:1,info:'passe sous les défenses (barricades, épaves…)'},
-  spit:{n:'Cracheur',hp:6,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
-  armor:{n:'Blindé',hp:10,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
-  howl:{n:'Hurleur',hp:8,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
-  boss:{n:'Le Colosse',hp:60,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
+  walk:{n:'Rôdeur',hp:12,spd:2,dmg:1,info:'lent'},
+  run:{n:'Coureur',hp:8,spd:1,dmg:1,info:'rapide'},
+  fat:{n:'Gonflé',hp:32,spd:3,dmg:2,info:'très lent, 2 dégâts par coup'},
+  zdog:{n:'Chien zombie',hp:4,spd:1,dmg:1,info:'rapide et fragile'},
+  crawl:{n:'Rampant',hp:8,spd:2,dmg:1,crawl:1,info:'passe sous les défenses (barricades, épaves…)'},
+  spit:{n:'Cracheur',hp:12,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
+  armor:{n:'Blindé',hp:20,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
+  howl:{n:'Hurleur',hp:16,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
+  boss:{n:'Le Colosse',hp:120,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
  };
  const ZK=Object.keys(ZT);
  const EVENTS=[

@@ -48,6 +48,8 @@ const ICON={
 };
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
+// à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
+const VERSION='v8 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -531,5 +533,5 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${(b=>b?`<p>Ton record : <b>${plural(b,'nuit survécue','nuits survécues')}</b>.</p>`:'')((()=>{try{return +localStorage.getItem('abri-best-nuits')||0}catch(e){return 0}})())}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button>`)}
+<button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
