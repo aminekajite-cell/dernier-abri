@@ -89,7 +89,7 @@ const stars=u=>'★'.repeat(u.gold||0);
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v28 · 15 oct.';
+const VERSION='v29 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -720,7 +720,7 @@ async function night(){
  const mut=Z.mutNight(G.night)?Z.mutate(G,R):null;
  const hero=G.grid.filter(u=>u&&u.name&&u.nk>0).sort((a,b)=>b.nk-a.nk)[0];
  const fallen=(G.fallen||[]).filter(f=>f.night===G.night);
- let rewardCard=null;if(dawnInfo.card){const pool=G.pool.filter(t=>Z.RAR[t]===dawnInfo.card);if(pool.length){rewardCard=pool[Math.floor(R()*pool.length)];S.discard.push(rewardCard)}}
+ const rewardCard=null;
  S.dawn={kills:G.kills-kills0,scrap:G.scrap-scrap0,heal:dawnInfo.heal,mut,rewardCard,relicReward:dawnInfo.relic,tier:dawnInfo.tier,hero:hero?{name:hero.name,t:hero.t,nk:hero.nk}:null,fallen};save();render();
  dawn();
 }
@@ -749,15 +749,13 @@ function dawnStep(ph,picks){
    <div class="relics"><button type="button" class="relic" data-a="lvl" data-v="atk">${svg('shot')}<span><b>Offensive</b>+1 dégât à chaque coup</span></button><button type="button" class="relic" data-a="lvl" data-v="def">${svg('riot')}<span><b>Défensive</b>+3 PV max, et tous ses PV récupérés</span></button></div>`)}
  if(ph==='event'){S.picks=picks;save();const E=Z.DAWN[picks[0]];
   return show(`<h2 class="pw">${E.n}</h2>${dawnTxt()}<p>${E.d}</p><div class="relics">${E.ch.map((c,k)=>`<button type="button" class="relic evc" data-a="evc" data-v="${k}" ${c.ok&&!c.ok(G)?'disabled':''}><span><b>${c.n}</b>${c.d}</span></button>`).join('')}</div>`)}
- if(ph==='draft'){S.picks=picks||Z.draftChoices(R,3,G.pool);save();
-  return show(`<h2 class="ok">Nuit ${G.night} survécue</h2>${dawnTxt()}<p>Choisis la carte que tu auras <b>en main demain</b>. Elle rejoint ensuite ton deck.</p>
-   ${TUTO===3?(tuto(3),`<p class="tipin">💡 À chaque aube, tu choisis une carte : elle arrive dans ta main dès demain. Ensuite viendra le troc, où tu dépenses ta ferraille.</p>`):''}
+ // la carte de demain : 3 cartes au choix tirées de ta pioche et de ta défausse (jamais de carte hors du deck)
+ if(ph==='draft'){S.picks=picks||shuffle([...new Set([...S.draw,...S.discard])]).slice(0,3);if(!S.picks.length)return dawnStep('shop');save();
+  return show(`<h2 class="ok">Nuit ${G.night} survécue</h2>${dawnTxt()}<p>Choisis une carte de <b>ton deck</b> que tu auras <b>en main demain</b>.</p>
+   ${TUTO===3?(tuto(3),`<p class="tipin">💡 À chaque aube, tu choisis une carte de ton deck : elle arrive dans ta main dès demain. Ensuite viendra le troc, où tu dépenses ta ferraille.</p>`):''}
    <div class="picks">${S.picks.map(t=>pickBtn(t,'draft',t)).join('')}</div>
    <button type="button" class="skip" data-a="draft" data-v="">Ne rien prendre</button>`)}
  if(ph==='night')return nightScreen(picks);
- if(ph==='buy'){S.picks=picks||Z.draftChoices(R,2,G.pool);save();
-  return show(`<h2 class="pw">Acheter une carte</h2><p>Elle rejoint ton deck.</p><div class="picks two">${S.picks.map(t=>pickBtn(t,'bought',t)).join('')}</div>
-   <button type="button" class="skip" data-a="shop">Ne rien prendre</button>`)}
  S.picks=null;save();shopScreen();
 }
 function dawnTxt(){const d=S.dawn;if(!d||d.txtShown)return '';d.txtShown=1;return (d.rewardCard?`<p>Butin de la ${(Z.TIERS[d.tier]||Z.TIERS.base).n.toLowerCase()} : <b>${Z.U[d.rewardCard].n}</b> rejoint ton deck.</p>`:'')+`<p>L’abri tient avec <b>${G.shelter}/${Z.maxS(G)} PV</b>. Cette nuit : <b><span data-count="${d.kills}">${d.kills}</span> ${d.kills>1?'zombies éliminés':'zombie éliminé'}</b>, <b>+<span data-count="${d.scrap}">${d.scrap}</span> ferraille</b>${d.heal?`, <b>+${d.heal} PV</b> à l’aube`:''}.</p>`
@@ -768,7 +766,7 @@ function shopScreen(){
  const row=(k,ex)=>{const o=Z.SHOP[k],c=Z.shopCost(G,k),ok=G.scrap>=c&&!ex;return `<button type="button" class="shopi" data-a="shop-${k}" ${ok?'':'disabled'}><span><b>${o.n}</b>${o.d}</span><span class="cost">${svg('scrap')}${c}</span></button>`};
  const upg=deckTypes().filter(t=>Z.UPGRADABLE.includes(t)&&!G.upg[t]);
  show(`<h2 class="pw">Le troc de l’aube</h2><p>Tu as <b>${G.scrap} ferraille</b>. Un zombie éliminé rapporte 1 ferraille, le Colosse 15. Économise pour ce qui compte.</p>
-  <div class="shop">${row('heal',G.shelter>=Z.maxS(G))}${row('buy')}${row('upgrade',!upg.length)}${row('remove',deckList().length<=5)}</div>
+  <div class="shop">${row('heal',G.shelter>=Z.maxS(G))}${row('upgrade',!upg.length)}${row('remove',deckList().length<=5)}</div>
   <button type="button" class="go" data-a="nightpick">Continuer</button>`);
 }
 const deckTypes=()=>[...new Set(deckList())];
@@ -882,7 +880,7 @@ const ACT={
  load:()=>{const d=loadSave();if(d)resume(d);else prepScreen()},
  title:()=>title(),
  close:()=>hide(),
- deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu prépares ton deck (20 à 30 cartes) avec les cartes de ta collection. Pendant la partie, des renforts s’ajoutent à l’aube et au troc. Les cartes rares et épiques sortent rarement.</p>${deckHtml()}<h2 class="pw">Fusion, évolutions et niveaux</h2><p><b>Fusion :</b> quand 3 unités du même type et du même nombre d’étoiles sont sur la carte, elles fusionnent en une unité avec une étoile de plus. Chaque étoile ajoute les PV de base de la carte et +1 dégât (ou +1 soin). Les 2 cartes absorbées reviennent dans ta défausse.</p><p><b>Évolutions :</b> certaines paires de cartes posées côte à côte se transforment en une unité unique ✦. À toi de les découvrir.</p><p><b>Niveaux :</b> tous les 20 zombies tués, une unité gagne un niveau : +1 dégât ou +3 PV, au choix à l’aube.</p><h2 class="pw">Les factions</h2><p><b>Solidarité :</b> chaque voisin de la même faction donne +1 dégât (ou +1 soin, +1 réparation), au plus +2. <b>Riposte :</b> une unité de corps à corps frappée au contact rend le coup aussitôt.</p><p>Plus tu as d’unités d’une même faction sur la carte, plus elles sont fortes. Le Chef d’une faction (carte légendaire) lui fait gagner un palier tant qu’il est en vie.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:20px">${f.ic}</span><span><b>${f.n}</b>${f.lv[0]} unités : ${f.d[0]}. ${f.lv[1]} unités : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">Les alliances</h2><p>Quand deux factions ont chacune au moins 3 unités sur la carte, elles débloquent un bonus commun.</p><div class="deck">${Object.values(Z.ALLY).map(a=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:18px">${a.f.map(f=>Z.FAM[f].ic).join('')}</span><span><b>${a.n}</b>${a.d}</span></div>`).join('')}</div><h2 class="pw">Les murs reliés</h2><p>Des murs posés côte à côte forment un rempart : quand un mur est frappé, c’est le plus solide du rempart qui encaisse le coup.</p><h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie. À partir de la nuit 8, chaque mutation ajoute aussi la <b>frénésie meurtrière</b> : +10 % de PV et de dégâts pour tous les zombies, cumulable.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
+ deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu prépares ton deck (20 à 30 cartes) avec les cartes de ta collection. Pendant la partie, tu ne joues que les cartes de ton deck : à l’aube, tu choisis l’une d’elles pour l’avoir en main le lendemain.</p>${deckHtml()}<h2 class="pw">Fusion, évolutions et niveaux</h2><p><b>Fusion :</b> quand 3 unités du même type et du même nombre d’étoiles sont sur la carte, elles fusionnent en une unité avec une étoile de plus. Chaque étoile ajoute les PV de base de la carte et +1 dégât (ou +1 soin). Les 2 cartes absorbées reviennent dans ta défausse.</p><p><b>Évolutions :</b> certaines paires de cartes posées côte à côte se transforment en une unité unique ✦. À toi de les découvrir.</p><p><b>Niveaux :</b> tous les 20 zombies tués, une unité gagne un niveau : +1 dégât ou +3 PV, au choix à l’aube.</p><h2 class="pw">Les factions</h2><p><b>Solidarité :</b> chaque voisin de la même faction donne +1 dégât (ou +1 soin, +1 réparation), au plus +2. <b>Riposte :</b> une unité de corps à corps frappée au contact rend le coup aussitôt.</p><p>Plus tu as d’unités d’une même faction sur la carte, plus elles sont fortes. Le Chef d’une faction (carte légendaire) lui fait gagner un palier tant qu’il est en vie.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:20px">${f.ic}</span><span><b>${f.n}</b>${f.lv[0]} unités : ${f.d[0]}. ${f.lv[1]} unités : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">Les alliances</h2><p>Quand deux factions ont chacune au moins 3 unités sur la carte, elles débloquent un bonus commun.</p><div class="deck">${Object.values(Z.ALLY).map(a=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:18px">${a.f.map(f=>Z.FAM[f].ic).join('')}</span><span><b>${a.n}</b>${a.d}</span></div>`).join('')}</div><h2 class="pw">Les murs reliés</h2><p>Des murs posés côte à côte forment un rempart : quand un mur est frappé, c’est le plus solide du rempart qui encaisse le coup.</p><h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie. À partir de la nuit 8, chaque mutation ajoute aussi la <b>frénésie meurtrière</b> : +10 % de PV et de dégâts pour tous les zombies, cumulable.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
  dawn:()=>dawn(),
  lvl:v=>{const i=S.picks&&S.picks[0];if(i!=null&&Z.levelUp(G,i,v==='atk'?'atk':'def')){const p=tc(i);floatTxt(p.x,p.y-20,v==='atk'?'+1 dégât':'+3 PV','#9fd86b',15);addFX({type:'ring',x:p.x,y:p.y,r:44,c:'#9fd86b',dur:500})}S.phase=null;save();render();dawn()},
  relic:v=>{Z.addRelic(G,v);afterRelic()},
@@ -890,13 +888,11 @@ const ACT={
   (r.cards||[]).forEach(t=>S.discard.push(t));syncBoard();S.phase='draft';S.picks=null;save();render();SFX.play('ui');
   show(`<h2 class="pw">${Z.DAWN[id].n}</h2><p>${r.txt}</p>${r.cards&&r.cards.length?`<p>Ajouté à ton deck : <b>${r.cards.map(t=>Z.U[t].n).join(', ')}</b>.</p>`:''}<button type="button" class="go" data-a="todraft">Continuer</button>`)},
  todraft:()=>dawnStep('draft'),
- draft:v=>{S.next=v||null;dawnStep('shop')},
+ draft:v=>{if(v&&(S.draw.includes(v)||S.discard.includes(v))){for(const pile of[S.draw,S.discard]){const k=pile.indexOf(v);if(k>=0){pile.splice(k,1);break}}S.next=v}dawnStep('shop')},
  shop:()=>shopScreen(),
  'shop-heal':()=>{if(Z.pay(G,'heal'))render();shopScreen()},
- 'shop-buy':()=>{if(Z.pay(G,'buy')){render();dawnStep('buy')}},
  'shop-upgrade':()=>listScreen('Améliorer une carte','Toutes les cartes de ce type seront améliorées, y compris celles déjà posées.',deckTypes().filter(t=>Z.UPGRADABLE.includes(t)&&!G.upg[t]),'up-pick'),
  'shop-remove':()=>listScreen('Jeter une carte','Une carte de ce type quitte ton deck pour cette partie (les unités posées ne comptent pas).',pileTypes(),'rm-pick'),
- bought:v=>{S.discard.push(v);shopScreen()},
  'up-pick':v=>{if(Z.pay(G,'upgrade'))Z.upgrade(G,v);render();shopScreen()},
  'rm-pick':v=>{if(pileList().includes(v)&&Z.pay(G,'remove'))removeCard(v);shopScreen()},
  day:()=>nextDay(),
@@ -935,7 +931,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Regroupe les unités d’une même <b>faction</b> (👮 🎖️ ⛑️ 🔥 🪤 🐕 ⚡ 🏠) pour les renforcer : côte à côte, chaque voisin de la même faction donne <b>+1</b> (dégât ou soin, +2 au plus) ; leur <b>Chef</b> légendaire les renforce encore, et, certains soirs, choisis ta <b>nuit</b> : prudente ou risquée.</li>
 <li>Pose 3 fois la même unité : elles <b>fusionnent</b> en une version dorée ★ ; 3 unités ★ donnent une ★★, et ainsi de suite. Certaines paires de cartes posées côte à côte <b>évoluent</b> en unité secrète. Tous les 20 zombies tués, une unité gagne un <b>niveau</b>.</li>
 <li>La nuit, les zombies sortent des <b>bois</b> et marchent vers la maison. Tes survivants se défendent tout seuls.</li>
-<li>À l’aube, choisis la carte que tu auras <b>en main le lendemain</b>, puis échange ta <b>ferraille</b> au troc.</li>
+<li>Tu ne joues que les cartes de <b>ton deck</b>. À l’aube, choisis l’une d’elles pour l’avoir <b>en main le lendemain</b>, puis échange ta <b>ferraille</b> au troc.</li>
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon ; à partir de la nuit 8, chaque mutation ajoute aussi une <b>frénésie meurtrière</b> (+10 % de PV et de dégâts). Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}

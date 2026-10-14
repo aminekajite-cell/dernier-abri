@@ -139,8 +139,8 @@ const Z=(()=>{
  // PV max : la version dorée (fusion) a deux fois plus de PV, chaque niveau défensif ajoute 3 PV
  const maxHp=(st,u)=>Math.max(1,stat(st,u.t).hp*(1+(u.gold||0))+((TRAITS[u.trait]||{}).hpB||0)+(u.lvD||0)*3+(u.leg?2:0));
  const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)+(u.lvA||0)+(u.gold||0)+(u.leg?1:0)};
- // héritage : un survivant tombé après 20 victimes laisse un souvenir ; dans la partie suivante, la première unité de son métier gagne +1 dégât et +2 PV
- const LEGACY_KILLS=20;
+ // héritage : un survivant tombé après 100 victimes laisse un souvenir ; dans la partie suivante, la première unité de son métier gagne +1 dégât et +2 PV
+ const LEGACY_KILLS=100;
  const legacies=st=>(st.fallen||[]).filter(f=>f.kills>=LEGACY_KILLS&&U[f.t]&&!U[f.t].evo&&!U[f.t].chief);
  // niveaux : tous les 20 zombies tués, l'unité gagne un niveau, offensif (+1 dégât) ou défensif (+3 PV max et soin complet)
  const LVL=20;
@@ -244,7 +244,7 @@ const Z=(()=>{
   base:{n:'Nuit',d:'Horde normale.',count:1},
   calm:{n:'Nuit tranquille',d:'Horde −30 %. Aucun bonus.',count:.7,safe:1},
   normal:{n:'Nuit ordinaire',d:'Horde normale. +6 ferraille à l’aube.',count:1,scrap:6,safe:1},
-  raid:{n:'Nuit de pillage',d:'Horde +40 %. Une carte rare à l’aube.',count:1.4,card:'rare'},
+  raid:{n:'Nuit de pillage',d:'Horde +40 %. +15 ferraille à l’aube.',count:1.4,scrap:15},
   blood:{n:'Nuit sanglante',d:'Horde +70 %. Une relique à l’aube.',count:1.7,relic:1}
  };
  // le choix de la nuit est rare : 1 aube sur 4 environ, à partir de la nuit 3
@@ -268,10 +268,10 @@ const Z=(()=>{
    {n:'Payer 8 ferraille',d:'Ils partent sans histoire.',ok:st=>st.scrap>=8,go:st=>{st.scrap-=8;return{txt:'Ils empochent la ferraille et disparaissent.'}}},
    {n:'Les repousser',d:'+6 ferraille, mais un de tes défenseurs est blessé.',go:(st,rnd)=>{st.scrap+=6;const j=randUnit(st,rnd);return{txt:'Tu récupères leurs affaires (+6 ferraille). '+(j>=0?hurt(st,j,3):'')}}}]},
   market:{n:'Le supermarché',d:'Un supermarché à moitié pillé, à dix minutes de marche.',ch:[
-   {n:'Fouiller',d:'Une carte rare et de la ferraille… ou une embuscade.',go:(st,rnd)=>{if(rnd()<.6){st.scrap+=5;const c=pickR((st.pool||KEYS).filter(t=>RAR[t]==='rare'),rnd);return{txt:`Butin : ${U[c].n} et 5 ferraille.`,cards:[c]}}st.shelter=Math.max(1,st.shelter-2);return{txt:'Une embuscade ! Tu rentres en courant, la horde sur les talons : l’abri perd 2 PV.'}}},
+   {n:'Fouiller',d:'12 ferraille… ou une embuscade.',go:(st,rnd)=>{if(rnd()<.6){st.scrap+=12;return{txt:'Butin : 12 ferraille.'}}st.shelter=Math.max(1,st.shelter-2);return{txt:'Une embuscade ! Tu rentres en courant, la horde sur les talons : l’abri perd 2 PV.'}}},
    {n:'Rester à l’abri',d:'Pas de risque.',go:()=>({txt:'Tu passes la matinée à renforcer les planches.'})}]},
   radio:{n:'Un message radio',d:'Des survivants donnent leur position et demandent de l’aide.',ch:[
-   {n:'Y aller',d:'2 cartes communes, mais −1 énergie demain (fatigue).',go:(st,rnd)=>{st.nextE=(st.nextE||0)-1;const cs=[pickR((st.pool||KEYS).filter(t=>RAR[t]==='com'),rnd),pickR((st.pool||KEYS).filter(t=>RAR[t]==='com'),rnd)];return{txt:`Ils te donnent ${U[cs[0]].n} et ${U[cs[1]].n}. Le retour est épuisant.`,cards:cs}}},
+   {n:'Y aller',d:'Un survivant gratuit, mais −1 énergie demain (fatigue).',go:(st,rnd)=>{st.nextE=(st.nextE||0)-1;const u=recruit(st,pickR(['gun','axe','med','vigile'],rnd),rnd);return{txt:u?`${u.name} (${U[u.t].n}) te suit jusqu’à l’abri. Le retour est épuisant.`:'Il n’y a plus de place autour de l’abri. Le retour est épuisant pour rien.'}}},
    {n:'Ignorer',d:'Pas de risque.',go:()=>({txt:'Le message se répète jusqu’au soir, puis plus rien.'})}]},
   dog:{n:'Un chien errant',d:'Un chien maigre rôde autour de l’abri.',ch:[
    {n:'L’adopter',d:'Un chien gratuit autour de l’abri.',go:(st,rnd)=>{const u=recruit(st,'dog',rnd);return{txt:u?`${u.name} monte la garde.`:'Pas de place pour lui. Il s’éloigne.'}}},
@@ -284,7 +284,7 @@ const Z=(()=>{
    {n:'Payer 6 ferraille',d:'Toutes tes unités récupèrent tous leurs PV.',ok:st=>st.scrap>=6,go:st=>{st.scrap-=6;st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=maxHp(st,u)});return{txt:'En une matinée, tout est comme neuf.'}}},
    {n:'Refuser',d:'Pas de risque.',go:()=>({txt:'Il hausse les épaules et reprend la route.'})}]},
   wounded:{n:'Un blessé dans le fossé',d:'Une personne blessée appelle à l’aide.',ch:[
-   {n:'Soigner la personne',d:'L’abri perd 1 PV (provisions), tu gagnes une Trousse de secours.',go:st=>{st.shelter=Math.max(1,st.shelter-1);return{txt:'En remerciement, tu reçois sa trousse de secours.',cards:['kit']}}},
+   {n:'Soigner la personne',d:'L’abri perd 1 PV (provisions), toutes tes unités récupèrent 3 PV.',go:st=>{st.shelter=Math.max(1,st.shelter-1);st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+3)});return{txt:'C’était une infirmière. Avant de repartir, elle soigne tout le monde.'}}},
    {n:'Passer ton chemin',d:'Pas de risque.',go:()=>({txt:'Ses appels s’éteignent dans ton dos.'})}]}
  };
  const dawnEvent=(st,rnd=Math.random)=>st.night>=2&&rnd()<.45?pickR(Object.keys(DAWN),rnd):null;
@@ -317,7 +317,6 @@ const Z=(()=>{
  };
  const SHOP={
   heal:{n:'Réparer l’abri',d:'+3 PV à l’abri',cost:15},
-  buy:{n:'Acheter une carte',d:'Une carte au choix parmi 2, ajoutée au deck',cost:12},
   upgrade:{n:'Améliorer une carte',d:'Toutes tes cartes de ce type sont améliorées. Plus cher à chaque fois',cost:25,more:15},
   remove:{n:'Jeter une carte',d:'Retire une carte de ton deck',cost:10}
  };

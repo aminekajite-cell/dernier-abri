@@ -15,7 +15,7 @@ Plateformes visées : Steam (PC) puis mobile.
 4. **Aube** :
    - toutes les 4 nuits, la horde mute (bonus permanent pour les zombies) ;
    - toutes les 5 nuits, tu choisis 1 relique parmi 3 ;
-   - tu choisis 1 carte parmi 3 (ou aucune), tirées selon leur rareté : elle arrive **d'office dans ta main du lendemain**, puis rejoint ton deck ;
+   - tu choisis 1 carte parmi 3 (ou aucune), tirées de ta propre pioche et de ta défausse : elle arrive **d'office dans ta main du lendemain** (aucune carte hors du deck) ;
    - au troc, tu dépenses ta ferraille (réparer, acheter, améliorer, jeter).
 5. La partie continue jusqu'à ce que la maison tombe à 0 PV. Le Colosse attaque toutes les 10 nuits.
 
@@ -198,7 +198,7 @@ C'est un moment rare : environ 1 aube sur 4, à partir de la nuit 3. Après le t
 |---|---|---|
 | Tranquille | −30 % | aucune |
 | Ordinaire | normale | +6 ferraille |
-| De pillage | +40 % | une carte rare |
+| De pillage | +40 % | +15 ferraille |
 | Sanglante | +70 % | une relique |
 
 ## La collection et les decks
@@ -257,7 +257,7 @@ Nuit du Colosse, Nuit sanglante ou de pillage, Pleine lune, ou 30 zombies et plu
 
 ## L'héritage des survivants
 
-Un survivant nommé qui tombe après 20 victimes ou plus laisse un souvenir (3 au plus, les plus glorieux, sauvegardés dans `abri-meta.legacy`). Dans la partie suivante (hors défi du jour), la première unité de son métier posée porte son souvenir : +1 dégât et +2 PV. Les souvenirs sont consommés au début de la partie.
+Un survivant nommé qui tombe après 100 victimes ou plus laisse un souvenir (3 au plus, les plus glorieux, sauvegardés dans `abri-meta.legacy`). Dans la partie suivante (hors défi du jour), la première unité de son métier posée porte son souvenir : +1 dégât et +2 PV. Les souvenirs sont consommés au début de la partie.
 
 ## Le retour visuel
 
@@ -310,12 +310,12 @@ Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque ty
 |---|---|---|
 | Un inconnu à la porte | L'accueillir : un survivant gratuit, ou 30 % de risque qu'il soit mordu (abri −2 PV) | Fermer la porte |
 | Des pillards | Les repousser : +6 ferraille, un défenseur perd 3 PV | Payer 8 ferraille |
-| Le supermarché | Fouiller : 60 % une carte rare et +5 ferraille, sinon abri −2 PV | Rester à l'abri |
-| Un message radio | Y aller : 2 cartes communes, −1 énergie demain | Ignorer |
+| Le supermarché | Fouiller : 60 % +12 ferraille, sinon abri −2 PV | Rester à l'abri |
+| Un message radio | Y aller : un survivant gratuit, −1 énergie demain | Ignorer |
 | Un chien errant | L'adopter : un chien gratuit | Le chasser |
 | Une caisse militaire | L'ouvrir : 50 % une amélioration gratuite, sinon une unité perd 4 PV | La laisser |
 | Un mécanicien de passage | Payer 6 ferraille : toutes les unités récupèrent leurs PV | Refuser |
-| Un blessé dans le fossé | Soigner : abri −1 PV, +1 Trousse de secours | Passer son chemin |
+| Un blessé dans le fossé | Soigner : abri −1 PV, toutes les unités +3 PV | Passer son chemin |
 
 ## Les mutations de la horde
 
@@ -385,7 +385,6 @@ Une relique reste active toute la partie. On en choisit 1 parmi 3 toutes les 5 n
 | Action | Coût | Effet |
 |---|---|---|
 | Réparer l’abri | 15 | +3 PV à l’abri |
-| Acheter une carte | 12 | Une carte au choix parmi 2, ajoutée au deck |
 | Améliorer une carte | 25 (+15 par amélioration déjà faite) | Toutes tes cartes de ce type sont améliorées. Plus cher à chaque fois |
 | Jeter une carte | 10 | Retire une carte de ton deck |
 
@@ -469,6 +468,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Le deck est fermé pendant la partie : plus aucune carte ajoutée (l'aube propose 3 cartes de sa propre pioche pour la main du lendemain, plus d'achat de carte au troc, la Nuit de pillage et les événements donnent de la ferraille, des soins ou un survivant). Héritage relevé à 100 victimes (demande d'Amine).
 - Très grosses nuits en 3 vagues avec pause, alliances entre factions, murs reliés, héritage des survivants tombés (demande d'Amine).
 - Solidarité entre voisins de même faction, riposte et renfort du corps à corps, combattants pour les Soignants, les Bricoleurs et la Communauté (Amine : des factions ne pouvaient pas se défendre, le corps à corps était injouable).
 - Frénésie meurtrière dès la nuit 8 et fusions à plusieurs étoiles (demande d'Amine : difficulté toujours croissante, mais le joueur garde une chance dans les longues parties).
