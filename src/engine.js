@@ -143,8 +143,14 @@ const Z=(()=>{
  const EDGES=[...Array(N*N).keys()].filter(isEdge);
  const INNER=[...Array(N*N).keys()].filter(i=>!isEdge(i)&&i!==C);
  const sideOf=i=>{const[r,c]=rc(i);return r===0?0:r===N-1?1:c===0?2:3};
- // un pas vers la cible (la maison par défaut) : réduit d'abord le plus grand écart
- function next(p,t=C){let[r,c]=rc(p);const[tr,tc]=rc(t),dr=tr-r,dc=tc-c;if(Math.abs(dr)>=Math.abs(dc))r+=Math.sign(dr);else c+=Math.sign(dc);return idx(r,c)}
+ // les pas possibles vers la cible (la maison par défaut), du préféré au moins préféré.
+ // Chaque zombie a un style de marche (z.style) : 0 réduit d'abord l'écart en ligne, 1 l'écart en colonne, 2 coupe en diagonale.
+ // Tous ces pas rapprochent de la cible ; les zombies arrivent ainsi de tous les côtés et par les 8 cases autour de l'abri.
+ function moves(p,t=C,style=0){const[r,c]=rc(p),[tr,tc]=rc(t),sr=Math.sign(tr-r),sc=Math.sign(tc-c),ar=Math.abs(tr-r),ac=Math.abs(tc-c);
+  const row=sr?idx(r+sr,c):-1,col=sc?idx(r,c+sc):-1,diag=sr&&sc?idx(r+sr,c+sc):-1;
+  const order=style===2?[diag,ar>=ac?row:col,ar>=ac?col:row]:style===1?[ac>=ar?col:row,diag,ac>=ar?row:col]:[ar>=ac?row:col,diag,ar>=ac?col:row];
+  return order.filter((m,k)=>m>=0&&order.indexOf(m)===k)}
+ const next=(p,t,style)=>moves(p,t,style)[0];
  // un pas en s'éloignant de la maison (recul)
  function back(p){let[r,c]=rc(p);const dr=r-3,dc=c-3;if(Math.abs(dr)>=Math.abs(dc))r+=Math.sign(dr);else c+=Math.sign(dc);return idx(Math.max(0,Math.min(N-1,r)),Math.max(0,Math.min(N-1,c)))}
  function shuffle(a,rnd=Math.random){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -207,7 +213,7 @@ const Z=(()=>{
   for(const k of ZK){let v=waveCount(k,st.night);if(k!=='boss'){if(e==='lune')v*=1.5;v=Math.round(v*(1+.2*mc(st,'nombre')))}w[k]=v}
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
- function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau')));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k)};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
+ function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau')));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
  function startNight(st,rnd){const w=waveList(st),list=[];
   for(const k of ZK)if(k!=='boss')for(let j=0;j<w[k];j++)list.push(k);
   shuffle(list,rnd);
@@ -266,11 +272,13 @@ const Z=(()=>{
    if(D.dyn&&st.tick===8){st.grid[i]=null;explode(st,i,D.dyn,ev)}
   }
   for(const z of st.z){if(z.hp<=0)continue;z.cd--;if(z.cd>0)continue;const T=ZT[z.k],dm=zdmg(st,z.k);z.cd=zspd(st,z.k);
-   const tgt=lureTarget(st,z.pos),n=next(z.pos,tgt);
+   const tgt=lureTarget(st,z.pos),ms=moves(z.pos,tgt,z.style),blocks=j=>{const v=st.grid[j];return !!(v&&U[v.t].block&&!(T.crawl&&U[v.t].cat==='wall'))};
+   // contournement : si le pas préféré est bloqué, le zombie prend un autre pas libre (le Colosse fonce toujours tout droit)
+   let n=ms[0];if(n!==C&&blocks(n)&&!T.boss){const alt=ms.find(j=>j===C||!blocks(j));if(alt!==undefined)n=alt}
    if(n===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'bite',zid:z.id});if(!T.boss){z.hp=0;z.bit=1}continue}
    const u=st.grid[n];
    if(u&&U[u.t].block&&!(T.crawl&&U[u.t].cat==='wall')){strike(st,z,n,u,ev,false,pow);continue}
-   if(T.spit){const n2=next(n,tgt);
+   if(T.spit){const n2=next(n,tgt,z.style);
     if(n2===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'spit',zid:z.id,from:z.pos});continue}
     const u2=st.grid[n2];if(u2&&U[u2.t].block){strike(st,z,n2,u2,ev,true,pow);continue}}
    z.pos=n;enter(st,z,n,u,ev)

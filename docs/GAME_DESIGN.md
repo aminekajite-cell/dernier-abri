@@ -34,7 +34,8 @@ Score : nombre de nuits survécues, avec un record sauvegardé (et le nombre de 
 - L'anneau extérieur (24 cases) est la forêt : les zombies y apparaissent, le joueur ne peut rien y poser.
 - La case centrale est la maison : 10 PV maximum.
 - Les 24 cases intérieures restantes sont les emplacements du joueur.
-- Les zombies avancent case par case vers la maison, en ligne droite (ils réduisent d'abord le plus grand écart, ligne ou colonne).
+- Les zombies avancent case par case vers la maison. Chacun a un style de marche : réduire d'abord l'écart en ligne, en colonne, ou couper en diagonale. Ils arrivent donc de tous les côtés et peuvent frapper l'abri depuis ses 8 cases voisines.
+- Quand le pas préféré est bloqué par une unité, le zombie prend un autre pas libre qui le rapproche aussi de la maison. Il ne frappe que s'il est coincé. Les murs ralentissent et canalisent la horde ; pour la bloquer, il faut un anneau complet. Le Colosse fonce toujours tout droit.
 
 ## Les cartes
 
@@ -206,7 +207,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 
 - Le bot joue le Survivant. À l'aube, il choisit comme un joueur : il teste chacune des 3 cartes sur la nuit suivante et garde la meilleure. Il prend une relique au hasard et dépense sa ferraille (réparer si l'abri est à 5 PV ou moins, sinon améliorer). Il joue jusqu'à la chute de l'abri. `HASARD=1 node tools/simulate.js` le fait choisir ses cartes au hasard.
 - Cible : le bot tombe en moyenne vers la nuit 7-8, et environ 40 % des zombies arrivent au contact d'une unité ou de l'abri (la simulation affiche cette part).
-- Résultat actuel (60 parties) : chute en moyenne à la nuit 4,1 ; 70 % des zombies arrivent au contact. Problème connu : 22 des 24 trajets entrent dans l'abri par les 2 cases à gauche et à droite de la maison, donc deux murs solides suffisent presque. Le bot place mieux qu'un débutant, mais Amine trouvait le jeu trop facile : la cible a été durcie.
+- Résultat actuel (60 parties) : chute en moyenne à la nuit 4,1 ; 70 % des zombies arrivent au contact. Corrigé ensuite : avant, 22 des 24 trajets entraient dans l'abri par les 2 cases à gauche et à droite de la maison, donc deux murs solides suffisaient presque. Le bot place mieux qu'un débutant, mais Amine trouvait le jeu trop facile : la cible a été durcie.
 - Les deux premières nuits sont volontairement plus faciles pour l'apprentissage.
 - Un placement au hasard perd généralement dès la nuit 2 : le placement doit compter.
 
@@ -228,6 +229,8 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Deck de départ réduit à 8 cartes par personnage : avec 40 cartes, un deck complet dès le départ rendrait les parties toutes pareilles.
 - La carte choisie à l'aube arrive d'office dans la main du lendemain (demande d'Amine).
 - Une seule monnaie (la ferraille) pour le troc : plusieurs ressources seraient trop lourdes sur petit écran.
+- Trajets variés et contournement des murs : avant, deux murs à gauche et à droite de la maison bloquaient presque toute la horde.
+- Amine teste lui-même l'équilibrage ; la simulation n'est plus lancée à chaque changement.
 - PV des zombies doublés une seconde fois (Amine était invincible à la nuit 15). Le bot tombe alors vers la nuit 4 : il joue nettement moins bien qu'Amine, la simulation sert surtout à comparer.
 - Zombies deux fois plus coriaces mais 40 % moins nombreux (Amine : « les zombies meurent avant d'atteindre mes unités »). Avant, seuls 26 % arrivaient au contact.
 - Mutations de la horde toutes les 4 nuits plutôt qu'une gestion de nourriture ou de munitions (demande d'Amine : garder le jeu fun et simple). Elles répondent au problème de l'« armée de tireurs » invincible dès la nuit 5.
