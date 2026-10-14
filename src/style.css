@@ -128,4 +128,20 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .relic.nightc.risk{border-color:color-mix(in srgb,var(--blood) 60%,var(--line))}
 .relic.nightc.safe{border-color:color-mix(in srgb,var(--good) 50%,var(--line))}
 .relic.nightc em{font-style:normal;color:var(--lantern);font-size:12px}
+.tabs{display:flex;gap:6px}
+.tabs.wrap{flex-wrap:wrap}
+.tab{flex:1;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:8px 6px;color:var(--muted);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.tabs.wrap .tab{flex:0 1 auto}
+.tab small{font-size:11px;opacity:.8}
+.tab.on{border-color:var(--lantern);color:var(--ink);background:color-mix(in srgb,var(--lantern) 18%,var(--panel2))}
+.tab:disabled{opacity:.45}
+.panel .bad{color:var(--blood)}
+.dk.ed{border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--panel2)}
+.dk.ed.in{border-color:color-mix(in srgb,var(--lantern) 55%,var(--line))}
+.dk.ed.locked{opacity:.8}
+.dk .qty{display:flex;align-items:center;gap:6px;flex:none;margin-left:auto;color:var(--ink)}
+.dk .qty button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:18px;line-height:1;padding:0}
+.dk .qty button:disabled{opacity:.3}
+.dk .qty button.buy{width:auto;padding:0 8px;font-size:12px;font-weight:700;color:var(--lantern);border-color:var(--lantern)}
+.dk .qty b{font-variant-numeric:tabular-nums;min-width:28px;text-align:center}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}

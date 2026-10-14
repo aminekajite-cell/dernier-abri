@@ -162,7 +162,7 @@ const Z=(()=>{
  const randUnit=(st,rnd)=>{const us=st.grid.map((u,i)=>u&&U[u.t].block?i:-1).filter(i=>i>=0);return us.length?us[Math.floor(rnd()*us.length)]:-1};
  const pickR=(a,rnd)=>a[Math.floor(rnd()*a.length)];
  function hurt(st,j,d){const u=st.grid[j];if(!u)return'';u.hp-=d;const nm=u.name||U[u.t].n;if(u.hp<=0){lose(st,j,u,[]);return st.grid[j]?`${nm} s’en sort de justesse.`:`${nm} n’a pas survécu.`}return `${nm} perd ${d} PV.`}
- function recruit(st,t,rnd){const fc=freeCells(st);if(!fc.length)return null;const i=pickR(fc,rnd);place(st,t,i,rnd,true);return st.grid[i]}
+ function recruit(st,t,rnd){const fc=freeCells(st);if(!fc.length)return null;const i=pickR(fc,rnd);place(st,t,i,rnd,true);st.grid[i].gen=1;return st.grid[i]}
  const DAWN={
   stranger:{n:'Un inconnu à la porte',d:'Quelqu’un frappe, à bout de forces. Son bras est caché sous sa veste.',ch:[
    {n:'L’accueillir',d:'Un survivant gratuit… s’il n’est pas mordu.',go:(st,rnd)=>{if(rnd()<.3){st.shelter=Math.max(1,st.shelter-2);return{txt:'L’inconnu était mordu. La transformation a lieu dans la nuit : l’abri perd 2 PV avant que tout soit fini.'}}
@@ -209,10 +209,10 @@ const Z=(()=>{
  const zspd=(st,k)=>{const s=ZT[k].spd;return mc(st,'frenesie')&&s>1&&!ZT[k].boss?s-1:s};
  const zdmg=(st,k)=>ZT[k].dmg+(mc(st,'enrage')&&(k==='walk'||k==='run')?1:0);
  const CHARS={
-  surv:{n:'Le survivant',d:'Un deck équilibré, sans bonus. Idéal pour apprendre.',deck:['bar','bar','car','gun','gun','axe','trap','food','grenade'],relic:null},
-  cop:{n:'La policière',d:'Tireurs. Commence avec la Lunette de visée (+1 portée).',deck:['bar','fen','gun','gun','snp','cop','lamp','food','grenade'],relic:'lunette'},
-  farm:{n:'Le fermier',d:'Pièges. Commence avec le Manuel du trappeur (+2 dégâts).',deck:['bar','bar','trap','trap','mine','fire','spike','dog','grenade'],relic:'pieges'},
-  nurse:{n:'L’infirmière',d:'Soins. Commence avec la Marmite de soupe (+1 PV à l’aube).',deck:['bar','car','gun','axe','med','food','rep','kit','grenade'],relic:'soupe'}
+  surv:{n:'Le survivant',d:'Aucun bonus. Idéal pour apprendre.',deck:['bar','bar','car','gun','gun','axe','trap','food','grenade'],relic:null},
+  cop:{n:'La policière',d:'Commence avec la Lunette de visée : tes tireurs ont +1 portée.',deck:['bar','fen','gun','gun','snp','cop','lamp','food','grenade'],relic:'lunette'},
+  farm:{n:'Le fermier',d:'Commence avec le Manuel du trappeur : tes pièges font +2 dégâts.',deck:['bar','bar','trap','trap','mine','fire','spike','dog','grenade'],relic:'pieges'},
+  nurse:{n:'L’infirmière',d:'Commence avec la Marmite de soupe : +1 PV à l’abri à chaque aube.',deck:['bar','car','gun','axe','med','food','rep','kit','grenade'],relic:'soupe'}
  };
  const SHOP={
   heal:{n:'Réparer l’abri',d:'+3 PV à l’abri',cost:15},
@@ -251,7 +251,7 @@ const Z=(()=>{
  /* ---------- état d'une partie ---------- */
  function newState(ch,pl,rnd=Math.random,pool){const P=PLACES[pl]||PLACES.bois;const st={grid:Array(N*N).fill(null),shelter:P.maxS||MAXS,maxS:P.maxS||MAXS,place:PLACES[pl]?pl:'bois',pool:pool||KEYS.slice(),night:1,event:EVENTS[0],z:[],pending:[],tick:0,zid:0,kills:0,scrap:0,relics:[],upg:{},muts:[],energy:ENERGY,moved:0,side:-1,char:CHARS[ch]?ch:'surv'};
   const r=CHARS[st.char].relic;if(r)st.relics.push(r);
-  st.scrap+=P.scrap||0;(P.start||[]).forEach(([t,i])=>place(st,t,i,rnd,true));return st}
+  st.scrap+=P.scrap||0;(P.start||[]).forEach(([t,i])=>{place(st,t,i,rnd,true);st.grid[i].gen=1});return st}
  const maxS=st=>st.maxS||MAXS;
  // les lieux : chacun change la carte de départ et une règle
  const PLACES={
@@ -264,11 +264,24 @@ const Z=(()=>{
  const UNLOCK={
   chars:{surv:0,cop:8,farm:20,nurse:35},
   places:{bois:0,ferme:5,station:8,mall:12},
-  cards:{mg:5,molo:10,siren:15,lead:20,solar:25,dyn:30,gas:40,door:50}
+  cards:{}
  };
  function unlocks(meta){const m=meta||{},b=m.best||0,t=m.total||0;
   return{chars:Object.keys(UNLOCK.chars).filter(k=>t>=UNLOCK.chars[k]),places:Object.keys(UNLOCK.places).filter(k=>b>=UNLOCK.places[k]),
-   pool:KEYS.filter(k=>!(k in UNLOCK.cards)||t>=UNLOCK.cards[k])}}
+   pool:(m.cards&&m.cards.length?m.cards:STARTER_CARDS).filter(k=>U[k])}}
+ /* ---------- collection et deck (entre les parties) ----------
+    La collection : les types de cartes débloqués, pour toujours. On en débloque avec les points de survie gagnés en fin de partie.
+    Le deck : préparé avant la partie, 20 à 30 cartes, avec un nombre limité d'exemplaires selon la rareté. */
+ const DECK_MIN=20,DECK_MAX=30,COPY_MAX={com:3,rare:2,epic:1};
+ const CARD_PRICE={com:15,rare:35,epic:70};
+ const STARTER_CARDS='bar car fen sand gun snp kid axe dog cop med lamp trap fire mine wire spike food rep grenade shot patch'.split(' ');
+ const STARTER_DECK=['bar','bar','bar','fen','car','gun','gun','gun','snp','axe','axe','dog','med','trap','trap','mine','food','rep','grenade','grenade'];
+ const copyMax=t=>COPY_MAX[RAR[t]||'com'];
+ const runPoints=(nights,kills)=>nights*10+Math.floor(kills/4);
+ function deckError(deck,owned){if(deck.length<DECK_MIN)return`Il faut au moins ${DECK_MIN} cartes (${deck.length} pour l’instant).`;
+  if(deck.length>DECK_MAX)return`${DECK_MAX} cartes au maximum.`;
+  const c={};for(const t of deck){c[t]=(c[t]||0)+1;if(owned&&!owned.includes(t))return`${U[t].n} n’est pas dans ta collection.`;if(c[t]>copyMax(t))return`${U[t].n} : ${copyMax(t)} exemplaire(s) au maximum.`}
+  return''}
  function newDay(st,rnd,offer){st.night++;st.energy=ENERGY+(st.nextE||0);st.nextE=0;st.moved=0;st.rushT=0;
   if(offer){st.event=EVENTS.find(e=>e.id===offer.event)||EVENTS[0];st.tier=offer.tier}else{st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))];st.tier='base'}}
  const has=(st,t)=>st.grid.some(u=>u&&u.t===t);
@@ -375,7 +388,7 @@ const Z=(()=>{
   u.hp-=d;ev.push({i:n,txt:'−'+d,k:ranged?'spit':'bite',zid:z.id,from:z.pos});
   if(!ranged&&u.t==='fen'&&pow){const el=(st._fl||{}).elec||0;hit(st,z,((st.relics.includes('groupe')||has(st,'solar'))?2:1)+(el?1:0),ev,n);if(el>=2)z.cd+=1}
   if(D.gas){st.grid[n]=null;explode(st,n,D.gas,ev);return}
-  if(u.hp<=0&&lose(st,n,u,ev)&&D.tire)st.grid[n]={t:'fire',hp:1}}
+  if(u.hp<=0&&lose(st,n,u,ev)&&D.tire)st.grid[n]={t:'fire',hp:1,gen:1}}
  // un zombie entre sur une case sans obstacle
  function enter(st,z,n,u,ev){if(!u||U[u.t].block)return;const D=stat(st,u.t),tb=[0,2,4][(st._fl||{}).trap||0];
   if(D.trap){hit(st,z,D.trap+tb,ev,n);st.grid[n]=null}
@@ -442,7 +455,7 @@ const Z=(()=>{
   for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;st.kills++;st.scrap+=ZT[z.k].boss?15:1}
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
- return{N,C,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
+ return{N,C,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
   DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

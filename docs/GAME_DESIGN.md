@@ -9,7 +9,7 @@ Plateformes visées : Steam (PC) puis mobile.
 
 ## La boucle de jeu
 
-1. **Début** : tu choisis un personnage, qui donne un deck de départ de 9 cartes (dont une Grenade) et parfois une relique.
+1. **Début** : tu prépares la partie : un de tes 3 decks (20 à 30 cartes, construits avec ta collection), un personnage (qui donne parfois une relique) et un lieu.
 2. **Jour** : tu as **4 énergies**. Chaque carte coûte de 0 à 3 énergies selon sa puissance ; tu joues autant de cartes que ton énergie le permet (le Café, gratuit, donne +2 énergies). Les cartes non jouées **restent en main** pour les jours suivants. Chaque jour, la main est complétée jusqu'à 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos), avec au moins 1 nouvelle carte et 8 cartes au maximum. Une fois par jour, tu peux aussi **déplacer** une de tes unités vers une case libre.
 3. **Nuit** : les zombies apparaissent sur l'anneau extérieur (les bois) et marchent vers la maison. Tes unités attaquent automatiquement. Les zombies frappent tout ce qui bloque leur chemin. Le bouton du bas passe la nuit en vitesse ×2.
 4. **Aube** :
@@ -134,6 +134,15 @@ C'est un moment rare : environ 1 aube sur 4, à partir de la nuit 3. Après le t
 | De pillage | +40 % | une carte rare |
 | Sanglante | +70 % | une relique |
 
+## La collection et les decks
+
+- **Collection** (permanente) : les types de cartes débloqués. On commence avec 22 cartes de base. Chaque partie rapporte des **points de survie** : 10 par nuit survécue, plus 1 tous les 4 zombies. On débloque une carte pour toujours : commune 15 points, rare 35, épique 70. Les parties du défi quotidien ne rapportent pas de points.
+- **Decks** : 3 emplacements sauvegardés. Un deck compte 20 à 30 cartes, avec au maximum 3 exemplaires d'une commune, 2 d'une rare, 1 d'une épique. Chaque emplacement commence avec le deck de départ (20 cartes équilibrées).
+- **Pendant la partie** : on pioche dans son deck. Une unité posée quitte la pioche ; quand elle est détruite, qu'un piège se déclenche ou qu'elle est remplacée, sa carte revient dans la défausse et peut être repiochée. Les objets et les réactions vont dans la défausse après usage. Les unités offertes par le jeu (lieu, événements, pneus en feu) ne sont pas des cartes et ne reviennent pas.
+- Les cartes gagnées à l'aube et au troc sont des **renforts temporaires** : elles ne valent que pour la partie en cours, et ne sont proposées que parmi les cartes de la collection.
+- Le personnage ne fixe plus le deck : il donne seulement sa relique de départ.
+- Défi quotidien : un deck de 24 cartes tiré au sort pour la journée, avec toutes les cartes.
+
 ## Les survivants nommés
 
 C'est l'identité du jeu : on s'attache à ses survivants, et on les perd.
@@ -247,7 +256,7 @@ Sauvegardée dans le navigateur : meilleur record, total de nuits survécues, no
 
 - Personnages : la Policière à 8 nuits au total, le Fermier à 20, l'Infirmière à 35.
 - Lieux : selon le record (voir ci-dessus).
-- Cartes épiques verrouillées au début, débloquées au total de nuits : Mitrailleuse 5, Cocktails 10, Sirène 15, Chef de groupe 20, Panneau solaire 25, Dynamite 30, Bonbonne de gaz 40, Porte blindée 50. Une carte verrouillée ne sort ni à l'aube, ni au troc, ni dans les événements.
+- Les cartes se débloquent désormais dans la collection avec les points de survie (voir « La collection et les decks »).
 - L'écran d'accueil indique le prochain déblocage ; l'écran de fin liste ce qui vient d'être débloqué.
 
 ## Les reliques
@@ -347,6 +356,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Trajets variés et contournement des murs : avant, deux murs à gauche et à droite de la maison bloquaient presque toute la horde.
 - Survivants nommés, avec trait et mort définitive : identité du jeu pour Steam (on s'attache, on raconte ses parties).
 - Énergie (4 par jour, cartes à 0-3) à la place de « 2 cartes par jour », main conservée d'un jour à l'autre et déplacement d'une unité par jour (Amine : 2 cartes ne laissaient pas de vraie stratégie).
+- Collection permanente et decks construits avant la partie (Amine : plus de stratégie de deck). Deck de 30 cartes au maximum plutôt que 40, pour que la stratégie ne se dilue pas.
 - Réactions de nuit, familles et choix de la nuit (rejouabilité et décisions). PV des zombies −25 % (Amine : trop dur), puis +25 % et choix de la nuit rendu rare (1 aube sur 4).
 - Amine teste lui-même l'équilibrage ; la simulation n'est plus lancée à chaque changement.
 - PV des zombies doublés une seconde fois (Amine était invincible à la nuit 15). Le bot tombe alors vers la nuit 4 : il joue nettement moins bien qu'Amine, la simulation sert surtout à comparer.

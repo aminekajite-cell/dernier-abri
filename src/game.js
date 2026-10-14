@@ -55,7 +55,7 @@ const ICON={
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v21 · 14 oct.';
+const VERSION='v22 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -80,10 +80,10 @@ let META=loadMeta();
 let TUTO=5;try{TUTO=+(localStorage.getItem('abri-tuto')??(META.runs||META.best?5:0))}catch(e){}
 function tuto(n){if(TUTO===n){TUTO=n+1;try{localStorage.setItem('abri-tuto',TUTO)}catch(e){}}}
 const TIPS=['👆 Touche une carte en bas pour la choisir. Le chiffre jaune est son coût en énergie.','Touche une case en pointillés jaunes pour la poser.','Bien ! Les points jaunes sous la carte sont ton énergie. Pose d’autres cartes, puis touche « Affronter la nuit ».','Tes survivants se défendent tout seuls. Touche le bouton du bas pour accélérer.'];
-function newGame(ch,pl,daily){
+function newGame(ch,pl,daily,deck){
  RS=daily?seedFrom('abri-'+daily):1+Math.floor(Math.random()*2147483645);
  G=Z.newState(ch,pl,R,daily?Z.KEYS.slice():Z.unlocks(META).pool);if(daily)G.daily=daily;
- S={draw:shuffle([...Z.CHARS[G.char].deck]),discard:[],hand:[],sel:null,moveFrom:null,inspect:null,busy:false,next:null,phase:null,picks:null,dawn:null};
+ S={draw:shuffle([...(deck||META.decks[META.slot]||Z.STARTER_DECK)]),board:G.grid.filter(Boolean),discard:[],hand:[],sel:null,moveFrom:null,inspect:null,busy:false,next:null,phase:null,picks:null,dawn:null};
  V.clear();FX.length=0;PT.length=0;facing.fill(null);clearDecals();
  fillHand();
 }
@@ -91,7 +91,11 @@ function newGame(ch,pl,daily){
 // la main se garde d'un jour à l'autre : on la complète jusqu'au nombre de cartes du jour (au moins 1 nouvelle), sans dépasser HAND_MAX
 function fillHand(){if(S.next){S.hand.push(S.next);S.next=null}drawCards(Math.min(Z.HAND_MAX-S.hand.length,Math.max(1,Z.drawCount(G)-S.hand.length)))}
 function drawCards(n){for(let k=0;k<n;k++){if(!S.draw.length){S.draw=shuffle(S.discard);S.discard=[]}if(!S.draw.length)break;S.hand.push(S.draw.pop())}}
-const deckList=()=>[...S.draw,...S.discard,...S.hand];
+// le deck de la partie : pioche, défausse, main, et les unités posées (qui reviennent dans la défausse quand elles tombent)
+const pileList=()=>[...S.draw,...S.discard,...S.hand];
+const deckList=()=>[...pileList(),...(S.board||[]).filter(u=>!u.gen).map(u=>u.t)];
+// une unité posée qui a disparu de la carte (détruite, piège déclenché, remplacée…) : sa carte revient dans la défausse
+function syncBoard(){const live=new Set(G.grid.filter(Boolean));for(const u of S.board||[])if(!live.has(u)&&!u.gen)S.discard.push(u.t);S.board=[...live]}
 
 /* ---------- sauvegarde (localStorage, marche aussi dans Electron/Tauri) ---------- */
 const SAVE_KEY='abri-save',SAVE_V=2;
@@ -101,7 +105,7 @@ function clearSave(){try{localStorage.removeItem(SAVE_KEY)}catch(e){}}
 function resume(d){
  newGame(d.g.char,d.g.place);
  Object.assign(G,d.g,{event:Z.EVENTS.find(e=>e.id===d.g.event)||Z.EVENTS[0]});Z.touch(G);
- RS=d.g.rs||RS;Object.assign(S,d.s,{sel:null,busy:false});
+ RS=d.g.rs||RS;Object.assign(S,d.s,{sel:null,busy:false});S.board=G.grid.filter(Boolean);
  hide();render();
  if(S.phase)dawnStep(S.phase,S.picks);
 }
@@ -523,7 +527,7 @@ cv.addEventListener('click',e=>{
 function unitLine(u){const tr=Z.TRAITS[u.trait];return u.name?`<b>${u.name}</b>, ${cardName(u.t)} · <b>${tr.n}</b> (${tr.d}) · ${plural(u.kills||0,'zombie tué','zombies tués')} · ${u.hp}/${Z.maxHp(G,u)} PV.`:`<b>${cardName(u.t)}</b> · ${u.hp}/${Z.maxHp(G,u)} PV.`}
 // jouer une réaction pendant la nuit
 function playReact(k,i){const t=S.hand[k];const types=G.grid.map(u=>u&&u.t);const ev=Z.react(G,t,i);if(!ev)return false;
- S.hand.splice(k,1);S.discard.push(t);S.sel=null;const now=performance.now();syncZ(now);playEvents(ev,types,now);
+ S.hand.splice(k,1);S.discard.push(t);syncBoard();S.sel=null;const now=performance.now();syncZ(now);playEvents(ev,types,now);
  const p=tc(i);if(t==='grenade')SFX.play('boom');else if(t==='shot')SFX.play('snp');else SFX.play('place');
  if(t==='horn'){addFX({type:'ring',x:CEN.x,y:CEN.y,r:200,c:'#f2b33d',dur:600});floatTxt(CEN.x,CEN.y-20,'Reculez !','#f2b33d')}
  if(t==='rush')floatTxt(CEN.x,CEN.y-20,'Adrénaline !','#ff7a59');
@@ -538,7 +542,7 @@ function tapCell(i){
   return}
  const t=S.hand[S.sel],D=Z.U[t];
  if(!Z.canPay(G,t)||!Z.canPlace(G,t,i))return;
- tuto(1);S.hand.splice(S.sel,1);Z.place(G,t,i,R);if(!D.instant)facing[i]=null;S.discard.push(t);S.sel=null;S.moveFrom=null;S.inspect=null;
+ tuto(1);S.hand.splice(S.sel,1);Z.place(G,t,i,R);if(!D.instant)facing[i]=null;if(D.instant)S.discard.push(t);syncBoard();S.sel=null;S.moveFrom=null;S.inspect=null;
  if(G.grid[i]&&G.grid[i].name){const q=tc(i);floatTxt(q.x,q.y-14,`${G.grid[i].name} rejoint l’abri`,'#f2b33d')}
  const p=D.instant&&!D.onUnit?CEN:tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#f2b33d',dur:350});SFX.play('place');
  const St=Z.stat(G,t);
@@ -564,7 +568,7 @@ async function night(){
  tuto(2);nightTarget=1;Z.startNight(G,R);render();await wait(900);
  let r;
  do{const types=G.grid.map(u=>u&&u.t);
-  r=Z.step(G);const now=performance.now();
+  r=Z.step(G);syncBoard();const now=performance.now();
   syncZ(now);playEvents(r.ev,types,now);render();
   const lostEv=r.ev.filter(e=>e.k==='lost');
   if(lostEv.length){const info=$('#info');info.className='info warn';const ppl=lostEv.filter(e=>e.name),obj=lostEv.filter(e=>!e.name);
@@ -572,7 +576,7 @@ async function night(){
   await wait(tickMs());
  }while(!r.done);
  await wait(700);
- const dawnInfo=Z.endNight(G);nightTarget=0;S.busy=false;render();await wait(900);
+ const dawnInfo=Z.endNight(G);syncBoard();nightTarget=0;S.busy=false;render();await wait(900);
  if(G.shelter<=0)return end();
  const mut=Z.mutNight(G.night)?Z.mutate(G,R):null;
  const hero=G.grid.filter(u=>u&&u.name&&u.nk>0).sort((a,b)=>b.nk-a.nk)[0];
@@ -623,6 +627,7 @@ function shopScreen(){
   <button type="button" class="go" data-a="nightpick">Continuer</button>`);
 }
 const deckTypes=()=>[...new Set(deckList())];
+const pileTypes=()=>[...new Set(pileList())];
 function listScreen(title,txt,types,a){show(`<h2 class="pw">${title}</h2><p>${txt}</p><div class="deck pickable">${types.map(t=>`<button type="button" class="dk" data-a="${a}" data-v="${t}" style="--cc:${cc(t)}">${svg(t)}<span><b>${cardName(t)}${a==='up-pick'?` → ${Z.upgDesc(t)}`:''}</b>${Z.U[t].d}</span></button>`).join('')}</div><button type="button" class="skip" data-a="shop">Retour</button>`)}
 function removeCard(t){for(const pile of[S.discard,S.draw,S.hand]){const k=pile.indexOf(t);if(k>=0){pile.splice(k,1);return true}}return false}
 // choisir la nuit suivante : une prudente, une risquée qui rapporte
@@ -638,11 +643,11 @@ function end(){
  SFX.play('death');
  clearSave();const nights=G.night-1;
  const before=Z.unlocks(META),newRec=nights>META.best&&nights>0;
- if(!G.daily){META.best=Math.max(META.best,nights);META.total+=nights;META.runs++;saveMeta(META)}
+ let pts=0;if(!G.daily){pts=Z.runPoints(nights,G.kills);META.points=(META.points||0)+pts;META.best=Math.max(META.best,nights);META.total+=nights;META.runs++;saveMeta(META)}
  const best=META.best,after=Z.unlocks(META);
- const fresh=[...after.chars.filter(k=>!before.chars.includes(k)).map(k=>'Personnage : '+Z.CHARS[k].n),...after.places.filter(k=>!before.places.includes(k)).map(k=>'Lieu : '+Z.PLACES[k].n),...after.pool.filter(k=>!before.pool.includes(k)).map(k=>'Carte : '+Z.U[k].n)];
+ const fresh=[...after.chars.filter(k=>!before.chars.includes(k)).map(k=>'Personnage : '+Z.CHARS[k].n),...after.places.filter(k=>!before.places.includes(k)).map(k=>'Lieu : '+Z.PLACES[k].n),];
  const dailyTxt=G.daily?dailyEnd(nights):'';
- show(`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div><p><b>${G.kills}</b> zombies éliminés. Record : <b>${plural(best,'nuit','nuits')}</b>${newRec?' (nouveau record !)':''}.</p>${dailyTxt}${fresh.length?`<h3>Débloqué !</h3><ul>${fresh.map(f=>`<li><b>${f}</b></li>`).join('')}</ul>`:''}<h3>Mémorial</h3>${memorialHtml()}<button type="button" class="go" data-a="new">Rejouer</button>`);
+ show(`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div><p><b>${G.kills}</b> zombies éliminés. Record : <b>${plural(best,'nuit','nuits')}</b>${newRec?' (nouveau record !)':''}.</p>${dailyTxt}${pts?`<p>+<b>${pts}</b> points de survie (total : ${META.points}). Débloque de nouvelles cartes dans la <b>Collection</b>.</p>`:''}${fresh.length?`<h3>Débloqué !</h3><ul>${fresh.map(f=>`<li><b>${f}</b></li>`).join('')}</ul>`:''}<h3>Mémorial</h3>${memorialHtml()}<button type="button" class="go" data-a="new">Rejouer</button><button type="button" class="skip" data-a="coll">Collection</button>`);
 }
 const CATN={wall:'Défenses',shoot:'Tireurs',melee:'Corps à corps',help:'Soutien',trap:'Pièges',item:'Objets'};
 const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${svg(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em> · ${Z.U[t].d}${famLine(t)}</span></div>`).join('')}</div>`).join('');
@@ -675,20 +680,56 @@ function placeScreen(){
   <button type="button" class="skip" data-a="new">Retour</button>`);
 }
 const ov=$('#ov'),panel=$('#panel');
-function show(h){panel.innerHTML=h;ov.hidden=false;panel.scrollTop=0}
+function show(h,keep){const y=panel.scrollTop;panel.innerHTML=h;ov.hidden=false;panel.scrollTop=keep?y:0}
 function hide(){ov.hidden=true}
+/* ---------- collection, decks et préparation de la partie ---------- */
+function ensureMeta(){if(!META.cards||!META.cards.length)META.cards=Z.STARTER_CARDS.slice();if(META.points==null)META.points=(META.total||0)*5;
+ if(!META.decks)META.decks=[0,1,2].map(()=>Z.STARTER_DECK.slice());if(META.slot==null)META.slot=0;saveMeta(META)}
+ensureMeta();
+const PREP={ch:'surv',pl:'bois'};
+const deckCount=d=>{const c={};d.forEach(t=>c[t]=(c[t]||0)+1);return c};
+function prepScreen(){const u=Z.unlocks(META);if(!u.chars.includes(PREP.ch))PREP.ch='surv';if(!u.places.includes(PREP.pl))PREP.pl='bois';
+ const d=META.decks[META.slot],err=Z.deckError(d,META.cards),fc={};d.forEach(t=>{const f=Z.famOf(t);if(f)fc[f]=(fc[f]||0)+1});
+ show(`<h2 class="pw">Préparer la partie</h2>
+  <h3>Ton deck</h3><div class="tabs">${META.decks.map((x,k)=>`<button type="button" class="tab${k===META.slot?' on':''}" data-a="prepdeck" data-v="${k}">Deck ${k+1}<small>${x.length} cartes</small></button>`).join('')}</div>
+  <p>${err?`<span class="bad">${err}</span>`:`<b>${d.length}</b> cartes · ${Object.entries(fc).sort((a,b)=>b[1]-a[1]).map(([f,n])=>`${Z.FAM[f].ic} ${n}`).join(' ')||'aucune famille'}`}</p>
+  <button type="button" class="skip" data-a="edit">Modifier le deck ${META.slot+1}</button>
+  <h3>Ton survivant</h3><div class="tabs wrap">${Object.keys(Z.CHARS).map(k=>u.chars.includes(k)?`<button type="button" class="tab${k===PREP.ch?' on':''}" data-a="prepch" data-v="${k}">${Z.CHARS[k].n}</button>`:`<button type="button" class="tab" disabled>🔒 ${Z.CHARS[k].n}</button>`).join('')}</div>
+  <p>${Z.CHARS[PREP.ch].d}</p>
+  <h3>Ton lieu</h3><div class="tabs wrap">${Object.keys(Z.PLACES).map(k=>u.places.includes(k)?`<button type="button" class="tab${k===PREP.pl?' on':''}" data-a="preppl" data-v="${k}">${Z.PLACES[k].n}</button>`:`<button type="button" class="tab" disabled>🔒 ${Z.PLACES[k].n}</button>`).join('')}</div>
+  <p>${Z.PLACES[PREP.pl].d}</p>
+  <button type="button" class="go" data-a="start" ${err?'disabled':''}>Commencer</button>
+  <button type="button" class="skip" data-a="coll">Collection (${META.points} points)</button><button type="button" class="skip" data-a="title">Retour</button>`)}
+function deckEditor(keep){const d=META.decks[META.slot],cnt=deckCount(d),err=Z.deckError(d,META.cards);
+ show(`<h2 class="pw">Deck ${META.slot+1}</h2><p><b>${d.length}</b> / ${Z.DECK_MAX} cartes (minimum ${Z.DECK_MIN}). ${err?`<span class="bad">${err}</span>`:'✓ Prêt.'} Commune ×3, rare ×2, épique ×1 au maximum.</p>
+  ${Object.keys(CATN).map(c=>{const ts=META.cards.filter(t=>Z.U[t].cat===c);if(!ts.length)return'';return `<h3>${CATN[c]}</h3><div class="deck">${ts.map(t=>`<div class="dk ed${cnt[t]?' in':''}" style="--cc:${cc(t)}">${svg(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em>${famLine(t)}<br>${Z.U[t].d}</span><span class="qty"><button type="button" data-a="dkm" data-v="${t}" ${cnt[t]?'':'disabled'}>−</button><b>${cnt[t]||0}/${Z.copyMax(t)}</b><button type="button" data-a="dkp" data-v="${t}" ${(cnt[t]||0)>=Z.copyMax(t)||d.length>=Z.DECK_MAX?'disabled':''}>+</button></span></div>`).join('')}</div>`}).join('')}
+  <button type="button" class="go" data-a="new">Terminé</button><button type="button" class="skip" data-a="dkreset">Remettre le deck de départ</button><button type="button" class="skip" data-a="coll">Collection</button>`,keep)}
+function collectionScreen(keep){const own=META.cards;
+ show(`<h2 class="pw">Collection</h2><p>Tu as <b>${META.points}</b> points de survie. Chaque partie en rapporte : 10 par nuit survécue, plus 1 tous les 4 zombies. Une carte débloquée l’est pour toujours.</p>
+  ${Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>{const has=own.includes(t),pr=Z.CARD_PRICE[Z.RAR[t]||'com'];return `<div class="dk ed${has?' in':' locked'}" style="--cc:${cc(t)}">${svg(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em>${famLine(t)}<br>${Z.U[t].d}</span><span class="qty">${has?'<b>✓</b>':`<button type="button" class="buy" data-a="unlock" data-v="${t}" ${META.points>=pr?'':'disabled'}>${pr} pts</button>`}</span></div>`}).join('')}</div>`).join('')}
+  <button type="button" class="go" data-a="new">Préparer une partie</button><button type="button" class="skip" data-a="title">Accueil</button>`,keep)}
 const ACT={
- new:()=>charScreen(),
+ new:()=>prepScreen(),
+ prepdeck:v=>{META.slot=+v;saveMeta(META);prepScreen()},
+ prepch:v=>{PREP.ch=v;prepScreen()},
+ preppl:v=>{PREP.pl=v;prepScreen()},
+ start:()=>{const d=META.decks[META.slot];if(Z.deckError(d,META.cards))return;newGame(PREP.ch,PREP.pl,null,d);save();hide();render()},
+ edit:()=>deckEditor(),
+ dkp:v=>{const d=META.decks[META.slot];if(d.length<Z.DECK_MAX&&(deckCount(d)[v]||0)<Z.copyMax(v)&&META.cards.includes(v)){d.push(v);saveMeta(META)}deckEditor(1)},
+ dkm:v=>{const d=META.decks[META.slot],k=d.indexOf(v);if(k>=0){d.splice(k,1);saveMeta(META)}deckEditor(1)},
+ dkreset:()=>{META.decks[META.slot]=Z.STARTER_DECK.slice();saveMeta(META);deckEditor()},
+ coll:()=>collectionScreen(),
+ unlock:v=>{const pr=Z.CARD_PRICE[Z.RAR[v]||'com'];if(!META.cards.includes(v)&&META.points>=pr){META.points-=pr;META.cards.push(v);saveMeta(META);SFX.play('dawn')}collectionScreen(1)},
  char:v=>{pendingChar=v;placeScreen()},
  place:v=>{newGame(pendingChar,v);save();hide();render()},
- load:()=>{const d=loadSave();if(d)resume(d);else charScreen()},
+ load:()=>{const d=loadSave();if(d)resume(d);else prepScreen()},
  title:()=>title(),
  close:()=>hide(),
- deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu commences avec 8 cartes. Les autres se gagnent à l’aube ou s’achètent au troc. Les cartes rares et épiques sortent rarement.</p>${deckHtml()}<h2 class="pw">Les familles</h2><p>Plus tu as d’unités d’une même famille sur la carte, plus elles sont fortes.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:20px">${f.ic}</span><span><b>${f.n}</b>${f.lv[0]} unités : ${f.d[0]}. ${f.lv[1]} unités : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
+ deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu prépares ton deck (20 à 30 cartes) avec les cartes de ta collection. Pendant la partie, des renforts s’ajoutent à l’aube et au troc. Les cartes rares et épiques sortent rarement.</p>${deckHtml()}<h2 class="pw">Les familles</h2><p>Plus tu as d’unités d’une même famille sur la carte, plus elles sont fortes.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:20px">${f.ic}</span><span><b>${f.n}</b>${f.lv[0]} unités : ${f.d[0]}. ${f.lv[1]} unités : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
  dawn:()=>dawn(),
  relic:v=>{Z.addRelic(G,v);afterRelic()},
  evc:v=>{const id=S.picks&&S.picks[0];if(!id)return dawnStep('draft');const r=Z.resolveDawn(G,id,+v,R,deckList());
-  (r.cards||[]).forEach(t=>S.discard.push(t));S.phase='draft';S.picks=null;save();render();SFX.play('ui');
+  (r.cards||[]).forEach(t=>S.discard.push(t));syncBoard();S.phase='draft';S.picks=null;save();render();SFX.play('ui');
   show(`<h2 class="pw">${Z.DAWN[id].n}</h2><p>${r.txt}</p>${r.cards&&r.cards.length?`<p>Ajouté à ton deck : <b>${r.cards.map(t=>Z.U[t].n).join(', ')}</b>.</p>`:''}<button type="button" class="go" data-a="todraft">Continuer</button>`)},
  todraft:()=>dawnStep('draft'),
  draft:v=>{S.next=v||null;dawnStep('shop')},
@@ -696,15 +737,15 @@ const ACT={
  'shop-heal':()=>{if(Z.pay(G,'heal'))render();shopScreen()},
  'shop-buy':()=>{if(Z.pay(G,'buy')){render();dawnStep('buy')}},
  'shop-upgrade':()=>listScreen('Améliorer une carte','Toutes les cartes de ce type seront améliorées, y compris celles déjà posées.',deckTypes().filter(t=>Z.UPGRADABLE.includes(t)&&!G.upg[t]),'up-pick'),
- 'shop-remove':()=>listScreen('Jeter une carte','Une carte de ce type quitte ton deck.',deckTypes(),'rm-pick'),
+ 'shop-remove':()=>listScreen('Jeter une carte','Une carte de ce type quitte ton deck pour cette partie (les unités posées ne comptent pas).',pileTypes(),'rm-pick'),
  bought:v=>{S.discard.push(v);shopScreen()},
  'up-pick':v=>{if(Z.pay(G,'upgrade'))Z.upgrade(G,v);render();shopScreen()},
- 'rm-pick':v=>{if(Z.pay(G,'remove'))removeCard(v);shopScreen()},
+ 'rm-pick':v=>{if(pileList().includes(v)&&Z.pay(G,'remove'))removeCard(v);shopScreen()},
  day:()=>nextDay(),
  nightpick:()=>Z.nightChoice(G,R)?nightScreen():nextDay(),
  nightgo:v=>{const o=S.picks&&S.picks[+v];nextDay(o)},
  daily:()=>dailyScreen(),
- 'daily-go':()=>{const day=today(),c=dailySetup(day);newGame(c.ch,c.pl,day);save();hide();render()},
+ 'daily-go':()=>{const day=today(),c=dailySetup(day),r=rng(seedFrom('deck-'+day)),d=[],ks=Z.KEYS.slice();while(d.length<24){const t=ks[Math.floor(r()*ks.length)];if(d.filter(x=>x===t).length<Z.copyMax(t))d.push(t)}newGame(c.ch,c.pl,day,d);save();hide();render()},
  peek:v=>{const k=S.draw.lastIndexOf(v);if(k>=0){S.draw.splice(k,1);S.hand.push(v)}save();hide();render()}
 };
 panel.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=ACT[b.dataset.a];if(f)f(b.dataset.v)});
@@ -737,7 +778,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
+<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son
