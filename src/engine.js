@@ -1,7 +1,7 @@
 // Moteur du jeu : règles pures, sans DOM. Utilisé par le jeu (navigateur) et par tools/simulate.js (Node).
 const Z=(()=>{
- const N=7,C=24,MAXS=10;let HPS=.07,HPS2=.12;
- // PV des zombies : +7 % par nuit jusqu'à la nuit 10, puis +12 % par nuit
+ const N=7,C=24,MAXS=10;let HPS=0,HPS2=.12;
+ // PV des zombies : stables jusqu'à la nuit 10 (ils sont déjà coriaces), puis +12 % par nuit
  const hpMult=n=>1+HPS*(Math.min(n,10)-1)+HPS2*Math.max(0,n-10);
  const U={
   // défenses
@@ -55,15 +55,15 @@ const Z=(()=>{
  };
  const KEYS=Object.keys(U);
  const ZT={
-  walk:{n:'Rôdeur',hp:3,spd:2,dmg:1,info:'lent'},
-  run:{n:'Coureur',hp:2,spd:1,dmg:1,info:'rapide'},
-  fat:{n:'Gonflé',hp:8,spd:3,dmg:2,info:'très lent, 2 dégâts par coup'},
-  zdog:{n:'Chien zombie',hp:1,spd:1,dmg:1,info:'rapide et fragile'},
-  crawl:{n:'Rampant',hp:2,spd:2,dmg:1,crawl:1,info:'passe sous les défenses (barricades, épaves…)'},
-  spit:{n:'Cracheur',hp:3,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
-  armor:{n:'Blindé',hp:5,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
-  howl:{n:'Hurleur',hp:4,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
-  boss:{n:'Le Colosse',hp:40,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
+  walk:{n:'Rôdeur',hp:6,spd:2,dmg:1,info:'lent'},
+  run:{n:'Coureur',hp:4,spd:1,dmg:1,info:'rapide'},
+  fat:{n:'Gonflé',hp:16,spd:3,dmg:2,info:'très lent, 2 dégâts par coup'},
+  zdog:{n:'Chien zombie',hp:2,spd:1,dmg:1,info:'rapide et fragile'},
+  crawl:{n:'Rampant',hp:4,spd:2,dmg:1,crawl:1,info:'passe sous les défenses (barricades, épaves…)'},
+  spit:{n:'Cracheur',hp:6,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
+  armor:{n:'Blindé',hp:10,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
+  howl:{n:'Hurleur',hp:8,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
+  boss:{n:'Le Colosse',hp:60,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
  };
  const ZK=Object.keys(ZT);
  const EVENTS=[
@@ -76,16 +76,16 @@ const Z=(()=>{
  ];
  // nuits 1 à 10, puis chaque nuit ajoute GROW zombies de chaque type (survie sans fin)
  let WAVES={
-  walk: [3,4,6,6,7,7,8,8,8,9],
-  run:  [0,0,1,2,2,2,3,3,3,4],
-  fat:  [0,0,1,1,1,1,1,2,2,2],
-  zdog: [0,0,0,1,1,1,1,2,2,2],
-  crawl:[0,0,1,1,1,1,1,2,2,2],
-  spit: [0,0,0,0,1,1,1,1,1,2],
-  armor:[0,0,0,0,1,1,1,1,1,2],
+  walk: [2,2,4,4,4,4,5,5,5,5],
+  run:  [0,0,1,1,1,1,2,2,2,2],
+  fat:  [0,0,1,1,1,1,1,1,1,1],
+  zdog: [0,0,0,1,1,1,1,1,1,1],
+  crawl:[0,0,1,1,1,1,1,1,1,1],
+  spit: [0,0,0,0,1,1,1,1,1,1],
+  armor:[0,0,0,0,1,1,1,1,1,1],
   howl: [0,0,0,0,0,1,1,1,1,1]
  };
- let GROW={walk:1,run:.6,fat:.4,zdog:.4,crawl:.4,spit:.3,armor:.4,howl:.25};
+ let GROW={walk:.6,run:.36,fat:.24,zdog:.24,crawl:.24,spit:.18,armor:.24,howl:.15};
  // le Colosse arrive toutes les 10 nuits (1 la nuit 10, 2 la nuit 20…)
  const bossCount=n=>n%10===0?n/10:0;
  function waveCount(k,n){if(k==='boss')return bossCount(n);const t=WAVES[k]||[];if(n<=t.length)return t[n-1]||0;return Math.round((t[t.length-1]||0)+(GROW[k]||0)*(n-t.length))}
@@ -207,7 +207,7 @@ const Z=(()=>{
   for(const k of ZK){let v=waveCount(k,st.night);if(k!=='boss'){if(e==='lune')v*=1.5;v=Math.round(v*(1+.2*mc(st,'nombre')))}w[k]=v}
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
- function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau')));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k)};st.z.push(z);return z}
+ function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau')));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k)};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
  function startNight(st,rnd){const w=waveList(st),list=[];
   for(const k of ZK)if(k!=='boss')for(let j=0;j<w[k];j++)list.push(k);
   shuffle(list,rnd);
@@ -237,7 +237,7 @@ const Z=(()=>{
    if(D.feed&&killed)u.hp=Math.min(D.hp,u.hp+1)}
  }
  // un zombie frappe une unité qui bloque (au contact, ou à distance pour le cracheur)
- function strike(st,z,n,u,ev,ranged,pow){const T=ZT[z.k],D=stat(st,u.t);let d=T.boss?u.hp:zdmg(st,z.k);if(D.cap&&!T.boss)d=Math.min(d,D.cap);
+ function strike(st,z,n,u,ev,ranged,pow){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const T=ZT[z.k],D=stat(st,u.t);let d=T.boss?u.hp:zdmg(st,z.k);if(D.cap&&!T.boss)d=Math.min(d,D.cap);
   u.hp-=d;ev.push({i:n,txt:'−'+d,k:ranged?'spit':'bite',zid:z.id,from:z.pos});
   if(!ranged&&u.t==='fen'&&pow)hit(st,z,(st.relics.includes('groupe')||has(st,'solar'))?2:1,ev,n);
   if(D.gas){st.grid[n]=null;explode(st,n,D.gas,ev);return}
@@ -267,11 +267,11 @@ const Z=(()=>{
   }
   for(const z of st.z){if(z.hp<=0)continue;z.cd--;if(z.cd>0)continue;const T=ZT[z.k],dm=zdmg(st,z.k);z.cd=zspd(st,z.k);
    const tgt=lureTarget(st,z.pos),n=next(z.pos,tgt);
-   if(n===C){st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'bite',zid:z.id});if(!T.boss){z.hp=0;z.bit=1}continue}
+   if(n===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'bite',zid:z.id});if(!T.boss){z.hp=0;z.bit=1}continue}
    const u=st.grid[n];
    if(u&&U[u.t].block&&!(T.crawl&&U[u.t].cat==='wall')){strike(st,z,n,u,ev,false,pow);continue}
    if(T.spit){const n2=next(n,tgt);
-    if(n2===C){st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'spit',zid:z.id,from:z.pos});continue}
+    if(n2===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'spit',zid:z.id,from:z.pos});continue}
     const u2=st.grid[n2];if(u2&&U[u2.t].block){strike(st,z,n2,u2,ev,true,pow);continue}}
    z.pos=n;enter(st,z,n,u,ev)
   }

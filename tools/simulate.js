@@ -5,7 +5,7 @@
 // une relique au hasard toutes les 5 nuits, et dépense sa ferraille (réparer si l'abri est bas, sinon améliorer).
 // Il joue jusqu'à la chute de l'abri (au plus MAXN nuits) : on mesure la nuit où il tombe.
 // Usage : node tools/simulate.js [vagues_json] [poses_par_jour=2] [parties=150] [hausse_pv_par_nuit=0.1] [personnage=surv]
-// Cible actuelle : le bot tombe en moyenne vers la nuit 8-9, environ 5 % au-delà de la nuit 15 (un humain fait moins bien).
+// Cible actuelle : le bot tombe en moyenne vers la nuit 7-8, et environ 40 % des zombies arrivent au contact.
 // HASARD=1 node tools/simulate.js : le bot choisit ses cartes de l'aube au hasard.
 const Z=require('../src/engine.js');
 if(process.argv[2])Z.WAVES=JSON.parse(process.argv[2]);
@@ -35,7 +35,7 @@ function game(){
    Z.place(st,hand[best.h],best.i);disc.push(hand[best.h]);hand.splice(best.h,1)}
   disc.push(...hand);
   Z.runNight(st,mk(1+Math.floor(Math.random()*1e9)));Z.endNight(st);
-  if(st.shelter<=0||st.night>=MAXN)return st.night;
+  if(st.shelter<=0||st.night>=MAXN){SP+=st.spawned||0;RE+=st.reached||0;return st.night}
   if(Z.mutNight(st.night))Z.mutate(st);
   if(Z.relicNight(st.night)){const r=Z.relicChoices(st);if(r.length)Z.addRelic(st,pick(r))}
   {const ch=Z.draftChoices();nextCard=SMART?bestCard(st,ch):pick(ch)}
@@ -47,6 +47,7 @@ function game(){
   Z.newDay(st,Math.random);
  }
 }
-const R=[];for(let k=0;k<G;k++)R.push(game());R.sort((a,b)=>a-b);
+let SP=0,RE=0;const R=[];for(let k=0;k<G;k++)R.push(game());R.sort((a,b)=>a-b);
 const pct=n=>(R.filter(r=>r>=n).length/G*100).toFixed(0)+'%';
 console.log('Nuit de la chute : moyenne',(R.reduce((a,b)=>a+b,0)/G).toFixed(1),'· médiane',R[G>>1],'· atteint la nuit 5 :',pct(5),'· nuit 10 :',pct(10),'· nuit 15 :',pct(15),'· nuit 20 :',pct(20));
+console.log('Zombies arrivés au contact (unité ou abri) :',(RE/Math.max(1,SP)*100).toFixed(0)+'%');

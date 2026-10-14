@@ -98,40 +98,42 @@ Règles détaillées :
 
 ## Les zombies
 
+Les zombies sont peu nombreux mais coriaces : ils doivent arriver jusqu'aux défenses, pas mourir à la lisière du bois.
+
 | Zombie | PV de base | Vitesse | Dégâts par coup | Particularité |
 |---|---|---|---|---|
-| Rôdeur | 3 | avance tous les 2 tours | 1 | lent |
-| Coureur | 2 | avance chaque tour | 1 | rapide |
-| Gonflé | 8 | avance tous les 3 tours | 2 | très lent, 2 dégâts par coup |
-| Chien zombie | 1 | avance chaque tour | 1 | rapide et fragile |
-| Rampant | 2 | avance tous les 2 tours | 1 | passe sous les défenses (barricades, épaves…) |
-| Cracheur | 3 | avance tous les 2 tours | 1 | crache sur ce qui est à 2 cases devant lui |
-| Blindé | 5 | avance tous les 2 tours | 1 | encaisse 1 dégât de moins par coup, sauf le feu |
-| Hurleur | 4 | avance tous les 2 tours | 1 | appelle 2 rôdeurs en mourant |
-| Le Colosse | 40 | avance tous les 3 tours | 2 | boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir |
+| Rôdeur | 6 | avance tous les 2 tours | 1 | lent |
+| Coureur | 4 | avance chaque tour | 1 | rapide |
+| Gonflé | 16 | avance tous les 3 tours | 2 | très lent, 2 dégâts par coup |
+| Chien zombie | 2 | avance chaque tour | 1 | rapide et fragile |
+| Rampant | 4 | avance tous les 2 tours | 1 | passe sous les défenses (barricades, épaves…) |
+| Cracheur | 6 | avance tous les 2 tours | 1 | crache sur ce qui est à 2 cases devant lui |
+| Blindé | 10 | avance tous les 2 tours | 1 | encaisse 1 dégât de moins par coup, sauf le feu |
+| Hurleur | 8 | avance tous les 2 tours | 1 | appelle 2 rôdeurs en mourant |
+| Le Colosse | 60 | avance tous les 3 tours | 2 | boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir |
 
-Les PV des zombies augmentent de 7 % par nuit jusqu'à la nuit 10, puis de 12 % par nuit.
+Leurs PV restent stables jusqu'à la nuit 10, puis augmentent de 12 % par nuit (en plus des mutations).
 Les zombies apparaissent de façon échelonnée pendant la nuit, à une position aléatoire de la forêt (d'un seul côté après une Fusée de détresse). Les Colosses arrivent à partir du 10ᵉ tour des nuits 10, 20, 30…
 
 ## Les vagues
 
-Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque type (+1 rôdeur, +0,6 coureur, +0,4 gonflé, chien, rampant et blindé, +0,3 cracheur, +0,25 hurleur), et un Colosse de plus toutes les 10 nuits.
+Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque type (+0,6 rôdeur, +0,36 coureur, +0,24 gonflé, chien, rampant et blindé, +0,18 cracheur, +0,15 hurleur), et un Colosse de plus toutes les 10 nuits.
 
 | Nuit | Rôdeur | Coureur | Gonflé | Chien zombie | Rampant | Cracheur | Blindé | Hurleur | Le Colosse | PV des zombies |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | ×1.00 |
-| 2 | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | ×1.07 |
-| 3 | 6 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | ×1.14 |
-| 4 | 6 | 2 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | ×1.21 |
-| 5 | 7 | 2 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | ×1.28 |
-| 6 | 7 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | ×1.35 |
-| 7 | 8 | 3 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | ×1.42 |
-| 8 | 8 | 3 | 2 | 2 | 2 | 1 | 1 | 1 | 0 | ×1.49 |
-| 9 | 8 | 3 | 2 | 2 | 2 | 1 | 1 | 1 | 0 | ×1.56 |
-| 10 | 9 | 4 | 2 | 2 | 2 | 2 | 2 | 1 | 1 | ×1.63 |
-| 15 | 14 | 7 | 4 | 4 | 4 | 4 | 4 | 2 | 0 | ×2.23 |
-| 20 | 19 | 10 | 6 | 6 | 6 | 5 | 6 | 4 | 2 | ×2.83 |
-| 30 | 29 | 16 | 10 | 10 | 10 | 8 | 10 | 6 | 3 | ×4.03 |
+| 1 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | ×1.00 |
+| 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | ×1.00 |
+| 3 | 4 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | ×1.00 |
+| 4 | 4 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | ×1.00 |
+| 5 | 4 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | ×1.00 |
+| 6 | 4 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | ×1.00 |
+| 7 | 5 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | ×1.00 |
+| 8 | 5 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | ×1.00 |
+| 9 | 5 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | ×1.00 |
+| 10 | 5 | 2 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | ×1.00 |
+| 15 | 8 | 4 | 2 | 2 | 2 | 2 | 2 | 2 | 0 | ×1.60 |
+| 20 | 11 | 6 | 3 | 3 | 3 | 3 | 3 | 3 | 2 | ×2.20 |
+| 30 | 17 | 9 | 6 | 6 | 6 | 5 | 6 | 4 | 3 | ×3.40 |
 
 ## Les mutations de la horde
 
@@ -203,8 +205,8 @@ Chaque nuit après la première a 80 % de chances d'avoir un événement (20 % d
 L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot pose ses cartes en testant toutes les possibilités sur une nuit simulée, puis joue la vraie nuit avec un autre tirage aléatoire.
 
 - Le bot joue le Survivant. À l'aube, il choisit comme un joueur : il teste chacune des 3 cartes sur la nuit suivante et garde la meilleure. Il prend une relique au hasard et dépense sa ferraille (réparer si l'abri est à 5 PV ou moins, sinon améliorer). Il joue jusqu'à la chute de l'abri. `HASARD=1 node tools/simulate.js` le fait choisir ses cartes au hasard.
-- Cible : le bot tombe en moyenne vers la nuit 8-9, environ 5 % des parties dépassent la nuit 15.
-- Résultat actuel (150 parties) : chute en moyenne à la nuit 8,2, médiane 8, 33 % atteignent la nuit 10, 5 % la nuit 15. Un humain fait moins bien.
+- Cible : le bot tombe en moyenne vers la nuit 7-8, et environ 40 % des zombies arrivent au contact d'une unité ou de l'abri (la simulation affiche cette part).
+- Résultat actuel (150 parties) : chute en moyenne à la nuit 7,3, médiane 7, 21 % atteignent la nuit 10 ; 39 % des zombies arrivent au contact. Le bot place mieux qu'un débutant, mais Amine trouvait le jeu trop facile : la cible a été durcie.
 - Les deux premières nuits sont volontairement plus faciles pour l'apprentissage.
 - Un placement au hasard perd généralement dès la nuit 2 : le placement doit compter.
 
@@ -226,6 +228,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Deck de départ réduit à 8 cartes par personnage : avec 40 cartes, un deck complet dès le départ rendrait les parties toutes pareilles.
 - La carte choisie à l'aube arrive d'office dans la main du lendemain (demande d'Amine).
 - Une seule monnaie (la ferraille) pour le troc : plusieurs ressources seraient trop lourdes sur petit écran.
+- Zombies deux fois plus coriaces mais 40 % moins nombreux (Amine : « les zombies meurent avant d'atteindre mes unités »). Avant, seuls 26 % arrivaient au contact.
 - Mutations de la horde toutes les 4 nuits plutôt qu'une gestion de nourriture ou de munitions (demande d'Amine : garder le jeu fun et simple). Elles répondent au problème de l'« armée de tireurs » invincible dès la nuit 5.
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 

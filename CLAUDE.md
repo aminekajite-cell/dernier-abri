@@ -31,7 +31,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 ## Règles de travail
 
 - Garde la séparation moteur / rendu : une règle de jeu va dans `engine.js`, jamais dans `game.js`.
-- Après toute modification de règles, de cartes, de zombies ou de vagues, lance `node tools/simulate.js` et donne la nuit moyenne de chute du bot. Cible actuelle : chute vers la nuit 8-9, environ 5 % des parties au-delà de la nuit 15.
+- Après toute modification de règles, de cartes, de zombies ou de vagues, lance `node tools/simulate.js` et donne la nuit moyenne de chute du bot. Cible actuelle : chute vers la nuit 7-8, et environ 40 % des zombies qui arrivent au contact (affiché par la simulation).
 - Après chaque changement visible, teste le jeu en largeur téléphone et vérifie qu'il n'y a aucune erreur dans la console.
 - La boucle d'affichage ne doit jamais s'arrêter sur une erreur : chaque élément est dessiné dans un bloc protégé. Évite les API de canvas récentes sans solution de secours (exemple : `roundRect`, déjà remplacé si absent).
 - Mets à jour `docs/GAME_DESIGN.md` quand une décision de conception change.
