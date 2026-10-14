@@ -16,6 +16,13 @@ Plateformes visées : Steam (PC) puis mobile.
 
 Score : nombre de zombies éliminés, avec un record sauvegardé.
 
+## La sauvegarde
+
+- La partie en cours est sauvegardée automatiquement dans le navigateur (`localStorage`) : au début de chaque jour, après chaque carte jouée et à l'aube, avec le choix de cartes proposé.
+- L'écran d'accueil propose « Continuer » si une partie est en cours. La sauvegarde est effacée à la victoire ou à la défaite.
+- Recharger la page pendant la nuit ramène au jour, avec les cartes déjà posées. Recharger à l'aube garde les 3 mêmes cartes proposées.
+- La sauvegarde porte un numéro de version, pour pouvoir gérer les anciennes sauvegardes lors des mises à jour (Steam).
+
 ## La carte
 
 - Grille de 7 × 7 cases.

@@ -35,6 +35,18 @@ function newGame(){
  V.clear();FX.length=0;PT.length=0;facing.fill(null);clearDecals();
  drawCards(5+Z.extraDraw(G));
 }
+/* ---------- sauvegarde (localStorage, marche aussi dans Electron/Tauri) ---------- */
+const SAVE_KEY='abri-save',SAVE_V=1;
+function save(draftPicks){try{localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_V,g:{grid:G.grid,shelter:G.shelter,night:G.night,event:G.event.id,zid:G.zid},s:{draw:S.draw,discard:S.discard,hand:S.hand,placed:S.placed,kills:S.kills},draft:draftPicks||null}))}catch(e){}}
+function loadSave(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d&&d.v===SAVE_V&&d.g&&d.s)return d}catch(e){}return null}
+function clearSave(){try{localStorage.removeItem(SAVE_KEY)}catch(e){}}
+function resume(d){
+ newGame();
+ Object.assign(G,d.g,{event:Z.EVENTS.find(e=>e.id===d.g.event)||Z.EVENTS[0]});
+ Object.assign(S,d.s,{sel:null,busy:false});
+ hide();render();
+ if(d.draft)draft(d.draft);
+}
 function drawCards(n){for(let k=0;k<n;k++){if(!S.draw.length){S.draw=shuffle(S.discard);S.discard=[]}if(!S.draw.length)break;S.hand.push(S.draw.pop())}}
 
 /* ---------- canvas setup ---------- */
@@ -173,14 +185,14 @@ function drawZombie(v,now){
 function addFX(f){f.t0=performance.now();FX.push(f)}
 function burst(x,y,c,n,spd,r){const now=performance.now();for(let k=0;k<n;k++){const a=Math.random()*7,s=spd*(.4+Math.random());PT.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,t0:now,dur:300+Math.random()*250,c,r:r||2,light:0})}}
 function drawFX(now){
- for(let k=FX.length-1;k>=0;k--){const f=FX[k],p=(now-f.t0)/f.dur;if(p>=1){FX.splice(k,1);continue}
+ for(let k=FX.length-1;k>=0;k--){const f=FX[k],p=Math.max(0,(now-f.t0)/f.dur);if(p>=1){FX.splice(k,1);continue}
   ctx.globalAlpha=1-p;
   if(f.type==='tracer')line(f.x1,f.y1,f.x1+(f.x2-f.x1)*Math.min(1,p*3),f.y1+(f.y2-f.y1)*Math.min(1,p*3),f.c,f.w);
   if(f.type==='flash')circ(f.x,f.y,f.r*(1-p*.5),f.c);
   if(f.type==='swing'){ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(f.x,f.y,18,f.a-1+p*1.6,f.a-.4+p*1.6);ctx.stroke()}
-  if(f.type==='ring'){ctx.strokeStyle=f.c;ctx.lineWidth=3*(1-p);ctx.beginPath();ctx.arc(f.x,f.y,f.r*p,0,7);ctx.stroke()}
+  if(f.type==='ring'&&p>0){ctx.strokeStyle=f.c;ctx.lineWidth=3*(1-p);ctx.beginPath();ctx.arc(f.x,f.y,f.r*p,0,7);ctx.stroke()}
   ctx.globalAlpha=1}
- for(let k=PT.length-1;k>=0;k--){const q=PT[k],p=(now-q.t0)/q.dur;if(p>=1){PT.splice(k,1);continue}const dt=now-q.t0;
+ for(let k=PT.length-1;k>=0;k--){const q=PT[k],p=Math.max(0,(now-q.t0)/q.dur);if(p>=1){PT.splice(k,1);continue}const dt=now-q.t0;
   ctx.globalAlpha=1-p;circ(q.x+q.vx*dt,q.y+q.vy*dt,q.r*(1-p*.5),q.c);ctx.globalAlpha=1}
 }
 const floats=[];
@@ -300,7 +312,7 @@ function tapCell(i){
  S.hand.splice(S.sel,1);Z.place(G,t,i);facing[i]=null;S.discard.push(t);S.placed++;S.sel=null;
  const p=D.instant?CEN:tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#f2b33d',dur:350});
  if(t==='food')floatTxt(CEN.x,CEN.y,'+3 PV','#9fd86b');if(t==='rep')G.grid.forEach((u,j)=>{if(u&&Z.U[u.t].block){const q=tc(j);floatTxt(q.x,q.y,'+3','#9fd86b')}});
- render();
+ save();render();
 }
 
 async function night(){
@@ -323,8 +335,9 @@ async function night(){
  if(G.night>=NIGHTS)return end(true);
  draft();
 }
-function draft(){
- const picks=shuffle([...Z.KEYS]).slice(0,3);
+function draft(saved){
+ const picks=saved||shuffle([...Z.KEYS]).slice(0,3);
+ save(picks);
  show(`<h2 class="ok">Nuit ${G.night} survécue</h2><p>L’abri tient encore avec <b>${G.shelter}/${Z.MAXS} PV</b>. Zombies éliminés depuis le début : <b>${S.kills}</b>.</p><p>Au lever du jour, tu trouves de quoi renforcer ton deck :</p>
   <div class="picks">${picks.map(t=>`<button type="button" class="pick" data-t="${t}" style="--cc:${cc(t)}">${svg(t)}<span class="nm">${Z.U[t].n}</span><span class="d">${Z.U[t].d}</span></button>`).join('')}</div>
   <button type="button" class="skip" data-t="">Ne rien prendre</button>`);
@@ -332,9 +345,10 @@ function draft(){
 function nextDay(){
  G.night++;S.placed=0;S.busy=false;V.clear();
  G.event=Math.random()<.2?Z.EVENTS[0]:Z.EVENTS[1+Math.floor(Math.random()*(Z.EVENTS.length-1))];
- drawCards(5+Z.extraDraw(G));hide();render();
+ drawCards(5+Z.extraDraw(G));save();hide();render();
 }
 function end(win){
+ clearSave();
  let best=0;try{best=+localStorage.getItem('abri-best')||0;if(S.kills>best){localStorage.setItem('abri-best',S.kills);best=S.kills}}catch(e){best=Math.max(best,S.kills)}
  show(win?`<h2 class="ok">Les secours arrivent</h2><p>Tu as tenu ${NIGHTS} nuits. Un hélicoptère se pose au milieu des ruines.</p><div class="big">${S.kills} zombies</div><p>Record : <b>${best}</b>.</p><button type="button" class="go" data-a="new">Rejouer</button>`
   :`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${S.kills} zombies</div><p>Record : <b>${best}</b>.</p><button type="button" class="go" data-a="new">Rejouer</button>`);
@@ -347,16 +361,18 @@ function hide(){ov.hidden=true}
 panel.addEventListener('click',e=>{
  const p=e.target.closest('[data-t]');if(p){if(p.dataset.t)S.discard.push(p.dataset.t);nextDay();return}
  const a=e.target.closest('[data-a]');if(!a)return;
- if(a.dataset.a==='new'){newGame();hide();render()}
- if(a.dataset.a==='deck')show(`<h2 class="pw">Ton deck</h2><p>Tu commences avec une carte de chaque.</p>${deckHtml()}<h2 class="pw">La horde</h2><p>Les zombies deviennent plus résistants chaque nuit.</p>${zedHtml()}<button type="button" class="go" data-a="new">Jouer</button>`);
+ if(a.dataset.a==='new'){newGame();save();hide();render()}
+ if(a.dataset.a==='load'){const d=loadSave();if(d)resume(d);else{newGame();save();hide();render()}}
+ if(a.dataset.a==='deck')show(`<h2 class="pw">Ton deck</h2><p>Tu commences avec une carte de chaque.</p>${deckHtml()}<h2 class="pw">La horde</h2><p>Les zombies deviennent plus résistants chaque nuit.</p>${zedHtml()}<button type="button" class="go" data-a="title">Retour</button>`);
+ if(a.dataset.a==='title')title();
 });
 $('#go').addEventListener('click',night);
 
-newGame();render();requestAnimationFrame(frame);
-show(`<h2 class="pw">Dernier Abri</h2><p>Survis <b>10 nuits</b> à l’apocalypse. Chaque nuit, la horde est plus nombreuse et plus coriace.</p>
+function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Survis <b>10 nuits</b> à l’apocalypse. Chaque nuit, la horde est plus nombreuse et plus coriace.</p>
 <ul><li>Le jour, joue <b>2 cartes</b> autour de ta maison : barricades, survivants armés, pièges ou objets.</li>
 <li>La nuit, les zombies sortent des <b>bois</b> et marchent vers la maison.</li>
 <li>Tes survivants tirent tout seuls. Les zombies frappent tout ce qui bloque leur chemin.</li>
 <li>Si l’abri tombe à 0 PV, c’est fini. Après chaque nuit, ajoute une carte à ton deck.</li></ul>
-<button type="button" class="go" data-a="new">Jouer</button>
-<button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button>`);
+${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.draft?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
+<button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button>`)}
+newGame();render();requestAnimationFrame(frame);title();

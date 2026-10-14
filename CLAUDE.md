@@ -42,7 +42,6 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 1. Mettre le jeu en ligne sur GitHub Pages pour pouvoir le tester sur téléphone depuis un lien.
 2. Ajouter des sons : tirs, grognements, impacts, ambiance nocturne (packs libres de droits, par exemple Kenney.nl).
 3. Remplacer les dessins en code par des sprites vus de dessus d'un pack libre de droits, en gardant les dessins actuels comme solution de secours.
-4. Ajouter une sauvegarde de la partie en cours (`localStorage`).
-5. Ajouter la profondeur roguelite : reliques permanentes pour la partie, boutique entre les nuits avec des ressources, boss la nuit 10.
-6. Ajouter une progression entre les parties : nouvelles cartes et nouveaux lieux à débloquer.
-7. Préparer la version Steam (Electron ou Tauri) et la version mobile.
+4. Ajouter la profondeur roguelite : reliques permanentes pour la partie, boutique entre les nuits avec des ressources, boss la nuit 10.
+5. Ajouter une progression entre les parties : nouvelles cartes et nouveaux lieux à débloquer.
+6. Préparer la version Steam (Electron ou Tauri) et la version mobile.
