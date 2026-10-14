@@ -49,7 +49,7 @@ const ICON={
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v13 · 14 oct.';
+const VERSION='v14 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -466,13 +466,17 @@ function dawn(){
  if(d&&d.mut&&!d.mutShown){d.mutShown=1;SFX.play('mutate');
   return show(`<h2 class="ko">La horde mute</h2>${dawnTxt()}<div class="relics"><div class="relic mutx">${svg('mut')}<span><b>${Z.MUTS[d.mut].n}</b>${Z.MUTS[d.mut].d}</span></div></div><p>C’est permanent. La prochaine mutation arrivera dans 4 nuits.</p><button type="button" class="go" data-a="dawn">Continuer</button>`)}
  if(Z.relicNight(G.night)){const r=Z.relicChoices(G);if(r.length)return dawnStep('relic',r)}
- dawnStep('draft');
+ afterRelic();
 }
+// un événement de l'aube (environ 1 aube sur 2), puis le choix de la carte
+function afterRelic(){const ev=Z.dawnEvent(G);if(ev)return dawnStep('event',[ev]);dawnStep('draft')}
 function dawnStep(ph,picks){
  S.phase=ph;
  if(ph==='relic'){S.picks=picks;save();
   return show(`<h2 class="ok">Nuit ${G.night} survécue</h2>${dawnTxt()}<p>Dans les décombres, tu trouves un objet rare. Choisis une <b>relique</b> : elle reste active toute la partie.</p>
    <div class="relics">${picks.map(r=>`<button type="button" class="relic" data-a="relic" data-v="${r}">${svg('relic')}<span><b>${Z.RELICS[r].n}</b>${Z.RELICS[r].d}</span></button>`).join('')}</div>`)}
+ if(ph==='event'){S.picks=picks;save();const E=Z.DAWN[picks[0]];
+  return show(`<h2 class="pw">${E.n}</h2>${dawnTxt()}<p>${E.d}</p><div class="relics">${E.ch.map((c,k)=>`<button type="button" class="relic evc" data-a="evc" data-v="${k}" ${c.ok&&!c.ok(G)?'disabled':''}><span><b>${c.n}</b>${c.d}</span></button>`).join('')}</div>`)}
  if(ph==='draft'){S.picks=picks||Z.draftChoices();save();
   return show(`<h2 class="ok">Nuit ${G.night} survécue</h2>${dawnTxt()}<p>Choisis la carte que tu auras <b>en main demain</b>. Elle rejoint ensuite ton deck.</p>
    <div class="picks">${S.picks.map(t=>pickBtn(t,'draft',t)).join('')}</div>
@@ -536,7 +540,11 @@ const ACT={
  close:()=>hide(),
  deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu commences avec 8 cartes. Les autres se gagnent à l’aube ou s’achètent au troc. Les cartes rares et épiques sortent rarement.</p>${deckHtml()}<h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
  dawn:()=>dawn(),
- relic:v=>{Z.addRelic(G,v);dawnStep('draft')},
+ relic:v=>{Z.addRelic(G,v);afterRelic()},
+ evc:v=>{const id=S.picks&&S.picks[0];if(!id)return dawnStep('draft');const r=Z.resolveDawn(G,id,+v,Math.random,deckList());
+  (r.cards||[]).forEach(t=>S.discard.push(t));S.phase='draft';S.picks=null;save();render();SFX.play('ui');
+  show(`<h2 class="pw">${Z.DAWN[id].n}</h2><p>${r.txt}</p>${r.cards&&r.cards.length?`<p>Ajouté à ton deck : <b>${r.cards.map(t=>Z.U[t].n).join(', ')}</b>.</p>`:''}<button type="button" class="go" data-a="todraft">Continuer</button>`)},
+ todraft:()=>dawnStep('draft'),
  draft:v=>{S.next=v||null;dawnStep('shop')},
  shop:()=>shopScreen(),
  'shop-heal':()=>{if(Z.pay(G,'heal'))render();shopScreen()},

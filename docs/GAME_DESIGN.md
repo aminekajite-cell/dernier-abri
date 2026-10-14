@@ -162,6 +162,21 @@ Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque ty
 | 20 | 11 | 6 | 3 | 3 | 3 | 3 | 3 | 3 | 2 | ×2.20 |
 | 30 | 17 | 9 | 6 | 6 | 6 | 5 | 6 | 4 | 3 | ×3.40 |
 
+## Les événements de l'aube
+
+À partir de la nuit 2, environ une aube sur deux propose une petite histoire avec deux choix : un choix risqué qui peut rapporter gros, et un choix prudent. Ils arrivent après la relique éventuelle et avant le choix de la carte.
+
+| Événement | Choix risqué | Choix prudent |
+|---|---|---|
+| Un inconnu à la porte | L'accueillir : un survivant gratuit, ou 30 % de risque qu'il soit mordu (abri −2 PV) | Fermer la porte |
+| Des pillards | Les repousser : +6 ferraille, un défenseur perd 3 PV | Payer 8 ferraille |
+| Le supermarché | Fouiller : 60 % une carte rare et +5 ferraille, sinon abri −2 PV | Rester à l'abri |
+| Un message radio | Y aller : 2 cartes communes, −1 énergie demain | Ignorer |
+| Un chien errant | L'adopter : un chien gratuit | Le chasser |
+| Une caisse militaire | L'ouvrir : 50 % une amélioration gratuite, sinon une unité perd 4 PV | La laisser |
+| Un mécanicien de passage | Payer 6 ferraille : toutes les unités récupèrent leurs PV | Refuser |
+| Un blessé dans le fossé | Soigner : abri −1 PV, +1 Trousse de secours | Passer son chemin |
+
 ## Les mutations de la horde
 
 Toutes les 4 nuits (nuits 4, 8, 12…), la horde gagne une mutation tirée au hasard, permanente pour toute la partie. Elle est annoncée à l'aube, et le bandeau du haut prévient la veille (« mute à l'aube »). Le but : casser les défenses qui semblaient sûres (par exemple une armée de tireurs) sans ajouter de mécanique à gérer pour le joueur.

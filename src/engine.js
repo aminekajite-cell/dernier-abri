@@ -124,6 +124,43 @@ const Z=(()=>{
  };
  // une relique toutes les 5 nuits
  const relicNight=n=>n%5===0;
+ // événements de l'aube : une petite histoire et un choix. Chaque choix renvoie un texte et ses effets.
+ // Les effets sur le deck (cartes gagnées) sont rendus dans res.cards : c'est le jeu qui les ajoute au deck.
+ const freeCells=st=>INNER.filter(i=>!st.grid[i]);
+ const randUnit=(st,rnd)=>{const us=st.grid.map((u,i)=>u&&U[u.t].block?i:-1).filter(i=>i>=0);return us.length?us[Math.floor(rnd()*us.length)]:-1};
+ const pickR=(a,rnd)=>a[Math.floor(rnd()*a.length)];
+ function hurt(st,j,d){const u=st.grid[j];if(!u)return'';u.hp-=d;const nm=u.name||U[u.t].n;if(u.hp<=0){lose(st,j,u,[]);return st.grid[j]?`${nm} s’en sort de justesse.`:`${nm} n’a pas survécu.`}return `${nm} perd ${d} PV.`}
+ function recruit(st,t,rnd){const fc=freeCells(st);if(!fc.length)return null;const i=pickR(fc,rnd);place(st,t,i,rnd,true);return st.grid[i]}
+ const DAWN={
+  stranger:{n:'Un inconnu à la porte',d:'Quelqu’un frappe, à bout de forces. Son bras est caché sous sa veste.',ch:[
+   {n:'L’accueillir',d:'Un survivant gratuit… s’il n’est pas mordu.',go:(st,rnd)=>{if(rnd()<.3){st.shelter=Math.max(1,st.shelter-2);return{txt:'L’inconnu était mordu. La transformation a lieu dans la nuit : l’abri perd 2 PV avant que tout soit fini.'}}
+    const u=recruit(st,pickR(['gun','axe','cop','med'],rnd),rnd);return{txt:u?`${u.name} rejoint l’abri (${U[u.t].n}).`:'Il n’y a plus de place autour de l’abri. L’inconnu repart dans la nuit.'}}},
+   {n:'Lui fermer la porte',d:'Pas de risque.',go:()=>({txt:'Ses coups contre la porte cessent au bout d’une heure.'})}]},
+  raiders:{n:'Des pillards',d:'Trois hommes armés exigent ta ferraille.',ch:[
+   {n:'Payer 8 ferraille',d:'Ils partent sans histoire.',ok:st=>st.scrap>=8,go:st=>{st.scrap-=8;return{txt:'Ils empochent la ferraille et disparaissent.'}}},
+   {n:'Les repousser',d:'+6 ferraille, mais un de tes défenseurs est blessé.',go:(st,rnd)=>{st.scrap+=6;const j=randUnit(st,rnd);return{txt:'Tu récupères leurs affaires (+6 ferraille). '+(j>=0?hurt(st,j,3):'')}}}]},
+  market:{n:'Le supermarché',d:'Un supermarché à moitié pillé, à dix minutes de marche.',ch:[
+   {n:'Fouiller',d:'Une carte rare et de la ferraille… ou une embuscade.',go:(st,rnd)=>{if(rnd()<.6){st.scrap+=5;const c=pickR(KEYS.filter(t=>RAR[t]==='rare'),rnd);return{txt:`Butin : ${U[c].n} et 5 ferraille.`,cards:[c]}}st.shelter=Math.max(1,st.shelter-2);return{txt:'Une embuscade ! Tu rentres en courant, la horde sur les talons : l’abri perd 2 PV.'}}},
+   {n:'Rester à l’abri',d:'Pas de risque.',go:()=>({txt:'Tu passes la matinée à renforcer les planches.'})}]},
+  radio:{n:'Un message radio',d:'Des survivants donnent leur position et demandent de l’aide.',ch:[
+   {n:'Y aller',d:'2 cartes communes, mais −1 énergie demain (fatigue).',go:(st,rnd)=>{st.nextE=(st.nextE||0)-1;const cs=[pickR(KEYS.filter(t=>RAR[t]==='com'),rnd),pickR(KEYS.filter(t=>RAR[t]==='com'),rnd)];return{txt:`Ils te donnent ${U[cs[0]].n} et ${U[cs[1]].n}. Le retour est épuisant.`,cards:cs}}},
+   {n:'Ignorer',d:'Pas de risque.',go:()=>({txt:'Le message se répète jusqu’au soir, puis plus rien.'})}]},
+  dog:{n:'Un chien errant',d:'Un chien maigre rôde autour de l’abri.',ch:[
+   {n:'L’adopter',d:'Un chien gratuit autour de l’abri.',go:(st,rnd)=>{const u=recruit(st,'dog',rnd);return{txt:u?`${u.name} monte la garde.`:'Pas de place pour lui. Il s’éloigne.'}}},
+   {n:'Le chasser',d:'Rien ne se passe.',go:()=>({txt:'Il disparaît dans les bois.'})}]},
+  cache:{n:'Une caisse militaire',d:'Une caisse scellée, peut-être piégée.',ch:[
+   {n:'L’ouvrir',d:'Une amélioration gratuite… ou une explosion.',go:(st,rnd,deck)=>{if(rnd()<.5){const ts=[...new Set(deck||[])].filter(t=>UPGRADABLE.includes(t)&&!st.upg[t]);if(ts.length){const t=pickR(ts,rnd);upgrade(st,t);return{txt:`Du matériel de qualité : ${U[t].n} est amélioré.`}}st.scrap+=6;return{txt:'De la ferraille de qualité : +6.'}}
+    const j=randUnit(st,rnd);return{txt:'Piégée ! '+(j>=0?hurt(st,j,4):'Personne n’était à côté.')}}},
+   {n:'La laisser',d:'Pas de risque.',go:()=>({txt:'Tu la recouvres de branches et tu l’oublies.'})}]},
+  mechanic:{n:'Un mécanicien de passage',d:'Il propose de réparer tes défenses contre de la ferraille.',ch:[
+   {n:'Payer 6 ferraille',d:'Toutes tes unités récupèrent tous leurs PV.',ok:st=>st.scrap>=6,go:st=>{st.scrap-=6;st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=maxHp(st,u)});return{txt:'En une matinée, tout est comme neuf.'}}},
+   {n:'Refuser',d:'Pas de risque.',go:()=>({txt:'Il hausse les épaules et reprend la route.'})}]},
+  wounded:{n:'Un blessé dans le fossé',d:'Une personne blessée appelle à l’aide.',ch:[
+   {n:'Soigner la personne',d:'L’abri perd 1 PV (provisions), tu gagnes une Trousse de secours.',go:st=>{st.shelter=Math.max(1,st.shelter-1);return{txt:'En remerciement, tu reçois sa trousse de secours.',cards:['kit']}}},
+   {n:'Passer ton chemin',d:'Pas de risque.',go:()=>({txt:'Ses appels s’éteignent dans ton dos.'})}]}
+ };
+ const dawnEvent=(st,rnd=Math.random)=>st.night>=2&&rnd()<.45?pickR(Object.keys(DAWN),rnd):null;
+ function resolveDawn(st,id,k,rnd=Math.random,deck){const c=DAWN[id].ch[k];if(c.ok&&!c.ok(st))return{txt:'Impossible.'};const r=c.go(st,rnd,deck)||{};touch(st);return r}
  // mutations : toutes les 4 nuits, la horde gagne un bonus permanent pour toute la partie
  const MUTS={
   peau:{n:'Peau épaisse',d:'Les zombies ont +20 % de PV',stack:1},
@@ -181,7 +218,7 @@ const Z=(()=>{
  /* ---------- état d'une partie ---------- */
  function newState(ch){const st={grid:Array(N*N).fill(null),shelter:MAXS,night:1,event:EVENTS[0],z:[],pending:[],tick:0,zid:0,kills:0,scrap:0,relics:[],upg:{},muts:[],energy:ENERGY,moved:0,side:-1,char:CHARS[ch]?ch:'surv'};
   const r=CHARS[st.char].relic;if(r)st.relics.push(r);return st}
- function newDay(st,rnd){st.night++;st.energy=ENERGY;st.moved=0;st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))]}
+ function newDay(st,rnd){st.night++;st.energy=ENERGY+(st.nextE||0);st.nextE=0;st.moved=0;st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))]}
  const has=(st,t)=>st.grid.some(u=>u&&u.t===t);
  const canPay=(st,t)=>cost(t)<=(st.energy??ENERGY);
  const drawCount=st=>5+(has(st,'radio')?1:0)+(st.relics.includes('sac')?1:0);
@@ -226,7 +263,7 @@ const Z=(()=>{
   if(isEdge(i)||i===C)return false;
   if(D.near)return cheb(i,C)===1;
   return true}
- function place(st,t,i,rnd=Math.random){const D=stat(st,t);st.energy=(st.energy??ENERGY)-cost(t);if(D.instant){applyItem(st,t,i,rnd);return}
+ function place(st,t,i,rnd=Math.random,free){const D=stat(st,t);if(!free)st.energy=(st.energy??ENERGY)-cost(t);if(D.instant){applyItem(st,t,i,rnd);return}
   const u={t,hp:D.hp};
   if(named(t)){const used=new Set(st.grid.filter(Boolean).map(v=>v.name).concat((st.fallen||[]).map(f=>f.name)));
    const pool=(t==='dog'?DOG_NAMES:NAMES).filter(n=>!used.has(n));const list=pool.length?pool:(t==='dog'?DOG_NAMES:NAMES);
@@ -337,6 +374,6 @@ const Z=(()=>{
   return{heal:st.shelter-before,scrap:s}}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
  return{N,C,MAXS,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;
