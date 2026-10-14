@@ -115,4 +115,5 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .mute svg{width:18px;height:18px}
 .relic.evc{color:var(--ink)}
 .relic:disabled{opacity:.4}
+.char:disabled{opacity:.5;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}

@@ -200,6 +200,26 @@ Toutes les 4 nuits (nuits 4, 8, 12…), la horde gagne une mutation tirée au ha
 | Le fermier | Barricade, Barricade, Piège à loup, Piège à loup, Mine, Essence, Fosse à pieux, Chien | Manuel du trappeur |
 | L’infirmière | Barricade, Épave, Tireur, Bûcheron, Infirmière, Conserves, Outils, Trousse de secours | Marmite de soupe |
 
+## Les lieux
+
+On choisit un lieu après le personnage. Chaque lieu change le départ et une règle.
+
+| Lieu | Effet | Déblocage |
+|---|---|---|
+| La maison des bois | Ni bonus, ni malus | Dès le départ |
+| La ferme | Rivière au nord : la horde arrive par 3 côtés. 2 barricades au départ | Record de 5 nuits |
+| La station-service | 2 bonbonnes de gaz et 10 ferraille au départ, l'Essence est gratuite. Horde +15 % | Record de 8 nuits |
+| Le centre commercial | Abri à 15 PV. Zombies +15 % de PV | Record de 12 nuits |
+
+## La progression entre les parties
+
+Sauvegardée dans le navigateur : meilleur record, total de nuits survécues, nombre de parties. Les parties du défi quotidien ne comptent pas.
+
+- Personnages : la Policière à 8 nuits au total, le Fermier à 20, l'Infirmière à 35.
+- Lieux : selon le record (voir ci-dessus).
+- Cartes épiques verrouillées au début, débloquées au total de nuits : Mitrailleuse 5, Cocktails 10, Sirène 15, Chef de groupe 20, Panneau solaire 25, Dynamite 30, Bonbonne de gaz 40, Porte blindée 50. Une carte verrouillée ne sort ni à l'aube, ni au troc, ni dans les événements.
+- L'écran d'accueil indique le prochain déblocage ; l'écran de fin liste ce qui vient d'être débloqué.
+
 ## Les reliques
 
 Une relique reste active toute la partie. On en choisit 1 parmi 3 toutes les 5 nuits : c'est rare et ça doit compter.

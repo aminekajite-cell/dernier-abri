@@ -140,10 +140,10 @@ const Z=(()=>{
    {n:'Payer 8 ferraille',d:'Ils partent sans histoire.',ok:st=>st.scrap>=8,go:st=>{st.scrap-=8;return{txt:'Ils empochent la ferraille et disparaissent.'}}},
    {n:'Les repousser',d:'+6 ferraille, mais un de tes défenseurs est blessé.',go:(st,rnd)=>{st.scrap+=6;const j=randUnit(st,rnd);return{txt:'Tu récupères leurs affaires (+6 ferraille). '+(j>=0?hurt(st,j,3):'')}}}]},
   market:{n:'Le supermarché',d:'Un supermarché à moitié pillé, à dix minutes de marche.',ch:[
-   {n:'Fouiller',d:'Une carte rare et de la ferraille… ou une embuscade.',go:(st,rnd)=>{if(rnd()<.6){st.scrap+=5;const c=pickR(KEYS.filter(t=>RAR[t]==='rare'),rnd);return{txt:`Butin : ${U[c].n} et 5 ferraille.`,cards:[c]}}st.shelter=Math.max(1,st.shelter-2);return{txt:'Une embuscade ! Tu rentres en courant, la horde sur les talons : l’abri perd 2 PV.'}}},
+   {n:'Fouiller',d:'Une carte rare et de la ferraille… ou une embuscade.',go:(st,rnd)=>{if(rnd()<.6){st.scrap+=5;const c=pickR((st.pool||KEYS).filter(t=>RAR[t]==='rare'),rnd);return{txt:`Butin : ${U[c].n} et 5 ferraille.`,cards:[c]}}st.shelter=Math.max(1,st.shelter-2);return{txt:'Une embuscade ! Tu rentres en courant, la horde sur les talons : l’abri perd 2 PV.'}}},
    {n:'Rester à l’abri',d:'Pas de risque.',go:()=>({txt:'Tu passes la matinée à renforcer les planches.'})}]},
   radio:{n:'Un message radio',d:'Des survivants donnent leur position et demandent de l’aide.',ch:[
-   {n:'Y aller',d:'2 cartes communes, mais −1 énergie demain (fatigue).',go:(st,rnd)=>{st.nextE=(st.nextE||0)-1;const cs=[pickR(KEYS.filter(t=>RAR[t]==='com'),rnd),pickR(KEYS.filter(t=>RAR[t]==='com'),rnd)];return{txt:`Ils te donnent ${U[cs[0]].n} et ${U[cs[1]].n}. Le retour est épuisant.`,cards:cs}}},
+   {n:'Y aller',d:'2 cartes communes, mais −1 énergie demain (fatigue).',go:(st,rnd)=>{st.nextE=(st.nextE||0)-1;const cs=[pickR((st.pool||KEYS).filter(t=>RAR[t]==='com'),rnd),pickR((st.pool||KEYS).filter(t=>RAR[t]==='com'),rnd)];return{txt:`Ils te donnent ${U[cs[0]].n} et ${U[cs[1]].n}. Le retour est épuisant.`,cards:cs}}},
    {n:'Ignorer',d:'Pas de risque.',go:()=>({txt:'Le message se répète jusqu’au soir, puis plus rien.'})}]},
   dog:{n:'Un chien errant',d:'Un chien maigre rôde autour de l’abri.',ch:[
    {n:'L’adopter',d:'Un chien gratuit autour de l’abri.',go:(st,rnd)=>{const u=recruit(st,'dog',rnd);return{txt:u?`${u.name} monte la garde.`:'Pas de place pour lui. Il s’éloigne.'}}},
@@ -216,11 +216,30 @@ const Z=(()=>{
  function shuffle(a,rnd=Math.random){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
  /* ---------- état d'une partie ---------- */
- function newState(ch){const st={grid:Array(N*N).fill(null),shelter:MAXS,night:1,event:EVENTS[0],z:[],pending:[],tick:0,zid:0,kills:0,scrap:0,relics:[],upg:{},muts:[],energy:ENERGY,moved:0,side:-1,char:CHARS[ch]?ch:'surv'};
-  const r=CHARS[st.char].relic;if(r)st.relics.push(r);return st}
+ function newState(ch,pl,rnd=Math.random,pool){const P=PLACES[pl]||PLACES.bois;const st={grid:Array(N*N).fill(null),shelter:P.maxS||MAXS,maxS:P.maxS||MAXS,place:PLACES[pl]?pl:'bois',pool:pool||KEYS.slice(),night:1,event:EVENTS[0],z:[],pending:[],tick:0,zid:0,kills:0,scrap:0,relics:[],upg:{},muts:[],energy:ENERGY,moved:0,side:-1,char:CHARS[ch]?ch:'surv'};
+  const r=CHARS[st.char].relic;if(r)st.relics.push(r);
+  st.scrap+=P.scrap||0;(P.start||[]).forEach(([t,i])=>place(st,t,i,rnd,true));return st}
+ const maxS=st=>st.maxS||MAXS;
+ // les lieux : chacun change la carte de départ et une règle
+ const PLACES={
+  bois:{n:'La maison des bois',d:'Le lieu d’origine. Ni bonus, ni malus.'},
+  ferme:{n:'La ferme',d:'Une rivière protège le nord : la horde arrive par les 3 autres côtés. Deux bottes de paille (barricades) au départ.',sides:[1,2,3],start:[['bar',16],['bar',18]]},
+  station:{n:'La station-service',d:'Deux bonbonnes de gaz et 10 ferraille au départ, l’Essence ne coûte rien. Mais la horde est 15 % plus nombreuse.',start:[['gas',10],['gas',38]],scrap:10,free:['fire'],count:1.15},
+  mall:{n:'Le centre commercial',d:'Murs épais : l’abri a 15 PV au lieu de 10. Mais les zombies ont 15 % de PV en plus.',maxS:15,hp:1.15}
+ };
+ // progression entre les parties : ce qui est débloqué selon le record (lieux) et le total de nuits survécues (personnages, cartes)
+ const UNLOCK={
+  chars:{surv:0,cop:8,farm:20,nurse:35},
+  places:{bois:0,ferme:5,station:8,mall:12},
+  cards:{mg:5,molo:10,siren:15,lead:20,solar:25,dyn:30,gas:40,door:50}
+ };
+ function unlocks(meta){const m=meta||{},b=m.best||0,t=m.total||0;
+  return{chars:Object.keys(UNLOCK.chars).filter(k=>t>=UNLOCK.chars[k]),places:Object.keys(UNLOCK.places).filter(k=>b>=UNLOCK.places[k]),
+   pool:KEYS.filter(k=>!(k in UNLOCK.cards)||t>=UNLOCK.cards[k])}}
  function newDay(st,rnd){st.night++;st.energy=ENERGY+(st.nextE||0);st.nextE=0;st.moved=0;st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))]}
  const has=(st,t)=>st.grid.some(u=>u&&u.t===t);
- const canPay=(st,t)=>cost(t)<=(st.energy??ENERGY);
+ const costOf=(st,t)=>(PLACES[st.place]||{}).free&&PLACES[st.place].free.includes(t)?0:cost(t);
+ const canPay=(st,t)=>costOf(st,t)<=(st.energy??ENERGY);
  const drawCount=st=>5+(has(st,'radio')?1:0)+(st.relics.includes('sac')?1:0);
 
  /* ---------- améliorations et reliques : statistiques réelles d'une carte ---------- */
@@ -247,11 +266,11 @@ const Z=(()=>{
  function upgrade(st,t){st.upg[t]=1;touch(st)}
  function addRelic(st,r){if(!st.relics.includes(r))st.relics.push(r);touch(st)}
  function relicChoices(st,rnd=Math.random,n=3){return shuffle(Object.keys(RELICS).filter(r=>!st.relics.includes(r)),rnd).slice(0,n)}
- function draftChoices(rnd=Math.random,n=3){const out=[];
+ function draftChoices(rnd=Math.random,n=3,pool=KEYS){const out=[];
   while(out.length<n){let r=rnd()*100,rr='com';for(const k in RARITY){if(r<RARITY[k].w){rr=k;break}r-=RARITY[k].w}
-   const pool=KEYS.filter(t=>RAR[t]===rr&&!out.includes(t));if(pool.length)out.push(pool[Math.floor(rnd()*pool.length)])}
+   const cand=pool.filter(t=>RAR[t]===rr&&!out.includes(t));if(cand.length)out.push(cand[Math.floor(rnd()*cand.length)]);else if(!pool.some(t=>!out.includes(t)))break}
   return out}
- function pay(st,k){const c=shopCost(st,k);if(st.scrap<c)return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(MAXS,st.shelter+3);return true}
+ function pay(st,k){const c=shopCost(st,k);if(st.scrap<c)return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(maxS(st),st.shelter+3);return true}
 
  /* ---------- pose des cartes ---------- */
  // déplacer une de ses unités : une fois par jour, vers une case libre où elle pourrait être posée
@@ -263,7 +282,7 @@ const Z=(()=>{
   if(isEdge(i)||i===C)return false;
   if(D.near)return cheb(i,C)===1;
   return true}
- function place(st,t,i,rnd=Math.random,free){const D=stat(st,t);if(!free)st.energy=(st.energy??ENERGY)-cost(t);if(D.instant){applyItem(st,t,i,rnd);return}
+ function place(st,t,i,rnd=Math.random,free){const D=stat(st,t);if(!free)st.energy=(st.energy??ENERGY)-costOf(st,t);if(D.instant){applyItem(st,t,i,rnd);return}
   const u={t,hp:D.hp};
   if(named(t)){const used=new Set(st.grid.filter(Boolean).map(v=>v.name).concat((st.fallen||[]).map(f=>f.name)));
    const pool=(t==='dog'?DOG_NAMES:NAMES).filter(n=>!used.has(n));const list=pool.length?pool:(t==='dog'?DOG_NAMES:NAMES);
@@ -276,7 +295,7 @@ const Z=(()=>{
   st.grid[j]=null;ev.push({i:j,k:'lost',t:u.t,name:u.name});
   if(u.name)(st.fallen=st.fallen||[]).push({name:u.name,t:u.t,trait:u.trait,kills:u.kills||0,night:st.night});return true}
  function applyItem(st,t,i,rnd){const D=stat(st,t);
-  if(t==='food')st.shelter=Math.min(MAXS,st.shelter+D.gain);
+  if(t==='food')st.shelter=Math.min(maxS(st),st.shelter+D.gain);
   if(t==='rep')st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+D.gain)});
   if(t==='kit'&&st.grid[i])st.grid[i].hp=maxHp(st,st.grid[i]);
   if(t==='coffee')st.energy+=2;
@@ -284,14 +303,14 @@ const Z=(()=>{
 
  /* ---------- la nuit ---------- */
  function waveList(st){const e=st.event.id,w={};
-  for(const k of ZK){let v=waveCount(k,st.night);if(k!=='boss'){if(e==='lune')v*=1.5;v=Math.round(v*(1+.2*mc(st,'nombre')))}w[k]=v}
+  for(const k of ZK){let v=waveCount(k,st.night);if(k!=='boss'){if(e==='lune')v*=1.5;v=Math.round(v*(1+.2*mc(st,'nombre'))*((PLACES[st.place]||{}).count||1))}w[k]=v}
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
- function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau')));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
+ function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau'))*((PLACES[st.place]||{}).hp||1));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
  function startNight(st,rnd){const w=waveList(st),list=[];st.grid.forEach(u=>{if(u)u.nk=0});
   for(const k of ZK)if(k!=='boss')for(let j=0;j<w[k];j++)list.push(k);
   shuffle(list,rnd);
-  const edges=st.side>=0?EDGES.filter(i=>sideOf(i)===st.side):EDGES;
+  const ps=(PLACES[st.place]||{}).sides,edges=st.side>=0?EDGES.filter(i=>sideOf(i)===st.side):ps?EDGES.filter(i=>ps.includes(sideOf(i))&&!(ps.indexOf(0)<0&&rc(i)[0]===0)):EDGES;
   st.pending=list.map((k,j)=>({k,at:1+Math.floor(j*1.3),pos:edges[Math.floor(rnd()*edges.length)]}));
   for(let j=0;j<w.boss;j++)st.pending.push({k:'boss',at:10+j*12,pos:edges[Math.floor(rnd()*edges.length)]});
   st.cap=Math.max(90,st.pending.reduce((m,p)=>Math.max(m,p.at),0)+60);
@@ -370,10 +389,10 @@ const Z=(()=>{
  function endNight(st){st.grid.forEach((u,i)=>{if(u&&u.t==='fire')st.grid[i]=null;else if(u&&u.trait==='coriace'&&u.hp>0)u.hp=Math.min(maxHp(st,u),u.hp+1)});st.z=[];st.side=-1;
   if(st.shelter<=0)return{heal:0,scrap:0};
   const h=st.grid.filter(u=>u&&u.t==='cook').length+(st.relics.includes('soupe')?1:0),before=st.shelter;
-  st.shelter=Math.min(MAXS,st.shelter+h);const s=st.relics.includes('aimant')?3:0;st.scrap+=s;
+  st.shelter=Math.min(maxS(st),st.shelter+h);const s=st.relics.includes('aimant')?3:0;st.scrap+=s;
   return{heal:st.shelter-before,scrap:s}}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
- return{N,C,MAXS,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
+ return{N,C,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
   DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;
