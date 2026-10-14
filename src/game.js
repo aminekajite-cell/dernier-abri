@@ -49,12 +49,16 @@ const ICON={
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v15 · 14 oct.';
+const VERSION='v16 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const $=s=>document.querySelector(s);
-const shuffle=a=>Z.shuffle(a);
+// hasard de la partie, à graine : la graine est sauvegardée, et le défi quotidien utilise la même pour tout le monde.
+// Les effets visuels (particules, sang…) gardent Math.random.
+let RS=1;function R(){RS=(RS*16807)%2147483647;return (RS-1)/2147483646}
+const seedFrom=str=>{let h=2166136261;for(const c of str)h=Math.imul(h^c.charCodeAt(0),16777619);return (Math.abs(h)%2147483646)+1};
+const shuffle=a=>Z.shuffle(a,R);
 const plural=(n,s,p)=>n+' '+(n>1?p:s);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const ZN={walk:['rôdeur','rôdeurs'],run:['coureur','coureurs'],fat:['gonflé','gonflés'],zdog:['chien zombie','chiens zombies'],crawl:['rampant','rampants'],spit:['cracheur','cracheurs'],armor:['blindé','blindés'],howl:['hurleur','hurleurs'],boss:['Colosse','Colosses']};
@@ -66,8 +70,13 @@ function loadMeta(){let m={};try{m=JSON.parse(localStorage.getItem('abri-meta'))
  if(!m.best){try{m.best=+localStorage.getItem('abri-best-nuits')||0}catch(e){}}m.best=m.best||0;m.total=m.total||m.best||0;m.runs=m.runs||0;return m}
 function saveMeta(m){try{localStorage.setItem('abri-meta',JSON.stringify(m))}catch(e){}}
 let META=loadMeta();
-function newGame(ch,pl){
- G=Z.newState(ch,pl,Math.random,Z.unlocks(META).pool);
+// tutoriel de la première partie : une bulle d'aide par étape (0 à 4 ; 5 = terminé)
+let TUTO=5;try{TUTO=+(localStorage.getItem('abri-tuto')??(META.runs||META.best?5:0))}catch(e){}
+function tuto(n){if(TUTO===n){TUTO=n+1;try{localStorage.setItem('abri-tuto',TUTO)}catch(e){}}}
+const TIPS=['👆 Touche une carte en bas pour la choisir. Le chiffre jaune est son coût en énergie.','Touche une case en pointillés jaunes pour la poser.','Bien ! Les points jaunes sous la carte sont ton énergie. Pose d’autres cartes, puis touche « Affronter la nuit ».','Tes survivants se défendent tout seuls. Touche le bouton du bas pour accélérer.'];
+function newGame(ch,pl,daily){
+ RS=daily?seedFrom('abri-'+daily):1+Math.floor(Math.random()*2147483645);
+ G=Z.newState(ch,pl,R,daily?Z.KEYS.slice():Z.unlocks(META).pool);if(daily)G.daily=daily;
  S={draw:shuffle([...Z.CHARS[G.char].deck]),discard:[],hand:[],sel:null,moveFrom:null,inspect:null,busy:false,next:null,phase:null,picks:null,dawn:null};
  V.clear();FX.length=0;PT.length=0;facing.fill(null);clearDecals();
  fillHand();
@@ -80,13 +89,13 @@ const deckList=()=>[...S.draw,...S.discard,...S.hand];
 
 /* ---------- sauvegarde (localStorage, marche aussi dans Electron/Tauri) ---------- */
 const SAVE_KEY='abri-save',SAVE_V=2;
-function save(){try{const g={...G,event:G.event.id,z:[],pending:[],tick:0};localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_V,g,s:{draw:S.draw,discard:S.discard,hand:S.hand,next:S.next,phase:S.phase,picks:S.picks}}))}catch(e){}}
+function save(){try{G.rs=RS;const g={...G,event:G.event.id,z:[],pending:[],tick:0};localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_V,g,s:{draw:S.draw,discard:S.discard,hand:S.hand,next:S.next,phase:S.phase,picks:S.picks}}))}catch(e){}}
 function loadSave(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d&&d.v===SAVE_V&&d.g&&d.s)return d}catch(e){}return null}
 function clearSave(){try{localStorage.removeItem(SAVE_KEY)}catch(e){}}
 function resume(d){
- newGame(d.g.char);
+ newGame(d.g.char,d.g.place);
  Object.assign(G,d.g,{event:Z.EVENTS.find(e=>e.id===d.g.event)||Z.EVENTS[0]});Z.touch(G);
- Object.assign(S,d.s,{sel:null,busy:false});
+ RS=d.g.rs||RS;Object.assign(S,d.s,{sel:null,busy:false});
  hide();render();
  if(S.phase)dawnStep(S.phase,S.picks);
 }
@@ -410,9 +419,10 @@ function render(){
  else if(S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
  else if(S.inspect!==null&&G.grid[S.inspect])info.innerHTML=unitLine(G.grid[S.inspect])+(G.moved?' (déjà un déplacement aujourd’hui)':'');
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie.`+(G.moved?'':' Touche une unité pour la déplacer (1 fois par jour).');
+ const tip=$('#tip');if(TUTO<4&&ov.hidden&&(S.busy?TUTO===3:TUTO<3)){tip.hidden=false;tip.textContent=TIPS[TUTO]}else tip.hidden=true;
  const go=$('#go');go.disabled=false;go.textContent=S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy);
 }
-$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;SFX.play('ui');const k=+b.dataset.k;S.sel=S.sel===k?null:k;S.moveFrom=null;S.inspect=null;render()});
+$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;SFX.play('ui');const k=+b.dataset.k;S.sel=S.sel===k?null:k;S.moveFrom=null;S.inspect=null;if(S.sel!==null)tuto(0);render()});
 $('#round').addEventListener('click',()=>{if(!S.busy&&ov.hidden)runInfo()});
 cv.addEventListener('click',e=>{
  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*L,y=(e.clientY-r.top)/r.height*L;
@@ -429,7 +439,7 @@ function tapCell(i){
   return}
  const t=S.hand[S.sel],D=Z.U[t];
  if(!Z.canPay(G,t)||!Z.canPlace(G,t,i))return;
- S.hand.splice(S.sel,1);Z.place(G,t,i);if(!D.instant)facing[i]=null;S.discard.push(t);S.sel=null;S.moveFrom=null;S.inspect=null;
+ tuto(1);S.hand.splice(S.sel,1);Z.place(G,t,i,R);if(!D.instant)facing[i]=null;S.discard.push(t);S.sel=null;S.moveFrom=null;S.inspect=null;
  if(G.grid[i]&&G.grid[i].name){const q=tc(i);floatTxt(q.x,q.y-14,`${G.grid[i].name} rejoint l’abri`,'#f2b33d')}
  const p=D.instant&&!D.onUnit?CEN:tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#f2b33d',dur:350});SFX.play('place');
  const St=Z.stat(G,t);
@@ -452,7 +462,7 @@ async function night(){
  if(S.busy)return;S.busy=true;S.sel=null;
  S.moveFrom=null;S.inspect=null;save();
  const scrap0=G.scrap,kills0=G.kills;
- nightTarget=1;Z.startNight(G,Math.random);render();await wait(900);
+ tuto(2);nightTarget=1;Z.startNight(G,R);render();await wait(900);
  let r;
  do{const types=G.grid.map(u=>u&&u.t);
   r=Z.step(G);const now=performance.now();
@@ -465,7 +475,7 @@ async function night(){
  await wait(700);
  const dawnInfo=Z.endNight(G);nightTarget=0;S.busy=false;render();await wait(900);
  if(G.shelter<=0)return end();
- const mut=Z.mutNight(G.night)?Z.mutate(G):null;
+ const mut=Z.mutNight(G.night)?Z.mutate(G,R):null;
  const hero=G.grid.filter(u=>u&&u.name&&u.nk>0).sort((a,b)=>b.nk-a.nk)[0];
  const fallen=(G.fallen||[]).filter(f=>f.night===G.night);
  S.dawn={kills:G.kills-kills0,scrap:G.scrap-scrap0,heal:dawnInfo.heal,mut,hero:hero?{name:hero.name,t:hero.t,nk:hero.nk}:null,fallen};save();render();
@@ -478,11 +488,11 @@ function dawn(){
  const d=S.dawn;if(d&&!d.chimed){d.chimed=1;SFX.play('dawn')}
  if(d&&d.mut&&!d.mutShown){d.mutShown=1;SFX.play('mutate');
   return show(`<h2 class="ko">La horde mute</h2>${dawnTxt()}<div class="relics"><div class="relic mutx">${svg('mut')}<span><b>${Z.MUTS[d.mut].n}</b>${Z.MUTS[d.mut].d}</span></div></div><p>C’est permanent. La prochaine mutation arrivera dans 4 nuits.</p><button type="button" class="go" data-a="dawn">Continuer</button>`)}
- if(Z.relicNight(G.night)){const r=Z.relicChoices(G);if(r.length)return dawnStep('relic',r)}
+ if(Z.relicNight(G.night)){const r=Z.relicChoices(G,R);if(r.length)return dawnStep('relic',r)}
  afterRelic();
 }
 // un événement de l'aube (environ 1 aube sur 2), puis le choix de la carte
-function afterRelic(){const ev=Z.dawnEvent(G);if(ev)return dawnStep('event',[ev]);dawnStep('draft')}
+function afterRelic(){const ev=Z.dawnEvent(G,R);if(ev)return dawnStep('event',[ev]);dawnStep('draft')}
 function dawnStep(ph,picks){
  S.phase=ph;
  if(ph==='relic'){S.picks=picks;save();
@@ -490,11 +500,12 @@ function dawnStep(ph,picks){
    <div class="relics">${picks.map(r=>`<button type="button" class="relic" data-a="relic" data-v="${r}">${svg('relic')}<span><b>${Z.RELICS[r].n}</b>${Z.RELICS[r].d}</span></button>`).join('')}</div>`)}
  if(ph==='event'){S.picks=picks;save();const E=Z.DAWN[picks[0]];
   return show(`<h2 class="pw">${E.n}</h2>${dawnTxt()}<p>${E.d}</p><div class="relics">${E.ch.map((c,k)=>`<button type="button" class="relic evc" data-a="evc" data-v="${k}" ${c.ok&&!c.ok(G)?'disabled':''}><span><b>${c.n}</b>${c.d}</span></button>`).join('')}</div>`)}
- if(ph==='draft'){S.picks=picks||Z.draftChoices(Math.random,3,G.pool);save();
+ if(ph==='draft'){S.picks=picks||Z.draftChoices(R,3,G.pool);save();
   return show(`<h2 class="ok">Nuit ${G.night} survécue</h2>${dawnTxt()}<p>Choisis la carte que tu auras <b>en main demain</b>. Elle rejoint ensuite ton deck.</p>
+   ${TUTO===3?(tuto(3),`<p class="tipin">💡 À chaque aube, tu choisis une carte : elle arrive dans ta main dès demain. Ensuite viendra le troc, où tu dépenses ta ferraille.</p>`):''}
    <div class="picks">${S.picks.map(t=>pickBtn(t,'draft',t)).join('')}</div>
    <button type="button" class="skip" data-a="draft" data-v="">Ne rien prendre</button>`)}
- if(ph==='buy'){S.picks=picks||Z.draftChoices(Math.random,2,G.pool);save();
+ if(ph==='buy'){S.picks=picks||Z.draftChoices(R,2,G.pool);save();
   return show(`<h2 class="pw">Acheter une carte</h2><p>Elle rejoint ton deck.</p><div class="picks two">${S.picks.map(t=>pickBtn(t,'bought',t)).join('')}</div>
    <button type="button" class="skip" data-a="shop">Ne rien prendre</button>`)}
  S.picks=null;save();shopScreen();
@@ -514,7 +525,7 @@ const deckTypes=()=>[...new Set(deckList())];
 function listScreen(title,txt,types,a){show(`<h2 class="pw">${title}</h2><p>${txt}</p><div class="deck pickable">${types.map(t=>`<button type="button" class="dk" data-a="${a}" data-v="${t}" style="--cc:${cc(t)}">${svg(t)}<span><b>${cardName(t)}${a==='up-pick'?` → ${Z.upgDesc(t)}`:''}</b>${Z.U[t].d}</span></button>`).join('')}</div><button type="button" class="skip" data-a="shop">Retour</button>`)}
 function removeCard(t){for(const pile of[S.discard,S.draw,S.hand]){const k=pile.indexOf(t);if(k>=0){pile.splice(k,1);return true}}return false}
 function nextDay(){
- Z.newDay(G,Math.random);S.moveFrom=null;S.busy=false;S.phase=null;S.picks=null;S.dawn=null;V.clear();
+ Z.newDay(G,R);S.moveFrom=null;S.busy=false;S.phase=null;S.picks=null;S.dawn=null;V.clear();
  fillHand();save();hide();render();
 }
 function end(){
@@ -524,7 +535,7 @@ function end(){
  if(!G.daily){META.best=Math.max(META.best,nights);META.total+=nights;META.runs++;saveMeta(META)}
  const best=META.best,after=Z.unlocks(META);
  const fresh=[...after.chars.filter(k=>!before.chars.includes(k)).map(k=>'Personnage : '+Z.CHARS[k].n),...after.places.filter(k=>!before.places.includes(k)).map(k=>'Lieu : '+Z.PLACES[k].n),...after.pool.filter(k=>!before.pool.includes(k)).map(k=>'Carte : '+Z.U[k].n)];
- const dailyTxt='';
+ const dailyTxt=G.daily?dailyEnd(nights):'';
  show(`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div><p><b>${G.kills}</b> zombies éliminés. Record : <b>${plural(best,'nuit','nuits')}</b>${newRec?' (nouveau record !)':''}.</p>${dailyTxt}${fresh.length?`<h3>Débloqué !</h3><ul>${fresh.map(f=>`<li><b>${f}</b></li>`).join('')}</ul>`:''}<h3>Mémorial</h3>${memorialHtml()}<button type="button" class="go" data-a="new">Rejouer</button>`);
 }
 const CATN={wall:'Défenses',shoot:'Tireurs',melee:'Corps à corps',help:'Soutien',trap:'Pièges',item:'Objets'};
@@ -569,7 +580,7 @@ const ACT={
  deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu commences avec 8 cartes. Les autres se gagnent à l’aube ou s’achètent au troc. Les cartes rares et épiques sortent rarement.</p>${deckHtml()}<h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
  dawn:()=>dawn(),
  relic:v=>{Z.addRelic(G,v);afterRelic()},
- evc:v=>{const id=S.picks&&S.picks[0];if(!id)return dawnStep('draft');const r=Z.resolveDawn(G,id,+v,Math.random,deckList());
+ evc:v=>{const id=S.picks&&S.picks[0];if(!id)return dawnStep('draft');const r=Z.resolveDawn(G,id,+v,R,deckList());
   (r.cards||[]).forEach(t=>S.discard.push(t));S.phase='draft';S.picks=null;save();render();SFX.play('ui');
   show(`<h2 class="pw">${Z.DAWN[id].n}</h2><p>${r.txt}</p>${r.cards&&r.cards.length?`<p>Ajouté à ton deck : <b>${r.cards.map(t=>Z.U[t].n).join(', ')}</b>.</p>`:''}<button type="button" class="go" data-a="todraft">Continuer</button>`)},
  todraft:()=>dawnStep('draft'),
@@ -583,6 +594,8 @@ const ACT={
  'up-pick':v=>{if(Z.pay(G,'upgrade'))Z.upgrade(G,v);render();shopScreen()},
  'rm-pick':v=>{if(Z.pay(G,'remove'))removeCard(v);shopScreen()},
  day:()=>nextDay(),
+ daily:()=>dailyScreen(),
+ 'daily-go':()=>{const day=today(),c=dailySetup(day);newGame(c.ch,c.pl,day);save();hide();render()},
  peek:v=>{const k=S.draw.lastIndexOf(v);if(k>=0){S.draw.splice(k,1);S.hand.push(v)}save();hide();render()}
 };
 panel.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=ACT[b.dataset.a];if(f)f(b.dataset.v)});
@@ -593,6 +606,17 @@ function nextUnlockTxt(){const u=Z.unlocks(META),nx=[];
  for(const k in Z.UNLOCK.cards)if(!u.pool.includes(k))nx.push([Z.UNLOCK.cards[k]-META.total,`la carte ${Z.U[k].n} dans ${Z.UNLOCK.cards[k]-META.total} nuits au total`]);
  for(const k in Z.UNLOCK.places)if(!u.places.includes(k))nx.push([99,`${Z.PLACES[k].n} avec un record de ${Z.UNLOCK.places[k]} nuits`]);
  nx.sort((a,b)=>a[0]-b[0]);return nx.length?`<p>Prochain déblocage : ${nx[0][1]}.</p>`:''}
+/* ---------- défi quotidien : même graine, même personnage et même lieu pour tout le monde ce jour-là ---------- */
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+function dailySetup(day){const r=seedFrom('cfg-'+day),ch=Object.keys(Z.CHARS),pl=Object.keys(Z.PLACES);return{ch:ch[r%ch.length],pl:pl[Math.floor(r/7)%pl.length]}}
+function dailyBest(day){try{const d=JSON.parse(localStorage.getItem('abri-daily'))||{};return d[day]??null}catch(e){return null}}
+function dailyEnd(n){let prev=null;try{const d=JSON.parse(localStorage.getItem('abri-daily'))||{};prev=d[G.daily]??null;if(prev===null||n>prev){d[G.daily]=n;localStorage.setItem('abri-daily',JSON.stringify(d))}}catch(e){}
+ return `<p>Défi du jour : <b>${plural(n,'nuit','nuits')}</b>${prev!==null?` (ton meilleur aujourd’hui : ${plural(Math.max(prev,n),'nuit','nuits')})`:''}. Compare ton score avec tes amis : tout le monde a la même partie aujourd’hui.</p>`}
+function dailyScreen(){const day=today(),c=dailySetup(day),b=dailyBest(day);
+ show(`<h2 class="pw">Défi du jour</h2><p>Aujourd’hui, tout le monde joue <b>la même partie</b> : même personnage, même lieu, mêmes cartes et mêmes nuits. Tu peux le rejouer autant que tu veux.</p>
+  <ul><li>Personnage : <b>${Z.CHARS[c.ch].n}</b></li><li>Lieu : <b>${Z.PLACES[c.pl].n}</b></li><li>Toutes les cartes sont disponibles.</li></ul>
+  ${b!==null?`<p>Ton meilleur score aujourd’hui : <b>${plural(b,'nuit','nuits')}</b>.</p>`:''}<p>Les défis ne comptent pas pour les déblocages.</p>
+  <button type="button" class="go" data-a="daily-go">Jouer le défi</button><button type="button" class="skip" data-a="title">Retour</button>`)}
 function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de fin. Survis <b>une nuit de plus</b>, encore et encore : chaque nuit, la horde est plus nombreuse et plus coriace.</p>
 <ul><li>Le jour, dépense tes <b>4 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
 <li>Chaque survivant a un <b>prénom</b> et un trait. S’il tombe, il est perdu pour de bon.</li>
@@ -602,7 +626,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
+<button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son

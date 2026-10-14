@@ -281,6 +281,17 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Unités sur un cercle de couleur selon leur rôle : bois (défense), jaune (tireur), rouge-orangé (corps à corps), bleu (soutien), rouge (piège), violet clair (objet).
 - Pour la version commerciale : remplacer les dessins en code par des sprites d'un pack libre de droits (par exemple Kenney.nl).
 
+## Le défi quotidien
+
+- Chaque jour, tout le monde joue la même partie : même graine de hasard, même personnage et même lieu (tirés à partir de la date), toutes les cartes disponibles.
+- Rejouable à volonté ; le meilleur score du jour est gardé dans le navigateur. Il ne compte pas pour les déblocages.
+- Tout le hasard de la partie (pioche, nuits, aube, événements, mutations, prénoms) passe par un générateur à graine sauvegardé avec la partie. Les effets visuels gardent un hasard libre.
+- Pas encore de classement en ligne : il faudra un serveur (ou les classements Steam).
+
+## Le tutoriel
+
+À la toute première partie, une bulle jaune guide les premiers gestes : choisir une carte, la poser, l'énergie, la nuit et l'accélération, puis le choix de la carte à l'aube. Elle ne revient plus ensuite.
+
 ## Le son
 
 - Tous les sons sont générés en code (Web Audio, `src/audio.js`) : tirs différents selon l'arme, coups au corps à corps, morsures, coups sur l'abri, explosions, grognements, mort d'un survivant, carillon de l'aube, mutation.

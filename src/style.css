@@ -116,4 +116,6 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .relic.evc{color:var(--ink)}
 .relic:disabled{opacity:.4}
 .char:disabled{opacity:.5;color:var(--muted)}
+.tip{background:color-mix(in srgb,var(--lantern) 18%,var(--panel));border:1px solid var(--lantern);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.35;text-align:center}
+.panel p.tipin{color:var(--ink);background:color-mix(in srgb,var(--lantern) 14%,transparent);border-radius:8px;padding:8px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}

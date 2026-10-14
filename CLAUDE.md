@@ -41,9 +41,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 
 ## Prochaines étapes (par ordre de priorité)
 
-1. Mettre le jeu en ligne sur GitHub Pages pour pouvoir le tester sur téléphone depuis un lien.
-2. Ajouter des sons : tirs, grognements, impacts, ambiance nocturne (packs libres de droits, par exemple Kenney.nl).
-3. Remplacer les dessins en code par des sprites vus de dessus d'un pack libre de droits, en gardant les dessins actuels comme solution de secours.
-4. Ajouter la suite de la profondeur roguelite (reliques, troc, boss et personnages sont faits) : lieux, choix entre deux nuits, expéditions, synergies visibles, tutoriel, journal de fin de partie.
-5. Ajouter une progression entre les parties : déblocage de cartes et de lieux, niveaux de difficulté, défi quotidien, succès.
-6. Préparer la version Steam (Electron ou Tauri) et la version mobile.
+1. Sprites vus de dessus d'un pack libre de droits (Kenney, CC0) en gardant les dessins actuels comme solution de secours. Les sites de packs sont bloqués depuis l'environnement de Claude : Amine doit déposer le pack dans le dépôt (dossier `assets/`).
+2. Remplacer les sons générés par des sons d'un pack libre de droits si besoin (même contrainte de téléchargement).
+3. Classement en ligne du défi quotidien (serveur ou classements Steam).
+4. Préparer la page Steam, une démo pour le Steam Next Fest, puis la version Steam (Electron ou Tauri) et la version mobile.
