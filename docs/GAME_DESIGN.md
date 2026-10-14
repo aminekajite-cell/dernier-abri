@@ -9,7 +9,7 @@ Plateformes visées : Steam (PC) puis mobile.
 
 ## La boucle de jeu
 
-1. **Début** : tu choisis un personnage, qui donne un deck de départ de 8 cartes et parfois une relique.
+1. **Début** : tu choisis un personnage, qui donne un deck de départ de 9 cartes (dont une Grenade) et parfois une relique.
 2. **Jour** : tu as **4 énergies**. Chaque carte coûte de 0 à 3 énergies selon sa puissance ; tu joues autant de cartes que ton énergie le permet (le Café, gratuit, donne +2 énergies). Les cartes non jouées **restent en main** pour les jours suivants. Chaque jour, la main est complétée jusqu'à 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos), avec au moins 1 nouvelle carte et 8 cartes au maximum. Une fois par jour, tu peux aussi **déplacer** une de tes unités vers une case libre.
 3. **Nuit** : les zombies apparaissent sur l'anneau extérieur (les bois) et marchent vers la maison. Tes unités attaquent automatiquement. Les zombies frappent tout ce qui bloque leur chemin. Le bouton du bas passe la nuit en vitesse ×2.
 4. **Aube** :
@@ -104,6 +104,36 @@ Règles détaillées :
 - Les objets se jouent sur la maison (la Trousse sur une unité blessée) et ont un effet immédiat.
 - Le feu (essence, lance-flammes, cocktails, explosions) ignore le blindage.
 
+## Les réactions (agir pendant la nuit)
+
+- Les cartes de la catégorie **Réaction** ne se jouent que pendant la nuit, avec l'énergie **gardée** du jour : chaque jour, il faut choisir entre construire et garder de quoi réagir.
+- Grenade (1, commune) : 5 dégâts sur la case visée et autour. Tir de l'abri (1, commune) : 6 dégâts au zombie le plus proche de l'abri. Réparation express (1, commune) : une unité récupère 5 PV. Molotov (2, rare) : 2 dégâts en zone et les zombies brûlent 4 tours. Klaxon (2, rare) : tous les zombies (sauf le Colosse) reculent d'une case. Adrénaline (2, épique) : les unités attaquent deux fois pendant 3 tours.
+- Chaque personnage commence avec une Grenade.
+
+## Les familles
+
+Chaque unité appartient au plus à une famille. Plus il y a d'unités d'une même famille sur la carte, plus la famille est forte (2 paliers). Les familles actives s'affichent sous le compte de la horde.
+
+| Famille | Cartes | Palier 1 | Palier 2 |
+|---|---|---|---|
+| 🔥 Feu | Essence, Lance-flammes, Cocktails, Dynamite, Bonbonne de gaz, Mur de pneus | 3 : le feu fait +1 dégât par tour | 5 : les zombies qui meurent en brûlant explosent (2 dégâts autour) |
+| ⚡ Électricité | Clôture, Projecteur, Panneau solaire, Sirène | 2 : clôtures +1 dégât | 4 : la clôture étourdit 1 tour |
+| 🪤 Pièges | Piège à loup, Mine, Fosse, Barbelés, Fumigène, Appât | 3 : pièges +2 dégâts | 5 : +4 dégâts au total |
+| 🪓 Meute | Bûcheron, Chien, Policier, Boucher, Moine | 3 : corps à corps +1 dégât | 5 : +1 PV par zombie tué |
+| 🔫 Armes à feu | Tireur, Sniper, Fusil à pompe, Mitrailleuse, Arbalète, Gamin | 4 : +1 portée | 6 : +1 dégât |
+| 🏠 Communauté | Infirmière, Cuisinier, Mécanicien, Chef de groupe, Radio | 3 : l'abri récupère 1 PV à l'aube | 5 : toutes les unités récupèrent 1 PV à l'aube |
+
+## Le choix de la nuit
+
+Après le troc, on choisit la nuit suivante entre deux propositions : une prudente et une risquée, chacune avec un événement différent.
+
+| Nuit | Horde | Récompense à l'aube |
+|---|---|---|
+| Tranquille | −30 % | aucune |
+| Ordinaire | normale | +6 ferraille |
+| De pillage | +40 % | une carte rare |
+| Sanglante | +70 % | une relique |
+
 ## Les survivants nommés
 
 C'est l'identité du jeu : on s'attache à ses survivants, et on les perd.
@@ -129,15 +159,15 @@ Les zombies sont peu nombreux mais coriaces : ils doivent arriver jusqu'aux déf
 
 | Zombie | PV de base | Vitesse | Dégâts par coup | Particularité |
 |---|---|---|---|---|
-| Rôdeur | 12 | avance tous les 2 tours | 1 | lent |
-| Coureur | 8 | avance chaque tour | 1 | rapide |
-| Gonflé | 32 | avance tous les 3 tours | 2 | très lent, 2 dégâts par coup |
-| Chien zombie | 4 | avance chaque tour | 1 | rapide et fragile |
-| Rampant | 8 | avance tous les 2 tours | 1 | passe sous les défenses (barricades, épaves…) |
-| Cracheur | 12 | avance tous les 2 tours | 1 | crache sur ce qui est à 2 cases devant lui |
-| Blindé | 20 | avance tous les 2 tours | 1 | encaisse 1 dégât de moins par coup, sauf le feu |
-| Hurleur | 16 | avance tous les 2 tours | 1 | appelle 2 rôdeurs en mourant |
-| Le Colosse | 120 | avance tous les 3 tours | 2 | boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir |
+| Rôdeur | 9 | avance tous les 2 tours | 1 | lent |
+| Coureur | 6 | avance chaque tour | 1 | rapide |
+| Gonflé | 24 | avance tous les 3 tours | 2 | très lent, 2 dégâts par coup |
+| Chien zombie | 3 | avance chaque tour | 1 | rapide et fragile |
+| Rampant | 6 | avance tous les 2 tours | 1 | passe sous les défenses (barricades, épaves…) |
+| Cracheur | 9 | avance tous les 2 tours | 1 | crache sur ce qui est à 2 cases devant lui |
+| Blindé | 15 | avance tous les 2 tours | 1 | encaisse 1 dégât de moins par coup, sauf le feu |
+| Hurleur | 12 | avance tous les 2 tours | 1 | appelle 2 rôdeurs en mourant |
+| Le Colosse | 90 | avance tous les 3 tours | 2 | boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir |
 
 Leurs PV restent stables jusqu'à la nuit 10, puis augmentent de 12 % par nuit (en plus des mutations).
 Les zombies apparaissent de façon échelonnée pendant la nuit, à une position aléatoire de la forêt (d'un seul côté après une Fusée de détresse). Les Colosses arrivent à partir du 10ᵉ tour des nuits 10, 20, 30…
@@ -317,6 +347,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Trajets variés et contournement des murs : avant, deux murs à gauche et à droite de la maison bloquaient presque toute la horde.
 - Survivants nommés, avec trait et mort définitive : identité du jeu pour Steam (on s'attache, on raconte ses parties).
 - Énergie (4 par jour, cartes à 0-3) à la place de « 2 cartes par jour », main conservée d'un jour à l'autre et déplacement d'une unité par jour (Amine : 2 cartes ne laissaient pas de vraie stratégie).
+- Réactions de nuit, familles et choix de la nuit (rejouabilité et décisions). PV des zombies −25 % (Amine : trop dur).
 - Amine teste lui-même l'équilibrage ; la simulation n'est plus lancée à chaque changement.
 - PV des zombies doublés une seconde fois (Amine était invincible à la nuit 15). Le bot tombe alors vers la nuit 4 : il joue nettement moins bien qu'Amine, la simulation sert surtout à comparer.
 - Zombies deux fois plus coriaces mais 40 % moins nombreux (Amine : « les zombies meurent avant d'atteindre mes unités »). Avant, seuls 26 % arrivaient au contact.

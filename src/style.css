@@ -118,4 +118,14 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .char:disabled{opacity:.5;color:var(--muted)}
 .tip{background:color-mix(in srgb,var(--lantern) 18%,var(--panel));border:1px solid var(--lantern);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.35;text-align:center}
 .panel p.tipin{color:var(--ink);background:color-mix(in srgb,var(--lantern) 14%,transparent);border-radius:8px;padding:8px}
+.fams{display:flex;gap:6px;flex-wrap:wrap}
+.fams:empty{display:none}
+.fam{font-size:12px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.fam.l1{border-color:var(--lantern);color:var(--ink)}
+.fam.l2{border-color:var(--lantern);background:color-mix(in srgb,var(--lantern) 25%,transparent);color:var(--ink)}
+.card .ft{position:absolute;top:2px;right:3px;font-size:10px;line-height:1}
+.relic.nightc{color:var(--ink)}
+.relic.nightc.risk{border-color:color-mix(in srgb,var(--blood) 60%,var(--line))}
+.relic.nightc.safe{border-color:color-mix(in srgb,var(--good) 50%,var(--line))}
+.relic.nightc em{font-style:normal;color:var(--lantern);font-size:12px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
