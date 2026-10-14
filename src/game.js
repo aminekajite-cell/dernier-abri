@@ -55,7 +55,7 @@ const ICON={
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v20 · 14 oct.';
+const VERSION='v21 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -611,7 +611,7 @@ function dawnStep(ph,picks){
    <button type="button" class="skip" data-a="shop">Ne rien prendre</button>`)}
  S.picks=null;save();shopScreen();
 }
-function dawnTxt(){const d=S.dawn;if(!d||d.txtShown)return '';d.txtShown=1;return (d.rewardCard?`<p>Butin de la ${Z.TIERS[d.tier].n.toLowerCase()} : <b>${Z.U[d.rewardCard].n}</b> rejoint ton deck.</p>`:'')+`<p>L’abri tient avec <b>${G.shelter}/${Z.maxS(G)} PV</b>. Cette nuit : <b>${plural(d.kills,'zombie éliminé','zombies éliminés')}</b>, <b>+${d.scrap} ferraille</b>${d.heal?`, <b>+${d.heal} PV</b> à l’aube`:''}.</p>`
+function dawnTxt(){const d=S.dawn;if(!d||d.txtShown)return '';d.txtShown=1;return (d.rewardCard?`<p>Butin de la ${(Z.TIERS[d.tier]||Z.TIERS.base).n.toLowerCase()} : <b>${Z.U[d.rewardCard].n}</b> rejoint ton deck.</p>`:'')+`<p>L’abri tient avec <b>${G.shelter}/${Z.maxS(G)} PV</b>. Cette nuit : <b>${plural(d.kills,'zombie éliminé','zombies éliminés')}</b>, <b>+${d.scrap} ferraille</b>${d.heal?`, <b>+${d.heal} PV</b> à l’aube`:''}.</p>`
  +(d.hero?`<p>Héros de la nuit : <b>${d.hero.name}</b> (${Z.U[d.hero.t].n}), ${plural(d.hero.nk,'zombie','zombies')}.</p>`:'')
  +(d.fallen&&d.fallen.length?`<p class="rip">✝ Tombés cette nuit : ${d.fallen.map(f=>`<b>${f.name}</b> (${Z.U[f.t].n}, ${plural(f.kills,'zombie','zombies')})`).join(', ')}.</p>`:'')}
 function shopScreen(){
@@ -701,7 +701,7 @@ const ACT={
  'up-pick':v=>{if(Z.pay(G,'upgrade'))Z.upgrade(G,v);render();shopScreen()},
  'rm-pick':v=>{if(Z.pay(G,'remove'))removeCard(v);shopScreen()},
  day:()=>nextDay(),
- nightpick:()=>nightScreen(),
+ nightpick:()=>Z.nightChoice(G,R)?nightScreen():nextDay(),
  nightgo:v=>{const o=S.picks&&S.picks[+v];nextDay(o)},
  daily:()=>dailyScreen(),
  'daily-go':()=>{const day=today(),c=dailySetup(day);newGame(c.ch,c.pl,day);save();hide();render()},
@@ -731,7 +731,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Chaque survivant a un <b>prénom</b> et un trait. S’il tombe, il est perdu pour de bon.</li>
 <li>Une fois par jour, tu peux <b>déplacer</b> une de tes unités : touche-la, puis touche une case libre.</li>
 <li>Garde de l’énergie pour la nuit : les cartes <b>Réaction</b> (grenade, tir de l’abri…) se jouent pendant l’attaque.</li>
-<li>Regroupe les unités d’une même <b>famille</b> (🔥 ⚡ 🪤 🪓 🔫 🏠) pour les renforcer, et choisis chaque soir ta <b>nuit</b> : prudente ou risquée.</li>
+<li>Regroupe les unités d’une même <b>famille</b> (🔥 ⚡ 🪤 🪓 🔫 🏠) pour les renforcer, et, certains soirs, choisis ta <b>nuit</b> : prudente ou risquée.</li>
 <li>La nuit, les zombies sortent des <b>bois</b> et marchent vers la maison. Tes survivants se défendent tout seuls.</li>
 <li>À l’aube, choisis la carte que tu auras <b>en main le lendemain</b>, puis échange ta <b>ferraille</b> au troc.</li>
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>

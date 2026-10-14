@@ -125,7 +125,7 @@ Chaque unité appartient au plus à une famille. Plus il y a d'unités d'une mê
 
 ## Le choix de la nuit
 
-Après le troc, on choisit la nuit suivante entre deux propositions : une prudente et une risquée, chacune avec un événement différent.
+C'est un moment rare : environ 1 aube sur 4, à partir de la nuit 3. Après le troc, on choisit alors la nuit suivante entre deux propositions : une prudente et une risquée, chacune avec un événement différent. Les autres soirs, la nuit est normale, sans bonus.
 
 | Nuit | Horde | Récompense à l'aube |
 |---|---|---|
@@ -159,15 +159,15 @@ Les zombies sont peu nombreux mais coriaces : ils doivent arriver jusqu'aux déf
 
 | Zombie | PV de base | Vitesse | Dégâts par coup | Particularité |
 |---|---|---|---|---|
-| Rôdeur | 9 | avance tous les 2 tours | 1 | lent |
-| Coureur | 6 | avance chaque tour | 1 | rapide |
-| Gonflé | 24 | avance tous les 3 tours | 2 | très lent, 2 dégâts par coup |
-| Chien zombie | 3 | avance chaque tour | 1 | rapide et fragile |
-| Rampant | 6 | avance tous les 2 tours | 1 | passe sous les défenses (barricades, épaves…) |
-| Cracheur | 9 | avance tous les 2 tours | 1 | crache sur ce qui est à 2 cases devant lui |
-| Blindé | 15 | avance tous les 2 tours | 1 | encaisse 1 dégât de moins par coup, sauf le feu |
-| Hurleur | 12 | avance tous les 2 tours | 1 | appelle 2 rôdeurs en mourant |
-| Le Colosse | 90 | avance tous les 3 tours | 2 | boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir |
+| Rôdeur | 11 | avance tous les 2 tours | 1 | lent |
+| Coureur | 8 | avance chaque tour | 1 | rapide |
+| Gonflé | 30 | avance tous les 3 tours | 2 | très lent, 2 dégâts par coup |
+| Chien zombie | 4 | avance chaque tour | 1 | rapide et fragile |
+| Rampant | 8 | avance tous les 2 tours | 1 | passe sous les défenses (barricades, épaves…) |
+| Cracheur | 11 | avance tous les 2 tours | 1 | crache sur ce qui est à 2 cases devant lui |
+| Blindé | 19 | avance tous les 2 tours | 1 | encaisse 1 dégât de moins par coup, sauf le feu |
+| Hurleur | 15 | avance tous les 2 tours | 1 | appelle 2 rôdeurs en mourant |
+| Le Colosse | 112 | avance tous les 3 tours | 2 | boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir |
 
 Leurs PV restent stables jusqu'à la nuit 10, puis augmentent de 12 % par nuit (en plus des mutations).
 Les zombies apparaissent de façon échelonnée pendant la nuit, à une position aléatoire de la forêt (d'un seul côté après une Fusée de détresse). Les Colosses arrivent à partir du 10ᵉ tour des nuits 10, 20, 30…
@@ -347,7 +347,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Trajets variés et contournement des murs : avant, deux murs à gauche et à droite de la maison bloquaient presque toute la horde.
 - Survivants nommés, avec trait et mort définitive : identité du jeu pour Steam (on s'attache, on raconte ses parties).
 - Énergie (4 par jour, cartes à 0-3) à la place de « 2 cartes par jour », main conservée d'un jour à l'autre et déplacement d'une unité par jour (Amine : 2 cartes ne laissaient pas de vraie stratégie).
-- Réactions de nuit, familles et choix de la nuit (rejouabilité et décisions). PV des zombies −25 % (Amine : trop dur).
+- Réactions de nuit, familles et choix de la nuit (rejouabilité et décisions). PV des zombies −25 % (Amine : trop dur), puis +25 % et choix de la nuit rendu rare (1 aube sur 4).
 - Amine teste lui-même l'équilibrage ; la simulation n'est plus lancée à chaque changement.
 - PV des zombies doublés une seconde fois (Amine était invincible à la nuit 15). Le bot tombe alors vers la nuit 4 : il joue nettement moins bien qu'Amine, la simulation sert surtout à comparer.
 - Zombies deux fois plus coriaces mais 40 % moins nombreux (Amine : « les zombies meurent avant d'atteindre mes unités »). Avant, seuls 26 % arrivaient au contact.

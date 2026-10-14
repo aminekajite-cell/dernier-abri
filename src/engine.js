@@ -85,15 +85,15 @@ const Z=(()=>{
  'car door snp sht mg molo siren lead solar dyn'.split(' ').forEach(t=>COST[t]=3);
  const cost=t=>COST[t]??2;
  const ZT={
-  walk:{n:'Rôdeur',hp:9,spd:2,dmg:1,info:'lent'},
-  run:{n:'Coureur',hp:6,spd:1,dmg:1,info:'rapide'},
-  fat:{n:'Gonflé',hp:24,spd:3,dmg:2,info:'très lent, 2 dégâts par coup'},
-  zdog:{n:'Chien zombie',hp:3,spd:1,dmg:1,info:'rapide et fragile'},
-  crawl:{n:'Rampant',hp:6,spd:2,dmg:1,crawl:1,info:'passe sous les défenses (barricades, épaves…)'},
-  spit:{n:'Cracheur',hp:9,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
-  armor:{n:'Blindé',hp:15,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
-  howl:{n:'Hurleur',hp:12,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
-  boss:{n:'Le Colosse',hp:90,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
+  walk:{n:'Rôdeur',hp:11,spd:2,dmg:1,info:'lent'},
+  run:{n:'Coureur',hp:8,spd:1,dmg:1,info:'rapide'},
+  fat:{n:'Gonflé',hp:30,spd:3,dmg:2,info:'très lent, 2 dégâts par coup'},
+  zdog:{n:'Chien zombie',hp:4,spd:1,dmg:1,info:'rapide et fragile'},
+  crawl:{n:'Rampant',hp:8,spd:2,dmg:1,crawl:1,info:'passe sous les défenses (barricades, épaves…)'},
+  spit:{n:'Cracheur',hp:11,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
+  armor:{n:'Blindé',hp:19,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
+  howl:{n:'Hurleur',hp:15,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
+  boss:{n:'Le Colosse',hp:112,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
  };
  const ZK=Object.keys(ZT);
  const EVENTS=[
@@ -145,11 +145,14 @@ const Z=(()=>{
  function famLevels(st){const c=famCounts(st),l={};for(const f in FAM)l[f]=(c[f]||0)>=FAM[f].lv[1]?2:(c[f]||0)>=FAM[f].lv[0]?1:0;return l}
  // choisir sa nuit : à l'aube, 2 nuits au choix, l'une prudente, l'autre risquée mais payante
  const TIERS={
+  base:{n:'Nuit',d:'Horde normale.',count:1},
   calm:{n:'Nuit tranquille',d:'Horde −30 %. Aucun bonus.',count:.7,safe:1},
   normal:{n:'Nuit ordinaire',d:'Horde normale. +6 ferraille à l’aube.',count:1,scrap:6,safe:1},
   raid:{n:'Nuit de pillage',d:'Horde +40 %. Une carte rare à l’aube.',count:1.4,card:'rare'},
   blood:{n:'Nuit sanglante',d:'Horde +70 %. Une relique à l’aube.',count:1.7,relic:1}
  };
+ // le choix de la nuit est rare : 1 aube sur 4 environ, à partir de la nuit 3
+ const nightChoice=(st,rnd=Math.random)=>st.night>=3&&rnd()<.25;
  function nightOffers(st,rnd=Math.random){const ev=()=>(rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))]).id;
   const e1=ev();let e2=ev();for(let k=0;k<5&&e2===e1;k++)e2=ev();
   return[{tier:rnd()<.5?'calm':'normal',event:e1},{tier:rnd()<.6?'raid':'blood',event:e2}]}
@@ -267,7 +270,7 @@ const Z=(()=>{
   return{chars:Object.keys(UNLOCK.chars).filter(k=>t>=UNLOCK.chars[k]),places:Object.keys(UNLOCK.places).filter(k=>b>=UNLOCK.places[k]),
    pool:KEYS.filter(k=>!(k in UNLOCK.cards)||t>=UNLOCK.cards[k])}}
  function newDay(st,rnd,offer){st.night++;st.energy=ENERGY+(st.nextE||0);st.nextE=0;st.moved=0;st.rushT=0;
-  if(offer){st.event=EVENTS.find(e=>e.id===offer.event)||EVENTS[0];st.tier=offer.tier}else{st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))];st.tier='normal'}}
+  if(offer){st.event=EVENTS.find(e=>e.id===offer.event)||EVENTS[0];st.tier=offer.tier}else{st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))];st.tier='base'}}
  const has=(st,t)=>st.grid.some(u=>u&&u.t===t);
  const costOf=(st,t)=>(PLACES[st.place]||{}).free&&PLACES[st.place].free.includes(t)?0:cost(t);
  const canPay=(st,t)=>costOf(st,t)<=(st.energy??ENERGY);
@@ -334,7 +337,7 @@ const Z=(()=>{
 
  /* ---------- la nuit ---------- */
  function waveList(st){const e=st.event.id,w={};
-  for(const k of ZK){let v=waveCount(k,st.night);if(k!=='boss'){if(e==='lune')v*=1.5;v=Math.round(v*(1+.2*mc(st,'nombre'))*((PLACES[st.place]||{}).count||1)*((TIERS[st.tier]||TIERS.normal).count))}w[k]=v}
+  for(const k of ZK){let v=waveCount(k,st.night);if(k!=='boss'){if(e==='lune')v*=1.5;v=Math.round(v*(1+.2*mc(st,'nombre'))*((PLACES[st.place]||{}).count||1)*((TIERS[st.tier]||TIERS.base).count))}w[k]=v}
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
  function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau'))*((PLACES[st.place]||{}).hp||1));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
@@ -421,11 +424,11 @@ const Z=(()=>{
  // l'aube : l'essence s'éteint, les soins et la ferraille de l'aube s'appliquent
  function endNight(st){st.grid.forEach((u,i)=>{if(u&&u.t==='fire')st.grid[i]=null;else if(u&&u.trait==='coriace'&&u.hp>0)u.hp=Math.min(maxHp(st,u),u.hp+1)});st.z=[];st.side=-1;
   if(st.shelter<=0)return{heal:0,scrap:0};
-  const fl=famLevels(st),T=TIERS[st.tier]||TIERS.normal;
+  const fl=famLevels(st),T=TIERS[st.tier]||TIERS.base;
   const h=st.grid.filter(u=>u&&u.t==='cook').length+(st.relics.includes('soupe')?1:0)+(fl.comm?1:0),before=st.shelter;
   st.shelter=Math.min(maxS(st),st.shelter+h);if(fl.comm>=2)st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+1)});
   const s=(st.relics.includes('aimant')?3:0)+(T.scrap||0);st.scrap+=s;
-  return{heal:st.shelter-before,scrap:s,card:T.card||null,relic:!!T.relic,tier:st.tier||'normal'}}
+  return{heal:st.shelter-before,scrap:s,card:T.card||null,relic:!!T.relic,tier:st.tier||'base'}}
  // réactions pendant la nuit
  function canReact(st,t,i){const D=U[t];if(!D||!D.react||!canPay(st,t))return false;
   if(D.react==='unit')return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<maxHp(st,st.grid[i]));return D.react==='any'||(i>=0&&i<N*N)}
@@ -440,6 +443,6 @@ const Z=(()=>{
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
  return{N,C,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,famOf,famCounts,famLevels,TIERS,nightOffers,canReact,react,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;
