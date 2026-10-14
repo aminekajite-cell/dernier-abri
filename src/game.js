@@ -89,7 +89,7 @@ const stars=u=>'★'.repeat(u.gold||0);
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v29 · 15 oct.';
+const VERSION='v30 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -608,7 +608,7 @@ function playEvents(ev,types,now){
 
 /* ---------- UI ---------- */
 function hordeHtml(){const w=Z.waveList(G);const parts=Z.ZK.filter(k=>w[k]).map(k=>`<span class="hz"><span class="dot" style="--zc:var(--z-${k})"></span>${plural(w[k],...ZN[k])}</span>`);
- return `<span>Cette nuit :</span>${parts.join('')}${Z.bigNight(G,w)?'<span class="hz big">⚠ Très grosse nuit : 3 vagues</span>':''}`}
+ return `<span>Cette nuit :</span>${parts.join('')}${Z.bigNight(G,w)?'<span class="hz big">⚠ Nuit du Colosse : 2 vagues</span>':''}`}
 const cardName=t=>Z.stat(G,t).n;
 const famTag=t=>{const f=Z.famOf(t);return f?`<span class="ft">${Z.FAM[f].ic}</span>`:''};
 const famLine=t=>{const f=Z.famOf(t);return f?` <em class="ce">${Z.FAM[f].ic} ${Z.FAM[f].n}</em>`:''};
@@ -629,14 +629,14 @@ function render(){
  const info=$('#info');info.className='info';
  if(S.busy&&S.sel!==null){const t=S.hand[S.sel];info.innerHTML=`<b>${cardName(t)}</b> : ${Z.U[t].d}. `+(Z.U[t].react==='unit'?'Touche une unité blessée.':'Touche une case de la carte.')}
  else if(S.pause&&S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
- else if(S.pause)info.innerHTML=`<b>Pause : vague ${S.pause} sur 3 repoussée.</b> `+(G.moved?'Unité déplacée. ':'Tu peux déplacer une unité. ')+`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`;
+ else if(S.pause)info.innerHTML=`<b>Pause : vague ${S.pause} sur ${G.waves} repoussée.</b> Déplace tes unités librement : touche une unité, puis une case libre. `+`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`;
  else if(S.busy){const left=G.z.length+G.pending.length,hasR=S.hand.some(t=>Z.U[t].react);info.innerHTML=`<b>${plural(left,'zombie','zombies')}</b> encore dehors.`+(hasR?` <span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`:'')}
  else if(S.sel!==null){const t=S.hand[S.sel],D=Z.U[t];info.innerHTML=`<b>${cardName(t)}</b> (${Z.costOf(G,t)} énergie) : ${D.d}.`+(D.onUnit?' Touche une unité blessée.':D.instant?' Touche l’abri.':D.near?' Touche une case collée à l’abri.':' Touche un emplacement.')}
  else if(S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
  else if(S.inspect!==null&&G.grid[S.inspect])info.innerHTML=unitLine(G.grid[S.inspect])+(G.moved?' (déjà un déplacement aujourd’hui)':'');
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie.`+(G.moved?'':' Touche une unité pour la déplacer (1 fois par jour).');
  const tip=$('#tip');if(TUTO<4&&ov.hidden&&(S.busy?TUTO===3:TUTO<3)){tip.hidden=false;tip.textContent=TIPS[TUTO]}else tip.hidden=true;
- const go=$('#go');go.disabled=false;go.textContent=S.pause?`Lancer la vague ${S.pause+1} sur 3`:S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy&&!S.pause);
+ const go=$('#go');go.disabled=false;go.textContent=S.pause?`Lancer la vague ${S.pause+1} sur ${G.waves}`:S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy&&!S.pause);
 }
 $('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;SFX.play('ui');const k=+b.dataset.k;
  if(S.busy&&Z.U[S.hand[k]].react==='any'){playReact(k,Z.C);return}S.sel=S.sel===k?null:k;S.moveFrom=null;S.inspect=null;if(S.sel!==null)tuto(0);render()});
@@ -671,7 +671,7 @@ function tapCell(i){
  if(S.sel===null){
   // déplacement d'une unité : on la touche, puis on touche une case libre
   if(S.moveFrom!==null){const a=S.moveFrom;S.moveFrom=null;S.inspect=null;const mv=Z.move(G,a,i);if(mv){facing[i]=facing[a];facing[a]=null;const p=tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#7cc7ff',dur:350});syncBoard();mergeFx(mv);if(typeof mv==='object')S.inspect=i;if(!S.busy)save()}render();return}
-  S.inspect=null;if(G.grid[i]){if(G.moved)S.inspect=i;else S.moveFrom=i}render();
+  S.inspect=null;if(G.grid[i]){if(G.moved&&!G.freeMove)S.inspect=i;else S.moveFrom=i}render();
   return}
  const t=S.hand[S.sel],D=Z.U[t];
  if(!Z.canPay(G,t)||!Z.canPlace(G,t,i))return;
@@ -698,7 +698,7 @@ function peekScreen(){
 // pause entre deux vagues d'une très grosse nuit : le joueur peut déplacer une unité et jouer ses réactions
 function wavePause(n){return new Promise(res=>{S.pause=n;S.moveFrom=null;S.inspect=null;S.resume=res;SFX.play('dawn');
  floatTxt(CEN.x,CEN.y-40,`Vague ${n} repoussée !`,'#9fd86b',18);render()})}
-function resumeWave(){if(!S.pause)return;S.pause=0;S.moveFrom=null;S.inspect=null;Z.nextWave(G);const f=S.resume;S.resume=null;floatTxt(CEN.x,CEN.y-40,`Vague ${G.wave} sur 3 !`,'#ff6b6b',18);SFX.play('groan');render();f&&f()}
+function resumeWave(){if(!S.pause)return;S.pause=0;S.moveFrom=null;S.inspect=null;Z.nextWave(G);const f=S.resume;S.resume=null;floatTxt(CEN.x,CEN.y-40,`Vague ${G.wave} sur ${G.waves} : le Colosse arrive !`,'#ff6b6b',18);SFX.play('groan');render();f&&f()}
 async function night(){
  if(S.busy)return;S.busy=true;S.sel=null;
  S.moveFrom=null;S.inspect=null;save();
@@ -925,7 +925,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <ul><li>Le jour, dépense tes <b>4 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
 <li>Chaque survivant a un <b>prénom</b> et un trait. S’il tombe, il est perdu pour de bon.</li>
 <li>Les unités de <b>corps à corps</b> rendent chaque coup reçu au contact. Des <b>murs</b> côte à côte forment un rempart qui partage les coups. Deux factions à 3 unités chacune forment une <b>alliance</b>.</li>
-<li>Les très grosses nuits arrivent en <b>3 vagues</b> : entre deux vagues, tu peux déplacer une unité et jouer tes réactions.</li>
+<li>La nuit du <b>Colosse</b> arrive en <b>2 vagues</b> : entre les deux, tu déplaces librement tes unités et tu peux jouer tes réactions.</li>
 <li>Une fois par jour, tu peux <b>déplacer</b> une de tes unités : touche-la, puis touche une case libre.</li>
 <li>Garde de l’énergie pour la nuit : les cartes <b>Réaction</b> (grenade, tir de l’abri…) se jouent pendant l’attaque.</li>
 <li>Regroupe les unités d’une même <b>faction</b> (👮 🎖️ ⛑️ 🔥 🪤 🐕 ⚡ 🏠) pour les renforcer : côte à côte, chaque voisin de la même faction donne <b>+1</b> (dégât ou soin, +2 au plus) ; leur <b>Chef</b> légendaire les renforce encore, et, certains soirs, choisis ta <b>nuit</b> : prudente ou risquée.</li>

@@ -425,7 +425,7 @@ const Z=(()=>{
 
  /* ---------- pose des cartes ---------- */
  // déplacer une de ses unités : une fois par jour, vers une case libre où elle pourrait être posée
- function canMove(st,a,b){const u=st.grid[a];return !st.moved&&!!u&&a!==b&&!st.grid[b]&&canPlace(st,u.t,b)}
+ function canMove(st,a,b){const u=st.grid[a];return (!st.moved||st.freeMove)&&!!u&&a!==b&&!st.grid[b]&&canPlace(st,u.t,b)}
  function move(st,a,b){if(!canMove(st,a,b))return false;st.grid[b]=st.grid[a];st.grid[a]=null;st.moved=1;return merge(st,b)||true}
  function canPlace(st,t,i){const D=U[t];if(D.react)return false;
   if(D.onUnit)return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<maxHp(st,st.grid[i]));
@@ -480,16 +480,18 @@ const Z=(()=>{
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
  function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau'))*(1+FRENZY*frenzy(st))*((PLACES[st.place]||{}).hp||1));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
-  // très grosses nuits (Colosse, nuit sanglante ou de pillage, pleine lune, 30 zombies et plus) : la horde arrive en 3 vagues, avec une pause entre chaque
- function bigNight(st,w){w=w||waveList(st);const n=ZK.reduce((a,k)=>a+(k==='boss'?0:w[k]),0);return w.boss>0||st.tier==='raid'||st.tier==='blood'||st.event.id==='lune'||n>=30}
- function nextWave(st){st.wave=(st.wave||1)+1;st.wtick=0}
+  // nuit du Colosse : la horde arrive en 2 vagues (le Colosse dans la 2ᵉ), avec une pause entre les deux où l'on déplace librement ses unités.
+ // Toutes les autres nuits arrivent d'un seul tenant.
+ const WAVES_N=2;
+ function bigNight(st,w){w=w||waveList(st);return w.boss>0}
+ function nextWave(st){st.wave=(st.wave||1)+1;st.wtick=0;st.freeMove=0}
  function startNight(st,rnd){const w=waveList(st),list=[],big=bigNight(st,w);st.grid.forEach(u=>{if(u)u.nk=0});
   for(const k of ZK)if(k!=='boss')for(let j=0;j<w[k];j++)list.push(k);
   shuffle(list,rnd);
   const ps=(PLACES[st.place]||{}).sides,edges=st.side>=0?EDGES.filter(i=>sideOf(i)===st.side):ps?EDGES.filter(i=>ps.includes(sideOf(i))&&!(ps.indexOf(0)<0&&rc(i)[0]===0)):EDGES;
-  const per=Math.ceil(list.length/3)||1;st.waves=big?3:0;st.wave=1;st.wtick=0;
+  const per=Math.ceil(list.length/WAVES_N)||1;st.waves=big?WAVES_N:0;st.freeMove=0;st.wave=1;st.wtick=0;
   st.pending=list.map((k,j)=>{const wv=big?1+Math.floor(j/per):1,jj=big?j-(wv-1)*per:j;return{k,wave:wv,at:1+Math.floor(jj*1.3),pos:edges[Math.floor(rnd()*edges.length)]}});
-  for(let j=0;j<w.boss;j++)st.pending.push({k:'boss',wave:big?3:1,at:10+j*12,pos:edges[Math.floor(rnd()*edges.length)]});
+  for(let j=0;j<w.boss;j++)st.pending.push({k:'boss',wave:big?WAVES_N:1,at:10+j*12,pos:edges[Math.floor(rnd()*edges.length)]});
   st.cap=Math.max(90,st.pending.reduce((m,p)=>Math.max(m,p.at),0)+60);
   st.z=[];st.tick=0}
  const power=st=>st.event.id!=='coupure'||st.relics.includes('groupe')||has(st,'solar');
@@ -578,8 +580,8 @@ const Z=(()=>{
   st.z=st.z.filter(z=>z.hp>0);
   const boss=st.z.some(z=>ZT[z.k].boss)||st.pending.some(p=>p.k==='boss');
   const done=(!st.pending.length&&!st.z.length)||st.shelter<=0||st.wtick>(st.cap||90)+(boss?110:0);
-  // fin d'une vague : pause (le joueur peut déplacer une unité et jouer ses réactions avant la suivante)
-  if(!done&&st.waves&&!st.z.length&&!st.pending.some(p=>(p.wave||1)===st.wave)){st.moved=0;return{ev,done:false,pause:st.wave}}
+  // fin d'une vague : pause (le joueur déplace librement ses unités et peut jouer ses réactions avant la suivante)
+  if(!done&&st.waves&&!st.z.length&&!st.pending.some(p=>(p.wave||1)===st.wave)){st.freeMove=1;return{ev,done:false,pause:st.wave}}
   return{ev,done};
  }
  // l'aube : l'essence s'éteint, les soins et la ferraille de l'aube s'appliquent
@@ -610,6 +612,6 @@ const Z=(()=>{
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
  return{N,C,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

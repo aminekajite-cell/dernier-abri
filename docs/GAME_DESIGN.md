@@ -251,9 +251,9 @@ Inspiré de *Super Auto Pets*, *Vampire Survivors* et *Rogue Tower* : les unité
 
 - **Niveaux** : tous les 20 zombies tués (20, 40, 60…), une unité gagne un niveau. À l'aube, le joueur choisit : offensif (+1 dégât) ou défensif (+3 PV max et soin complet). Le niveau est affiché sur l'unité (N1, N2…).
 
-## Les très grosses nuits en 3 vagues
+## La nuit du Colosse en 2 vagues
 
-Nuit du Colosse, Nuit sanglante ou de pillage, Pleine lune, ou 30 zombies et plus : la horde est coupée en 3 vagues (le Colosse dans la 3ᵉ). Quand une vague est repoussée, la nuit se met en pause : le joueur peut déplacer une unité et jouer ses réactions, puis lance la vague suivante. L'annonce « ⚠ Très grosse nuit : 3 vagues » apparaît pendant la journée. Les nuits ordinaires restent d'un seul tenant.
+Seule la nuit du Colosse (toutes les 10 nuits) est coupée en 2 vagues ; le Colosse arrive dans la 2ᵉ. Quand la 1ʳᵉ vague est repoussée, la nuit se met en pause : le joueur déplace librement toutes ses unités et peut jouer ses réactions, puis lance la 2ᵉ vague. L'annonce « ⚠ Nuit du Colosse : 2 vagues » apparaît pendant la journée. Toutes les autres nuits arrivent d'un seul tenant (choix d'Amine : la pause est réservée à l'élite).
 
 ## L'héritage des survivants
 
@@ -468,6 +468,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Pause en pleine nuit réservée à la nuit du Colosse (2 vagues), avec déplacements libres pendant la pause (demande d'Amine).
 - Le deck est fermé pendant la partie : plus aucune carte ajoutée (l'aube propose 3 cartes de sa propre pioche pour la main du lendemain, plus d'achat de carte au troc, la Nuit de pillage et les événements donnent de la ferraille, des soins ou un survivant). Héritage relevé à 100 victimes (demande d'Amine).
 - Très grosses nuits en 3 vagues avec pause, alliances entre factions, murs reliés, héritage des survivants tombés (demande d'Amine).
 - Solidarité entre voisins de même faction, riposte et renfort du corps à corps, combattants pour les Soignants, les Bricoleurs et la Communauté (Amine : des factions ne pouvaient pas se défendre, le corps à corps était injouable).
