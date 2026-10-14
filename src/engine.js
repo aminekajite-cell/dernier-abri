@@ -51,6 +51,38 @@ const Z=(()=>{
   kit:{n:'Trousse de secours',cat:'item',instant:1,onUnit:1,v:'Soin total',d:'Utilise-la sur une de tes unités blessées : elle récupère tous ses PV'},
   coffee:{n:'Café',cat:'item',instant:1,v:'+2 énergie',d:'Utilise-le sur l’abri : gratuit, +2 énergie aujourd’hui'},
   roadmap:{n:'Carte routière',cat:'item',instant:1,peek:3,v:'Fouille',d:'Utilise-la sur l’abri : regarde les 3 prochaines cartes de ta pioche et prends-en une'},
+  // --- extension : nouvelles cartes de faction ---
+  riot:{n:'Agent anti-émeute',cat:'melee',hp:9,block:1,rng:1,dmg:1,every:1,push:1,cap:2,v:'Bouclier',d:'Bouclier : 9 PV, ne perd jamais plus de 2 PV par coup, frappe et repousse'},
+  k9:{n:'Chien policier',cat:'melee',hp:4,block:1,rng:1,dmg:1,every:1,hits:2,stun:1,v:'1 ×2 · Étourdit',d:'Mord 2 fois par tour, chaque morsure étourdit le zombie 1 tour'},
+  barrier:{n:'Barrage de police',cat:'wall',hp:8,block:1,v:'8 PV',d:'Barrières de police : bloque, 8 PV'},
+  swat:{n:'Tireur d’élite du GIGN',cat:'shoot',hp:4,block:1,rng:3,dmg:2,every:1,v:'2 · P3',d:'2 dégâts par tour, portée 3'},
+  mortar:{n:'Mortier',cat:'shoot',hp:3,block:1,rng:9,dmg:3,every:3,blast:1,v:'3 zone · P∞',d:'Tous les 3 tours, un obus sur le groupe le plus serré : 3 dégâts sur la case et autour'},
+  sentry:{n:'Sentinelle automatique',cat:'shoot',hp:6,block:1,rng:2,dmg:1,every:1,hits:2,v:'1 ×2 · P2',d:'Tourelle : 2 tirs de 1 dégât par tour, portée 2, 6 PV'},
+  clay:{n:'Mine claymore',cat:'trap',hp:1,block:0,clay:4,v:'4 grande zone',d:'Explose au passage : 4 dégâts sur toutes les cases à 2 cases ou moins'},
+  bunker:{n:'Bunker',cat:'wall',hp:14,block:1,rng:1,dmg:1,every:1,v:'14 PV · 1',d:'Bloque, 14 PV, et tire sur les zombies au contact'},
+  pharma:{n:'Pharmacienne',cat:'help',hp:3,block:1,heal:1,hfast:1,v:'Soin rapide',d:'Soigne 1 PV à une unité voisine à chaque tour'},
+  hospital:{n:'Hôpital de campagne',cat:'help',hp:6,block:1,healAll:1,v:'Soin zone',d:'Tous les 2 tours, toutes les unités voisines récupèrent 1 PV'},
+  priest:{n:'Prêtre',cat:'help',hp:3,block:1,bless:1,v:'Protège',d:'Une fois chacune, les unités voisines qui devraient tomber restent à 1 PV'},
+  stretch:{n:'Brancardier',cat:'help',hp:4,block:1,heal:1,v:'Soin',d:'Soigne 1 PV à une unité voisine tous les 2 tours, 4 PV'},
+  brasero:{n:'Brasero',cat:'wall',hp:5,block:1,aura:1,v:'Brûle autour',d:'Bloque. Tous les 2 tours, 1 dégât et feu aux zombies collés à lui'},
+  firetrap:{n:'Fût piégé',cat:'trap',hp:1,block:0,firetrap:4,v:'4 zone + feu',d:'Explose au passage : 4 dégâts autour et les zombies brûlent 3 tours'},
+  net:{n:'Filet',cat:'trap',hp:2,block:0,net:4,v:'Immobilise',d:'Le zombie qui passe est pris 4 tours, sert 2 fois'},
+  bear:{n:'Piège à ours',cat:'trap',hp:1,block:0,trap:10,v:'10',d:'Le premier zombie qui marche dessus subit 10 dégâts'},
+  hunter:{n:'Chasseur',cat:'shoot',hp:3,block:1,rng:3,dmg:2,every:2,v:'2 · P3',d:'2 dégâts tous les 2 tours, portée 3'},
+  dogs:{n:'Meute de chiens',cat:'melee',hp:5,block:1,rng:1,dmg:1,every:1,hits:4,v:'1 ×4',d:'4 morsures de 1 dégât par tour au corps à corps'},
+  pitch:{n:'Fermier à la fourche',cat:'melee',hp:5,block:1,rng:1,dmg:2,every:1,push:1,v:'2 · Recul',d:'2 dégâts au contact et repousse le zombie d’une case'},
+  scare:{n:'Épouvantail',cat:'help',hp:6,block:1,lure:2,v:'Attire',d:'Les zombies à 2 cases ou moins marchent vers lui au lieu de l’abri, 6 PV'},
+  turret:{n:'Tourelle bricolée',cat:'shoot',hp:4,block:1,rng:2,dmg:1,every:1,v:'1 · P2',d:'1 dégât par tour, portée 2, 4 PV'},
+  workshop:{n:'Atelier',cat:'help',hp:5,block:1,mech:1,mechAll:1,v:'Répare tout',d:'Répare 1 PV à toutes les défenses voisines à chaque tour'},
+  modwall:{n:'Mur modulaire',cat:'wall',hp:9,block:1,v:'9 PV',d:'Panneaux de tôle : bloque, 9 PV'},
+  tesla:{n:'Bobine Tesla',cat:'shoot',hp:4,block:1,rng:2,dmg:2,every:2,hits:3,distinct:1,needPow:1,v:'2 ×3 · P2',d:'Tous les 2 tours, un arc frappe 3 zombies (2 dégâts). Inactive pendant une coupure'},
+  teacher:{n:'Institutrice',cat:'help',hp:3,block:1,draw:1,v:'+1 carte',d:'Tant qu’elle tient, tu pioches 1 carte de plus chaque jour'},
+  market:{n:'Marché',cat:'help',hp:4,block:1,market:2,v:'+2 ferraille',d:'À chaque aube, +2 ferraille'},
+  vigile:{n:'Vigile',cat:'shoot',hp:4,block:1,rng:2,dmg:1,every:1,v:'1 · P2',d:'1 dégât par tour, portée 2, 4 PV'},
+  carp:{n:'Charpentier',cat:'help',hp:4,block:1,carp:2,v:'Répare',d:'À chaque aube, les défenses voisines récupèrent 2 PV'},
+  tear:{n:'Gaz lacrymogène',cat:'react',react:'cell',v:'Étourdit',d:'Pendant la nuit : les zombies sur la case visée et autour sont perdus 3 tours'},
+  napalm:{n:'Napalm',cat:'react',react:'cell',v:'Feu zone',d:'Pendant la nuit : la case visée et autour s’embrasent (flaques de feu jusqu’à l’aube)'},
+  air:{n:'Frappe aérienne',cat:'react',react:'any',v:'4 partout',d:'Pendant la nuit : 4 dégâts à tous les zombies'},
   // chefs de faction (légendaires) : la faction gagne un palier tant que le chef est en vie
   chief_police:{n:'Le Commissaire',cat:'shoot',hp:5,block:1,rng:2,dmg:2,every:1,chief:'police',v:'2 · P2',d:'Chef de la Police : 2 dégâts par tour, portée 2. La Police gagne un palier'},
   chief_mil:{n:'La Sergente',cat:'shoot',hp:5,block:1,rng:3,dmg:1,every:1,hits:3,chief:'mil',v:'1 ×3 · P3',d:'Cheffe des Militaires : 3 tirs par tour, portée 3. Les Militaires gagnent un palier'},
@@ -71,7 +103,7 @@ const Z=(()=>{
  };
  const KEYS=Object.keys(U);
  // survivants nommés : chaque humain ou chien posé reçoit un prénom et un trait, compte ses victimes, et meurt pour de bon
- const HUMANS='gun snp sht xbow flame mg molo kid axe cop butch monk med cook mech lead'.split(' ');
+ const HUMANS='gun snp sht xbow flame mg molo kid axe cop butch monk med cook mech lead riot swat pharma priest stretch hunter pitch teacher vigile carp'.split(' ');
  const NAMES='Marco Léa Karim Sofia Hugo Nadia Bruno Inès Yanis Chloé Malik Julie Théo Amira Victor Lina Samir Emma Rachid Zoé Paul Yasmine Louis Clara Mehdi Sarah Hector Nora Igor Maya Omar Jade Gaston Lou Bilal Rose Kenji Alice Driss Margot'.split(' ');
  const DOG_NAMES='Rex Kira Brutus Lola Tyson Médor Nala Rocky'.split(' ');
  const TRAITS={
@@ -83,12 +115,12 @@ const Z=(()=>{
   coriace:{n:'Coriace',d:'récupère 1 PV à chaque aube',regen:1},
   aguerri:{n:'Aguerri',d:'+1 dégât après 10 zombies tués',att:1}
  };
- const named=t=>HUMANS.includes(t)||t==='dog'||!!(U[t]&&U[t].chief);
+ const named=t=>HUMANS.includes(t)||t==='dog'||t==='k9'||t==='dogs'||!!(U[t]&&U[t].chief);
  const maxHp=(st,u)=>Math.max(1,stat(st,u.t).hp+((TRAITS[u.trait]||{}).hpB||0));
  const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)};
  // énergie : chaque jour on a ENERGY points, chaque carte coûte de 0 à 3 selon sa puissance
  const ENERGY=4,HAND_MAX=8;
- const COST={chief_police:3,chief_mil:3,chief_care:3,chief_pyro:3,chief_trap:3,chief_farm:3,chief_tech:3,chief_comm:3,coffee:0,grenade:1,shot:1,patch:1,molotov:2,horn:2,rush:2};
+ const COST={riot:2,k9:1,barrier:2,swat:3,mortar:3,sentry:2,clay:2,bunker:3,pharma:2,hospital:3,priest:2,stretch:1,brasero:2,firetrap:1,net:1,bear:2,hunter:2,dogs:2,pitch:2,scare:1,turret:2,workshop:3,modwall:2,tesla:3,teacher:2,market:2,vigile:1,carp:2,tear:1,napalm:2,air:3,chief_police:3,chief_mil:3,chief_care:3,chief_pyro:3,chief_trap:3,chief_farm:3,chief_tech:3,chief_comm:3,coffee:0,grenade:1,shot:1,patch:1,molotov:2,horn:2,rush:2};
  'bar fen sand trap fire wire smoke bait food kid dog med roadmap kit flare'.split(' ').forEach(t=>COST[t]=1);
  'gun axe cop tire spike mine lamp radio cook mech butch monk flame xbow rep gas'.split(' ').forEach(t=>COST[t]=2);
  'car door snp sht mg molo siren lead solar dyn'.split(' ').forEach(t=>COST[t]=3);
@@ -144,14 +176,14 @@ const Z=(()=>{
  // factions : plus il y a d'unités d'une faction sur la carte, plus elle est forte (2 paliers).
  // Le Chef d'une faction (carte légendaire) lui fait gagner un palier tant qu'il est en vie.
  const FAM={
-  police:{n:'Police',ic:'👮',cards:['cop','gun','lamp','siren','chief_police'],lv:[3,5],d:['tes policiers perdent 1 PV de moins par coup','tes policiers ont +1 portée']},
-  mil:{n:'Militaires',ic:'🎖️',cards:['snp','mg','sht','mine','dyn','chief_mil'],lv:[3,5],d:['tes militaires font +1 dégât','mines et dynamite : +3 dégâts']},
-  care:{n:'Soignants',ic:'⛑️',cards:['med','cook','chief_care'],lv:[2,4],d:['tes soignants soignent 1 PV de plus','à l’aube, toutes tes unités récupèrent 2 PV']},
-  pyro:{n:'Pyromanes',ic:'🔥',cards:['fire','flame','molo','gas','tire','chief_pyro'],lv:[3,5],d:['le feu fait +1 dégât par tour','les zombies qui meurent en brûlant explosent (2 dégâts autour)']},
-  trap:{n:'Trappeurs',ic:'🪤',cards:['trap','spike','wire','smoke','bait','xbow','chief_trap'],lv:[3,5],d:['pièges : +2 dégâts','pièges : +4 dégâts au total']},
-  farm:{n:'Fermiers',ic:'🐕',cards:['dog','axe','butch','chief_farm'],lv:[2,4],d:['corps à corps : +1 dégât','corps à corps : +1 PV à chaque zombie tué']},
-  tech:{n:'Bricoleurs',ic:'⚡',cards:['fen','solar','mech','radio','chief_tech'],lv:[3,5],d:['clôtures : +1 dégât','clôtures : étourdissent 1 tour, le mécanicien répare 2 PV']},
-  comm:{n:'Communauté',ic:'🏠',cards:['lead','monk','kid','chief_comm'],lv:[2,4],d:['à l’aube, l’abri récupère 1 PV','+1 énergie chaque jour']}
+  police:{n:'Police',ic:'👮',cards:['riot','k9','barrier','swat','cop','gun','lamp','siren','chief_police'],lv:[3,5],d:['tes policiers perdent 1 PV de moins par coup','tes policiers ont +1 portée']},
+  mil:{n:'Militaires',ic:'🎖️',cards:['mortar','sentry','clay','bunker','snp','mg','sht','mine','dyn','chief_mil'],lv:[3,5],d:['tes militaires font +1 dégât','mines et dynamite : +3 dégâts']},
+  care:{n:'Soignants',ic:'⛑️',cards:['pharma','hospital','priest','stretch','med','cook','chief_care'],lv:[3,5],d:['tes soignants soignent 1 PV de plus','à l’aube, toutes tes unités récupèrent 2 PV']},
+  pyro:{n:'Pyromanes',ic:'🔥',cards:['brasero','firetrap','fire','flame','molo','gas','tire','chief_pyro'],lv:[3,5],d:['le feu fait +1 dégât par tour','les zombies qui meurent en brûlant explosent (2 dégâts autour)']},
+  trap:{n:'Trappeurs',ic:'🪤',cards:['net','bear','hunter','trap','spike','wire','smoke','bait','xbow','chief_trap'],lv:[3,5],d:['pièges : +2 dégâts','pièges : +4 dégâts au total']},
+  farm:{n:'Fermiers',ic:'🐕',cards:['dogs','pitch','scare','dog','axe','butch','chief_farm'],lv:[3,5],d:['corps à corps : +1 dégât','corps à corps : +1 PV à chaque zombie tué']},
+  tech:{n:'Bricoleurs',ic:'⚡',cards:['turret','workshop','modwall','tesla','fen','solar','mech','radio','chief_tech'],lv:[3,5],d:['clôtures : +1 dégât','clôtures : étourdissent 1 tour, le mécanicien répare 2 PV']},
+  comm:{n:'Communauté',ic:'🏠',cards:['teacher','market','vigile','carp','lead','monk','kid','chief_comm'],lv:[3,5],d:['à l’aube, l’abri récupère 1 PV','+1 énergie chaque jour']}
  };
  const CHIEF={police:'chief_police',mil:'chief_mil',care:'chief_care',pyro:'chief_pyro',trap:'chief_trap',farm:'chief_farm',tech:'chief_tech',comm:'chief_comm'};
  const famOf=t=>Object.keys(FAM).find(f=>FAM[f].cards.includes(t));
@@ -243,6 +275,9 @@ const Z=(()=>{
  'car tire snp xbow flame butch monk lamp radio cook mech mine spike kit flare roadmap'.split(' ').forEach(t=>RAR[t]='rare');
  'door sht mg molo siren lead solar gas dyn coffee rush'.split(' ').forEach(t=>RAR[t]='epic');
  'grenade shot patch'.split(' ').forEach(t=>RAR[t]='com');
+ 'k9 barrier clay stretch firetrap net hunter pitch scare turret modwall vigile market tear'.split(' ').forEach(t=>RAR[t]='com');
+ 'riot mortar sentry bunker pharma priest brasero bear dogs workshop teacher carp napalm'.split(' ').forEach(t=>RAR[t]='rare');
+ 'swat hospital tesla air'.split(' ').forEach(t=>RAR[t]='epic');
  KEYS.filter(t=>U[t].chief).forEach(t=>RAR[t]='leg');'molotov horn'.split(' ').forEach(t=>RAR[t]='rare');
  const SIDES=['le nord','le sud','l’ouest','l’est'];
  const rc=i=>[Math.floor(i/N),i%N],idx=(r,c)=>r*N+c;
@@ -303,7 +338,7 @@ const Z=(()=>{
  const has=(st,t)=>st.grid.some(u=>u&&u.t===t);
  const costOf=(st,t)=>(PLACES[st.place]||{}).free&&PLACES[st.place].free.includes(t)?0:cost(t);
  const canPay=(st,t)=>costOf(st,t)<=(st.energy??ENERGY);
- const drawCount=st=>5+(has(st,'radio')?1:0)+(st.relics.includes('sac')?1:0);
+ const drawCount=st=>5+(has(st,'radio')?1:0)+(has(st,'teacher')?1:0)+(st.relics.includes('sac')?1:0);
 
  /* ---------- améliorations et reliques : statistiques réelles d'une carte ---------- */
  const TRAPF=['trap','mine','spike','gas','dyn'];
@@ -348,13 +383,14 @@ const Z=(()=>{
  function place(st,t,i,rnd=Math.random,free){const D=stat(st,t);if(!free)st.energy=(st.energy??ENERGY)-costOf(st,t);if(D.instant){applyItem(st,t,i,rnd);return}
   const u={t,hp:D.hp};
   if(named(t)){const used=new Set(st.grid.filter(Boolean).map(v=>v.name).concat((st.fallen||[]).map(f=>f.name)));
-   const pool=(t==='dog'?DOG_NAMES:NAMES).filter(n=>!used.has(n));const list=pool.length?pool:(t==='dog'?DOG_NAMES:NAMES);
+   const dg=t==='dog'||t==='k9'||t==='dogs',pool=(dg?DOG_NAMES:NAMES).filter(n=>!used.has(n));const list=pool.length?pool:(dg?DOG_NAMES:NAMES);
    u.name=D.chief?U[t].n:list[Math.floor(rnd()*list.length)];
    const tr=Object.keys(TRAITS).filter(k=>(!TRAITS[k].att||D.dmg)&&(!TRAITS[k].far||(D.rng||0)>1));
    u.trait=tr[Math.floor(rnd()*tr.length)];u.kills=0;u.hp=maxHp(st,u)}
   st.grid[i]=u}
  // une unité tombe : un survivant nommé rejoint le mémorial (sauf s'il est Increvable et n'a pas encore utilisé sa chance)
  function lose(st,j,u,ev){if(u.trait==='increvable'&&!u.saved){u.hp=1;u.saved=1;ev.push({i:j,k:'saved',name:u.name});return false}
+  if(U[u.t].block&&!u.blessed&&around(j).some(k=>st.grid[k]&&U[st.grid[k].t].bless)){u.hp=1;u.blessed=1;ev.push({i:j,k:'saved',name:u.name||U[u.t].n});return false}
   st.grid[j]=null;ev.push({i:j,k:'lost',t:u.t,name:u.name});
   if(u.name)(st.fallen=st.fallen||[]).push({name:u.name,t:u.t,trait:u.trait,kills:u.kills||0,night:st.night});return true}
  function applyItem(st,t,i,rnd){const D=stat(st,t);
@@ -382,20 +418,21 @@ const Z=(()=>{
  const lampB=(st,i,pow)=>pow?around(i).reduce((s,j)=>s+(st.grid[j]&&st.grid[j].t==='lamp'?stat(st,'lamp').buff:0),0):0;
  function hit(st,z,d,ev,src,fire){if(!fire){const a=(ZT[z.k].armor||0)+(mc(st,'carapace')&&z.k==='walk'?1:0);if(a)d=Math.max(0,d-a)}const was=z.hp;z.hp-=d;ev.push({i:z.pos,txt:d?'−'+d:'0',k:'hit',zid:z.id,src});return was>0&&z.hp<=0}
  function explode(st,i,d,ev){st.z.filter(o=>o.hp>0&&cheb(o.pos,i)<=1).forEach(o=>hit(st,o,d,ev,i,1));ev.push({i,k:'boom'})}
- function lureTarget(st,p){let best=C,bd=99;for(let j=0;j<st.grid.length;j++){const u=st.grid[j];if(!u||u.t!=='siren')continue;const d=cheb(p,j);if(d<=U.siren.lure&&d<bd){bd=d;best=j}}return best}
+ function lureTarget(st,p){let best=C,bd=99;for(let j=0;j<st.grid.length;j++){const u=st.grid[j];if(!u||!U[u.t].lure)continue;const d=cheb(p,j);if(d<=U[u.t].lure&&d<bd){bd=d;best=j}}return best}
  function attack(st,i,u,D,rng,dmg,ev){
   const inR=()=>st.z.filter(z=>z.hp>0&&cheb(z.pos,i)<=rng);
   const got=k=>{if(k){u.kills=(u.kills||0)+1;u.nk=(u.nk||0)+1}};
   if(D.aoe){const ts=inR();if(ts.length){ts.forEach(z=>got(hit(st,z,dmg,ev,i)));ev.push({i,k:'fire'})}return}
-  if(D.molo){const ts=inR();if(!ts.length)return;let best=null,bc=-1;
+  if(D.molo||D.blast){const ts=inR();if(!ts.length)return;let best=null,bc=-1;
    for(const z of ts){const c=st.z.filter(o=>o.hp>0&&cheb(o.pos,z.pos)<=1).length;if(c>bc){bc=c;best=z}}
-   const at=best.pos;ev.push({i,k:'fire'},{i:at,k:'molo',src:i});
-   st.z.filter(o=>o.hp>0&&cheb(o.pos,at)<=1).forEach(o=>{got(hit(st,o,dmg,ev,i,1));o.burnT=Math.max(o.burnT||0,2)});return}
+   const at=best.pos;ev.push({i,k:'fire'},D.blast?{i:at,k:'boom'}:{i:at,k:'molo',src:i});
+   st.z.filter(o=>o.hp>0&&cheb(o.pos,at)<=1).forEach(o=>{got(hit(st,o,dmg,ev,i,1));if(D.molo)o.burnT=Math.max(o.burnT||0,2)});return}
   const done=new Set();
   for(let h=0;h<(D.hits||1);h++){let ts=inR();if(D.distinct)ts=ts.filter(z=>!done.has(z.id));if(!ts.length)break;
    ts.sort((a,b)=>cheb(a.pos,C)-cheb(b.pos,C)||a.hp-b.hp);const z=ts[0];done.add(z.id);
    const killed=hit(st,z,dmg,ev,i);ev.push({i,k:'fire'});got(killed);
    if(D.ignite&&z.hp>0)z.burnT=Math.max(z.burnT||0,D.ignite);
+   if(D.stun&&z.hp>0)z.cd+=D.stun;
    if(D.push&&z.hp>0&&!ZT[z.k].boss){const b=back(z.pos),bu=st.grid[b];if(!(bu&&U[bu.t].block))z.pos=b}
    if((D.feed||(D.cat==='melee'&&(st._fl||{}).farm>=2))&&killed)u.hp=Math.min(maxHp(st,u),u.hp+1)}
  }
@@ -411,6 +448,9 @@ const Z=(()=>{
   if(D.mine){st.grid[n]=null;explode(st,n,D.mine+tb+((st._fl||{}).mil>=2?3:0),ev)}
   if(D.spike){hit(st,z,D.spike+tb,ev,n);u.hp--;if(u.hp<=0)st.grid[n]=null}
   if(D.wire){hit(st,z,D.wire+tb,ev,n);z.cd+=ZT[z.k].spd}
+  if(D.clay){st.grid[n]=null;st.z.filter(o=>o.hp>0&&cheb(o.pos,n)<=2).forEach(o=>hit(st,o,D.clay+tb+((st._fl||{}).mil>=2?3:0),ev,n,1));ev.push({i:n,k:'boom'})}
+  if(D.firetrap){st.grid[n]=null;st.z.filter(o=>o.hp>0&&cheb(o.pos,n)<=1).forEach(o=>{hit(st,o,D.firetrap+tb,ev,n,1);o.burnT=Math.max(o.burnT||0,3)});ev.push({i:n,k:'boom'})}
+  if(D.net){z.cd+=D.net;ev.push({i:n,k:'eat',zid:z.id});u.hp--;if(u.hp<=0)st.grid[n]=null}
   if(D.smoke){st.z.filter(o=>o.hp>0&&cheb(o.pos,n)<=1).forEach(o=>o.cd+=D.smoke);ev.push({i:n,k:'smoke'});st.grid[n]=null}
   if(D.bait){z.cd+=D.bait;ev.push({i:n,k:'eat',zid:z.id});u.hp--;if(u.hp<=0)st.grid[n]=null}}
  function step(st){const ev=[];st.tick++;const e=st.event.id,pow=power(st),fl=st._fl=famLevels(st);if(st.rushT>0)st.rushT--;
@@ -420,12 +460,15 @@ const Z=(()=>{
   for(const z of alive())if(z.burnT>0){z.burnT--;hit(st,z,1+(fl.pyro?1:0),ev,-1,1)}
   if(mc(st,'regen')&&st.tick%3===0)for(const z of alive())if(z.hp<z.max)z.hp++;
   for(let i=0;i<st.grid.length;i++){const u=st.grid[i];if(!u)continue;const D=stat(st,u.t);
-   if(D.rng&&st.tick%D.every===0&&!(D.jam&&st.tick%D.jam===0)){
+   if(D.rng&&st.tick%D.every===0&&!(D.jam&&st.tick%D.jam===0)&&!(D.needPow&&!pow)){
     const reps=1+(st.tick%3===0&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].lead)?1:0)+(st.rushT>0?1:0);
     const rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&famOf(u.t)==='police'?1:0)),dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+(fl.mil&&famOf(u.t)==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}
    if(D.heal&&(D.hfast||st.tick%2===0)){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0));ev.push({i,k:'heal'})}}
-   if(D.mech){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j]));if(ns.length){const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0));ev.push({i:ns[0],k:'heal'})}}
+   if(D.mech&&!D.mechAll){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j]));if(ns.length){const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0));ev.push({i:ns[0],k:'heal'})}}
+   if(D.healAll&&st.tick%2===0)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].block&&v.hp<maxHp(st,v)){v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.care?1:0));ev.push({i:j,k:'heal'})}});
+   if(D.mechAll)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].cat==='wall'&&v.hp<maxHp(st,v)){v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.tech>=2?1:0));ev.push({i:j,k:'heal'})}});
+   if(D.aura&&st.tick%2===0)alive().filter(z=>cheb(z.pos,i)<=1).forEach(z=>{hit(st,z,1+(fl.pyro?1:0),ev,i,1);z.burnT=Math.max(z.burnT||0,2)});
    if(D.burn&&e!=='pluie')alive().filter(z=>z.pos===i).forEach(z=>{z.inFire=1;hit(st,z,D.burn+(fl.pyro?1:0),ev,i,1)});
    if(D.dyn&&st.tick===8){st.grid[i]=null;explode(st,i,D.dyn+(fl.mil>=2?3:0),ev)}
   }
@@ -457,7 +500,8 @@ const Z=(()=>{
   const h=st.grid.filter(u=>u&&u.t==='cook').length+(st.relics.includes('soupe')?1:0)+(fl.comm?1:0),before=st.shelter;
   if(fl.care>=2)st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+2)});
   st.shelter=Math.min(maxS(st),st.shelter+h);
-  const s=(st.relics.includes('aimant')?3:0)+(T.scrap||0);st.scrap+=s;
+  st.grid.forEach((u,i)=>{if(u&&U[u.t].carp)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].cat==='wall')v.hp=Math.min(maxHp(st,v),v.hp+U[u.t].carp)})});
+  const s=(st.relics.includes('aimant')?3:0)+(T.scrap||0)+st.grid.reduce((a,u)=>a+(u&&U[u.t].market||0),0);st.scrap+=s;
   return{heal:st.shelter-before,scrap:s,card:T.card||null,relic:!!T.relic,tier:st.tier||'base'}}
  // réactions pendant la nuit
  function canReact(st,t,i){const D=U[t];if(!D||!D.react||!canPay(st,t))return false;
@@ -469,6 +513,9 @@ const Z=(()=>{
   if(t==='molotov'){al().filter(z=>cheb(z.pos,i)<=1).forEach(z=>{hit(st,z,2,ev,-1,1);z.burnT=Math.max(z.burnT||0,4)});ev.push({i,k:'molo',src:C})}
   if(t==='horn'){al().forEach(z=>{if(ZT[z.k].boss)return;const b=back(z.pos),bu=st.grid[b];if(!(bu&&U[bu.t].block))z.pos=b});ev.push({i:C,k:'horn'})}
   if(t==='rush'){st.rushT=3;ev.push({i:C,k:'rush'})}
+  if(t==='tear'){al().filter(z=>cheb(z.pos,i)<=1).forEach(z=>z.cd+=3);ev.push({i,k:'smoke'})}
+  if(t==='air'){al().forEach(z=>hit(st,z,4,ev,-1,1));ev.push({i:C,k:'air'})}
+  if(t==='napalm'){around(i).concat(i).forEach(j=>{if(!isEdge(j)&&j!==C&&!st.grid[j])st.grid[j]={t:'fire',hp:1,gen:1}});al().filter(z=>cheb(z.pos,i)<=1).forEach(z=>{hit(st,z,1,ev,-1,1);z.burnT=Math.max(z.burnT||0,3)});ev.push({i,k:'molo',src:C})}
   for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;st.kills++;st.scrap+=ZT[z.k].boss?15:1}
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}

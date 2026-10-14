@@ -39,7 +39,7 @@ Score : nombre de nuits survécues, avec un record sauvegardé (et le nombre de 
 
 ## Les cartes
 
-Il y a 40 cartes. Le deck de départ ne contient que les 8 cartes du personnage : les autres se gagnent à l'aube ou s'achètent au troc. Les unités posées restent en place d'une nuit à l'autre et gardent leurs dégâts. Poser une carte sur une case occupée remplace l'unité.
+Il y a 85 cartes (dont 8 chefs légendaires). Le deck de départ ne contient que les 8 cartes du personnage : les autres se gagnent à l'aube ou s'achètent au troc. Les unités posées restent en place d'une nuit à l'autre et gardent leurs dégâts. Poser une carte sur une case occupée remplace l'unité.
 
 Coût en énergie :
 
@@ -125,7 +125,46 @@ Chaque unité appartient au plus à une faction. Plus il y a d'unités d'une mê
 | ⚡ Bricoleurs | Clôture, Panneau solaire, Mécanicien, Radio | 3 : clôtures +1 dégât | 5 : clôtures étourdissantes, réparations +1 | L'Ingénieur (répare 2 PV par tour) |
 | 🏠 Communauté | Chef de groupe, Moine, Gamin | 2 : l'abri +1 PV à l'aube | 4 : +1 énergie par jour | Le Maire (les voisins attaquent plus souvent) |
 
-L'étape suivante ajoute de nouvelles cartes pour que chaque faction ait assez de cartes pour un deck complet.
+Tous les paliers sont à 3 et 5 unités.
+
+### Cartes de l'extension « factions » (31 cartes)
+
+Pour que chaque faction ait de quoi remplir un deck, 28 unités et 3 réactions ont été ajoutées (à débloquer dans la collection) :
+
+| Carte | Faction | Rareté | Énergie | Effet |
+|---|---|---|---|---|
+| Agent anti-émeute | 👮 Police | Rare | 2 | Bouclier : 9 PV, ne perd jamais plus de 2 PV par coup, frappe et repousse |
+| Chien policier | 👮 Police | Commune | 1 | Mord 2 fois par tour, chaque morsure étourdit le zombie 1 tour |
+| Barrage de police | 👮 Police | Commune | 2 | Barrières de police : bloque, 8 PV |
+| Tireur d’élite du GIGN | 👮 Police | Épique | 3 | 2 dégâts par tour, portée 3 |
+| Mortier | 🎖️ Militaires | Rare | 3 | Tous les 3 tours, un obus sur le groupe le plus serré : 3 dégâts sur la case et autour |
+| Sentinelle automatique | 🎖️ Militaires | Rare | 2 | Tourelle : 2 tirs de 1 dégât par tour, portée 2, 6 PV |
+| Mine claymore | 🎖️ Militaires | Commune | 2 | Explose au passage : 4 dégâts sur toutes les cases à 2 cases ou moins |
+| Bunker | 🎖️ Militaires | Rare | 3 | Bloque, 14 PV, et tire sur les zombies au contact |
+| Pharmacienne | ⛑️ Soignants | Rare | 2 | Soigne 1 PV à une unité voisine à chaque tour |
+| Hôpital de campagne | ⛑️ Soignants | Épique | 3 | Tous les 2 tours, toutes les unités voisines récupèrent 1 PV |
+| Prêtre | ⛑️ Soignants | Rare | 2 | Une fois chacune, les unités voisines qui devraient tomber restent à 1 PV |
+| Brancardier | ⛑️ Soignants | Commune | 1 | Soigne 1 PV à une unité voisine tous les 2 tours, 4 PV |
+| Brasero | 🔥 Pyromanes | Rare | 2 | Bloque. Tous les 2 tours, 1 dégât et feu aux zombies collés à lui |
+| Fût piégé | 🔥 Pyromanes | Commune | 1 | Explose au passage : 4 dégâts autour et les zombies brûlent 3 tours |
+| Filet | 🪤 Trappeurs | Commune | 1 | Le zombie qui passe est pris 4 tours, sert 2 fois |
+| Piège à ours | 🪤 Trappeurs | Rare | 2 | Le premier zombie qui marche dessus subit 10 dégâts |
+| Chasseur | 🪤 Trappeurs | Commune | 2 | 2 dégâts tous les 2 tours, portée 3 |
+| Meute de chiens | 🐕 Fermiers | Rare | 2 | 4 morsures de 1 dégât par tour au corps à corps |
+| Fermier à la fourche | 🐕 Fermiers | Commune | 2 | 2 dégâts au contact et repousse le zombie d’une case |
+| Épouvantail | 🐕 Fermiers | Commune | 1 | Les zombies à 2 cases ou moins marchent vers lui au lieu de l’abri, 6 PV |
+| Tourelle bricolée | ⚡ Bricoleurs | Commune | 2 | 1 dégât par tour, portée 2, 4 PV |
+| Atelier | ⚡ Bricoleurs | Rare | 3 | Répare 1 PV à toutes les défenses voisines à chaque tour |
+| Mur modulaire | ⚡ Bricoleurs | Commune | 2 | Panneaux de tôle : bloque, 9 PV |
+| Bobine Tesla | ⚡ Bricoleurs | Épique | 3 | Tous les 2 tours, un arc frappe 3 zombies (2 dégâts). Inactive pendant une coupure |
+| Institutrice | 🏠 Communauté | Rare | 2 | Tant qu’elle tient, tu pioches 1 carte de plus chaque jour |
+| Marché | 🏠 Communauté | Commune | 2 | À chaque aube, +2 ferraille |
+| Vigile | 🏠 Communauté | Commune | 1 | 1 dégât par tour, portée 2, 4 PV |
+| Charpentier | 🏠 Communauté | Rare | 2 | À chaque aube, les défenses voisines récupèrent 2 PV |
+| Gaz lacrymogène | Réaction | Commune | 1 | Pendant la nuit : les zombies sur la case visée et autour sont perdus 3 tours |
+| Napalm | Réaction | Rare | 2 | Pendant la nuit : la case visée et autour s’embrasent (flaques de feu jusqu’à l’aube) |
+| Frappe aérienne | Réaction | Épique | 3 | Pendant la nuit : 4 dégâts à tous les zombies |
+
 
 ## Le choix de la nuit
 
