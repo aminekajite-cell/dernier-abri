@@ -51,6 +51,15 @@ const Z=(()=>{
   kit:{n:'Trousse de secours',cat:'item',instant:1,onUnit:1,v:'Soin total',d:'Utilise-la sur une de tes unités blessées : elle récupère tous ses PV'},
   coffee:{n:'Café',cat:'item',instant:1,v:'+2 énergie',d:'Utilise-le sur l’abri : gratuit, +2 énergie aujourd’hui'},
   roadmap:{n:'Carte routière',cat:'item',instant:1,peek:3,v:'Fouille',d:'Utilise-la sur l’abri : regarde les 3 prochaines cartes de ta pioche et prends-en une'},
+  // chefs de faction (légendaires) : la faction gagne un palier tant que le chef est en vie
+  chief_police:{n:'Le Commissaire',cat:'shoot',hp:5,block:1,rng:2,dmg:2,every:1,chief:'police',v:'2 · P2',d:'Chef de la Police : 2 dégâts par tour, portée 2. La Police gagne un palier'},
+  chief_mil:{n:'La Sergente',cat:'shoot',hp:5,block:1,rng:3,dmg:1,every:1,hits:3,chief:'mil',v:'1 ×3 · P3',d:'Cheffe des Militaires : 3 tirs par tour, portée 3. Les Militaires gagnent un palier'},
+  chief_care:{n:'La Doctoresse',cat:'help',hp:4,block:1,heal:2,hfast:1,chief:'care',v:'Soin 2',d:'Cheffe des Soignants : soigne 2 PV à chaque tour. Les Soignants gagnent un palier'},
+  chief_pyro:{n:'Le Pyromane',cat:'shoot',hp:5,block:1,rng:2,dmg:1,every:1,aoe:1,ignite:3,chief:'pyro',v:'Feu zone',d:'Chef des Pyromanes : enflamme tous les zombies à 2 cases. Les Pyromanes gagnent un palier'},
+  chief_trap:{n:'Le Braconnier',cat:'shoot',hp:4,block:1,rng:4,dmg:3,every:2,chief:'trap',v:'3 · P4',d:'Chef des Trappeurs : 3 dégâts tous les 2 tours, portée 4. Les Trappeurs gagnent un palier'},
+  chief_farm:{n:'La Fermière',cat:'melee',hp:8,block:1,rng:1,dmg:2,every:1,hits:2,chief:'farm',v:'2 ×2',d:'Cheffe des Fermiers : 2 coups de 2 dégâts par tour, 8 PV. Les Fermiers gagnent un palier'},
+  chief_tech:{n:'L’Ingénieur',cat:'help',hp:5,block:1,mech:2,chief:'tech',v:'Répare 2',d:'Chef des Bricoleurs : répare 2 PV aux défenses voisines à chaque tour. Les Bricoleurs gagnent un palier'},
+  chief_comm:{n:'Le Maire',cat:'help',hp:4,block:1,lead:1,chief:'comm',v:'Rythme',d:'Chef de la Communauté : les unités autour attaquent plus souvent. La Communauté gagne un palier'},
   // réactions : jouables seulement pendant la nuit, avec l'énergie gardée du jour
   grenade:{n:'Grenade',cat:'react',react:'cell',v:'5 zone',d:'Pendant la nuit : 5 dégâts sur la case visée et autour'},
   shot:{n:'Tir de l’abri',cat:'react',react:'any',v:'6',d:'Pendant la nuit : 6 dégâts au zombie le plus proche de l’abri'},
@@ -74,12 +83,12 @@ const Z=(()=>{
   coriace:{n:'Coriace',d:'récupère 1 PV à chaque aube',regen:1},
   aguerri:{n:'Aguerri',d:'+1 dégât après 10 zombies tués',att:1}
  };
- const named=t=>HUMANS.includes(t)||t==='dog';
+ const named=t=>HUMANS.includes(t)||t==='dog'||!!(U[t]&&U[t].chief);
  const maxHp=(st,u)=>Math.max(1,stat(st,u.t).hp+((TRAITS[u.trait]||{}).hpB||0));
  const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)};
  // énergie : chaque jour on a ENERGY points, chaque carte coûte de 0 à 3 selon sa puissance
  const ENERGY=4,HAND_MAX=8;
- const COST={coffee:0,grenade:1,shot:1,patch:1,molotov:2,horn:2,rush:2};
+ const COST={chief_police:3,chief_mil:3,chief_care:3,chief_pyro:3,chief_trap:3,chief_farm:3,chief_tech:3,chief_comm:3,coffee:0,grenade:1,shot:1,patch:1,molotov:2,horn:2,rush:2};
  'bar fen sand trap fire wire smoke bait food kid dog med roadmap kit flare'.split(' ').forEach(t=>COST[t]=1);
  'gun axe cop tire spike mine lamp radio cook mech butch monk flame xbow rep gas'.split(' ').forEach(t=>COST[t]=2);
  'car door snp sht mg molo siren lead solar dyn'.split(' ').forEach(t=>COST[t]=3);
@@ -132,17 +141,23 @@ const Z=(()=>{
  // une relique toutes les 5 nuits
  const relicNight=n=>n%5===0;
  // familles : plus il y a d'unités d'une famille sur la carte, plus la famille est forte (2 paliers)
+ // factions : plus il y a d'unités d'une faction sur la carte, plus elle est forte (2 paliers).
+ // Le Chef d'une faction (carte légendaire) lui fait gagner un palier tant qu'il est en vie.
  const FAM={
-  fire:{n:'Feu',ic:'🔥',cards:['fire','flame','molo','dyn','gas','tire'],lv:[3,5],d:['le feu fait +1 dégât par tour','les zombies qui meurent en brûlant explosent (2 dégâts autour)']},
-  elec:{n:'Électricité',ic:'⚡',cards:['fen','lamp','solar','siren'],lv:[2,4],d:['clôtures : +1 dégât','clôtures : le zombie touché est étourdi 1 tour']},
-  trap:{n:'Pièges',ic:'🪤',cards:['trap','mine','spike','wire','smoke','bait'],lv:[3,5],d:['pièges : +2 dégâts','pièges : +4 dégâts au total']},
-  pack:{n:'Meute',ic:'🪓',cards:['axe','dog','cop','butch','monk'],lv:[3,5],d:['corps à corps : +1 dégât','corps à corps : +1 PV à chaque zombie tué']},
-  guns:{n:'Armes à feu',ic:'🔫',cards:['gun','snp','sht','mg','xbow','kid'],lv:[4,6],d:['tireurs : +1 portée','tireurs : +1 dégât']},
-  comm:{n:'Communauté',ic:'🏠',cards:['med','cook','mech','lead','radio'],lv:[3,5],d:['à l’aube, l’abri récupère 1 PV','à l’aube, toutes tes unités récupèrent 1 PV']}
+  police:{n:'Police',ic:'👮',cards:['cop','gun','lamp','siren','chief_police'],lv:[3,5],d:['tes policiers perdent 1 PV de moins par coup','tes policiers ont +1 portée']},
+  mil:{n:'Militaires',ic:'🎖️',cards:['snp','mg','sht','mine','dyn','chief_mil'],lv:[3,5],d:['tes militaires font +1 dégât','mines et dynamite : +3 dégâts']},
+  care:{n:'Soignants',ic:'⛑️',cards:['med','cook','chief_care'],lv:[2,4],d:['tes soignants soignent 1 PV de plus','à l’aube, toutes tes unités récupèrent 2 PV']},
+  pyro:{n:'Pyromanes',ic:'🔥',cards:['fire','flame','molo','gas','tire','chief_pyro'],lv:[3,5],d:['le feu fait +1 dégât par tour','les zombies qui meurent en brûlant explosent (2 dégâts autour)']},
+  trap:{n:'Trappeurs',ic:'🪤',cards:['trap','spike','wire','smoke','bait','xbow','chief_trap'],lv:[3,5],d:['pièges : +2 dégâts','pièges : +4 dégâts au total']},
+  farm:{n:'Fermiers',ic:'🐕',cards:['dog','axe','butch','chief_farm'],lv:[2,4],d:['corps à corps : +1 dégât','corps à corps : +1 PV à chaque zombie tué']},
+  tech:{n:'Bricoleurs',ic:'⚡',cards:['fen','solar','mech','radio','chief_tech'],lv:[3,5],d:['clôtures : +1 dégât','clôtures : étourdissent 1 tour, le mécanicien répare 2 PV']},
+  comm:{n:'Communauté',ic:'🏠',cards:['lead','monk','kid','chief_comm'],lv:[2,4],d:['à l’aube, l’abri récupère 1 PV','+1 énergie chaque jour']}
  };
+ const CHIEF={police:'chief_police',mil:'chief_mil',care:'chief_care',pyro:'chief_pyro',trap:'chief_trap',farm:'chief_farm',tech:'chief_tech',comm:'chief_comm'};
  const famOf=t=>Object.keys(FAM).find(f=>FAM[f].cards.includes(t));
  function famCounts(st){const c={};for(const u of st.grid)if(u){const f=famOf(u.t);if(f)c[f]=(c[f]||0)+1}return c}
- function famLevels(st){const c=famCounts(st),l={};for(const f in FAM)l[f]=(c[f]||0)>=FAM[f].lv[1]?2:(c[f]||0)>=FAM[f].lv[0]?1:0;return l}
+ function famLevels(st){const c=famCounts(st),l={};for(const f in FAM){l[f]=(c[f]||0)>=FAM[f].lv[1]?2:(c[f]||0)>=FAM[f].lv[0]?1:0;if(has(st,CHIEF[f]))l[f]=Math.min(2,l[f]+1)}return l}
+ const facOf=t=>famOf(t);
  // choisir sa nuit : à l'aube, 2 nuits au choix, l'une prudente, l'autre risquée mais payante
  const TIERS={
   base:{n:'Nuit',d:'Horde normale.',count:1},
@@ -222,12 +237,13 @@ const Z=(()=>{
  };
  const shopCost=(st,k)=>SHOP[k].cost+(SHOP[k].more||0)*Object.keys(st.upg||{}).length;
  // rareté : les cartes puissantes sortent rarement à l'aube et au troc
- const RARITY={com:{n:'Commune',w:67},rare:{n:'Rare',w:27},epic:{n:'Épique',w:6}};
+ const RARITY={com:{n:'Commune',w:67},rare:{n:'Rare',w:27},epic:{n:'Épique',w:6},leg:{n:'Légendaire',w:0}};
  const RAR={};
  'bar fen sand gun kid axe dog cop med trap fire wire smoke bait food rep'.split(' ').forEach(t=>RAR[t]='com');
  'car tire snp xbow flame butch monk lamp radio cook mech mine spike kit flare roadmap'.split(' ').forEach(t=>RAR[t]='rare');
  'door sht mg molo siren lead solar gas dyn coffee rush'.split(' ').forEach(t=>RAR[t]='epic');
- 'grenade shot patch'.split(' ').forEach(t=>RAR[t]='com');'molotov horn'.split(' ').forEach(t=>RAR[t]='rare');
+ 'grenade shot patch'.split(' ').forEach(t=>RAR[t]='com');
+ KEYS.filter(t=>U[t].chief).forEach(t=>RAR[t]='leg');'molotov horn'.split(' ').forEach(t=>RAR[t]='rare');
  const SIDES=['le nord','le sud','l’ouest','l’est'];
  const rc=i=>[Math.floor(i/N),i%N],idx=(r,c)=>r*N+c;
  const isEdge=i=>{const[r,c]=rc(i);return r===0||r===N-1||c===0||c===N-1};
@@ -272,8 +288,8 @@ const Z=(()=>{
  /* ---------- collection et deck (entre les parties) ----------
     La collection : les types de cartes débloqués, pour toujours. On en débloque avec les points de survie gagnés en fin de partie.
     Le deck : préparé avant la partie, 20 à 30 cartes, avec un nombre limité d'exemplaires selon la rareté. */
- const DECK_MIN=20,DECK_MAX=30,COPY_MAX={com:3,rare:2,epic:1};
- const CARD_PRICE={com:15,rare:35,epic:70};
+ const DECK_MIN=20,DECK_MAX=30,COPY_MAX={com:3,rare:2,epic:1,leg:1};
+ const CARD_PRICE={com:15,rare:35,epic:70,leg:100};
  const STARTER_CARDS='bar car fen sand gun snp kid axe dog cop med lamp trap fire mine wire spike food rep grenade shot patch'.split(' ');
  const STARTER_DECK=['bar','bar','bar','fen','car','gun','gun','gun','snp','axe','axe','dog','med','trap','trap','mine','food','rep','grenade','grenade'];
  const copyMax=t=>COPY_MAX[RAR[t]||'com'];
@@ -282,7 +298,7 @@ const Z=(()=>{
   if(deck.length>DECK_MAX)return`${DECK_MAX} cartes au maximum.`;
   const c={};for(const t of deck){c[t]=(c[t]||0)+1;if(owned&&!owned.includes(t))return`${U[t].n} n’est pas dans ta collection.`;if(c[t]>copyMax(t))return`${U[t].n} : ${copyMax(t)} exemplaire(s) au maximum.`}
   return''}
- function newDay(st,rnd,offer){st.night++;st.energy=ENERGY+(st.nextE||0);st.nextE=0;st.moved=0;st.rushT=0;
+ function newDay(st,rnd,offer){st.night++;st.energy=ENERGY+(st.nextE||0)+(famLevels(st).comm>=2?1:0);st.nextE=0;st.moved=0;st.rushT=0;
   if(offer){st.event=EVENTS.find(e=>e.id===offer.event)||EVENTS[0];st.tier=offer.tier}else{st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))];st.tier='base'}}
  const has=(st,t)=>st.grid.some(u=>u&&u.t===t);
  const costOf=(st,t)=>(PLACES[st.place]||{}).free&&PLACES[st.place].free.includes(t)?0:cost(t);
@@ -333,7 +349,7 @@ const Z=(()=>{
   const u={t,hp:D.hp};
   if(named(t)){const used=new Set(st.grid.filter(Boolean).map(v=>v.name).concat((st.fallen||[]).map(f=>f.name)));
    const pool=(t==='dog'?DOG_NAMES:NAMES).filter(n=>!used.has(n));const list=pool.length?pool:(t==='dog'?DOG_NAMES:NAMES);
-   u.name=list[Math.floor(rnd()*list.length)];
+   u.name=D.chief?U[t].n:list[Math.floor(rnd()*list.length)];
    const tr=Object.keys(TRAITS).filter(k=>(!TRAITS[k].att||D.dmg)&&(!TRAITS[k].far||(D.rng||0)>1));
    u.trait=tr[Math.floor(rnd()*tr.length)];u.kills=0;u.hp=maxHp(st,u)}
   st.grid[i]=u}
@@ -381,18 +397,18 @@ const Z=(()=>{
    const killed=hit(st,z,dmg,ev,i);ev.push({i,k:'fire'});got(killed);
    if(D.ignite&&z.hp>0)z.burnT=Math.max(z.burnT||0,D.ignite);
    if(D.push&&z.hp>0&&!ZT[z.k].boss){const b=back(z.pos),bu=st.grid[b];if(!(bu&&U[bu.t].block))z.pos=b}
-   if((D.feed||(D.cat==='melee'&&(st._fl||{}).pack>=2))&&killed)u.hp=Math.min(maxHp(st,u),u.hp+1)}
+   if((D.feed||(D.cat==='melee'&&(st._fl||{}).farm>=2))&&killed)u.hp=Math.min(maxHp(st,u),u.hp+1)}
  }
  // un zombie frappe une unité qui bloque (au contact, ou à distance pour le cracheur)
- function strike(st,z,n,u,ev,ranged,pow){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const T=ZT[z.k],D=stat(st,u.t);let d=T.boss?u.hp:zdmg(st,z.k);if(D.cap&&!T.boss)d=Math.min(d,D.cap);
+ function strike(st,z,n,u,ev,ranged,pow){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const T=ZT[z.k],D=stat(st,u.t);let d=T.boss?u.hp:zdmg(st,z.k);if(!T.boss&&(st._fl||{}).police&&famOf(u.t)==='police')d=Math.max(1,d-1);if(D.cap&&!T.boss)d=Math.min(d,D.cap);
   u.hp-=d;ev.push({i:n,txt:'−'+d,k:ranged?'spit':'bite',zid:z.id,from:z.pos});
-  if(!ranged&&u.t==='fen'&&pow){const el=(st._fl||{}).elec||0;hit(st,z,((st.relics.includes('groupe')||has(st,'solar'))?2:1)+(el?1:0),ev,n);if(el>=2)z.cd+=1}
+  if(!ranged&&u.t==='fen'&&pow){const el=(st._fl||{}).tech||0;hit(st,z,((st.relics.includes('groupe')||has(st,'solar'))?2:1)+(el?1:0),ev,n);if(el>=2)z.cd+=1}
   if(D.gas){st.grid[n]=null;explode(st,n,D.gas,ev);return}
   if(u.hp<=0&&lose(st,n,u,ev)&&D.tire)st.grid[n]={t:'fire',hp:1,gen:1}}
  // un zombie entre sur une case sans obstacle
  function enter(st,z,n,u,ev){if(!u||U[u.t].block)return;const D=stat(st,u.t),tb=[0,2,4][(st._fl||{}).trap||0];
   if(D.trap){hit(st,z,D.trap+tb,ev,n);st.grid[n]=null}
-  if(D.mine){st.grid[n]=null;explode(st,n,D.mine+tb,ev)}
+  if(D.mine){st.grid[n]=null;explode(st,n,D.mine+tb+((st._fl||{}).mil>=2?3:0),ev)}
   if(D.spike){hit(st,z,D.spike+tb,ev,n);u.hp--;if(u.hp<=0)st.grid[n]=null}
   if(D.wire){hit(st,z,D.wire+tb,ev,n);z.cd+=ZT[z.k].spd}
   if(D.smoke){st.z.filter(o=>o.hp>0&&cheb(o.pos,n)<=1).forEach(o=>o.cd+=D.smoke);ev.push({i:n,k:'smoke'});st.grid[n]=null}
@@ -401,17 +417,17 @@ const Z=(()=>{
   st.pending=st.pending.filter(p=>{if(p.at<=st.tick){spawn(st,p.k,p.pos);return false}return true});
   const alive=()=>st.z.filter(z=>z.hp>0);
   for(const z of alive()){z.inFire=0}
-  for(const z of alive())if(z.burnT>0){z.burnT--;hit(st,z,1+(fl.fire?1:0),ev,-1,1)}
+  for(const z of alive())if(z.burnT>0){z.burnT--;hit(st,z,1+(fl.pyro?1:0),ev,-1,1)}
   if(mc(st,'regen')&&st.tick%3===0)for(const z of alive())if(z.hp<z.max)z.hp++;
   for(let i=0;i<st.grid.length;i++){const u=st.grid[i];if(!u)continue;const D=stat(st,u.t);
    if(D.rng&&st.tick%D.every===0&&!(D.jam&&st.tick%D.jam===0)){
-    const reps=1+(st.tick%3===0&&around(i).some(j=>st.grid[j]&&st.grid[j].t==='lead')?1:0)+(st.rushT>0?1:0);
-    const rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(D.cat==='shoot'&&fl.guns?1:0)),dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+(D.cat==='shoot'&&fl.guns>=2?1:0)+(D.cat==='melee'&&fl.pack?1:0);
+    const reps=1+(st.tick%3===0&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].lead)?1:0)+(st.rushT>0?1:0);
+    const rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&famOf(u.t)==='police'?1:0)),dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+(fl.mil&&famOf(u.t)==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}
-   if(D.heal&&st.tick%2===0){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal);ev.push({i,k:'heal'})}}
-   if(D.mech){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j]));if(ns.length){st.grid[ns[0]].hp++;ev.push({i:ns[0],k:'heal'})}}
-   if(D.burn&&e!=='pluie')alive().filter(z=>z.pos===i).forEach(z=>{z.inFire=1;hit(st,z,D.burn+(fl.fire?1:0),ev,i,1)});
-   if(D.dyn&&st.tick===8){st.grid[i]=null;explode(st,i,D.dyn,ev)}
+   if(D.heal&&(D.hfast||st.tick%2===0)){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0));ev.push({i,k:'heal'})}}
+   if(D.mech){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j]));if(ns.length){const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0));ev.push({i:ns[0],k:'heal'})}}
+   if(D.burn&&e!=='pluie')alive().filter(z=>z.pos===i).forEach(z=>{z.inFire=1;hit(st,z,D.burn+(fl.pyro?1:0),ev,i,1)});
+   if(D.dyn&&st.tick===8){st.grid[i]=null;explode(st,i,D.dyn+(fl.mil>=2?3:0),ev)}
   }
   for(const z of st.z){if(z.hp<=0)continue;z.cd--;if(z.cd>0)continue;const T=ZT[z.k],dm=zdmg(st,z.k);z.cd=zspd(st,z.k);
    const tgt=lureTarget(st,z.pos),ms=moves(z.pos,tgt,z.style),blocks=j=>{const v=st.grid[j];return !!(v&&U[v.t].block&&!(T.crawl&&U[v.t].cat==='wall'))};
@@ -426,7 +442,7 @@ const Z=(()=>{
    z.pos=n;enter(st,z,n,u,ev)
   }
   for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;if(!z.bit){const T=ZT[z.k];st.kills++;st.scrap+=T.boss?15:1;
-   if(fl.fire>=2&&(z.burnT>0||z.inFire)){st.z.filter(o=>o.hp>0&&o!==z&&cheb(o.pos,z.pos)<=1).forEach(o=>hit(st,o,2,ev,-1,1));ev.push({i:z.pos,k:'boom'})}
+   if(fl.pyro>=2&&(z.burnT>0||z.inFire)){st.z.filter(o=>o.hp>0&&o!==z&&cheb(o.pos,z.pos)<=1).forEach(o=>hit(st,o,2,ev,-1,1));ev.push({i:z.pos,k:'boom'})}
    if(mc(st,'putride'))around(z.pos).forEach(j=>{const u=st.grid[j];if(u&&U[u.t].block){u.hp--;ev.push({i:j,txt:'−1',k:'bite',zid:z.id});if(u.hp<=0)lose(st,j,u,ev)}});
    if(T.howl){ev.push({i:z.pos,k:'howl'});for(let k=0;k<T.howl;k++)spawn(st,'walk',z.pos)}}}
   st.z=st.z.filter(z=>z.hp>0);
@@ -439,7 +455,8 @@ const Z=(()=>{
   if(st.shelter<=0)return{heal:0,scrap:0};
   const fl=famLevels(st),T=TIERS[st.tier]||TIERS.base;
   const h=st.grid.filter(u=>u&&u.t==='cook').length+(st.relics.includes('soupe')?1:0)+(fl.comm?1:0),before=st.shelter;
-  st.shelter=Math.min(maxS(st),st.shelter+h);if(fl.comm>=2)st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+1)});
+  if(fl.care>=2)st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+2)});
+  st.shelter=Math.min(maxS(st),st.shelter+h);
   const s=(st.relics.includes('aimant')?3:0)+(T.scrap||0);st.scrap+=s;
   return{heal:st.shelter-before,scrap:s,card:T.card||null,relic:!!T.relic,tier:st.tier||'base'}}
  // réactions pendant la nuit
@@ -456,6 +473,6 @@ const Z=(()=>{
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
  return{N,C,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

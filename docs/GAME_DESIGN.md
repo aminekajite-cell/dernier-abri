@@ -110,18 +110,22 @@ Règles détaillées :
 - Grenade (1, commune) : 5 dégâts sur la case visée et autour. Tir de l'abri (1, commune) : 6 dégâts au zombie le plus proche de l'abri. Réparation express (1, commune) : une unité récupère 5 PV. Molotov (2, rare) : 2 dégâts en zone et les zombies brûlent 4 tours. Klaxon (2, rare) : tous les zombies (sauf le Colosse) reculent d'une case. Adrénaline (2, épique) : les unités attaquent deux fois pendant 3 tours.
 - Chaque personnage commence avec une Grenade.
 
-## Les familles
+## Les factions et leurs chefs
 
-Chaque unité appartient au plus à une famille. Plus il y a d'unités d'une même famille sur la carte, plus la famille est forte (2 paliers). Les familles actives s'affichent sous le compte de la horde.
+Chaque unité appartient au plus à une faction. Plus il y a d'unités d'une même faction sur la carte, plus la faction est forte (2 paliers). Le **Chef** de la faction (carte légendaire : 1 exemplaire, 3 énergie, 100 points de survie, jamais proposé à l'aube ni au troc) lui fait gagner **un palier** tant qu'il est en vie. Les badges sous la horde montrent le nombre d'unités et les paliers atteints (★).
 
-| Famille | Cartes | Palier 1 | Palier 2 |
-|---|---|---|---|
-| 🔥 Feu | Essence, Lance-flammes, Cocktails, Dynamite, Bonbonne de gaz, Mur de pneus | 3 : le feu fait +1 dégât par tour | 5 : les zombies qui meurent en brûlant explosent (2 dégâts autour) |
-| ⚡ Électricité | Clôture, Projecteur, Panneau solaire, Sirène | 2 : clôtures +1 dégât | 4 : la clôture étourdit 1 tour |
-| 🪤 Pièges | Piège à loup, Mine, Fosse, Barbelés, Fumigène, Appât | 3 : pièges +2 dégâts | 5 : +4 dégâts au total |
-| 🪓 Meute | Bûcheron, Chien, Policier, Boucher, Moine | 3 : corps à corps +1 dégât | 5 : +1 PV par zombie tué |
-| 🔫 Armes à feu | Tireur, Sniper, Fusil à pompe, Mitrailleuse, Arbalète, Gamin | 4 : +1 portée | 6 : +1 dégât |
-| 🏠 Communauté | Infirmière, Cuisinier, Mécanicien, Chef de groupe, Radio | 3 : l'abri récupère 1 PV à l'aube | 5 : toutes les unités récupèrent 1 PV à l'aube |
+| Faction | Cartes | Palier 1 | Palier 2 | Chef |
+|---|---|---|---|---|
+| 👮 Police | Policier, Tireur, Projecteur, Sirène | 3 : les policiers perdent 1 PV de moins par coup | 5 : +1 portée | Le Commissaire (2 dégâts, portée 2) |
+| 🎖️ Militaires | Sniper, Mitrailleuse, Fusil à pompe, Mine, Dynamite | 3 : +1 dégât | 5 : mines et dynamite +3 dégâts | La Sergente (3 tirs, portée 3) |
+| ⛑️ Soignants | Infirmière, Cuisinier | 2 : soins +1 PV | 4 : toutes les unités +2 PV à l'aube | La Doctoresse (soigne 2 PV chaque tour) |
+| 🔥 Pyromanes | Essence, Lance-flammes, Cocktails, Bonbonne, Pneus | 3 : feu +1 dégât par tour | 5 : les zombies qui meurent en brûlant explosent | Le Pyromane (enflamme tout à 2 cases) |
+| 🪤 Trappeurs | Piège à loup, Fosse, Barbelés, Fumigène, Appât, Arbalète | 3 : pièges +2 dégâts | 5 : +4 au total | Le Braconnier (3 dégâts, portée 4) |
+| 🐕 Fermiers | Chien, Bûcheron, Boucher | 2 : corps à corps +1 dégât | 4 : +1 PV par zombie tué | La Fermière (2 coups de 2, 8 PV) |
+| ⚡ Bricoleurs | Clôture, Panneau solaire, Mécanicien, Radio | 3 : clôtures +1 dégât | 5 : clôtures étourdissantes, réparations +1 | L'Ingénieur (répare 2 PV par tour) |
+| 🏠 Communauté | Chef de groupe, Moine, Gamin | 2 : l'abri +1 PV à l'aube | 4 : +1 énergie par jour | Le Maire (les voisins attaquent plus souvent) |
+
+L'étape suivante ajoute de nouvelles cartes pour que chaque faction ait assez de cartes pour un deck complet.
 
 ## Le choix de la nuit
 
@@ -356,6 +360,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Trajets variés et contournement des murs : avant, deux murs à gauche et à droite de la maison bloquaient presque toute la horde.
 - Survivants nommés, avec trait et mort définitive : identité du jeu pour Steam (on s'attache, on raconte ses parties).
 - Énergie (4 par jour, cartes à 0-3) à la place de « 2 cartes par jour », main conservée d'un jour à l'autre et déplacement d'une unité par jour (Amine : 2 cartes ne laissaient pas de vraie stratégie).
+- 8 factions avec un Chef légendaire, à la place des 6 familles.
 - Collection permanente et decks construits avant la partie (Amine : plus de stratégie de deck). Deck de 30 cartes au maximum plutôt que 40, pour que la stratégie ne se dilue pas.
 - Réactions de nuit, familles et choix de la nuit (rejouabilité et décisions). PV des zombies −25 % (Amine : trop dur), puis +25 % et choix de la nuit rendu rare (1 aube sur 4).
 - Amine teste lui-même l'équilibrage ; la simulation n'est plus lancée à chaque changement.

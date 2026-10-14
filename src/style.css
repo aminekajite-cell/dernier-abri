@@ -99,6 +99,8 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .pick{position:relative}
 .rt{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 5px;align-self:center}
 .rt.rare{color:var(--r-rare);border:1px solid var(--r-rare)}
+.rt.leg{color:#f2c23d;border:1px solid #f2c23d}
+.card.r-leg,.pick.r-leg{border-color:#f2c23d;box-shadow:0 0 12px rgba(242,194,61,.3)}
 .rt.epic{color:var(--r-epic);border:1px solid var(--r-epic)}
 .dk .rt{display:inline-block;margin-right:6px}
 .panel p.ver{text-align:center;font-size:11px;opacity:.6}
