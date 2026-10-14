@@ -36,7 +36,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 - La boucle d'affichage ne doit jamais s'arrêter sur une erreur : chaque élément est dessiné dans un bloc protégé. Évite les API de canvas récentes sans solution de secours (exemple : `roundRect`, déjà remplacé si absent).
 - Mets à jour `docs/GAME_DESIGN.md` quand une décision de conception change.
 - Fais des commits petits, avec un message clair en français.
-- À chaque mise en ligne, change `VERSION` en haut de `src/game.js` (affichée sur l'écran d'accueil) pour qu'Amine vérifie qu'il teste la dernière version.
+- À chaque mise en ligne, change `VERSION` en haut de `src/game.js` (affichée sur l'écran d'accueil) et le numéro `?v=` des trois fichiers dans `index.html` (sinon le téléphone garde l'ancienne version en cache).
 
 ## Prochaines étapes (par ordre de priorité)
 
