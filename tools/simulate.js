@@ -25,15 +25,15 @@ function bestCard(st,choices){const seed=1+Math.floor(Math.random()*1e9);let bes
 function game(){
  const st=Z.newState(CH);let draw=sh([...Z.CHARS[CH].deck]),disc=[],nextCard=null;
  for(;;){
-  const hand=[];if(nextCard){hand.push(nextCard);nextCard=null}
-  const n=Z.drawCount(st);while(hand.length<n){if(!draw.length){draw=sh(disc);disc=[]}if(!draw.length)break;hand.push(draw.pop())}
+  if(!st.hand)st.hand=[];const hand=st.hand;if(nextCard){hand.push(nextCard);nextCard=null}
+  const n=Z.drawCount(st);let fresh=0;while(hand.length<n||fresh<1){fresh++;if(!draw.length){draw=sh(disc);disc=[]}if(!draw.length)break;hand.push(draw.pop())}
   const seed=1+Math.floor(Math.random()*1e9);
-  for(let p=0;p<Z.playsPerDay(st)+BONUS&&hand.length;p++){let best=null;
-   for(let h=0;h<hand.length;h++){const t=hand[h];if(t==='roadmap')continue;
+  for(let p=0;p<12&&hand.length;p++){let best=null;
+   for(let h=0;h<hand.length;h++){const t=hand[h];if(t==='roadmap'||!Z.canPay(st,t))continue;
     for(let i=0;i<Z.N*Z.N;i++){if(!Z.canPlace(st,t,i))continue;const c=clone(st);Z.place(c,t,i,mk(seed));Z.runNight(c,mk(seed));const v=score(c);if(!best||v>best.v)best={v,h,i}}}
    if(!best)break;
    Z.place(st,hand[best.h],best.i);disc.push(hand[best.h]);hand.splice(best.h,1)}
-  disc.push(...hand);
+  while(hand.length>Z.HAND_MAX-1)disc.push(hand.pop());
   Z.runNight(st,mk(1+Math.floor(Math.random()*1e9)));Z.endNight(st);
   if(st.shelter<=0||st.night>=MAXN){SP+=st.spawned||0;RE+=st.reached||0;return st.night}
   if(Z.mutNight(st.night))Z.mutate(st);

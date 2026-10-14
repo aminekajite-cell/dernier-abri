@@ -10,7 +10,7 @@ Plateformes visées : Steam (PC) puis mobile.
 ## La boucle de jeu
 
 1. **Début** : tu choisis un personnage, qui donne un deck de départ de 8 cartes et parfois une relique.
-2. **Jour** : tu pioches 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos) et tu en joues 2 (le Café en donne une de plus).
+2. **Jour** : tu as **4 énergies**. Chaque carte coûte de 0 à 3 énergies selon sa puissance ; tu joues autant de cartes que ton énergie le permet (le Café, gratuit, donne +2 énergies). Les cartes non jouées **restent en main** pour les jours suivants. Chaque jour, la main est complétée jusqu'à 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos), avec au moins 1 nouvelle carte et 8 cartes au maximum. Une fois par jour, tu peux aussi **déplacer** une de tes unités vers une case libre.
 3. **Nuit** : les zombies apparaissent sur l'anneau extérieur (les bois) et marchent vers la maison. Tes unités attaquent automatiquement. Les zombies frappent tout ce qui bloque leur chemin. Le bouton du bas passe la nuit en vitesse ×2.
 4. **Aube** :
    - toutes les 4 nuits, la horde mute (bonus permanent pour les zombies) ;
@@ -40,6 +40,13 @@ Score : nombre de nuits survécues, avec un record sauvegardé (et le nombre de 
 ## Les cartes
 
 Il y a 40 cartes. Le deck de départ ne contient que les 8 cartes du personnage : les autres se gagnent à l'aube ou s'achètent au troc. Les unités posées restent en place d'une nuit à l'autre et gardent leurs dégâts. Poser une carte sur une case occupée remplace l'unité.
+
+Coût en énergie :
+
+- **0 énergie** : Café
+- **1 énergie** : Barricade, Clôture, Sacs de sable, Gamin, Chien, Infirmière, Piège à loup, Essence, Barbelés, Fumigène, Appât, Conserves, Trousse de secours, Carte routière, Fusée de détresse
+- **2 énergie** : Mur de pneus, Tireur, Arbalète, Lance-flammes, Bûcheron, Policier, Boucher, Moine, Projecteur, Radio, Cuisinier, Mécanicien, Mine, Fosse à pieux, Bonbonne de gaz, Outils
+- **3 énergie** : Épave, Porte blindée, Sniper, Fusil à pompe, Mitrailleuse, Cocktails, Sirène, Chef de groupe, Panneau solaire, Dynamite
 
 Rareté : à chaque tirage (aube, troc), une carte est commune à 67 %, rare à 27 %, épique à 6 %. Les cartes les plus puissantes sont épiques.
 
@@ -230,6 +237,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - La carte choisie à l'aube arrive d'office dans la main du lendemain (demande d'Amine).
 - Une seule monnaie (la ferraille) pour le troc : plusieurs ressources seraient trop lourdes sur petit écran.
 - Trajets variés et contournement des murs : avant, deux murs à gauche et à droite de la maison bloquaient presque toute la horde.
+- Énergie (4 par jour, cartes à 0-3) à la place de « 2 cartes par jour », main conservée d'un jour à l'autre et déplacement d'une unité par jour (Amine : 2 cartes ne laissaient pas de vraie stratégie).
 - Amine teste lui-même l'équilibrage ; la simulation n'est plus lancée à chaque changement.
 - PV des zombies doublés une seconde fois (Amine était invincible à la nuit 15). Le bot tombe alors vers la nuit 4 : il joue nettement moins bien qu'Amine, la simulation sert surtout à comparer.
 - Zombies deux fois plus coriaces mais 40 % moins nombreux (Amine : « les zombies meurent avant d'atteindre mes unités »). Avant, seuls 26 % arrivaient au contact.

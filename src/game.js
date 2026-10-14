@@ -49,7 +49,7 @@ const ICON={
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v9 · 14 oct.';
+const VERSION='v10 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -63,18 +63,19 @@ const ZN={walk:['rôdeur','rôdeurs'],run:['coureur','coureurs'],fat:['gonflé',
 let S,G;
 function newGame(ch){
  G=Z.newState(ch);
- S={draw:shuffle([...Z.CHARS[G.char].deck]),discard:[],hand:[],sel:null,placed:0,busy:false,next:null,phase:null,picks:null,dawn:null};
+ S={draw:shuffle([...Z.CHARS[G.char].deck]),discard:[],hand:[],sel:null,moveFrom:null,busy:false,next:null,phase:null,picks:null,dawn:null};
  V.clear();FX.length=0;PT.length=0;facing.fill(null);clearDecals();
  fillHand();
 }
 // la carte choisie à l'aube arrive d'office dans la main, le reste est pioché
-function fillHand(){if(S.next){S.hand.push(S.next);S.next=null}drawCards(Z.drawCount(G)-S.hand.length)}
+// la main se garde d'un jour à l'autre : on la complète jusqu'au nombre de cartes du jour (au moins 1 nouvelle), sans dépasser HAND_MAX
+function fillHand(){if(S.next){S.hand.push(S.next);S.next=null}drawCards(Math.min(Z.HAND_MAX-S.hand.length,Math.max(1,Z.drawCount(G)-S.hand.length)))}
 function drawCards(n){for(let k=0;k<n;k++){if(!S.draw.length){S.draw=shuffle(S.discard);S.discard=[]}if(!S.draw.length)break;S.hand.push(S.draw.pop())}}
 const deckList=()=>[...S.draw,...S.discard,...S.hand];
 
 /* ---------- sauvegarde (localStorage, marche aussi dans Electron/Tauri) ---------- */
 const SAVE_KEY='abri-save',SAVE_V=2;
-function save(){try{const g={...G,event:G.event.id,z:[],pending:[],tick:0};localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_V,g,s:{draw:S.draw,discard:S.discard,hand:S.hand,placed:S.placed,next:S.next,phase:S.phase,picks:S.picks}}))}catch(e){}}
+function save(){try{const g={...G,event:G.event.id,z:[],pending:[],tick:0};localStorage.setItem(SAVE_KEY,JSON.stringify({v:SAVE_V,g,s:{draw:S.draw,discard:S.discard,hand:S.hand,next:S.next,phase:S.phase,picks:S.picks}}))}catch(e){}}
 function loadSave(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(d&&d.v===SAVE_V&&d.g&&d.s)return d}catch(e){}return null}
 function clearSave(){try{localStorage.removeItem(SAVE_KEY)}catch(e){}}
 function resume(d){
@@ -307,8 +308,9 @@ function frameInner(now){
  BARS=[];EYES=[];
  ctx.drawImage(ground,0,0,L,L);ctx.drawImage(decal,0,0,L,L);
  if(!S.busy){
-  const t=S.sel!==null?S.hand[S.sel]:null;
-  for(const i of Z.INNER){const p=tc(i);if(t&&Z.canPlace(G,t,i)){ctx.strokeStyle='rgba(242,179,61,.7)';ctx.lineWidth=t==='kit'?2:1;ctx.setLineDash([4,4])}else{ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;ctx.setLineDash([])}ctx.strokeRect(p.x-T/2+2,p.y-T/2+2,T-4,T-4)}
+  const t=S.sel!==null?S.hand[S.sel]:null,mv=S.moveFrom;
+  if(mv!==null){const p=tc(mv);ctx.strokeStyle='#7cc7ff';ctx.lineWidth=2.5;ctx.strokeRect(p.x-T/2+2,p.y-T/2+2,T-4,T-4)}
+  for(const i of Z.INNER){const p=tc(i);if(mv!==null&&Z.canMove(G,mv,i)){ctx.strokeStyle='rgba(124,199,255,.75)';ctx.lineWidth=1.5;ctx.setLineDash([4,4])}else if(t&&Z.canPlace(G,t,i)){ctx.strokeStyle='rgba(242,179,61,.7)';ctx.lineWidth=t==='kit'?2:1;ctx.setLineDash([4,4])}else{ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;ctx.setLineDash([])}ctx.strokeRect(p.x-T/2+2,p.y-T/2+2,T-4,T-4)}
   ctx.setLineDash([]);
   if(t&&Z.canPlace(G,t,Z.C)){ctx.strokeStyle='rgba(242,179,61,.8)';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.strokeRect(CEN.x-T/2-4,CEN.y-T/2-4,T+8,T+8);ctx.setLineDash([])}
  }
@@ -380,33 +382,38 @@ function render(){
  $('#event').innerHTML=`<b>${G.event.n}</b><span>${G.event.d}${G.side>=0?` · Fusée : ils viendront de ${Z.SIDES[G.side]}`:''}</span>`;
  const mN=G.muts.length,soon=Z.mutNight(G.night);
  $('#horde').innerHTML=(S.busy?'':hordeHtml())+`<span class="tags">${mN||soon?`<span class="mutc${soon?' soon':''}" title="Mutations de la horde">${svg('mut')}${mN}${soon?' · mute à l’aube':''}</span>`:''}<span class="scrap" title="Ferraille">${svg('scrap')}${G.scrap}</span></span>`;
- const plays=Z.playsPerDay(G),left=plays-S.placed;
- const hand=$('#hand');hand.style.setProperty('--n',Math.max(5,S.hand.length));
- hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card r-${rar(t)}${S.sel===k?' sel':''}${G.upg[t]?' up':''}" data-k="${k}" style="--cc:${cc(t)}" ${S.busy||left<=0?'disabled':''}>${svg(t)}<span class="nm">${cardName(t)}</span><span class="v">${Z.U[t].v}</span></button>`).join('');
+ const left=G.energy??Z.ENERGY;
+ const hand=$('#hand');hand.style.setProperty('--n',Math.max(5,Math.min(6,S.hand.length)));
+ hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card r-${rar(t)}${S.sel===k?' sel':''}${G.upg[t]?' up':''}" data-k="${k}" style="--cc:${cc(t)}" ${S.busy||!Z.canPay(G,t)?'disabled':''}><span class="cost">${Z.cost(t)}</span>${svg(t)}<span class="nm">${cardName(t)}</span><span class="v">${Z.U[t].v}</span></button>`).join('');
  const info=$('#info');info.className='info';
  if(S.busy){const left=G.z.length+G.pending.length;info.innerHTML=`<b>${plural(left,'zombie','zombies')}</b> encore dehors.`}
- else if(S.sel!==null){const t=S.hand[S.sel],D=Z.U[t];info.innerHTML=`<b>${cardName(t)}</b> : ${D.d}.`+(D.onUnit?' Touche une unité blessée.':D.instant?' Touche l’abri.':D.near?' Touche une case collée à l’abri.':' Touche un emplacement.')}
- else if(left>0)info.innerHTML=`Prépare l’abri avant la nuit. <b>${left}</b> carte${left>1?'s':''} à jouer.`;
- else info.textContent='Prêt. Affronte la nuit.';
+ else if(S.sel!==null){const t=S.hand[S.sel],D=Z.U[t];info.innerHTML=`<b>${cardName(t)}</b> (${Z.cost(t)} énergie) : ${D.d}.`+(D.onUnit?' Touche une unité blessée.':D.instant?' Touche l’abri.':D.near?' Touche une case collée à l’abri.':' Touche un emplacement.')}
+ else if(S.moveFrom!==null)info.innerHTML=`Déplacer <b>${cardName(G.grid[S.moveFrom].t)}</b> : touche une case libre en bleu.`;
+ else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie.`+(G.moved?'':' Touche une unité pour la déplacer (1 fois par jour).');
  const go=$('#go');go.disabled=false;go.textContent=S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy);
 }
-$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;const k=+b.dataset.k;S.sel=S.sel===k?null:k;render()});
+$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;const k=+b.dataset.k;S.sel=S.sel===k?null:k;S.moveFrom=null;render()});
 $('#round').addEventListener('click',()=>{if(!S.busy&&ov.hidden)runInfo()});
 cv.addEventListener('click',e=>{
  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*L,y=(e.clientY-r.top)/r.height*L;
  const i=Math.floor(y/T)*Z.N+Math.floor(x/T);tapCell(i);
 });
 function tapCell(i){
- if(S.busy||S.sel===null||S.placed>=Z.playsPerDay(G))return;
+ if(S.busy)return;
+ if(S.sel===null){
+  // déplacement d'une unité : on la touche, puis on touche une case libre
+  if(S.moveFrom!==null){const a=S.moveFrom;S.moveFrom=null;if(Z.move(G,a,i)){facing[i]=facing[a];facing[a]=null;const p=tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#7cc7ff',dur:350});save()}render();return}
+  if(G.grid[i]&&!G.moved){S.moveFrom=i;render()}
+  return}
  const t=S.hand[S.sel],D=Z.U[t];
- if(!Z.canPlace(G,t,i))return;
- S.hand.splice(S.sel,1);Z.place(G,t,i);if(!D.instant)facing[i]=null;S.discard.push(t);S.placed++;S.sel=null;
+ if(!Z.canPay(G,t)||!Z.canPlace(G,t,i))return;
+ S.hand.splice(S.sel,1);Z.place(G,t,i);if(!D.instant)facing[i]=null;S.discard.push(t);S.sel=null;S.moveFrom=null;
  const p=D.instant&&!D.onUnit?CEN:tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#f2b33d',dur:350});
  const St=Z.stat(G,t);
  if(t==='food')floatTxt(CEN.x,CEN.y,`+${St.gain} PV`,'#9fd86b');
  if(t==='rep')G.grid.forEach((u,j)=>{if(u&&Z.U[u.t].block){const q=tc(j);floatTxt(q.x,q.y,`+${St.gain}`,'#9fd86b')}});
  if(t==='kit')floatTxt(p.x,p.y,'Soigné','#9fd86b');
- if(t==='coffee')floatTxt(CEN.x,CEN.y,'+1 carte','#f2b33d');
+ if(t==='coffee')floatTxt(CEN.x,CEN.y,'+2 énergie','#f2b33d');
  if(t==='flare')floatTxt(CEN.x,CEN.y,'Fusée !','#ff8a5a');
  save();render();
  if(D.peek)peekScreen();
@@ -420,7 +427,7 @@ function peekScreen(){
 
 async function night(){
  if(S.busy)return;S.busy=true;S.sel=null;
- S.discard.push(...S.hand);S.hand=[];save();
+ S.moveFrom=null;save();
  const scrap0=G.scrap,kills0=G.kills;
  nightTarget=1;Z.startNight(G,Math.random);render();await wait(900);
  let r;
@@ -440,7 +447,7 @@ async function night(){
 }
 
 /* ---------- l'aube : relique, carte pour demain, boutique ---------- */
-const pickBtn=(t,a,v)=>`<button type="button" class="pick r-${rar(t)}${G.upg[t]?' up':''}" data-a="${a}" data-v="${v}" style="--cc:${cc(t)}">${rarTag(t)}${svg(t)}<span class="nm">${cardName(t)}</span><span class="d">${Z.U[t].d}</span></button>`;
+const pickBtn=(t,a,v)=>`<button type="button" class="pick r-${rar(t)}${G.upg[t]?' up':''}" data-a="${a}" data-v="${v}" style="--cc:${cc(t)}"><span class="cost">${Z.cost(t)}</span>${rarTag(t)}${svg(t)}<span class="nm">${cardName(t)}</span><span class="d">${Z.U[t].d}</span></button>`;
 function dawn(){
  const d=S.dawn;
  if(d&&d.mut&&!d.mutShown){d.mutShown=1;
@@ -475,7 +482,7 @@ const deckTypes=()=>[...new Set(deckList())];
 function listScreen(title,txt,types,a){show(`<h2 class="pw">${title}</h2><p>${txt}</p><div class="deck pickable">${types.map(t=>`<button type="button" class="dk" data-a="${a}" data-v="${t}" style="--cc:${cc(t)}">${svg(t)}<span><b>${cardName(t)}${a==='up-pick'?` → ${Z.upgDesc(t)}`:''}</b>${Z.U[t].d}</span></button>`).join('')}</div><button type="button" class="skip" data-a="shop">Retour</button>`)}
 function removeCard(t){for(const pile of[S.discard,S.draw,S.hand]){const k=pile.indexOf(t);if(k>=0){pile.splice(k,1);return true}}return false}
 function nextDay(){
- Z.newDay(G,Math.random);S.placed=0;S.busy=false;S.phase=null;S.picks=null;S.dawn=null;V.clear();
+ Z.newDay(G,Math.random);S.moveFrom=null;S.busy=false;S.phase=null;S.picks=null;S.dawn=null;V.clear();
  fillHand();save();hide();render();
 }
 function end(){
@@ -484,7 +491,7 @@ function end(){
  show(`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div><p><b>${G.kills}</b> zombies éliminés. Record : <b>${plural(best,'nuit','nuits')}</b>${nights>=best&&nights>0?' (nouveau record !)':''}.</p><button type="button" class="go" data-a="new">Rejouer</button>`);
 }
 const CATN={wall:'Défenses',shoot:'Tireurs',melee:'Corps à corps',help:'Soutien',trap:'Pièges',item:'Objets'};
-const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${svg(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}${Z.U[t].d}</span></div>`).join('')}</div>`).join('');
+const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${svg(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em> · ${Z.U[t].d}</span></div>`).join('')}</div>`).join('');
 const zedHtml=()=>`<div class="deck">${Object.entries(Z.ZT).map(([k,z])=>`<div class="dk" style="--cc:var(--z-${k})"><svg class="ic" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="7"/></svg><span><b>${z.n}</b>${z.hp} PV, ${z.dmg} dégât${z.dmg>1?'s':''} par coup, ${z.info}</span></div>`).join('')}</div>`;
 function runInfo(){
  const counts={};deckList().forEach(t=>counts[t]=(counts[t]||0)+1);
@@ -527,7 +534,8 @@ panel.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b
 $('#go').addEventListener('click',()=>{if(S.busy){SPEED=SPEED===1?2:1;render()}else night()});
 
 function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de fin. Survis <b>une nuit de plus</b>, encore et encore : chaque nuit, la horde est plus nombreuse et plus coriace.</p>
-<ul><li>Le jour, joue <b>2 cartes</b> autour de ta maison : défenses, survivants armés, pièges ou objets.</li>
+<ul><li>Le jour, dépense tes <b>4 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
+<li>Une fois par jour, tu peux <b>déplacer</b> une de tes unités : touche-la, puis touche une case libre.</li>
 <li>La nuit, les zombies sortent des <b>bois</b> et marchent vers la maison. Tes survivants se défendent tout seuls.</li>
 <li>À l’aube, choisis la carte que tu auras <b>en main le lendemain</b>, puis échange ta <b>ferraille</b> au troc.</li>
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>

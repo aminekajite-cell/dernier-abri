@@ -49,11 +49,18 @@ const Z=(()=>{
   food:{n:'Conserves',cat:'item',instant:1,gain:3,v:'+3 abri',d:'Utilise-la sur l\'abri : +3 PV'},
   rep:{n:'Outils',cat:'item',instant:1,gain:3,v:'+3 PV',d:'Utilise-les sur l\'abri : toutes tes unités récupèrent 3 PV'},
   kit:{n:'Trousse de secours',cat:'item',instant:1,onUnit:1,v:'Soin total',d:'Utilise-la sur une de tes unités blessées : elle récupère tous ses PV'},
-  coffee:{n:'Café',cat:'item',instant:1,v:'+1 carte',d:'Utilise-le sur l’abri : il ne compte pas, et tu joues 1 carte de plus aujourd’hui'},
+  coffee:{n:'Café',cat:'item',instant:1,v:'+2 énergie',d:'Utilise-le sur l’abri : gratuit, +2 énergie aujourd’hui'},
   roadmap:{n:'Carte routière',cat:'item',instant:1,peek:3,v:'Fouille',d:'Utilise-la sur l’abri : regarde les 3 prochaines cartes de ta pioche et prends-en une'},
   flare:{n:'Fusée de détresse',cat:'item',instant:1,flare:1,v:'1 côté',d:'Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté'}
  };
  const KEYS=Object.keys(U);
+ // énergie : chaque jour on a ENERGY points, chaque carte coûte de 0 à 3 selon sa puissance
+ const ENERGY=4,HAND_MAX=8;
+ const COST={coffee:0};
+ 'bar fen sand trap fire wire smoke bait food kid dog med roadmap kit flare'.split(' ').forEach(t=>COST[t]=1);
+ 'gun axe cop tire spike mine lamp radio cook mech butch monk flame xbow rep gas'.split(' ').forEach(t=>COST[t]=2);
+ 'car door snp sht mg molo siren lead solar dyn'.split(' ').forEach(t=>COST[t]=3);
+ const cost=t=>COST[t]??2;
  const ZT={
   walk:{n:'Rôdeur',hp:12,spd:2,dmg:1,info:'lent'},
   run:{n:'Coureur',hp:8,spd:1,dmg:1,info:'rapide'},
@@ -156,11 +163,11 @@ const Z=(()=>{
  function shuffle(a,rnd=Math.random){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
  /* ---------- état d'une partie ---------- */
- function newState(ch){const st={grid:Array(N*N).fill(null),shelter:MAXS,night:1,event:EVENTS[0],z:[],pending:[],tick:0,zid:0,kills:0,scrap:0,relics:[],upg:{},muts:[],extra:0,side:-1,char:CHARS[ch]?ch:'surv'};
+ function newState(ch){const st={grid:Array(N*N).fill(null),shelter:MAXS,night:1,event:EVENTS[0],z:[],pending:[],tick:0,zid:0,kills:0,scrap:0,relics:[],upg:{},muts:[],energy:ENERGY,moved:0,side:-1,char:CHARS[ch]?ch:'surv'};
   const r=CHARS[st.char].relic;if(r)st.relics.push(r);return st}
- function newDay(st,rnd){st.night++;st.extra=0;st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))]}
+ function newDay(st,rnd){st.night++;st.energy=ENERGY;st.moved=0;st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))]}
  const has=(st,t)=>st.grid.some(u=>u&&u.t===t);
- const playsPerDay=st=>2+(st.extra||0);
+ const canPay=(st,t)=>cost(t)<=(st.energy??ENERGY);
  const drawCount=st=>5+(has(st,'radio')?1:0)+(st.relics.includes('sac')?1:0);
 
  /* ---------- améliorations et reliques : statistiques réelles d'une carte ---------- */
@@ -194,18 +201,21 @@ const Z=(()=>{
  function pay(st,k){const c=shopCost(st,k);if(st.scrap<c)return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(MAXS,st.shelter+3);return true}
 
  /* ---------- pose des cartes ---------- */
+ // déplacer une de ses unités : une fois par jour, vers une case libre où elle pourrait être posée
+ function canMove(st,a,b){const u=st.grid[a];return !st.moved&&!!u&&a!==b&&!st.grid[b]&&canPlace(st,u.t,b)}
+ function move(st,a,b){if(!canMove(st,a,b))return false;st.grid[b]=st.grid[a];st.grid[a]=null;st.moved=1;return true}
  function canPlace(st,t,i){const D=U[t];
   if(D.onUnit)return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<stat(st,st.grid[i].t).hp);
   if(D.instant)return i===C;
   if(isEdge(i)||i===C)return false;
   if(D.near)return cheb(i,C)===1;
   return true}
- function place(st,t,i,rnd=Math.random){const D=stat(st,t);if(D.instant){applyItem(st,t,i,rnd);return}st.grid[i]={t,hp:D.hp}}
+ function place(st,t,i,rnd=Math.random){const D=stat(st,t);st.energy=(st.energy??ENERGY)-cost(t);if(D.instant){applyItem(st,t,i,rnd);return}st.grid[i]={t,hp:D.hp}}
  function applyItem(st,t,i,rnd){const D=stat(st,t);
   if(t==='food')st.shelter=Math.min(MAXS,st.shelter+D.gain);
   if(t==='rep')st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(stat(st,u.t).hp,u.hp+D.gain)});
   if(t==='kit'&&st.grid[i])st.grid[i].hp=stat(st,st.grid[i].t).hp;
-  if(t==='coffee')st.extra=(st.extra||0)+2;
+  if(t==='coffee')st.energy+=2;
   if(t==='flare')st.side=Math.floor(rnd()*4)}
 
  /* ---------- la nuit ---------- */
@@ -299,6 +309,6 @@ const Z=(()=>{
   return{heal:st.shelter-before,scrap:s}}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
  return{N,C,MAXS,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,playsPerDay};
+  rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

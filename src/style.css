@@ -102,4 +102,12 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .rt.epic{color:var(--r-epic);border:1px solid var(--r-epic)}
 .dk .rt{display:inline-block;margin-right:6px}
 .panel p.ver{text-align:center;font-size:11px;opacity:.6}
+.card,.pick{position:relative}
+.card .cost,.pick .cost{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:var(--lantern);color:#1d1404;font-size:11px;font-weight:700;display:grid;place-items:center;line-height:1}
+.card:disabled .cost{background:var(--muted)}
+.nrg{display:inline-flex;gap:3px;vertical-align:middle}
+.nrg i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--lantern)}
+.nrg i.on{background:var(--lantern)}
+.dk em.ce{font-style:normal;color:var(--lantern);font-weight:700}
+.hand{grid-auto-rows:auto}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
