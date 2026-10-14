@@ -279,7 +279,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - La nuit : obscurité avec des sources de lumière (maison, projecteurs, flammes, tirs). Les zombies ont des yeux rouges lumineux pour rester visibles.
 - Retours visuels : traînées de balles, éclairs de tir, coups de hache, explosions, taches de sang qui restent au sol, tremblement d'écran quand la maison est touchée.
 - Unités sur un cercle de couleur selon leur rôle : bois (défense), jaune (tireur), rouge-orangé (corps à corps), bleu (soutien), rouge (piège), violet clair (objet).
-- Pour la version commerciale : remplacer les dessins en code par des sprites d'un pack libre de droits (par exemple Kenney.nl).
+- Personnages et zombies : sprites du pack Kenney « Top-down Shooter » (licence CC0, utilisable commercialement), dans `assets/sprites/`. Un seul sprite de zombie, teinté selon le type. Les défenses, pièges, chiens et l'abri restent dessinés en code ; si une image ne se charge pas, le dessin en code reprend la main.
 
 ## Le défi quotidien
 

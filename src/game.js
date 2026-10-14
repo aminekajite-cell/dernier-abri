@@ -49,7 +49,7 @@ const ICON={
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v16 · 14 oct.';
+const VERSION='v17 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -187,8 +187,28 @@ function drawUnit(i,u,now){
  const mx=Z.maxHp(G,u);if(D0.block)hpBar(p0.x,p0.y-31,u.hp/mx,u.hp/mx>.4?'#9fd86b':'#e5484d');
  if(u.name&&nightAmt<.5)LABELS.push([p0.x,p0.y+33,u.name]);
 }
+/* ---------- sprites (pack Kenney « Top-down Shooter », CC0) : tant qu'une image n'est pas chargée, on garde le dessin en code ---------- */
+const SPR={};
+function spr(n){if(!(n in SPR)){const im=new Image();im.src='assets/sprites/'+n+'.png?v=17';SPR[n]=im}const im=SPR[n];return im.complete&&im.naturalWidth?im:null}
+const UNIT_SPR={gun:'manBlue_gun',snp:'soldier1_silencer',sht:'manBrown_gun',mg:'soldier1_machine',xbow:'survivor1_silencer',flame:'hitman1_machine',molo:'manOld_hold',kid:'womanGreen_gun',axe:'survivor1_hold',cop:'manBlue_hold',butch:'manBrown_hold',monk:'manOld_stand',med:'womanGreen_stand',cook:'womanGreen_hold',mech:'survivor1_reload',lead:'soldier1_stand'};
+Object.values(UNIT_SPR).concat('zombie_hold').forEach(spr);
+// zombies : un seul sprite, teinté selon le type
+const ZTINT={run:'#d8e45a',fat:'#b98be0',crawl:'#6fb0b0',spit:'#c6e83a',armor:'#a9b3bd',howl:'#e0a0c0',boss:'#ff5a3a'};
+const tintCache={};
+function zspr(k){const im=spr('zombie_hold');if(!im)return null;if(!ZTINT[k])return im;
+ if(!tintCache[k]){const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;const g=c.getContext('2d');g.drawImage(im,0,0);g.globalCompositeOperation='source-atop';g.globalAlpha=.5;g.fillStyle=ZTINT[k];g.fillRect(0,0,c.width,c.height);tintCache[k]=c}
+ return tintCache[k]}
 function drawUnitInner(i,u,now){
  const{x,y}=tc(i),D=Z.U[u.t],dx=x-CEN.x,dy=y-CEN.y,out=Math.atan2(dy,dx);const a=facing[i]??out,s=rng(i+3);
+ const sp=UNIT_SPR[u.t]&&spr(UNIT_SPR[u.t]);
+ if(sp){const k=u.t==='kid'?.5:.62,w=sp.naturalWidth*k,h=sp.naturalHeight*k,sw=(u.t==='axe'||u.t==='butch')?Math.sin(now/300)*.1:0;
+  ctx.save();ctx.translate(x,y);ell(2,4,12,9,'rgba(0,0,0,.35)');ctx.rotate(a+sw);
+  if(u.t==='axe'||u.t==='butch'){line(4,6,17,6,'#6b4a2a',2.5);ctx.fillStyle='#9aa0a6';ctx.fillRect(14,2,6,5)}
+  if(u.t==='flame'){circ(-9,0,4,'#b8332f')}
+  ctx.drawImage(sp,-w*.38,-h/2,w,h);
+  if(u.t==='med'){ctx.fillStyle='#d23b3b';ctx.fillRect(-6,-1.2,6,2.4);ctx.fillRect(-4.2,-3,2.4,6)}
+  if(u.t==='cook'){circ(-1,0,4.5,'#f4f4f4')}
+  ctx.restore();return}
  switch(u.t){
   case 'bar':{ctx.save();ctx.translate(x,y);ell(2,5,24,10,'rgba(0,0,0,.3)');[[-.45,-6],[.4,4],[0,0]].forEach(([r,o])=>{ctx.save();ctx.rotate(r+out+Math.PI/2);ctx.fillStyle='#8a6a45';ctx.fillRect(-24,o-4.5,48,9);ctx.strokeStyle='#4d3a24';ctx.lineWidth=1.2;ctx.strokeRect(-24,o-4.5,48,9);circ(-18,o,1.2,'#c8c8c8');circ(18,o,1.2,'#c8c8c8');ctx.restore()});ctx.restore();break}
   case 'car':{ctx.save();ctx.translate(x,y);ctx.rotate(out+Math.PI/2+(s()-.5)*.5);ell(3,5,28,17,'rgba(0,0,0,.35)');ctx.fillStyle='#111';[[-17,-15],[11,-15],[-17,11],[11,11]].forEach(([a,b])=>ctx.fillRect(a,b,7,4));
@@ -257,7 +277,9 @@ function drawZombie(v,now){
  if(v.burn&&!v.dying&&Math.random()<.3)PT.push({x:p.x+(Math.random()-.5)*10,y:p.y-4,vx:0,vy:-.04,t0:now,dur:300,c:Math.random()<.5?'#ff9a2e':'#ffd25a',r:2.5,light:0});
  ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ell(2,4,11*sz,8*sz,'rgba(0,0,0,.35)');ctx.rotate(a+wob);ctx.scale(sz,sz);
  if(v.dying){ctx.rotate(.6);}
- if(Lk.dog){line(-10,0,-15,Math.sin(now/70)*3,skin,2.5);ell(-2,0,10,5,cloth);circ(8,0,4.5,skin);ell(7,-3.5,1.8,2.5,cloth);ell(7,3.5,1.8,2.5,cloth)}
+ const zi=!Lk.dog&&zspr(k);
+ if(zi){const w=zi.width*.56,h=zi.height*.56;ctx.drawImage(zi,-w*.42,-h/2,w,h);if(Lk.helm){ctx.fillStyle=Lk.helm;ctx.beginPath();ctx.arc(-1,0,5,0,7);ctx.fill()}}
+ else if(Lk.dog){line(-10,0,-15,Math.sin(now/70)*3,skin,2.5);ell(-2,0,10,5,cloth);circ(8,0,4.5,skin);ell(7,-3.5,1.8,2.5,cloth);ell(7,3.5,1.8,2.5,cloth)}
  else{const reach=v.dying?6:(Lk.low?10:14)+Math.sin(now/150+v.id)*2;line(2,-6,reach,-5,skin,3.5);line(2,6,reach,5,skin,3.5);
   ell(Lk.low?-3:0,0,Lk.low?10:7,Lk.low?6:10.5,cloth);if(k==='fat'||k==='boss'){circ(-2,3,2,'#6c5a7a');circ(1,-4,1.6,'#6c5a7a')}
   if(k==='spit')circ(6,0,2.5,'#d8f05a');
@@ -626,7 +648,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
+<button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION} · personnages : Kenney.nl (CC0)</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son
