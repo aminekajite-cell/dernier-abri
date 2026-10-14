@@ -104,6 +104,25 @@ Règles détaillées :
 - Les objets se jouent sur la maison (la Trousse sur une unité blessée) et ont un effet immédiat.
 - Le feu (essence, lance-flammes, cocktails, explosions) ignore le blindage.
 
+## Les survivants nommés
+
+C'est l'identité du jeu : on s'attache à ses survivants, et on les perd.
+
+- Chaque humain posé (tireurs, corps à corps, infirmière, cuisinier, mécanicien, chef de groupe) et chaque chien reçoit un **prénom** et un **trait** tirés au hasard. Le prénom s'affiche sous l'unité pendant le jour.
+- Chaque survivant compte ses zombies tués. Toucher une unité affiche sa fiche (prénom, métier, trait, victimes, PV).
+- À l'aube : le **héros de la nuit** (celui qui a tué le plus) et les **survivants tombés** sont annoncés.
+- Un survivant tombé est perdu pour de bon et rejoint le **mémorial** (visible en touchant « Jour X », et sur l'écran de fin).
+
+| Trait | Effet |
+|---|---|
+| Costaud | +2 PV |
+| Fragile | −1 PV |
+| Précis | +1 dégât (seulement pour les unités qui attaquent) |
+| Myope | −1 portée (seulement pour les tireurs à distance) |
+| Increvable | survit une fois à un coup fatal |
+| Coriace | récupère 1 PV à chaque aube |
+| Aguerri | +1 dégât après 10 zombies tués (seulement pour les unités qui attaquent) |
+
 ## Les zombies
 
 Les zombies sont peu nombreux mais coriaces : ils doivent arriver jusqu'aux défenses, pas mourir à la lisière du bois.
@@ -237,6 +256,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - La carte choisie à l'aube arrive d'office dans la main du lendemain (demande d'Amine).
 - Une seule monnaie (la ferraille) pour le troc : plusieurs ressources seraient trop lourdes sur petit écran.
 - Trajets variés et contournement des murs : avant, deux murs à gauche et à droite de la maison bloquaient presque toute la horde.
+- Survivants nommés, avec trait et mort définitive : identité du jeu pour Steam (on s'attache, on raconte ses parties).
 - Énergie (4 par jour, cartes à 0-3) à la place de « 2 cartes par jour », main conservée d'un jour à l'autre et déplacement d'une unité par jour (Amine : 2 cartes ne laissaient pas de vraie stratégie).
 - Amine teste lui-même l'équilibrage ; la simulation n'est plus lancée à chaque changement.
 - PV des zombies doublés une seconde fois (Amine était invincible à la nuit 15). Le bot tombe alors vers la nuit 4 : il joue nettement moins bien qu'Amine, la simulation sert surtout à comparer.

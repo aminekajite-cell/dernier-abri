@@ -54,6 +54,22 @@ const Z=(()=>{
   flare:{n:'Fusée de détresse',cat:'item',instant:1,flare:1,v:'1 côté',d:'Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté'}
  };
  const KEYS=Object.keys(U);
+ // survivants nommés : chaque humain ou chien posé reçoit un prénom et un trait, compte ses victimes, et meurt pour de bon
+ const HUMANS='gun snp sht xbow flame mg molo kid axe cop butch monk med cook mech lead'.split(' ');
+ const NAMES='Marco Léa Karim Sofia Hugo Nadia Bruno Inès Yanis Chloé Malik Julie Théo Amira Victor Lina Samir Emma Rachid Zoé Paul Yasmine Louis Clara Mehdi Sarah Hector Nora Igor Maya Omar Jade Gaston Lou Bilal Rose Kenji Alice Driss Margot'.split(' ');
+ const DOG_NAMES='Rex Kira Brutus Lola Tyson Médor Nala Rocky'.split(' ');
+ const TRAITS={
+  costaud:{n:'Costaud',d:'+2 PV',hpB:2},
+  fragile:{n:'Fragile',d:'−1 PV',hpB:-1},
+  precis:{n:'Précis',d:'+1 dégât',dmgB:1,att:1},
+  myope:{n:'Myope',d:'−1 portée',rngB:-1,far:1},
+  increvable:{n:'Increvable',d:'survit une fois à un coup fatal'},
+  coriace:{n:'Coriace',d:'récupère 1 PV à chaque aube',regen:1},
+  aguerri:{n:'Aguerri',d:'+1 dégât après 10 zombies tués',att:1}
+ };
+ const named=t=>HUMANS.includes(t)||t==='dog';
+ const maxHp=(st,u)=>Math.max(1,stat(st,u.t).hp+((TRAITS[u.trait]||{}).hpB||0));
+ const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)};
  // énergie : chaque jour on a ENERGY points, chaque carte coûte de 0 à 3 selon sa puissance
  const ENERGY=4,HAND_MAX=8;
  const COST={coffee:0};
@@ -205,16 +221,27 @@ const Z=(()=>{
  function canMove(st,a,b){const u=st.grid[a];return !st.moved&&!!u&&a!==b&&!st.grid[b]&&canPlace(st,u.t,b)}
  function move(st,a,b){if(!canMove(st,a,b))return false;st.grid[b]=st.grid[a];st.grid[a]=null;st.moved=1;return true}
  function canPlace(st,t,i){const D=U[t];
-  if(D.onUnit)return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<stat(st,st.grid[i].t).hp);
+  if(D.onUnit)return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<maxHp(st,st.grid[i]));
   if(D.instant)return i===C;
   if(isEdge(i)||i===C)return false;
   if(D.near)return cheb(i,C)===1;
   return true}
- function place(st,t,i,rnd=Math.random){const D=stat(st,t);st.energy=(st.energy??ENERGY)-cost(t);if(D.instant){applyItem(st,t,i,rnd);return}st.grid[i]={t,hp:D.hp}}
+ function place(st,t,i,rnd=Math.random){const D=stat(st,t);st.energy=(st.energy??ENERGY)-cost(t);if(D.instant){applyItem(st,t,i,rnd);return}
+  const u={t,hp:D.hp};
+  if(named(t)){const used=new Set(st.grid.filter(Boolean).map(v=>v.name).concat((st.fallen||[]).map(f=>f.name)));
+   const pool=(t==='dog'?DOG_NAMES:NAMES).filter(n=>!used.has(n));const list=pool.length?pool:(t==='dog'?DOG_NAMES:NAMES);
+   u.name=list[Math.floor(rnd()*list.length)];
+   const tr=Object.keys(TRAITS).filter(k=>(!TRAITS[k].att||D.dmg)&&(!TRAITS[k].far||(D.rng||0)>1));
+   u.trait=tr[Math.floor(rnd()*tr.length)];u.kills=0;u.hp=maxHp(st,u)}
+  st.grid[i]=u}
+ // une unité tombe : un survivant nommé rejoint le mémorial (sauf s'il est Increvable et n'a pas encore utilisé sa chance)
+ function lose(st,j,u,ev){if(u.trait==='increvable'&&!u.saved){u.hp=1;u.saved=1;ev.push({i:j,k:'saved',name:u.name});return false}
+  st.grid[j]=null;ev.push({i:j,k:'lost',t:u.t,name:u.name});
+  if(u.name)(st.fallen=st.fallen||[]).push({name:u.name,t:u.t,trait:u.trait,kills:u.kills||0,night:st.night});return true}
  function applyItem(st,t,i,rnd){const D=stat(st,t);
   if(t==='food')st.shelter=Math.min(MAXS,st.shelter+D.gain);
-  if(t==='rep')st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(stat(st,u.t).hp,u.hp+D.gain)});
-  if(t==='kit'&&st.grid[i])st.grid[i].hp=stat(st,st.grid[i].t).hp;
+  if(t==='rep')st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+D.gain)});
+  if(t==='kit'&&st.grid[i])st.grid[i].hp=maxHp(st,st.grid[i]);
   if(t==='coffee')st.energy+=2;
   if(t==='flare')st.side=Math.floor(rnd()*4)}
 
@@ -224,7 +251,7 @@ const Z=(()=>{
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
  function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau')));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
- function startNight(st,rnd){const w=waveList(st),list=[];
+ function startNight(st,rnd){const w=waveList(st),list=[];st.grid.forEach(u=>{if(u)u.nk=0});
   for(const k of ZK)if(k!=='boss')for(let j=0;j<w[k];j++)list.push(k);
   shuffle(list,rnd);
   const edges=st.side>=0?EDGES.filter(i=>sideOf(i)===st.side):EDGES;
@@ -239,25 +266,26 @@ const Z=(()=>{
  function lureTarget(st,p){let best=C,bd=99;for(let j=0;j<st.grid.length;j++){const u=st.grid[j];if(!u||u.t!=='siren')continue;const d=cheb(p,j);if(d<=U.siren.lure&&d<bd){bd=d;best=j}}return best}
  function attack(st,i,u,D,rng,dmg,ev){
   const inR=()=>st.z.filter(z=>z.hp>0&&cheb(z.pos,i)<=rng);
-  if(D.aoe){const ts=inR();if(ts.length){ts.forEach(z=>hit(st,z,dmg,ev,i));ev.push({i,k:'fire'})}return}
+  const got=k=>{if(k){u.kills=(u.kills||0)+1;u.nk=(u.nk||0)+1}};
+  if(D.aoe){const ts=inR();if(ts.length){ts.forEach(z=>got(hit(st,z,dmg,ev,i)));ev.push({i,k:'fire'})}return}
   if(D.molo){const ts=inR();if(!ts.length)return;let best=null,bc=-1;
    for(const z of ts){const c=st.z.filter(o=>o.hp>0&&cheb(o.pos,z.pos)<=1).length;if(c>bc){bc=c;best=z}}
    const at=best.pos;ev.push({i,k:'fire'},{i:at,k:'molo',src:i});
-   st.z.filter(o=>o.hp>0&&cheb(o.pos,at)<=1).forEach(o=>{hit(st,o,dmg,ev,i,1);o.burnT=Math.max(o.burnT||0,2)});return}
+   st.z.filter(o=>o.hp>0&&cheb(o.pos,at)<=1).forEach(o=>{got(hit(st,o,dmg,ev,i,1));o.burnT=Math.max(o.burnT||0,2)});return}
   const done=new Set();
   for(let h=0;h<(D.hits||1);h++){let ts=inR();if(D.distinct)ts=ts.filter(z=>!done.has(z.id));if(!ts.length)break;
    ts.sort((a,b)=>cheb(a.pos,C)-cheb(b.pos,C)||a.hp-b.hp);const z=ts[0];done.add(z.id);
-   const killed=hit(st,z,dmg,ev,i);ev.push({i,k:'fire'});
+   const killed=hit(st,z,dmg,ev,i);ev.push({i,k:'fire'});got(killed);
    if(D.ignite&&z.hp>0)z.burnT=Math.max(z.burnT||0,D.ignite);
    if(D.push&&z.hp>0&&!ZT[z.k].boss){const b=back(z.pos),bu=st.grid[b];if(!(bu&&U[bu.t].block))z.pos=b}
-   if(D.feed&&killed)u.hp=Math.min(D.hp,u.hp+1)}
+   if(D.feed&&killed)u.hp=Math.min(maxHp(st,u),u.hp+1)}
  }
  // un zombie frappe une unité qui bloque (au contact, ou à distance pour le cracheur)
  function strike(st,z,n,u,ev,ranged,pow){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const T=ZT[z.k],D=stat(st,u.t);let d=T.boss?u.hp:zdmg(st,z.k);if(D.cap&&!T.boss)d=Math.min(d,D.cap);
   u.hp-=d;ev.push({i:n,txt:'−'+d,k:ranged?'spit':'bite',zid:z.id,from:z.pos});
   if(!ranged&&u.t==='fen'&&pow)hit(st,z,(st.relics.includes('groupe')||has(st,'solar'))?2:1,ev,n);
   if(D.gas){st.grid[n]=null;explode(st,n,D.gas,ev);return}
-  if(u.hp<=0){st.grid[n]=null;ev.push({i:n,k:'lost',t:u.t});if(D.tire)st.grid[n]={t:'fire',hp:1}}}
+  if(u.hp<=0&&lose(st,n,u,ev)&&D.tire)st.grid[n]={t:'fire',hp:1}}
  // un zombie entre sur une case sans obstacle
  function enter(st,z,n,u,ev){if(!u||U[u.t].block)return;const D=stat(st,u.t);
   if(D.trap){hit(st,z,D.trap,ev,n);st.grid[n]=null}
@@ -274,10 +302,10 @@ const Z=(()=>{
   for(let i=0;i<st.grid.length;i++){const u=st.grid[i];if(!u)continue;const D=stat(st,u.t);
    if(D.rng&&st.tick%D.every===0&&!(D.jam&&st.tick%D.jam===0)){
     const reps=1+(st.tick%3===0&&around(i).some(j=>st.grid[j]&&st.grid[j].t==='lead')?1:0);
-    const rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)),dmg=D.dmg+lampB(st,i,pow);
+    const rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+((TRAITS[u.trait]||{}).rngB||0)),dmg=D.dmg+lampB(st,i,pow)+unitDmg(u);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}
-   if(D.heal&&st.tick%2===0){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<stat(st,v.t).hp);if(ns.length){ns.sort((a,b)=>(a.hp-stat(st,a.t).hp)-(b.hp-stat(st,b.t).hp));ns[0].hp=Math.min(stat(st,ns[0].t).hp,ns[0].hp+D.heal);ev.push({i,k:'heal'})}}
-   if(D.mech){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<stat(st,st.grid[j].t).hp);if(ns.length){st.grid[ns[0]].hp++;ev.push({i:ns[0],k:'heal'})}}
+   if(D.heal&&st.tick%2===0){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal);ev.push({i,k:'heal'})}}
+   if(D.mech){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j]));if(ns.length){st.grid[ns[0]].hp++;ev.push({i:ns[0],k:'heal'})}}
    if(D.burn&&e!=='pluie')alive().filter(z=>z.pos===i).forEach(z=>hit(st,z,D.burn,ev,i,1));
    if(D.dyn&&st.tick===8){st.grid[i]=null;explode(st,i,D.dyn,ev)}
   }
@@ -294,7 +322,7 @@ const Z=(()=>{
    z.pos=n;enter(st,z,n,u,ev)
   }
   for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;if(!z.bit){const T=ZT[z.k];st.kills++;st.scrap+=T.boss?15:1;
-   if(mc(st,'putride'))around(z.pos).forEach(j=>{const u=st.grid[j];if(u&&U[u.t].block){u.hp--;ev.push({i:j,txt:'−1',k:'bite',zid:z.id});if(u.hp<=0){st.grid[j]=null;ev.push({i:j,k:'lost',t:u.t})}}});
+   if(mc(st,'putride'))around(z.pos).forEach(j=>{const u=st.grid[j];if(u&&U[u.t].block){u.hp--;ev.push({i:j,txt:'−1',k:'bite',zid:z.id});if(u.hp<=0)lose(st,j,u,ev)}});
    if(T.howl){ev.push({i:z.pos,k:'howl'});for(let k=0;k<T.howl;k++)spawn(st,'walk',z.pos)}}}
   st.z=st.z.filter(z=>z.hp>0);
   const boss=st.z.some(z=>ZT[z.k].boss)||st.pending.some(p=>p.k==='boss');
@@ -302,13 +330,13 @@ const Z=(()=>{
   return{ev,done};
  }
  // l'aube : l'essence s'éteint, les soins et la ferraille de l'aube s'appliquent
- function endNight(st){st.grid.forEach((u,i)=>{if(u&&u.t==='fire')st.grid[i]=null});st.z=[];st.side=-1;
+ function endNight(st){st.grid.forEach((u,i)=>{if(u&&u.t==='fire')st.grid[i]=null;else if(u&&u.trait==='coriace'&&u.hp>0)u.hp=Math.min(maxHp(st,u),u.hp+1)});st.z=[];st.side=-1;
   if(st.shelter<=0)return{heal:0,scrap:0};
   const h=st.grid.filter(u=>u&&u.t==='cook').length+(st.relics.includes('soupe')?1:0),before=st.shelter;
   st.shelter=Math.min(MAXS,st.shelter+h);const s=st.relics.includes('aimant')?3:0;st.scrap+=s;
   return{heal:st.shelter-before,scrap:s}}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
  return{N,C,MAXS,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,TRAITS,named,maxHp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

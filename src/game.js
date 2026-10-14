@@ -49,7 +49,7 @@ const ICON={
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v11 · 14 oct.';
+const VERSION='v12 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -63,7 +63,7 @@ const ZN={walk:['rôdeur','rôdeurs'],run:['coureur','coureurs'],fat:['gonflé',
 let S,G;
 function newGame(ch){
  G=Z.newState(ch);
- S={draw:shuffle([...Z.CHARS[G.char].deck]),discard:[],hand:[],sel:null,moveFrom:null,busy:false,next:null,phase:null,picks:null,dawn:null};
+ S={draw:shuffle([...Z.CHARS[G.char].deck]),discard:[],hand:[],sel:null,moveFrom:null,inspect:null,busy:false,next:null,phase:null,picks:null,dawn:null};
  V.clear();FX.length=0;PT.length=0;facing.fill(null);clearDecals();
  fillHand();
 }
@@ -160,7 +160,7 @@ function person(x,y,a,o,now){
  if(o.hat){circ(-1,0,5,'#f4f4f4');circ(-3,0,3.5,'#e2e2e2')}
  if(o.cap){ctx.fillStyle=o.cap;ctx.beginPath();ctx.arc(0,0,5.4,Math.PI*.5,Math.PI*1.5);ctx.fill();ctx.fillRect(3,-3,3,6)}
  ctx.restore()}
-let BARS=[],EYES=[];
+let BARS=[],EYES=[],LABELS=[];
 function hpBar(x,y,f,c){if(f>=1)return;BARS.push([x,y,f,c])}
 function drawBars(){for(const[x,y,f,c]of BARS){ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(x-17,y,34,5);ctx.fillStyle=c;ctx.fillRect(x-17,y,34*clamp(f,0,1),5)}}
 const CATC={wall:'#c9a27a',shoot:'#f2b33d',melee:'#ff7a59',help:'#7cc7ff',trap:'#e5484d',item:'#d6c2ff'};
@@ -170,7 +170,8 @@ function drawUnit(i,u,now){
  ctx.save();ctx.translate(p0.x,p0.y);ctx.scale(1.45,1.45);ctx.translate(-p0.x,-p0.y);
  drawUnitInner(i,u,now);ctx.restore();
  if(D0.up)safeTxt(p0.x+19,p0.y-17,'+','#f2b33d');
- if(D0.block)hpBar(p0.x,p0.y-31,u.hp/D0.hp,u.hp/D0.hp>.4?'#9fd86b':'#e5484d');
+ const mx=Z.maxHp(G,u);if(D0.block)hpBar(p0.x,p0.y-31,u.hp/mx,u.hp/mx>.4?'#9fd86b':'#e5484d');
+ if(u.name&&nightAmt<.5)LABELS.push([p0.x,p0.y+33,u.name]);
 }
 function drawUnitInner(i,u,now){
  const{x,y}=tc(i),D=Z.U[u.t],dx=x-CEN.x,dy=y-CEN.y,out=Math.atan2(dy,dx);const a=facing[i]??out,s=rng(i+3);
@@ -305,7 +306,7 @@ function frameInner(now){
  nightAmt+=(nightTarget-nightAmt)*Math.min(1,dt/450);
  let sx=0,sy=0;if(now-shakeT<260&&!reduce){const k=(1-(now-shakeT)/260)*5;sx=(Math.random()-.5)*k;sy=(Math.random()-.5)*k}
  ctx.setTransform(SC,0,0,SC,sx*SC,sy*SC);
- BARS=[];EYES=[];
+ BARS=[];EYES=[];LABELS=[];
  ctx.drawImage(ground,0,0,L,L);ctx.drawImage(decal,0,0,L,L);
  if(!S.busy){
   const t=S.sel!==null?S.hand[S.sel]:null,mv=S.moveFrom;
@@ -324,6 +325,7 @@ function frameInner(now){
  drawDark(now);
  if(nightAmt>.05){ctx.save();ctx.shadowColor='#ff2a2a';ctx.shadowBlur=6;for(const[x,y,nx,ny,sz,al]of EYES){ctx.globalAlpha=al*nightAmt;circ(x+nx*2*sz,y+ny*2*sz,1.3*sz,'#ff4a3a');circ(x-nx*2*sz,y-ny*2*sz,1.3*sz,'#ff4a3a')}ctx.restore()}
  drawBars();
+ ctx.save();ctx.font='bold 10px "Atkinson Hyperlegible",system-ui,sans-serif';ctx.textAlign='center';for(const[x,y,n]of LABELS){ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillText(n,x+1,y+1);ctx.fillStyle='#ebe7da';ctx.fillText(n,x,y)}ctx.restore();
  drawFloats(now);
  if(now-hurtT<400){ctx.save();ctx.setTransform(1,0,0,1,0,0);const g=ctx.createRadialGradient(cv.width/2,cv.height/2,cv.width*.3,cv.width/2,cv.height/2,cv.width*.75);g.addColorStop(0,'rgba(229,72,77,0)');g.addColorStop(1,`rgba(229,72,77,${.45*(1-(now-hurtT)/400)})`);ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);ctx.restore()}
 }
@@ -365,6 +367,7 @@ function playEvents(ev,types,now){
   if(e.k==='eat'){const p=tc(e.i);floatTxt(p.x,p.y,'miam','#ff9a9a');burst(p.x,p.y,'rgba(140,20,24,.9)',4,.04,2)}
   if(e.k==='molo'){const p=tc(e.i),sp=tc(e.src);addFX({type:'tracer',x1:sp.x,y1:sp.y,x2:p.x,y2:p.y,c:'#3c7a3a',w:2,dur:200});addFX({type:'flash',x:p.x,y:p.y,r:30,c:'rgba(255,140,40,.8)',dur:320,light:T*1.6});burst(p.x,p.y,'#ff9a2e',16,.12,3)}
   if(e.k==='howl'){const p=tc(e.i);addFX({type:'ring',x:p.x,y:p.y,r:60,c:'#e0a0c0',dur:500});floatTxt(p.x,p.y-10,'HOOO !','#e0a0c0')}
+  if(e.k==='saved'){const p=tc(e.i);floatTxt(p.x,p.y-10,'Increvable !','#f2b33d');addFX({type:'ring',x:p.x,y:p.y,r:40,c:'#f2b33d',dur:400})}
   if(e.k==='heal'){const p=tc(e.i);for(let k=0;k<3;k++)PT.push({x:p.x+(Math.random()-.5)*20,y:p.y,vx:0,vy:-.03,t0:now,dur:500,c:'#7ee08a',r:2.5,light:0})}
  }
 }
@@ -388,26 +391,30 @@ function render(){
  const info=$('#info');info.className='info';
  if(S.busy){const left=G.z.length+G.pending.length;info.innerHTML=`<b>${plural(left,'zombie','zombies')}</b> encore dehors.`}
  else if(S.sel!==null){const t=S.hand[S.sel],D=Z.U[t];info.innerHTML=`<b>${cardName(t)}</b> (${Z.cost(t)} énergie) : ${D.d}.`+(D.onUnit?' Touche une unité blessée.':D.instant?' Touche l’abri.':D.near?' Touche une case collée à l’abri.':' Touche un emplacement.')}
- else if(S.moveFrom!==null)info.innerHTML=`Déplacer <b>${cardName(G.grid[S.moveFrom].t)}</b> : touche une case libre en bleu.`;
+ else if(S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
+ else if(S.inspect!==null&&G.grid[S.inspect])info.innerHTML=unitLine(G.grid[S.inspect])+(G.moved?' (déjà un déplacement aujourd’hui)':'');
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie.`+(G.moved?'':' Touche une unité pour la déplacer (1 fois par jour).');
  const go=$('#go');go.disabled=false;go.textContent=S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy);
 }
-$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;const k=+b.dataset.k;S.sel=S.sel===k?null:k;S.moveFrom=null;render()});
+$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;const k=+b.dataset.k;S.sel=S.sel===k?null:k;S.moveFrom=null;S.inspect=null;render()});
 $('#round').addEventListener('click',()=>{if(!S.busy&&ov.hidden)runInfo()});
 cv.addEventListener('click',e=>{
  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*L,y=(e.clientY-r.top)/r.height*L;
  const i=Math.floor(y/T)*Z.N+Math.floor(x/T);tapCell(i);
 });
+// fiche d'une unité : prénom, métier, trait, victimes, PV
+function unitLine(u){const tr=Z.TRAITS[u.trait];return u.name?`<b>${u.name}</b>, ${cardName(u.t)} · <b>${tr.n}</b> (${tr.d}) · ${plural(u.kills||0,'zombie tué','zombies tués')} · ${u.hp}/${Z.maxHp(G,u)} PV.`:`<b>${cardName(u.t)}</b> · ${u.hp}/${Z.maxHp(G,u)} PV.`}
 function tapCell(i){
  if(S.busy)return;
  if(S.sel===null){
   // déplacement d'une unité : on la touche, puis on touche une case libre
-  if(S.moveFrom!==null){const a=S.moveFrom;S.moveFrom=null;if(Z.move(G,a,i)){facing[i]=facing[a];facing[a]=null;const p=tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#7cc7ff',dur:350});save()}render();return}
-  if(G.grid[i]&&!G.moved){S.moveFrom=i;render()}
+  if(S.moveFrom!==null){const a=S.moveFrom;S.moveFrom=null;S.inspect=null;if(Z.move(G,a,i)){facing[i]=facing[a];facing[a]=null;const p=tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#7cc7ff',dur:350});save()}render();return}
+  S.inspect=null;if(G.grid[i]){if(G.moved)S.inspect=i;else S.moveFrom=i}render();
   return}
  const t=S.hand[S.sel],D=Z.U[t];
  if(!Z.canPay(G,t)||!Z.canPlace(G,t,i))return;
- S.hand.splice(S.sel,1);Z.place(G,t,i);if(!D.instant)facing[i]=null;S.discard.push(t);S.sel=null;S.moveFrom=null;
+ S.hand.splice(S.sel,1);Z.place(G,t,i);if(!D.instant)facing[i]=null;S.discard.push(t);S.sel=null;S.moveFrom=null;S.inspect=null;
+ if(G.grid[i]&&G.grid[i].name){const q=tc(i);floatTxt(q.x,q.y-14,`${G.grid[i].name} rejoint l’abri`,'#f2b33d')}
  const p=D.instant&&!D.onUnit?CEN:tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#f2b33d',dur:350});
  const St=Z.stat(G,t);
  if(t==='food')floatTxt(CEN.x,CEN.y,`+${St.gain} PV`,'#9fd86b');
@@ -427,22 +434,25 @@ function peekScreen(){
 
 async function night(){
  if(S.busy)return;S.busy=true;S.sel=null;
- S.moveFrom=null;save();
+ S.moveFrom=null;S.inspect=null;save();
  const scrap0=G.scrap,kills0=G.kills;
  nightTarget=1;Z.startNight(G,Math.random);render();await wait(900);
  let r;
  do{const types=G.grid.map(u=>u&&u.t);
   r=Z.step(G);const now=performance.now();
   syncZ(now);playEvents(r.ev,types,now);render();
-  const lost=r.ev.filter(e=>e.k==='lost').map(e=>Z.U[e.t].n);
-  if(lost.length){const info=$('#info');info.className='info warn';info.textContent=`${lost.join(', ')} détruit${lost.length>1?'s':''} !`}
+  const lostEv=r.ev.filter(e=>e.k==='lost');
+  if(lostEv.length){const info=$('#info');info.className='info warn';const ppl=lostEv.filter(e=>e.name),obj=lostEv.filter(e=>!e.name);
+   info.innerHTML=[ppl.length?`✝ ${ppl.map(e=>`<b>${e.name}</b> (${Z.U[e.t].n})`).join(', ')} ${ppl.length>1?'sont tombés':'est tombé'}.`:'',obj.length?`${obj.map(e=>Z.U[e.t].n).join(', ')} détruit${obj.length>1?'s':''} !`:''].join(' ')}
   await wait(tickMs());
  }while(!r.done);
  await wait(700);
  const dawnInfo=Z.endNight(G);nightTarget=0;S.busy=false;render();await wait(900);
  if(G.shelter<=0)return end();
  const mut=Z.mutNight(G.night)?Z.mutate(G):null;
- S.dawn={kills:G.kills-kills0,scrap:G.scrap-scrap0,heal:dawnInfo.heal,mut};save();render();
+ const hero=G.grid.filter(u=>u&&u.name&&u.nk>0).sort((a,b)=>b.nk-a.nk)[0];
+ const fallen=(G.fallen||[]).filter(f=>f.night===G.night);
+ S.dawn={kills:G.kills-kills0,scrap:G.scrap-scrap0,heal:dawnInfo.heal,mut,hero:hero?{name:hero.name,t:hero.t,nk:hero.nk}:null,fallen};save();render();
  dawn();
 }
 
@@ -469,7 +479,9 @@ function dawnStep(ph,picks){
    <button type="button" class="skip" data-a="shop">Ne rien prendre</button>`)}
  S.picks=null;save();shopScreen();
 }
-function dawnTxt(){const d=S.dawn;if(!d||d.txtShown)return '';d.txtShown=1;return `<p>L’abri tient avec <b>${G.shelter}/${Z.MAXS} PV</b>. Cette nuit : <b>${plural(d.kills,'zombie éliminé','zombies éliminés')}</b>, <b>+${d.scrap} ferraille</b>${d.heal?`, <b>+${d.heal} PV</b> à l’aube`:''}.</p>`}
+function dawnTxt(){const d=S.dawn;if(!d||d.txtShown)return '';d.txtShown=1;return `<p>L’abri tient avec <b>${G.shelter}/${Z.MAXS} PV</b>. Cette nuit : <b>${plural(d.kills,'zombie éliminé','zombies éliminés')}</b>, <b>+${d.scrap} ferraille</b>${d.heal?`, <b>+${d.heal} PV</b> à l’aube`:''}.</p>`
+ +(d.hero?`<p>Héros de la nuit : <b>${d.hero.name}</b> (${Z.U[d.hero.t].n}), ${plural(d.hero.nk,'zombie','zombies')}.</p>`:'')
+ +(d.fallen&&d.fallen.length?`<p class="rip">✝ Tombés cette nuit : ${d.fallen.map(f=>`<b>${f.name}</b> (${Z.U[f.t].n}, ${plural(f.kills,'zombie','zombies')})`).join(', ')}.</p>`:'')}
 function shopScreen(){
  S.phase='shop';S.picks=null;save();
  const row=(k,ex)=>{const o=Z.SHOP[k],c=Z.shopCost(G,k),ok=G.scrap>=c&&!ex;return `<button type="button" class="shopi" data-a="shop-${k}" ${ok?'':'disabled'}><span><b>${o.n}</b>${o.d}</span><span class="cost">${svg('scrap')}${c}</span></button>`};
@@ -488,16 +500,19 @@ function nextDay(){
 function end(){
  clearSave();const nights=G.night-1;
  let best=0;try{best=+localStorage.getItem('abri-best-nuits')||0;if(nights>best){localStorage.setItem('abri-best-nuits',nights);best=nights}}catch(e){best=Math.max(best,nights)}
- show(`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div><p><b>${G.kills}</b> zombies éliminés. Record : <b>${plural(best,'nuit','nuits')}</b>${nights>=best&&nights>0?' (nouveau record !)':''}.</p><button type="button" class="go" data-a="new">Rejouer</button>`);
+ show(`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div><p><b>${G.kills}</b> zombies éliminés. Record : <b>${plural(best,'nuit','nuits')}</b>${nights>=best&&nights>0?' (nouveau record !)':''}.</p><h3>Mémorial</h3>${memorialHtml()}<button type="button" class="go" data-a="new">Rejouer</button>`);
 }
 const CATN={wall:'Défenses',shoot:'Tireurs',melee:'Corps à corps',help:'Soutien',trap:'Pièges',item:'Objets'};
 const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${svg(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em> · ${Z.U[t].d}</span></div>`).join('')}</div>`).join('');
 const zedHtml=()=>`<div class="deck">${Object.entries(Z.ZT).map(([k,z])=>`<div class="dk" style="--cc:var(--z-${k})"><svg class="ic" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="7"/></svg><span><b>${z.n}</b>${z.hp} PV, ${z.dmg} dégât${z.dmg>1?'s':''} par coup, ${z.info}</span></div>`).join('')}</div>`;
+const memorialHtml=()=>(G.fallen||[]).length?`<div class="deck">${G.fallen.map(f=>`<div class="dk" style="--cc:var(--muted)">${svg(f.t)}<span><b>✝ ${f.name}</b>${Z.U[f.t].n} · ${Z.TRAITS[f.trait]?Z.TRAITS[f.trait].n+' · ':''}${plural(f.kills,'zombie','zombies')} · tombé la nuit ${f.night}</span></div>`).join('')}</div>`:`<p>${G.shelter>0?'Personne n’est tombé. Pour l’instant.':'Aucun survivant n’est tombé au combat.'}</p>`;
 function runInfo(){
  const counts={};deckList().forEach(t=>counts[t]=(counts[t]||0)+1);
  show(`<h2 class="pw">${Z.CHARS[G.char].n}</h2><p><b>${G.kills}</b> zombies éliminés · <b>${G.scrap}</b> ferraille</p>
   <h3>Reliques</h3>${G.relics.length?`<div class="deck">${G.relics.map(r=>`<div class="dk" style="--cc:var(--lantern)">${svg('relic')}<span><b>${Z.RELICS[r].n}</b>${Z.RELICS[r].d}</span></div>`).join('')}</div>`:'<p>Aucune pour l’instant. Tu en trouves une toutes les 5 nuits.</p>'}
   <h3>Mutations de la horde</h3>${G.muts.length?`<div class="deck">${G.muts.map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${Z.MUTS[m].n}</b>${Z.MUTS[m].d}</span></div>`).join('')}</div>`:'<p>Aucune pour l’instant. La horde mute toutes les 4 nuits.</p>'}
+  <h3>Tes survivants</h3>${G.grid.some(u=>u&&u.name)?`<div class="deck">${G.grid.filter(u=>u&&u.name).map(u=>`<div class="dk" style="--cc:${cc(u.t)}">${svg(u.t)}<span><b>${u.name}</b>${cardName(u.t)} · ${Z.TRAITS[u.trait].n} (${Z.TRAITS[u.trait].d}) · ${plural(u.kills||0,'zombie','zombies')} · ${u.hp}/${Z.maxHp(G,u)} PV</span></div>`).join('')}</div>`:'<p>Aucun survivant posé.</p>'}
+  <h3>Mémorial</h3>${memorialHtml()}
   <h3>Ton deck (${deckList().length} cartes)</h3><div class="deck">${Object.entries(counts).map(([t,n])=>`<div class="dk" style="--cc:${cc(t)}">${svg(t)}<span><b>${n>1?n+' × ':''}${cardName(t)}</b>${Z.U[t].d}${G.upg[t]?` (amélioré : ${Z.upgDesc(t)})`:''}</span></div>`).join('')}</div>
   <button type="button" class="go" data-a="close">Fermer</button>`);
 }
@@ -535,6 +550,7 @@ $('#go').addEventListener('click',()=>{if(S.busy){SPEED=SPEED===1?2:1;render()}e
 
 function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de fin. Survis <b>une nuit de plus</b>, encore et encore : chaque nuit, la horde est plus nombreuse et plus coriace.</p>
 <ul><li>Le jour, dépense tes <b>4 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
+<li>Chaque survivant a un <b>prénom</b> et un trait. S’il tombe, il est perdu pour de bon.</li>
 <li>Une fois par jour, tu peux <b>déplacer</b> une de tes unités : touche-la, puis touche une case libre.</li>
 <li>La nuit, les zombies sortent des <b>bois</b> et marchent vers la maison. Tes survivants se défendent tout seuls.</li>
 <li>À l’aube, choisis la carte que tu auras <b>en main le lendemain</b>, puis échange ta <b>ferraille</b> au troc.</li>

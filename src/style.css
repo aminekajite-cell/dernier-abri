@@ -110,4 +110,5 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .nrg i.on{background:var(--lantern)}
 .dk em.ce{font-style:normal;color:var(--lantern);font-weight:700}
 .hand{grid-auto-rows:auto}
+.panel p.rip{color:#d8a0a0}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
