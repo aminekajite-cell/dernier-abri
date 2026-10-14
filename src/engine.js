@@ -137,8 +137,11 @@ const Z=(()=>{
  };
  const named=t=>HUMANS.includes(t)||t==='dog'||t==='k9'||t==='dogs'||!!(U[t]&&U[t].chief);
  // PV max : la version dorée (fusion) a deux fois plus de PV, chaque niveau défensif ajoute 3 PV
- const maxHp=(st,u)=>Math.max(1,stat(st,u.t).hp*(1+(u.gold||0))+((TRAITS[u.trait]||{}).hpB||0)+(u.lvD||0)*3);
- const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)+(u.lvA||0)+(u.gold||0)};
+ const maxHp=(st,u)=>Math.max(1,stat(st,u.t).hp*(1+(u.gold||0))+((TRAITS[u.trait]||{}).hpB||0)+(u.lvD||0)*3+(u.leg?2:0));
+ const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)+(u.lvA||0)+(u.gold||0)+(u.leg?1:0)};
+ // héritage : un survivant tombé après 20 victimes laisse un souvenir ; dans la partie suivante, la première unité de son métier gagne +1 dégât et +2 PV
+ const LEGACY_KILLS=20;
+ const legacies=st=>(st.fallen||[]).filter(f=>f.kills>=LEGACY_KILLS&&U[f.t]&&!U[f.t].evo&&!U[f.t].chief);
  // niveaux : tous les 20 zombies tués, l'unité gagne un niveau, offensif (+1 dégât) ou défensif (+3 PV max et soin complet)
  const LVL=20;
  const lvPending=u=>u?Math.floor((u.kills||0)/LVL)-(u.lvA||0)-(u.lvD||0):0;
@@ -217,6 +220,23 @@ const Z=(()=>{
  function famCounts(st){const c={};for(const u of st.grid)if(u){const f=famOf(u.t);if(f)c[f]=(c[f]||0)+1}return c}
  function famLevels(st){const c=famCounts(st),l={};for(const f in FAM){l[f]=(c[f]||0)>=FAM[f].lv[1]?2:(c[f]||0)>=FAM[f].lv[0]?1:0;if(has(st,CHIEF[f]))l[f]=Math.min(2,l[f]+1)}return l}
  const facOf=t=>famOf(t);
+ // alliances : deux factions avec chacune au moins 3 unités sur la carte débloquent un bonus commun
+ const ALLY={
+  martial:{n:'Loi martiale',f:['police','mil'],d:'tes tireurs ont +1 portée'},
+  incend:{n:'Pièges incendiaires',f:['pyro','trap'],d:'tes pièges enflamment les zombies (3 tours)'},
+  fieldcare:{n:'Médecine de campagne',f:['care','farm'],d:'ton corps à corps récupère 1 PV à chaque zombie tué'},
+  arsenal:{n:'Arsenal',f:['mil','tech'],d:'tes tirs traversent l’armure des Blindés'},
+  mutual:{n:'Entraide',f:['care','comm'],d:'à l’aube, l’abri et toutes tes unités récupèrent 1 PV'},
+  patrol:{n:'Patrouille de quartier',f:['police','comm'],d:'ton corps à corps repousse les zombies'},
+  hunt:{n:'Battue',f:['farm','trap'],d:'ton corps à corps fait +1 dégât'},
+  short:{n:'Court-circuit',f:['pyro','tech'],d:'clôtures et bobines Tesla enflamment les zombies'}
+ };
+ const ALLY_MIN=3;
+ function allies(st){const c=famCounts(st);return Object.keys(ALLY).filter(k=>ALLY[k].f.every(f=>(c[f]||0)>=ALLY_MIN))}
+ const ally=(st,k)=>!!(st._al&&st._al.has(k));
+ // murs reliés : des murs voisins forment un rempart ; le mur le plus solide du groupe encaisse les coups
+ function wallGroup(st,n){const isW=j=>{const v=st.grid[j];return !!(v&&U[v.t].cat==='wall'&&U[v.t].block)};if(!isW(n))return[];const seen=new Set([n]),q=[n];
+  while(q.length){const j=q.pop();for(const k of around(j))if(!seen.has(k)&&isW(k)){seen.add(k);q.push(k)}}return[...seen]}
  // solidarité : chaque voisin de la même faction donne +1 (dégât, soin ou réparation), au plus +2
  function sol(st,i,u){const f=famOf(u.t);if(!f)return 0;let n=0;for(const j of around(i)){const v=st.grid[j];if(v&&U[v.t].block&&famOf(v.t)===f&&++n>=2)break}return n}
  // choisir sa nuit : à l'aube, 2 nuits au choix, l'une prudente, l'autre risquée mais payante
@@ -421,6 +441,7 @@ const Z=(()=>{
    u.name=D.chief?U[t].n:list[Math.floor(rnd()*list.length)];
    const tr=Object.keys(TRAITS).filter(k=>(!TRAITS[k].att||D.dmg)&&(!TRAITS[k].far||(D.rng||0)>1));
    u.trait=tr[Math.floor(rnd()*tr.length)];u.kills=0;u.hp=maxHp(st,u)}
+  const lg=(st.legacy||[]).find(l=>l.t===t&&!l.used);if(lg&&D.block){lg.used=1;u.leg=lg.name;u.hp=maxHp(st,u)}
   st.grid[i]=u;return free?null:merge(st,i)}
  /* ---------- fusion et évolutions ----------
     Fusion : 3 unités du même type et du même nombre d'étoiles fusionnent en une unité avec une étoile de plus
@@ -433,7 +454,7 @@ const Z=(()=>{
  // l'unité qui reste garde le prénom, le trait et les niveaux du plus aguerri, et cumule les victimes
  function absorb(u,others){const all=[u,...others],best=all.filter(v=>v.name).sort((a,b)=>(b.kills||0)-(a.kills||0))[0];
   if(best&&best!==u){u.name=best.name;u.trait=best.trait;u.saved=best.saved}
-  u.kills=all.reduce((s,v)=>s+(v.kills||0),0);u.lvA=Math.max(...all.map(v=>v.lvA||0));u.lvD=Math.max(...all.map(v=>v.lvD||0))}
+  u.kills=all.reduce((s,v)=>s+(v.kills||0),0);u.lvA=Math.max(...all.map(v=>v.lvA||0));u.lvD=Math.max(...all.map(v=>v.lvD||0));u.leg=all.map(v=>v.leg).find(Boolean)}
  function merge(st,i){const u=st.grid[i];if(!u||U[u.t].evo)return null;
   if(basic(u))for(const j of around(i)){const v=st.grid[j];if(!basic(v))continue;const k=evoOf(u.t,v.t);if(!k)continue;
    const from=[u.t,v.t];u.src=[u,v].filter(w=>!w.gen).map(w=>w.t);delete u.gen;absorb(u,[v]);v.absorbed=1;st.grid[j]=null;u.t=k;u.hp=maxHp(st,u);
@@ -460,12 +481,16 @@ const Z=(()=>{
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
  function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau'))*(1+FRENZY*frenzy(st))*((PLACES[st.place]||{}).hp||1));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
- function startNight(st,rnd){const w=waveList(st),list=[];st.grid.forEach(u=>{if(u)u.nk=0});
+  // très grosses nuits (Colosse, nuit sanglante ou de pillage, pleine lune, 30 zombies et plus) : la horde arrive en 3 vagues, avec une pause entre chaque
+ function bigNight(st,w){w=w||waveList(st);const n=ZK.reduce((a,k)=>a+(k==='boss'?0:w[k]),0);return w.boss>0||st.tier==='raid'||st.tier==='blood'||st.event.id==='lune'||n>=30}
+ function nextWave(st){st.wave=(st.wave||1)+1;st.wtick=0}
+ function startNight(st,rnd){const w=waveList(st),list=[],big=bigNight(st,w);st.grid.forEach(u=>{if(u)u.nk=0});
   for(const k of ZK)if(k!=='boss')for(let j=0;j<w[k];j++)list.push(k);
   shuffle(list,rnd);
   const ps=(PLACES[st.place]||{}).sides,edges=st.side>=0?EDGES.filter(i=>sideOf(i)===st.side):ps?EDGES.filter(i=>ps.includes(sideOf(i))&&!(ps.indexOf(0)<0&&rc(i)[0]===0)):EDGES;
-  st.pending=list.map((k,j)=>({k,at:1+Math.floor(j*1.3),pos:edges[Math.floor(rnd()*edges.length)]}));
-  for(let j=0;j<w.boss;j++)st.pending.push({k:'boss',at:10+j*12,pos:edges[Math.floor(rnd()*edges.length)]});
+  const per=Math.ceil(list.length/3)||1;st.waves=big?3:0;st.wave=1;st.wtick=0;
+  st.pending=list.map((k,j)=>{const wv=big?1+Math.floor(j/per):1,jj=big?j-(wv-1)*per:j;return{k,wave:wv,at:1+Math.floor(jj*1.3),pos:edges[Math.floor(rnd()*edges.length)]}});
+  for(let j=0;j<w.boss;j++)st.pending.push({k:'boss',wave:big?3:1,at:10+j*12,pos:edges[Math.floor(rnd()*edges.length)]});
   st.cap=Math.max(90,st.pending.reduce((m,p)=>Math.max(m,p.at),0)+60);
   st.z=[];st.tick=0}
  const power=st=>st.event.id!=='coupure'||st.relics.includes('groupe')||has(st,'solar');
@@ -476,8 +501,10 @@ const Z=(()=>{
  function attack(st,i,u,D,rng,dmg,ev){
   const inR=()=>st.z.filter(z=>z.hp>0&&cheb(z.pos,i)<=rng);
   const got=k=>{if(k){u.kills=(u.kills||0)+1;u.nk=(u.nk||0)+1;
+   if(D.cat==='melee'&&ally(st,'fieldcare'))u.hp=Math.min(maxHp(st,u),u.hp+1);
    if(D.healKill)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].block&&v.hp<maxHp(st,v)){v.hp++;ev.push({i:j,k:'heal'})}})}};
-  if(D.aoe){const ts=inR();if(ts.length){ts.forEach(z=>got(hit(st,z,dmg,ev,i)));ev.push({i,k:'fire'})}return}
+  const pierce=D.cat==='shoot'&&ally(st,'arsenal');
+  if(D.aoe){const ts=inR();if(ts.length){ts.forEach(z=>got(hit(st,z,dmg,ev,i,pierce)));ev.push({i,k:'fire'})}return}
   if(D.molo||D.blast){const ts=inR();if(!ts.length)return;let best=null,bc=-1;
    for(const z of ts){const c=st.z.filter(o=>o.hp>0&&cheb(o.pos,z.pos)<=1).length;if(c>bc){bc=c;best=z}}
    const at=best.pos;ev.push({i,k:'fire'},D.blast?{i:at,k:'boom'}:{i:at,k:'molo',src:i});
@@ -485,22 +512,24 @@ const Z=(()=>{
   const done=new Set();
   for(let h=0;h<(D.hits||1);h++){let ts=inR();if(D.distinct)ts=ts.filter(z=>!done.has(z.id));if(!ts.length)break;
    ts.sort((a,b)=>cheb(a.pos,C)-cheb(b.pos,C)||a.hp-b.hp);const z=ts[0];done.add(z.id);
-   const killed=hit(st,z,dmg,ev,i);ev.push({i,k:'fire'});got(killed);
-   if(D.ignite&&z.hp>0)z.burnT=Math.max(z.burnT||0,D.ignite);
+   const killed=hit(st,z,dmg,ev,i,pierce);ev.push({i,k:'fire'});got(killed);
+   if((D.ignite||(u.t==='tesla'&&ally(st,'short')))&&z.hp>0)z.burnT=Math.max(z.burnT||0,D.ignite||3);
    if(D.stun&&z.hp>0)z.cd+=D.stun;
-   if(D.push&&z.hp>0&&!ZT[z.k].boss){const b=back(z.pos),bu=st.grid[b];if(!(bu&&U[bu.t].block))z.pos=b}
+   if((D.push||(D.cat==='melee'&&ally(st,'patrol')))&&z.hp>0&&!ZT[z.k].boss){const b=back(z.pos),bu=st.grid[b];if(!(bu&&U[bu.t].block))z.pos=b}
    if((D.feed||(D.cat==='melee'&&(st._fl||{}).farm>=2))&&killed)u.hp=Math.min(maxHp(st,u),u.hp+1)}
  }
  // un zombie frappe une unité qui bloque (au contact, ou à distance pour le cracheur)
  function strike(st,z,n,u,ev,ranged,pow){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const T=ZT[z.k],D=stat(st,u.t);let d=T.boss?u.hp:zhit(st,z);if(!T.boss&&(st._fl||{}).police&&famOf(u.t)==='police')d=Math.max(1,d-1);if(D.cap&&!T.boss)d=Math.min(d,D.cap);
-  u.hp-=d;ev.push({i:n,txt:'−'+d,k:ranged?'spit':'bite',zid:z.id,from:z.pos});
-  if(!ranged&&u.t==='fen'&&pow){const el=(st._fl||{}).tech||0;hit(st,z,((st.relics.includes('groupe')||has(st,'solar'))?2:1)+(el?1:0),ev,n);if(el>=2)z.cd+=1}
+  let tn=n,tu=u;if(D.cat==='wall'&&!T.boss)for(const j of wallGroup(st,n))if(st.grid[j].hp>tu.hp){tn=j;tu=st.grid[j]}
+  tu.hp-=d;ev.push({i:tn,txt:'−'+d,k:ranged?'spit':'bite',zid:z.id,from:z.pos});
+  if(!ranged&&u.t==='fen'&&pow){const el=(st._fl||{}).tech||0;hit(st,z,((st.relics.includes('groupe')||has(st,'solar'))?2:1)+(el?1:0),ev,n);if(el>=2)z.cd+=1;if(ally(st,'short'))z.burnT=Math.max(z.burnT||0,3)}
   // riposte : une unité de corps à corps frappée au contact rend le coup aussitôt
-  if(!ranged&&D.cat==='melee'&&D.dmg&&u.hp>0&&z.hp>0){const fl=st._fl||{};if(hit(st,z,D.dmg+unitDmg(u)+sol(st,n,u)+(fl.farm?1:0)+(fl.care&&famOf(u.t)==='care'?1:0),ev,n)){u.kills=(u.kills||0)+1;u.nk=(u.nk||0)+1}}
+  if(!ranged&&D.cat==='melee'&&D.dmg&&u.hp>0&&z.hp>0){const fl=st._fl||{};if(hit(st,z,D.dmg+unitDmg(u)+sol(st,n,u)+(fl.farm?1:0)+(fl.care&&famOf(u.t)==='care'?1:0)+(ally(st,'hunt')?1:0),ev,n)){u.kills=(u.kills||0)+1;u.nk=(u.nk||0)+1}}
   if(D.gas){st.grid[n]=null;explode(st,n,D.gas,ev);return}
-  if(u.hp<=0&&lose(st,n,u,ev)&&D.tire)st.grid[n]={t:'fire',hp:1,gen:1}}
+  if(tu.hp<=0&&lose(st,tn,tu,ev)&&stat(st,tu.t).tire)st.grid[tn]={t:'fire',hp:1,gen:1}}
  // un zombie entre sur une case sans obstacle
  function enter(st,z,n,u,ev){if(!u||U[u.t].block)return;const D=stat(st,u.t),tb=[0,2,4][(st._fl||{}).trap||0];
+  if(D.cat==='trap'&&ally(st,'incend'))z.burnT=Math.max(z.burnT||0,3);
   if(D.trap){hit(st,z,D.trap+tb,ev,n);st.grid[n]=null}
   if(D.mine){st.grid[n]=null;explode(st,n,D.mine+tb+((st._fl||{}).mil>=2?3:0),ev)}
   if(D.spike){hit(st,z,D.spike+tb,ev,n);u.hp--;if(u.hp<=0)st.grid[n]=null}
@@ -510,8 +539,8 @@ const Z=(()=>{
   if(D.net){z.cd+=D.net;ev.push({i:n,k:'eat',zid:z.id});u.hp--;if(u.hp<=0)st.grid[n]=null}
   if(D.smoke){st.z.filter(o=>o.hp>0&&cheb(o.pos,n)<=1).forEach(o=>o.cd+=D.smoke);ev.push({i:n,k:'smoke'});st.grid[n]=null}
   if(D.bait){z.cd+=D.bait;ev.push({i:n,k:'eat',zid:z.id});u.hp--;if(u.hp<=0)st.grid[n]=null}}
- function step(st){const ev=[];st.tick++;const e=st.event.id,pow=power(st),fl=st._fl=famLevels(st);if(st.rushT>0)st.rushT--;
-  st.pending=st.pending.filter(p=>{if(p.at<=st.tick){spawn(st,p.k,p.pos);return false}return true});
+ function step(st){const ev=[];st.tick++;st.wtick=(st.wtick||0)+1;const e=st.event.id,pow=power(st),fl=st._fl=famLevels(st);st._al=new Set(allies(st));if(st.rushT>0)st.rushT--;
+  st.pending=st.pending.filter(p=>{if((p.wave||1)===(st.wave||1)&&p.at<=st.wtick){spawn(st,p.k,p.pos);return false}return true});
   const alive=()=>st.z.filter(z=>z.hp>0);
   for(const z of alive()){z.inFire=0}
   for(const z of alive())if(z.burnT>0){z.burnT--;hit(st,z,1+(fl.pyro?1:0),ev,-1,1)}
@@ -519,8 +548,8 @@ const Z=(()=>{
   for(let i=0;i<st.grid.length;i++){const u=st.grid[i];if(!u)continue;const D=stat(st,u.t);
    if(D.rng&&st.tick%D.every===0&&!(D.jam&&st.tick%D.jam===0)&&!(D.needPow&&!pow)){
     const reps=1+(st.tick%3===0&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].lead)?1:0)+(st.rushT>0?1:0);
-    const F=famOf(u.t),rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&F==='police'?1:0)+(fl.comm&&F==='comm'&&D.rng>1?1:0)),
-     dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+sol(st,i,u)+(fl.mil&&F==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0)+(fl.tech&&F==='tech'?1:0)+(fl.care&&F==='care'?1:0);
+    const F=famOf(u.t),rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+(D.cat==='shoot'&&ally(st,'martial')?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&F==='police'?1:0)+(fl.comm&&F==='comm'&&D.rng>1?1:0)),
+     dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+sol(st,i,u)+(fl.mil&&F==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0)+(fl.tech&&F==='tech'?1:0)+(fl.care&&F==='care'?1:0)+(D.cat==='melee'&&ally(st,'hunt')?1:0);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}
    if(D.heal&&(D.hfast||st.tick%2===0)){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0)+(u.gold||0)+(sol(st,i,u)?1:0));ev.push({i,k:'heal'})}}
    if(D.mech&&!D.mechAll){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j]));if(ns.length){const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0)+(u.gold||0)+(sol(st,i,u)?1:0));ev.push({i:ns[0],k:'heal'})}}
@@ -549,14 +578,17 @@ const Z=(()=>{
    if(T.howl){ev.push({i:z.pos,k:'howl'});for(let k=0;k<T.howl;k++)spawn(st,'walk',z.pos)}}}
   st.z=st.z.filter(z=>z.hp>0);
   const boss=st.z.some(z=>ZT[z.k].boss)||st.pending.some(p=>p.k==='boss');
-  const done=(!st.pending.length&&!st.z.length)||st.shelter<=0||st.tick>(st.cap||90)+(boss?110:0);
+  const done=(!st.pending.length&&!st.z.length)||st.shelter<=0||st.wtick>(st.cap||90)+(boss?110:0);
+  // fin d'une vague : pause (le joueur peut déplacer une unité et jouer ses réactions avant la suivante)
+  if(!done&&st.waves&&!st.z.length&&!st.pending.some(p=>(p.wave||1)===st.wave)){st.moved=0;return{ev,done:false,pause:st.wave}}
   return{ev,done};
  }
  // l'aube : l'essence s'éteint, les soins et la ferraille de l'aube s'appliquent
  function endNight(st){st.grid.forEach((u,i)=>{if(u&&u.t==='fire')st.grid[i]=null;else if(u&&u.trait==='coriace'&&u.hp>0)u.hp=Math.min(maxHp(st,u),u.hp+1)});st.z=[];st.side=-1;
   if(st.shelter<=0)return{heal:0,scrap:0};
   const fl=famLevels(st),T=TIERS[st.tier]||TIERS.base;
-  const h=st.grid.reduce((a,u)=>a+(u&&U[u.t].cook||0),0)+(st.relics.includes('soupe')?1:0)+(fl.comm?1:0),before=st.shelter;
+  const mutual=allies(st).includes('mutual');if(mutual)st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+1)});
+  const h=st.grid.reduce((a,u)=>a+(u&&U[u.t].cook||0),0)+(st.relics.includes('soupe')?1:0)+(fl.comm?1:0)+(mutual?1:0),before=st.shelter;
   if(fl.care>=2)st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+2)});
   st.shelter=Math.min(maxS(st),st.shelter+h);
   st.grid.forEach((u,i)=>{if(u&&U[u.t].carp)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].cat==='wall')v.hp=Math.min(maxHp(st,v),v.hp+U[u.t].carp)})});
@@ -577,8 +609,8 @@ const Z=(()=>{
   if(t==='napalm'){around(i).concat(i).forEach(j=>{if(!isEdge(j)&&j!==C&&!st.grid[j])st.grid[j]={t:'fire',hp:1,gen:1}});al().filter(z=>cheb(z.pos,i)<=1).forEach(z=>{hit(st,z,1,ev,-1,1);z.burnT=Math.max(z.burnT||0,3)});ev.push({i,k:'molo',src:C})}
   for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;st.kills++;st.scrap+=ZT[z.k].boss?15:1;ev.push({i:z.pos,k:'die',zid:z.id,boss:!!ZT[z.k].boss})}
   st.z=st.z.filter(z=>z.hp>0);return ev}
- function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st)}while(!r.done)}
+ function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
  return{N,C,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

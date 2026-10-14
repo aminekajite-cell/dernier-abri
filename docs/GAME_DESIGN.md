@@ -131,6 +131,21 @@ Tous les paliers sont à 3 et 5 unités.
 
 **Riposte du corps à corps** : une unité de corps à corps frappée au contact rend aussitôt le coup (ses dégâts habituels). Le corps à corps a aussi été renforcé : Bûcheron 7 PV / 3 dégâts, Chien 5 PV, Policier 6 PV / 2, Boucher 6 PV / 3, Moine 8 PV / 2 en zone, Agent anti-émeute 11 PV / 2, Chien policier 6 PV, Meute 7 PV, Fermier à la fourche 7 PV / 3, La Fermière 11 PV. Le Lance-flammes passe à portée 2 et 5 PV.
 
+**Alliances** : quand deux factions ont chacune au moins 3 unités sur la carte, elles débloquent un bonus commun (badge 🤝 sous la horde).
+
+| Alliance | Factions | Bonus |
+|---|---|---|
+| Loi martiale | 👮 + 🎖️ | tireurs +1 portée |
+| Pièges incendiaires | 🔥 + 🪤 | les pièges enflamment (3 tours) |
+| Médecine de campagne | ⛑️ + 🐕 | corps à corps : +1 PV par zombie tué |
+| Arsenal | 🎖️ + ⚡ | les tirs traversent l'armure des Blindés |
+| Entraide | ⛑️ + 🏠 | à l'aube, l'abri et toutes les unités +1 PV |
+| Patrouille de quartier | 👮 + 🏠 | le corps à corps repousse |
+| Battue | 🐕 + 🪤 | corps à corps +1 dégât |
+| Court-circuit | 🔥 + ⚡ | clôtures et Tesla enflamment |
+
+**Murs reliés** : des murs voisins (8 cases autour) forment un rempart, relié par une poutre à l'écran. Quand un mur est frappé, c'est le mur le plus solide du rempart qui perd les PV. Le Colosse, lui, détruit toujours le mur qu'il frappe.
+
 **Chaque faction peut se défendre seule** (au moins 3 combattants) :
 - ⛑️ Soignants : Ambulancier (8 PV, 1 dégât et recul), Médecin de garde (pistolet, portée 2, se soigne), Infirmier costaud (2 dégâts, soigne ses voisins quand il tue, rare), et La Doctoresse frappe au scalpel (2 dégâts). Palier 1 : soins +1 et +1 dégât.
 - ⚡ Bricoleurs : Cloueur (2 tirs de 1, portée 2), et L'Ingénieur tire 2 clous par tour. Palier 1 : +1 dégât à tous les bricoleurs (plus seulement les clôtures).
@@ -235,6 +250,14 @@ Inspiré de *Super Auto Pets*, *Vampire Survivors* et *Rogue Tower* : les unité
 | Traqueur | Arbalète + Chasseur | 2 dégâts à 2 zombies par tour, portée 4 |
 
 - **Niveaux** : tous les 20 zombies tués (20, 40, 60…), une unité gagne un niveau. À l'aube, le joueur choisit : offensif (+1 dégât) ou défensif (+3 PV max et soin complet). Le niveau est affiché sur l'unité (N1, N2…).
+
+## Les très grosses nuits en 3 vagues
+
+Nuit du Colosse, Nuit sanglante ou de pillage, Pleine lune, ou 30 zombies et plus : la horde est coupée en 3 vagues (le Colosse dans la 3ᵉ). Quand une vague est repoussée, la nuit se met en pause : le joueur peut déplacer une unité et jouer ses réactions, puis lance la vague suivante. L'annonce « ⚠ Très grosse nuit : 3 vagues » apparaît pendant la journée. Les nuits ordinaires restent d'un seul tenant.
+
+## L'héritage des survivants
+
+Un survivant nommé qui tombe après 20 victimes ou plus laisse un souvenir (3 au plus, les plus glorieux, sauvegardés dans `abri-meta.legacy`). Dans la partie suivante (hors défi du jour), la première unité de son métier posée porte son souvenir : +1 dégât et +2 PV. Les souvenirs sont consommés au début de la partie.
 
 ## Le retour visuel
 
@@ -446,6 +469,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Très grosses nuits en 3 vagues avec pause, alliances entre factions, murs reliés, héritage des survivants tombés (demande d'Amine).
 - Solidarité entre voisins de même faction, riposte et renfort du corps à corps, combattants pour les Soignants, les Bricoleurs et la Communauté (Amine : des factions ne pouvaient pas se défendre, le corps à corps était injouable).
 - Frénésie meurtrière dès la nuit 8 et fusions à plusieurs étoiles (demande d'Amine : difficulté toujours croissante, mais le joueur garde une chance dans les longues parties).
 
