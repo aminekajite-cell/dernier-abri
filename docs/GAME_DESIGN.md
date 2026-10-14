@@ -13,6 +13,7 @@ Plateformes visées : Steam (PC) puis mobile.
 2. **Jour** : tu pioches 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos) et tu en joues 2 (le Café en donne une de plus).
 3. **Nuit** : les zombies apparaissent sur l'anneau extérieur (les bois) et marchent vers la maison. Tes unités attaquent automatiquement. Les zombies frappent tout ce qui bloque leur chemin. Le bouton du bas passe la nuit en vitesse ×2.
 4. **Aube** :
+   - toutes les 4 nuits, la horde mute (bonus permanent pour les zombies) ;
    - toutes les 5 nuits, tu choisis 1 relique parmi 3 ;
    - tu choisis 1 carte parmi 3 (ou aucune), tirées selon leur rareté : elle arrive **d'office dans ta main du lendemain**, puis rejoint ton deck ;
    - au troc, tu dépenses ta ferraille (réparer, acheter, améliorer, jeter).
@@ -132,6 +133,20 @@ Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque ty
 | 20 | 19 | 10 | 6 | 6 | 6 | 5 | 6 | 4 | 2 | ×2.83 |
 | 30 | 29 | 16 | 10 | 10 | 10 | 8 | 10 | 6 | 3 | ×4.03 |
 
+## Les mutations de la horde
+
+Toutes les 4 nuits (nuits 4, 8, 12…), la horde gagne une mutation tirée au hasard, permanente pour toute la partie. Elle est annoncée à l'aube, et le bandeau du haut prévient la veille (« mute à l'aube »). Le but : casser les défenses qui semblaient sûres (par exemple une armée de tireurs) sans ajouter de mécanique à gérer pour le joueur.
+
+| Mutation | Effet |
+|---|---|
+| Peau épaisse | Les zombies ont +20 % de PV (cumulable) |
+| Horde nombreuse | +20 % de zombies chaque nuit (cumulable) |
+| Enragés | Les rôdeurs et les coureurs font +1 dégât par coup |
+| Carapace | Les rôdeurs encaissent 1 dégât de moins par coup (sauf le feu et les explosions) |
+| Régénération | Les zombies récupèrent 1 PV tous les 3 tours |
+| Putréfaction | En mourant, un zombie éclabousse les unités autour de lui : 1 dégât |
+| Frénésie | Les zombies lents et très lents avancent plus vite |
+
 ## Les personnages
 
 | Personnage | Deck de départ | Relique de départ |
@@ -187,9 +202,9 @@ Chaque nuit après la première a 80 % de chances d'avoir un événement (20 % d
 
 L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot pose ses cartes en testant toutes les possibilités sur une nuit simulée, puis joue la vraie nuit avec un autre tirage aléatoire.
 
-- Le bot joue le Survivant, prend une carte au hasard à l'aube, une relique au hasard, et dépense sa ferraille (réparer si l'abri est à 5 PV ou moins, sinon améliorer). Il joue jusqu'à la chute de l'abri.
-- Cible : le bot tombe en moyenne vers la nuit 9-10, environ 10 % des parties dépassent la nuit 15, presque aucune la nuit 20.
-- Résultat actuel (200 parties) : chute en moyenne à la nuit 9,6, médiane 10, 55 % atteignent la nuit 10, 11 % la nuit 15, 4 % la nuit 20. Un humain fait moins bien.
+- Le bot joue le Survivant. À l'aube, il choisit comme un joueur : il teste chacune des 3 cartes sur la nuit suivante et garde la meilleure. Il prend une relique au hasard et dépense sa ferraille (réparer si l'abri est à 5 PV ou moins, sinon améliorer). Il joue jusqu'à la chute de l'abri. `HASARD=1 node tools/simulate.js` le fait choisir ses cartes au hasard.
+- Cible : le bot tombe en moyenne vers la nuit 8-9, environ 5 % des parties dépassent la nuit 15.
+- Résultat actuel (150 parties) : chute en moyenne à la nuit 8,2, médiane 8, 33 % atteignent la nuit 10, 5 % la nuit 15. Un humain fait moins bien.
 - Les deux premières nuits sont volontairement plus faciles pour l'apprentissage.
 - Un placement au hasard perd généralement dès la nuit 2 : le placement doit compter.
 
@@ -211,6 +226,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Deck de départ réduit à 8 cartes par personnage : avec 40 cartes, un deck complet dès le départ rendrait les parties toutes pareilles.
 - La carte choisie à l'aube arrive d'office dans la main du lendemain (demande d'Amine).
 - Une seule monnaie (la ferraille) pour le troc : plusieurs ressources seraient trop lourdes sur petit écran.
+- Mutations de la horde toutes les 4 nuits plutôt qu'une gestion de nourriture ou de munitions (demande d'Amine : garder le jeu fun et simple). Elles répondent au problème de l'« armée de tireurs » invincible dès la nuit 5.
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 ## Les questions ouvertes

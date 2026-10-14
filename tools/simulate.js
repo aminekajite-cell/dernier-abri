@@ -1,10 +1,12 @@
 // Simulation d'équilibrage (survie sans fin) : un bot joue G parties en choisissant à chaque pose
 // la carte et la case qui maximisent le résultat de la nuit (avec une graine différente de la vraie nuit).
-// Il part avec le deck du survivant, prend une carte au hasard à chaque aube (elle arrive dans sa main du lendemain),
+// Il part avec le deck du survivant, et à chaque aube choisit comme un joueur la carte qui l'aide le plus
+// (il teste chacune des 3 sur la nuit suivante ; elle arrive dans sa main du lendemain). La horde mute toutes les 3 nuits.
 // une relique au hasard toutes les 5 nuits, et dépense sa ferraille (réparer si l'abri est bas, sinon améliorer).
 // Il joue jusqu'à la chute de l'abri (au plus MAXN nuits) : on mesure la nuit où il tombe.
 // Usage : node tools/simulate.js [vagues_json] [poses_par_jour=2] [parties=150] [hausse_pv_par_nuit=0.1] [personnage=surv]
-// Cible actuelle : le bot tombe en moyenne vers la nuit 9-10, rarement après la nuit 15 (un humain fait moins bien).
+// Cible actuelle : le bot tombe en moyenne vers la nuit 8-9, environ 5 % au-delà de la nuit 15 (un humain fait moins bien).
+// HASARD=1 node tools/simulate.js : le bot choisit ses cartes de l'aube au hasard.
 const Z=require('../src/engine.js');
 if(process.argv[2])Z.WAVES=JSON.parse(process.argv[2]);
 if(process.argv[5])Z.HPS=+process.argv[5];
@@ -14,6 +16,12 @@ const sh=a=>Z.shuffle(a);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const score=st=>st.shelter*10+st.grid.reduce((s,u)=>s+(u?u.hp:0),0);
 const pick=a=>a[Math.floor(Math.random()*a.length)];
+const SMART=process.env.HASARD?0:1;
+function bestCard(st,choices){const seed=1+Math.floor(Math.random()*1e9);let best=null;
+ for(const t of choices){if(t==='roadmap')continue;const c0=clone(st);Z.newDay(c0,()=>.1);let bv=-1e9;
+  for(let i=0;i<Z.N*Z.N;i++){if(!Z.canPlace(c0,t,i))continue;const c=clone(c0);Z.place(c,t,i,mk(seed));Z.runNight(c,mk(seed));bv=Math.max(bv,score(c))}
+  if(!best||bv>best.v)best={t,v:bv}}
+ return best?best.t:choices[0]}
 function game(){
  const st=Z.newState(CH);let draw=sh([...Z.CHARS[CH].deck]),disc=[],nextCard=null;
  for(;;){
@@ -28,8 +36,9 @@ function game(){
   disc.push(...hand);
   Z.runNight(st,mk(1+Math.floor(Math.random()*1e9)));Z.endNight(st);
   if(st.shelter<=0||st.night>=MAXN)return st.night;
+  if(Z.mutNight(st.night))Z.mutate(st);
   if(Z.relicNight(st.night)){const r=Z.relicChoices(st);if(r.length)Z.addRelic(st,pick(r))}
-  nextCard=pick(Z.draftChoices());
+  {const ch=Z.draftChoices();nextCard=SMART?bestCard(st,ch):pick(ch)}
   for(;;){
    if(st.shelter<=5&&Z.pay(st,'heal'))continue;
    const deck=[...new Set([...draw,...disc])].filter(t=>Z.UPGRADABLE.includes(t)&&!st.upg[t]);

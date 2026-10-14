@@ -69,7 +69,13 @@ svg.ic .f{fill:currentColor;stroke:none}
 .dk span{color:var(--muted);line-height:1.3;min-width:0}
 .dk b{color:var(--ink);margin-right:6px}
 button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-decoration:underline dotted var(--muted);text-underline-offset:3px}
-.horde .scrap{margin-left:auto;display:inline-flex;align-items:center;gap:3px;color:var(--lantern);font-weight:700;font-variant-numeric:tabular-nums}
+.horde .tags{margin-left:auto;display:inline-flex;gap:10px;align-items:center}
+.horde .mutc{display:inline-flex;align-items:center;gap:3px;color:var(--blood);font-weight:700}
+.horde .mutc.soon{animation:pulse 1.2s ease-in-out infinite}
+.mutc svg{width:14px;height:14px}
+@keyframes pulse{50%{opacity:.45}}
+.relic.mutx{color:var(--blood)}
+.horde .scrap{display:inline-flex;align-items:center;gap:3px;color:var(--lantern);font-weight:700;font-variant-numeric:tabular-nums}
 .scrap svg,.cost svg{width:14px;height:14px}
 .card.up .nm,.pick.up .nm{color:var(--lantern)}
 .go.speed{background:var(--panel2);color:var(--ink);border:1px solid var(--line);font-size:15px;padding:12px}
