@@ -279,7 +279,6 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - La nuit : obscurité avec des sources de lumière (maison, projecteurs, flammes, tirs). Les zombies ont des yeux rouges lumineux pour rester visibles.
 - Retours visuels : traînées de balles, éclairs de tir, coups de hache, explosions, taches de sang qui restent au sol, tremblement d'écran quand la maison est touchée.
 - Unités sur un cercle de couleur selon leur rôle : bois (défense), jaune (tireur), rouge-orangé (corps à corps), bleu (soutien), rouge (piège), violet clair (objet).
-- Personnages et zombies : sprites du pack Kenney « Top-down Shooter » (licence CC0, utilisable commercialement), dans `assets/sprites/`. Un seul sprite de zombie, teinté selon le type. Tuiles du même pack : caisse (Barricade), baril (Bonbonne de gaz), flaque d'huile (Essence), rochers et débris pour décorer le terrain. Les autres défenses, pièges, chiens et l'abri restent dessinés en code ; si une image ne se charge pas, le dessin en code reprend la main.
 
 ## Le défi quotidien
 
@@ -298,6 +297,13 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Ambiance de nuit : vent et grondement sourd dont le volume suit l'obscurité.
 - Un bouton en haut coupe ou remet le son (choix mémorisé).
 - Plus tard : remplacer par des sons d'un pack libre de droits si besoin.
+
+## Le style graphique
+
+- Tout est dessiné en code, dans un seul style : contour sombre autour de chaque forme, ombre portée, ombrage, petits détails (sang, rouille, coutures), palette sombre et désaturée.
+- Survivants : une silhouette commune vue de dessus, habillée selon le métier (tenue, couvre-chef, arme, accessoire) avec une couleur de peau variable.
+- Zombies : une silhouette commune, chaque type a sa taille, sa peau, ses vêtements et un détail reconnaissable (casque du blindé, pustules du gonflé, os du Colosse…).
+- Décision : un pack Kenney a été essayé puis retiré (style trop « cartoon »). Aucun pack du marché ne couvre 16 survivants, 9 zombies, défenses, pièges et décors dans un même style. Pour la sortie Steam, un artiste pourra tout redessiner en partant de ce style.
 
 ## L'historique des décisions
 

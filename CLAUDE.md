@@ -25,7 +25,6 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 - `src/engine.js` : le moteur, avec les règles pures (cartes, zombies, vagues, événements, déroulé d'une nuit tour par tour). Aucun accès au DOM, il doit tourner dans Node comme dans le navigateur. Il expose l'objet global `Z`.
 - `src/game.js` : le rendu canvas, les animations, les cartes en main, les écrans de fin de nuit et la boucle de jeu.
 - `src/audio.js` : les sons, générés en code avec Web Audio (objet global `SFX`).
-- `assets/sprites/` : les sprites (Kenney, CC0).
 - `src/style.css` : le style de l'interface.
 - `tools/simulate.js` : la simulation d'équilibrage dans Node.
 - `docs/GAME_DESIGN.md` : le document de conception, à tenir à jour.
@@ -42,7 +41,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 
 ## Prochaines étapes (par ordre de priorité)
 
-1. Compléter les sprites (défenses, pièges, chiens, abri, sol) : personnages et zombies sont faits avec le pack Kenney « Top-down Shooter ». Les sites de packs sont bloqués depuis l'environnement de Claude : Amine dépose les packs dans le dépôt, Claude les intègre dans `assets/`.
+1. Graphismes : tout est dessiné en code dans un style unique (contours sombres, ombres, détails). Aucun pack du marché ne couvre tout le jeu de façon cohérente ; avant la sortie Steam, faire redessiner l'ensemble par un artiste en suivant ce style. Ne pas mélanger plusieurs packs.
 2. Remplacer les sons générés par des sons d'un pack libre de droits si besoin (même contrainte de téléchargement).
 3. Classement en ligne du défi quotidien (serveur ou classements Steam).
 4. Préparer la page Steam, une démo pour le Steam Next Fest, puis la version Steam (Electron ou Tauri) et la version mobile.
