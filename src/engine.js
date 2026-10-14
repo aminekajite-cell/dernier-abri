@@ -105,6 +105,7 @@ const Z=(()=>{
   molotov:{n:'Molotov',cat:'react',react:'cell',v:'Feu zone',d:'Pendant la nuit : 2 dégâts sur la case visée et autour, et les zombies y brûlent 4 tours'},
   horn:{n:'Klaxon',cat:'react',react:'any',v:'Recul',d:'Pendant la nuit : tous les zombies reculent d’une case'},
   rush:{n:'Adrénaline',cat:'react',react:'any',v:'×2',d:'Pendant la nuit : tes unités attaquent deux fois pendant 3 tours'},
+  rocket:{n:'Lance-roquettes',cat:'shoot',hp:4,block:1,rng:3,dmg:2,every:2,heavy:5,v:'2 · ×5 gros',d:'Tous les 2 tours, une roquette : 2 dégâts, et 5 fois plus (10) contre le Colosse et les Gonflés. Portée 3'},
   flare:{n:'Fusée de détresse',cat:'item',instant:1,flare:1,v:'1 côté',d:'Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté'},
   // évolutions secrètes : jamais dans le deck, elles naissent de deux cartes précises posées côte à côte (voir EVO)
   k9squad:{n:'Brigade canine',cat:'melee',hp:8,block:1,rng:1,dmg:2,every:1,hits:2,stun:1,push:1,evo:1,v:'2 ×2 · Étourdit',d:'Un policier et son chien : 2 morsures de 2 dégâts par tour, qui étourdissent et repoussent'},
@@ -150,7 +151,7 @@ const Z=(()=>{
   if(kind==='atk')u.lvA=(u.lvA||0)+1;else{u.lvD=(u.lvD||0)+1;u.hp=maxHp(st,u)}return true}
  // énergie : chaque jour on a ENERGY points, chaque carte coûte de 0 à 3 selon sa puissance
  const ENERGY=4,HAND_MAX=8;
- const COST={amb:2,doc:2,orderly:2,nailer:2,ranger:2,riot:2,k9:1,barrier:2,swat:3,mortar:3,sentry:2,clay:2,bunker:3,pharma:2,hospital:3,priest:2,stretch:1,brasero:2,firetrap:1,net:1,bear:2,hunter:2,dogs:2,pitch:2,scare:1,turret:2,workshop:3,modwall:2,tesla:3,teacher:2,market:2,vigile:1,carp:2,tear:1,napalm:2,air:3,chief_police:3,chief_mil:3,chief_care:3,chief_pyro:3,chief_trap:3,chief_farm:3,chief_tech:3,chief_comm:3,coffee:0,grenade:1,shot:1,patch:1,molotov:2,horn:2,rush:2};
+ const COST={rocket:3,amb:2,doc:2,orderly:2,nailer:2,ranger:2,riot:2,k9:1,barrier:2,swat:3,mortar:3,sentry:2,clay:2,bunker:3,pharma:2,hospital:3,priest:2,stretch:1,brasero:2,firetrap:1,net:1,bear:2,hunter:2,dogs:2,pitch:2,scare:1,turret:2,workshop:3,modwall:2,tesla:3,teacher:2,market:2,vigile:1,carp:2,tear:1,napalm:2,air:3,chief_police:3,chief_mil:3,chief_care:3,chief_pyro:3,chief_trap:3,chief_farm:3,chief_tech:3,chief_comm:3,coffee:0,grenade:1,shot:1,patch:1,molotov:2,horn:2,rush:2};
  'bar fen sand trap fire wire smoke bait food kid dog med roadmap kit flare'.split(' ').forEach(t=>COST[t]=1);
  'gun axe cop tire spike mine lamp radio cook mech butch monk flame xbow rep gas'.split(' ').forEach(t=>COST[t]=2);
  'car door snp sht mg molo siren lead solar dyn'.split(' ').forEach(t=>COST[t]=3);
@@ -317,6 +318,7 @@ const Z=(()=>{
  };
  const SHOP={
   heal:{n:'Réparer l’abri',d:'+3 PV à l’abri',cost:15},
+  ammo:{n:'Munition anti-Colosse',d:'Se tire pendant la nuit du Colosse : 30 dégâts. 3 en stock au maximum',cost:20},
   upgrade:{n:'Améliorer une carte',d:'Toutes tes cartes de ce type sont améliorées. Plus cher à chaque fois',cost:25,more:15},
   remove:{n:'Jeter une carte',d:'Retire une carte de ton deck',cost:10}
  };
@@ -330,7 +332,7 @@ const Z=(()=>{
  'grenade shot patch'.split(' ').forEach(t=>RAR[t]='com');
  'k9 barrier clay stretch firetrap net hunter pitch scare turret modwall vigile market tear amb doc nailer ranger'.split(' ').forEach(t=>RAR[t]='com');
  'riot mortar sentry bunker pharma priest brasero bear dogs workshop teacher carp napalm orderly'.split(' ').forEach(t=>RAR[t]='rare');
- 'swat hospital tesla air'.split(' ').forEach(t=>RAR[t]='epic');
+ 'swat hospital tesla air rocket'.split(' ').forEach(t=>RAR[t]='epic');
  KEYS.filter(t=>U[t].chief).forEach(t=>RAR[t]='leg');'molotov horn'.split(' ').forEach(t=>RAR[t]='rare');
  const SIDES=['le nord','le sud','l’ouest','l’est'];
  const rc=i=>[Math.floor(i/N),i%N],idx=(r,c)=>r*N+c;
@@ -421,7 +423,14 @@ const Z=(()=>{
   while(out.length<n){let r=rnd()*100,rr='com';for(const k in RARITY){if(r<RARITY[k].w){rr=k;break}r-=RARITY[k].w}
    const cand=pool.filter(t=>RAR[t]===rr&&!out.includes(t));if(cand.length)out.push(cand[Math.floor(rnd()*cand.length)]);else if(!pool.some(t=>!out.includes(t)))break}
   return out}
- function pay(st,k){const c=shopCost(st,k);if(st.scrap<c)return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(maxS(st),st.shelter+3);return true}
+ function pay(st,k){const c=shopCost(st,k);if(st.scrap<c||(k==='ammo'&&(st.ammo||0)>=AMMO_MAX))return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(maxS(st),st.shelter+3);if(k==='ammo')st.ammo=(st.ammo||0)+1;return true}
+ // munitions anti-Colosse : achetées au troc, tirées pendant la nuit sur le Colosse (ignorent l'armure)
+ const AMMO_MAX=3,AMMO_DMG=30;
+ const bossAlive=st=>st.z.some(z=>z.hp>0&&ZT[z.k].boss);
+ function fireAmmo(st){if(!(st.ammo>0))return null;const z=st.z.filter(z=>z.hp>0&&ZT[z.k].boss).sort((a,b)=>a.hp-b.hp)[0];if(!z)return null;st.ammo--;const ev=[];
+  hit(st,z,AMMO_DMG,ev,-1,1);ev.push({i:C,k:'shot',zid:z.id});
+  for(const o of st.z)if(o.hp<=0&&!o.dead){o.dead=1;st.kills++;st.scrap+=ZT[o.k].boss?15:1;ev.push({i:o.pos,k:'die',zid:o.id,boss:!!ZT[o.k].boss})}
+  st.z=st.z.filter(z=>z.hp>0);return ev}
 
  /* ---------- pose des cartes ---------- */
  // déplacer une de ses unités : une fois par jour, vers une case libre où elle pourrait être posée
@@ -479,7 +488,9 @@ const Z=(()=>{
   for(const k of ZK){let v=waveCount(k,st.night);if(k!=='boss'){if(e==='lune')v*=1.5;v=Math.round(v*(1+.2*mc(st,'nombre'))*((PLACES[st.place]||{}).count||1)*((TIERS[st.tier]||TIERS.base).count))}w[k]=v}
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
- function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*hpMult(st.night)*(1+.2*mc(st,'peau'))*(1+FRENZY*frenzy(st))*((PLACES[st.place]||{}).hp||1));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
+ // les zombies ordinaires ont +20 % de PV (ils mouraient trop vite en début de partie) ; le Colosse n'est pas concerné
+ const ZHP=1.2;
+ function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*(T.boss?1:ZHP)*hpMult(st.night)*(1+.2*mc(st,'peau'))*(1+FRENZY*frenzy(st))*((PLACES[st.place]||{}).hp||1));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
   // nuit du Colosse : la horde arrive en 2 vagues (le Colosse dans la 2ᵉ), avec une pause entre les deux où l'on déplace librement ses unités.
  // Toutes les autres nuits arrivent d'un seul tenant.
  const WAVES_N=2;
@@ -513,7 +524,7 @@ const Z=(()=>{
   const done=new Set();
   for(let h=0;h<(D.hits||1);h++){let ts=inR();if(D.distinct)ts=ts.filter(z=>!done.has(z.id));if(!ts.length)break;
    ts.sort((a,b)=>cheb(a.pos,C)-cheb(b.pos,C)||a.hp-b.hp);const z=ts[0];done.add(z.id);
-   const killed=hit(st,z,dmg,ev,i,pierce);ev.push({i,k:'fire'});got(killed);
+   const killed=hit(st,z,D.heavy&&(ZT[z.k].boss||z.k==='fat')?dmg*D.heavy:dmg,ev,i,pierce);ev.push({i,k:'fire'});got(killed);
    if((D.ignite||(u.t==='tesla'&&ally(st,'short')))&&z.hp>0)z.burnT=Math.max(z.burnT||0,D.ignite||3);
    if(D.stun&&z.hp>0)z.cd+=D.stun;
    if((D.push||(D.cat==='melee'&&ally(st,'patrol')))&&z.hp>0&&!ZT[z.k].boss){const b=back(z.pos),bu=st.grid[b];if(!(bu&&U[bu.t].block))z.pos=b}
@@ -612,6 +623,6 @@ const Z=(()=>{
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
  return{N,C,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

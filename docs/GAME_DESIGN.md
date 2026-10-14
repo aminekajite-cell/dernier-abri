@@ -253,6 +253,10 @@ Inspiré de *Super Auto Pets*, *Vampire Survivors* et *Rogue Tower* : les unité
 
 ## La nuit du Colosse en 2 vagues
 
+**Préparer le Colosse** : un compte à rebours dans le bandeau (« Colosse dans N nuits »), et au troc des **munitions anti-Colosse** (20 ferraille, 3 en stock au maximum). Pendant sa nuit, un bouton « Tirer sur le Colosse » apparaît : chaque munition lui inflige 30 dégâts (sans tenir compte de l'armure). Trois munitions retirent environ 90 de ses ~123 PV à la nuit 10 : il faut toujours une défense pour finir le travail. Le but : donner un objectif d'économie aux nuits 1 à 9.
+
+**Lance-roquettes** (carte épique, 3 énergie, sans faction) : 2 dégâts tous les 2 tours à portée 3, ×5 contre le Colosse et les Gonflés. L'option « deck anti-Colosse ».
+
 Seule la nuit du Colosse (toutes les 10 nuits) est coupée en 2 vagues ; le Colosse arrive dans la 2ᵉ. Quand la 1ʳᵉ vague est repoussée, la nuit se met en pause : le joueur déplace librement toutes ses unités et peut jouer ses réactions, puis lance la 2ᵉ vague. L'annonce « ⚠ Nuit du Colosse : 2 vagues » apparaît pendant la journée. Toutes les autres nuits arrivent d'un seul tenant (choix d'Amine : la pause est réservée à l'élite).
 
 ## L'héritage des survivants
@@ -468,6 +472,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Zombies ordinaires +20 % de PV (le Colosse non : il était déjà la cause des défaites), munitions anti-Colosse au troc, compte à rebours, Lance-roquettes (demande d'Amine : début trop facile, mort systématique au Colosse).
 - Pause en pleine nuit réservée à la nuit du Colosse (2 vagues), avec déplacements libres pendant la pause (demande d'Amine).
 - Le deck est fermé pendant la partie : plus aucune carte ajoutée (l'aube propose 3 cartes de sa propre pioche pour la main du lendemain, plus d'achat de carte au troc, la Nuit de pillage et les événements donnent de la ferraille, des soins ou un survivant). Héritage relevé à 100 victimes (demande d'Amine).
 - Très grosses nuits en 3 vagues avec pause, alliances entre factions, murs reliés, héritage des survivants tombés (demande d'Amine).

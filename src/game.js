@@ -84,12 +84,12 @@ const ICON={
  scrap:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>'
 };
 // évolutions : icônes provisoires tirées des cartes d'origine
-Object.assign(ICON,{amb:ICON.stretch,doc:ICON.pharma,orderly:ICON.med,nailer:ICON.turret,ranger:ICON.hunter,k9squad:ICON.k9,nightsnp:ICON.snp+'<path d="M2 2l3 3M22 2l-3 3"/>',heavyflame:ICON.flame,fortin:ICON.bunker,autogun:ICON.sentry,slaughter:ICON.butch,canteen:ICON.cook,gang:ICON.kid,saint:'<circle cx="12" cy="5" r="3"/><path d="M12 9v12M7 13h10"/>',tracker:ICON.xbow});
+Object.assign(ICON,{rocket:'<path d="M3 15l12-8 3 3-8 12zM15 7l3-3 2 2-3 3M6 14l-3 1 1-3"/>',ammo:'<path d="M9 3h6v4l1 2v12H8V9l1-2zM8 13h8"/>',amb:ICON.stretch,doc:ICON.pharma,orderly:ICON.med,nailer:ICON.turret,ranger:ICON.hunter,k9squad:ICON.k9,nightsnp:ICON.snp+'<path d="M2 2l3 3M22 2l-3 3"/>',heavyflame:ICON.flame,fortin:ICON.bunker,autogun:ICON.sentry,slaughter:ICON.butch,canteen:ICON.cook,gang:ICON.kid,saint:'<circle cx="12" cy="5" r="3"/><path d="M12 9v12M7 13h10"/>',tracker:ICON.xbow});
 const stars=u=>'★'.repeat(u.gold||0);
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v30 · 15 oct.';
+const VERSION='v31 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -247,6 +247,7 @@ const WEAP={
  ladle:()=>{oLine(6,5,14,5,'#9aa0a6',1.4);oCirc(15.5,5,2.2,'#9aa0a6',1)},
  fork:()=>{oLine(3,5,17,5,'#6b4a2a',1.8);[2.5,5,7.5].forEach(o=>oLine(17,o,22,o,'#9aa0a6',1))},
  hammer:()=>{oLine(5,5,15,5,'#6b4a2a',2);oRect(14,1.5,4,7,'#7a7f85',1)},
+ rocket:()=>{oRect(0,1.2,24,5.6,'#4a5236');oRect(22,.6,4,6.8,'#2a2e26',1);circ(25,4,1.6,'#c0392b')},
  none:()=>{}
 };
 /* survivants : une silhouette commune vue de dessus, habillée selon le métier */
@@ -287,6 +288,7 @@ const LOOK={
  chief_farm:{body:'#7a3a26',w:'axe',hc:'#b88a4a',one:1,plaid:1,chief:1},
  chief_tech:{body:'#2a4f78',w:'wrench',head:'helmet',hc:'#e0b23a',one:1,extra:'grease',chief:1},
  chief_comm:{body:'#5a4a6a',w:'pistol',hc:'#d8d8d8',one:1,chief:1},
+ rocket:{body:'#4a5236',w:'rocket',head:'helmet',hc:'#3a4230',pack:'#5a4128'},
  // combattants des factions de soutien
  amb:{body:'#e8e4d8',w:'none',head:'cap',hc:'#c0392b',extra:'cross'},
  doc:{body:'#f2f2f2',w:'pistol',hc:'#3a2a1a',extra:'cross',one:1},
@@ -564,7 +566,7 @@ function playEvents(ev,types,now){
   if(dead.length>=3){const ps=dead.map(e=>tc(e.i)),cx=ps.reduce((a,p)=>a+p.x,0)/ps.length,cy=ps.reduce((a,p)=>a+p.y,0)/ps.length;floatTxt(cx,cy-10,dead.length>=5?`Carnage ×${dead.length} !`:`Triple !${dead.length>3?' ×'+dead.length:''}`,'#ff9a2e',17);shake(now,4)}
   dead.forEach(e=>{const v=V.get(e.zid),p=v?zpos(v,now):tc(e.i);burst(p.x,p.y,'#d8d0b8',5,.07,1.6);
    if(e.boss){slowT=now+1800;shake(now,14);addFX({type:'ring',x:p.x,y:p.y,r:120,c:'#f2b33d',dur:900});addFX({type:'flash',x:p.x,y:p.y,r:50,c:'rgba(255,200,90,.9)',dur:700,light:T*3});burst(p.x,p.y,'rgba(140,20,24,.9)',30,.15,3);floatTxt(CEN.x,CEN.y-50,'LE COLOSSE EST TOMBÉ','#f2b33d',20);SFX.play('boom')}})}
- const SND={doc:'shot',nailer:'mg',ranger:'snp',chief_comm:'shot',chief_tech:'mg',amb:'melee',orderly:'melee',chief_care:'melee',nightsnp:'snp',heavyflame:'flame',fortin:'shot',autogun:'mg',slaughter:'melee',gang:'shot',saint:'melee',tracker:'bow',k9squad:'melee',swat:'snp',vigile:'shot',hunter:'bow',sentry:'mg',turret:'mg',mortar:'sht',tesla:'hit',bunker:'shot',riot:'melee',k9:'melee',dogs:'melee',pitch:'melee',gun:'shot',kid:'shot',snp:'snp',sht:'sht',mg:'mg',xbow:'bow',flame:'flame',axe:'melee',dog:'melee',cop:'melee',butch:'melee',monk:'melee'};
+ const SND={rocket:'sht',doc:'shot',nailer:'mg',ranger:'snp',chief_comm:'shot',chief_tech:'mg',amb:'melee',orderly:'melee',chief_care:'melee',nightsnp:'snp',heavyflame:'flame',fortin:'shot',autogun:'mg',slaughter:'melee',gang:'shot',saint:'melee',tracker:'bow',k9squad:'melee',swat:'snp',vigile:'shot',hunter:'bow',sentry:'mg',turret:'mg',mortar:'sht',tesla:'hit',bunker:'shot',riot:'melee',k9:'melee',dogs:'melee',pitch:'melee',gun:'shot',kid:'shot',snp:'snp',sht:'sht',mg:'mg',xbow:'bow',flame:'flame',axe:'melee',dog:'melee',cop:'melee',butch:'melee',monk:'melee'};
  for(const e of ev){
   try{if(e.k==='hit')SFX.play(SND[types[e.src]]||'hit');else if(e.k==='bite'||e.k==='spit')SFX.play(e.i===Z.C?'shelter':'bite');
    else if(e.k==='boom')SFX.play('boom');else if(e.k==='lost')SFX.play(e.name?'death':'lost',.3);else if(e.k==='molo')SFX.play('flame');else if(e.k==='howl')SFX.play('groan',.2)}catch(x){}
@@ -578,6 +580,7 @@ function playEvents(ev,types,now){
     addFX({type:'flash',x:mx,y:my,r:big?7:5,c:'#ffe08a',dur:90,light:T*.9})}
    else if(t==='sht'){if(!shots.has(e.src)){shots.add(e.src);const a=facing[e.src],mx=sp.x+Math.cos(a)*15,my=sp.y+Math.sin(a)*15;addFX({type:'flash',x:mx,y:my,r:8,c:'#ffd27a',dur:110,light:T})}
     addFX({type:'tracer',x1:sp.x,y1:sp.y,x2:tp.x+(Math.random()-.5)*10,y2:tp.y+(Math.random()-.5)*10,c:'#ffcf70',w:1,dur:140})}
+   else if(t==='rocket'){addFX({type:'tracer',x1:sp.x,y1:sp.y,x2:tp.x,y2:tp.y,c:'#ffb35c',w:3,dur:240});addFX({type:'flash',x:tp.x,y:tp.y,r:20,c:'rgba(255,160,60,.85)',dur:300,light:T*1.4});burst(tp.x,tp.y,'#ff9a2e',10,.12,2.5)}
    else if(t==='xbow'||t==='tracker'){addFX({type:'tracer',x1:sp.x,y1:sp.y,x2:tp.x,y2:tp.y,c:'#d8c49a',w:1.8,dur:200})}
    else if(t==='flame'||t==='heavyflame'){for(let k=0;k<6;k++)PT.push({x:sp.x+(tp.x-sp.x)*k/6,y:sp.y+(tp.y-sp.y)*k/6,vx:(Math.random()-.5)*.02,vy:-.02,t0:now,dur:260,c:k%2?'#ff9a2e':'#ffd25a',r:3+k*.6,light:k===5?24:0})}
    else if(t==='tesla'){addFX({type:'tracer',x1:sp.x,y1:sp.y,x2:tp.x,y2:tp.y,c:'#9fe8ff',w:2,dur:160});addFX({type:'flash',x:tp.x,y:tp.y,r:6,c:'#bff3ff',dur:120,light:T*.7})}
@@ -608,7 +611,7 @@ function playEvents(ev,types,now){
 
 /* ---------- UI ---------- */
 function hordeHtml(){const w=Z.waveList(G);const parts=Z.ZK.filter(k=>w[k]).map(k=>`<span class="hz"><span class="dot" style="--zc:var(--z-${k})"></span>${plural(w[k],...ZN[k])}</span>`);
- return `<span>Cette nuit :</span>${parts.join('')}${Z.bigNight(G,w)?'<span class="hz big">⚠ Nuit du Colosse : 2 vagues</span>':''}`}
+ return `<span>Cette nuit :</span>${parts.join('')}${Z.bigNight(G,w)?'<span class="hz big">⚠ Nuit du Colosse : 2 vagues</span>':`<span class="hz boss">Colosse dans ${plural(10-G.night%10,'nuit','nuits')}</span>`}`}
 const cardName=t=>Z.stat(G,t).n;
 const famTag=t=>{const f=Z.famOf(t);return f?`<span class="ft">${Z.FAM[f].ic}</span>`:''};
 const famLine=t=>{const f=Z.famOf(t);return f?` <em class="ce">${Z.FAM[f].ic} ${Z.FAM[f].n}</em>`:''};
@@ -621,7 +624,7 @@ function render(){
  const sb=$('#shelB');sb.style.width=Math.max(0,G.shelter)/Z.maxS(G)*100+'%';sb.className=G.shelter<=3?'low':'';
  $('#event').innerHTML=`<b>${G.event.n}</b><span>${G.event.d}${G.side>=0?` · Fusée : ils viendront de ${Z.SIDES[G.side]}`:''}</span>`;
  const mN=G.muts.length,soon=Z.mutNight(G.night);
- $('#horde').innerHTML=(S.busy?'':hordeHtml())+`<span class="tags">${mN||soon?`<span class="mutc${soon?' soon':''}" title="Mutations de la horde">${svg('mut')}${mN}${Z.frenzy(G)?` · +${Z.frenzy(G)*10} %`:''}${soon?' · mute à l’aube':''}</span>`:''}<span class="scrap" title="Ferraille">${svg('scrap')}${G.scrap}</span></span>`;
+ $('#horde').innerHTML=(S.busy?'':hordeHtml())+`<span class="tags">${mN||soon?`<span class="mutc${soon?' soon':''}" title="Mutations de la horde">${svg('mut')}${mN}${Z.frenzy(G)?` · +${Z.frenzy(G)*10} %`:''}${soon?' · mute à l’aube':''}</span>`:''}${G.ammo?`<span class="ammoc" title="Munitions anti-Colosse">${svg('ammo')}${G.ammo}/${Z.AMMO_MAX}</span>`:''}<span class="scrap" title="Ferraille">${svg('scrap')}${G.scrap}</span></span>`;
  const left=G.energy??Z.ENERGY;
  const hand=$('#hand');hand.style.setProperty('--n',Math.max(5,Math.min(6,S.hand.length)));
  hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card r-${rar(t)}${S.sel===k?' sel':''}${G.upg[t]?' up':''}" data-k="${k}" style="--cc:${cc(t)}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}><span class="cost">${Z.costOf(G,t)}</span>${famTag(t)}${svg(t)}<span class="nm">${cardName(t)}</span><span class="v">${Z.U[t].react&&!S.busy?'Nuit':Z.U[t].v}</span></button>`).join('');
@@ -635,11 +638,18 @@ function render(){
  else if(S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
  else if(S.inspect!==null&&G.grid[S.inspect])info.innerHTML=unitLine(G.grid[S.inspect])+(G.moved?' (déjà un déplacement aujourd’hui)':'');
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie.`+(G.moved?'':' Touche une unité pour la déplacer (1 fois par jour).');
+ // bouton de tir : un seul élément, mis à jour sans être recréé (sinon le toucher peut se perdre pendant la nuit)
+ const fire=FIRE(),on=!!(S.busy&&G.ammo>0&&Z.bossAlive(G));fire.hidden=!on;if(on){const t=`${svg('ammo')} Tirer sur le Colosse (${G.ammo})`;if(fire.innerHTML!==t)fire.innerHTML=t}
  const tip=$('#tip');if(TUTO<4&&ov.hidden&&(S.busy?TUTO===3:TUTO<3)){tip.hidden=false;tip.textContent=TIPS[TUTO]}else tip.hidden=true;
  const go=$('#go');go.disabled=false;go.textContent=S.pause?`Lancer la vague ${S.pause+1} sur ${G.waves}`:S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy&&!S.pause);
 }
 $('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;SFX.play('ui');const k=+b.dataset.k;
  if(S.busy&&Z.U[S.hand[k]].react==='any'){playReact(k,Z.C);return}S.sel=S.sel===k?null:k;S.moveFrom=null;S.inspect=null;if(S.sel!==null)tuto(0);render()});
+// munition anti-Colosse : 30 dégâts, ignore l'armure
+let fireBtn=null;
+function FIRE(){if(!fireBtn){fireBtn=document.createElement('button');fireBtn.type='button';fireBtn.className='ammo';fireBtn.id='fire';fireBtn.hidden=true;$('#info').after(fireBtn);fireBtn.addEventListener('click',fireAmmo)}return fireBtn}
+function fireAmmo(){const ev=Z.fireAmmo(G);if(!ev)return;const now=performance.now();syncZ(now);playEvents(ev,G.grid.map(u=>u&&u.t),now);SFX.play('snp');SFX.play('boom');shake(now,9);
+ const z=ev.find(e=>e.k==='shot'),v=z&&V.get(z.zid),p=v?zpos(v,now):CEN;floatTxt(p.x,p.y-30,`−${Z.AMMO_DMG}`,'#ffd25a',22);render()}
 $('#round').addEventListener('click',()=>{if(!S.busy&&ov.hidden)runInfo()});
 cv.addEventListener('click',e=>{
  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*L,y=(e.clientY-r.top)/r.height*L;
@@ -765,8 +775,8 @@ function shopScreen(){
  S.phase='shop';S.picks=null;save();
  const row=(k,ex)=>{const o=Z.SHOP[k],c=Z.shopCost(G,k),ok=G.scrap>=c&&!ex;return `<button type="button" class="shopi" data-a="shop-${k}" ${ok?'':'disabled'}><span><b>${o.n}</b>${o.d}</span><span class="cost">${svg('scrap')}${c}</span></button>`};
  const upg=deckTypes().filter(t=>Z.UPGRADABLE.includes(t)&&!G.upg[t]);
- show(`<h2 class="pw">Le troc de l’aube</h2><p>Tu as <b>${G.scrap} ferraille</b>. Un zombie éliminé rapporte 1 ferraille, le Colosse 15. Économise pour ce qui compte.</p>
-  <div class="shop">${row('heal',G.shelter>=Z.maxS(G))}${row('upgrade',!upg.length)}${row('remove',deckList().length<=5)}</div>
+ show(`<h2 class="pw">Le troc de l’aube</h2><p>Tu as <b>${G.scrap} ferraille</b>. Un zombie éliminé rapporte 1 ferraille, le Colosse 15. Économise pour ce qui compte. ${G.night%10===9?'<b>Le Colosse attaque demain !</b> ':''}Munitions anti-Colosse : <b>${G.ammo||0}/${Z.AMMO_MAX}</b>.</p>
+  <div class="shop">${row('heal',G.shelter>=Z.maxS(G))}${row('ammo',(G.ammo||0)>=Z.AMMO_MAX)}${row('upgrade',!upg.length)}${row('remove',deckList().length<=5)}</div>
   <button type="button" class="go" data-a="nightpick">Continuer</button>`);
 }
 const deckTypes=()=>[...new Set(deckList())];
@@ -891,6 +901,7 @@ const ACT={
  draft:v=>{if(v&&(S.draw.includes(v)||S.discard.includes(v))){for(const pile of[S.draw,S.discard]){const k=pile.indexOf(v);if(k>=0){pile.splice(k,1);break}}S.next=v}dawnStep('shop')},
  shop:()=>shopScreen(),
  'shop-heal':()=>{if(Z.pay(G,'heal'))render();shopScreen()},
+ 'shop-ammo':()=>{if(Z.pay(G,'ammo')){SFX.play('place');render()}shopScreen()},
  'shop-upgrade':()=>listScreen('Améliorer une carte','Toutes les cartes de ce type seront améliorées, y compris celles déjà posées.',deckTypes().filter(t=>Z.UPGRADABLE.includes(t)&&!G.upg[t]),'up-pick'),
  'shop-remove':()=>listScreen('Jeter une carte','Une carte de ce type quitte ton deck pour cette partie (les unités posées ne comptent pas).',pileTypes(),'rm-pick'),
  'up-pick':v=>{if(Z.pay(G,'upgrade'))Z.upgrade(G,v);render();shopScreen()},
@@ -925,7 +936,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <ul><li>Le jour, dépense tes <b>4 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
 <li>Chaque survivant a un <b>prénom</b> et un trait. S’il tombe, il est perdu pour de bon.</li>
 <li>Les unités de <b>corps à corps</b> rendent chaque coup reçu au contact. Des <b>murs</b> côte à côte forment un rempart qui partage les coups. Deux factions à 3 unités chacune forment une <b>alliance</b>.</li>
-<li>La nuit du <b>Colosse</b> arrive en <b>2 vagues</b> : entre les deux, tu déplaces librement tes unités et tu peux jouer tes réactions.</li>
+<li>Prépare-toi au <b>Colosse</b> : achète des <b>munitions anti-Colosse</b> au troc (30 dégâts chacune, 3 au maximum) et tire-les pendant sa nuit. Elle arrive en <b>2 vagues</b> : entre les deux, tu déplaces librement tes unités et tu peux jouer tes réactions.</li>
 <li>Une fois par jour, tu peux <b>déplacer</b> une de tes unités : touche-la, puis touche une case libre.</li>
 <li>Garde de l’énergie pour la nuit : les cartes <b>Réaction</b> (grenade, tir de l’abri…) se jouent pendant l’attaque.</li>
 <li>Regroupe les unités d’une même <b>faction</b> (👮 🎖️ ⛑️ 🔥 🪤 🐕 ⚡ 🏠) pour les renforcer : côte à côte, chaque voisin de la même faction donne <b>+1</b> (dégât ou soin, +2 au plus) ; leur <b>Chef</b> légendaire les renforce encore, et, certains soirs, choisis ta <b>nuit</b> : prudente ou risquée.</li>

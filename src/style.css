@@ -156,3 +156,11 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 /* alliance active et annonce des très grosses nuits */
 .fam.ally{border-color:var(--lantern);color:var(--lantern)}
 .hz.big{color:#ff6b6b;font-weight:700}
+
+/* munitions anti-Colosse : stock, bouton de tir, compte à rebours */
+.ammoc{display:inline-flex;align-items:center;gap:3px;color:#ffb35c;font-weight:700;margin-right:8px}
+.ammoc .ic{width:16px;height:16px}
+button.ammo{display:flex;align-items:center;justify-content:center;gap:6px;margin:6px auto 0;padding:8px 12px;border-radius:10px;border:2px solid #ffb35c;background:#3a2414;color:#ffd9a8;font:inherit;font-weight:700}
+button.ammo .ic{width:18px;height:18px}
+.hz.boss{color:var(--muted)}
+button.ammo[hidden]{display:none}
