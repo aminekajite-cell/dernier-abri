@@ -49,7 +49,7 @@ const ICON={
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v17 · 14 oct.';
+const VERSION='v18 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -189,9 +189,12 @@ function drawUnit(i,u,now){
 }
 /* ---------- sprites (pack Kenney « Top-down Shooter », CC0) : tant qu'une image n'est pas chargée, on garde le dessin en code ---------- */
 const SPR={};
-function spr(n){if(!(n in SPR)){const im=new Image();im.src='assets/sprites/'+n+'.png?v=17';SPR[n]=im}const im=SPR[n];return im.complete&&im.naturalWidth?im:null}
+function spr(n){if(!(n in SPR)){const im=new Image();im.src='assets/sprites/'+n+'.png?v=18';SPR[n]=im}const im=SPR[n];return im.complete&&im.naturalWidth?im:null}
 const UNIT_SPR={gun:'manBlue_gun',snp:'soldier1_silencer',sht:'manBrown_gun',mg:'soldier1_machine',xbow:'survivor1_silencer',flame:'hitman1_machine',molo:'manOld_hold',kid:'womanGreen_gun',axe:'survivor1_hold',cop:'manBlue_hold',butch:'manBrown_hold',monk:'manOld_stand',med:'womanGreen_stand',cook:'womanGreen_hold',mech:'survivor1_reload',lead:'soldier1_stand'};
-Object.values(UNIT_SPR).concat('zombie_hold').forEach(spr);
+// tuiles du même pack pour certaines défenses et pièges, et pour le décor du terrain
+const TILE_SPR={bar:['crate',.72],gas:['barrel',.5],fire:['oil',.95]};
+const DECOR=[['rock1',1.3,1.25,.4],['rock2',5.7,1.3,.35],['rock3',1.25,5.6,.38],['debris1',5.6,5.7,.55],['debris2',3.6,1.2,.45],['plank',1.2,3.75,.5],['rock2',4.7,5.75,.3]];
+Object.values(UNIT_SPR).concat('zombie_hold',...Object.values(TILE_SPR).map(v=>v[0]),...DECOR.map(d=>d[0])).forEach(spr);
 // zombies : un seul sprite, teinté selon le type
 const ZTINT={run:'#d8e45a',fat:'#b98be0',crawl:'#6fb0b0',spit:'#c6e83a',armor:'#a9b3bd',howl:'#e0a0c0',boss:'#ff5a3a'};
 const tintCache={};
@@ -200,6 +203,10 @@ function zspr(k){const im=spr('zombie_hold');if(!im)return null;if(!ZTINT[k])ret
  return tintCache[k]}
 function drawUnitInner(i,u,now){
  const{x,y}=tc(i),D=Z.U[u.t],dx=x-CEN.x,dy=y-CEN.y,out=Math.atan2(dy,dx);const a=facing[i]??out,s=rng(i+3);
+ const tl=TILE_SPR[u.t]&&spr(TILE_SPR[u.t][0]);
+ if(tl){const w=T*TILE_SPR[u.t][1];ctx.save();ctx.translate(x,y);ell(3,5,w*.45,w*.32,'rgba(0,0,0,.3)');ctx.rotate(out+Math.PI/2+(s()-.5)*.4);ctx.drawImage(tl,-w/2,-w/2,w,w);ctx.restore();
+  if(u.t==='fire'&&S.busy&&G.event.id!=='pluie'){for(let k=0;k<2;k++)PT.push({x:x+(Math.random()-.5)*34,y:y+(Math.random()-.5)*20,vx:(Math.random()-.5)*.01,vy:-.045,t0:now,dur:420,c:Math.random()<.5?'#ff9a2e':'#ffd25a',r:3+Math.random()*3,light:0})}
+  return}
  const sp=UNIT_SPR[u.t]&&spr(UNIT_SPR[u.t]);
  if(sp){const k=u.t==='kid'?.5:.62,w=sp.naturalWidth*k,h=sp.naturalHeight*k,sw=(u.t==='axe'||u.t==='butch')?Math.sin(now/300)*.1:0;
   ctx.save();ctx.translate(x,y);ell(2,4,12,9,'rgba(0,0,0,.35)');ctx.rotate(a+sw);
@@ -339,6 +346,7 @@ function frame(now){
 }
 // décor propre à chaque lieu, par-dessus le sol commun
 function drawPlace(now){const pl=G.place;
+ for(const[n,cx,cy,k]of DECOR){const im=spr(n);if(!im)continue;const c=Z.rc(Math.floor(cy)*7+Math.floor(cx));if(G.grid[Math.floor(cy)*7+Math.floor(cx)])continue;const w=T*k;ctx.drawImage(im,cx*T-w/2,cy*T-w/2,w,w)}
  if(pl==='ferme'){ctx.fillStyle='#24465a';ctx.fillRect(0,0,L,T*.8);ctx.strokeStyle='rgba(160,200,220,.35)';ctx.lineWidth=1.5;for(let k=0;k<6;k++){const y=8+k*8,o=(now/40+k*30)%60;ctx.beginPath();for(let x=-60+o;x<L;x+=60){ctx.moveTo(x,y);ctx.lineTo(x+22,y)}ctx.stroke()}
   ctx.fillStyle='rgba(120,140,60,.18)';for(let r=1;r<6;r++)ctx.fillRect(T,r*T+T/2-2,L-2*T,4)}
  if(pl==='station'){ctx.fillStyle='rgba(120,120,115,.35)';ctx.fillRect(T,T,L-2*T,L-2*T);ctx.strokeStyle='rgba(230,200,60,.35)';ctx.lineWidth=2;ctx.setLineDash([10,8]);ctx.strokeRect(T*1.5,T*1.5,L-3*T,L-3*T);ctx.setLineDash([]);
