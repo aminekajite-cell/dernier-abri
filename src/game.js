@@ -85,10 +85,11 @@ const ICON={
 };
 // évolutions : icônes provisoires tirées des cartes d'origine
 Object.assign(ICON,{k9squad:ICON.k9,nightsnp:ICON.snp+'<path d="M2 2l3 3M22 2l-3 3"/>',heavyflame:ICON.flame,fortin:ICON.bunker,autogun:ICON.sentry,slaughter:ICON.butch,canteen:ICON.cook,gang:ICON.kid,saint:'<circle cx="12" cy="5" r="3"/><path d="M12 9v12M7 13h10"/>',tracker:ICON.xbow});
+const stars=u=>'★'.repeat(u.gold||0);
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v25 · 14 oct.';
+const VERSION='v26 · 14 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -339,13 +340,13 @@ function drawUnit(i,u,now){
  ctx.save();ctx.globalAlpha=D0.block?.16:.1;circ(p0.x,p0.y,26,cc);ctx.globalAlpha=.55;ctx.strokeStyle=cc;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(p0.x,p0.y,26,0,7);ctx.stroke();ctx.setLineDash([]);ctx.restore();
  // version dorée (fusion) ou évolution : un anneau qui pulse
  if(u.gold||D0.evo){ctx.save();ctx.strokeStyle=u.gold?'#f2c23d':'#c58cff';ctx.lineWidth=3;ctx.globalAlpha=.55+.3*Math.sin(now/300);ctx.beginPath();ctx.arc(p0.x,p0.y,28,0,7);ctx.stroke();ctx.restore()}
- ctx.save();ctx.translate(p0.x,p0.y);ctx.scale(u.gold?1.6:1.45,u.gold?1.6:1.45);ctx.translate(-p0.x,-p0.y);
+ ctx.save();ctx.translate(p0.x,p0.y);const sc=1.45+.12*Math.min(3,u.gold||0);ctx.scale(sc,sc);ctx.translate(-p0.x,-p0.y);
  drawUnitInner(i,u,now);ctx.restore();
  if(D0.up)safeTxt(p0.x+19,p0.y-17,'+','#f2b33d');
- if(u.gold)safeTxt(p0.x-19,p0.y-17,'★','#f2c23d');else if(D0.evo)safeTxt(p0.x-19,p0.y-17,'✦','#c58cff');
+ if(u.gold)safeTxt(p0.x-19,p0.y-17,u.gold>1?u.gold+'★':'★','#f2c23d');else if(D0.evo)safeTxt(p0.x-19,p0.y-17,'✦','#c58cff');
  const lv=(u.lvA||0)+(u.lvD||0);if(lv){ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(p0.x+11,p0.y+14,18,12);ctx.fillStyle='#9fd86b';ctx.font='bold 9px system-ui,sans-serif';ctx.textAlign='center';ctx.fillText('N'+lv,p0.x+20,p0.y+23)}
  const mx=Z.maxHp(G,u);if(D0.block)hpBar(p0.x,p0.y-31,u.hp/mx,u.hp/mx>.4?'#9fd86b':'#e5484d');
- if(u.name&&nightAmt<.5)LABELS.push([p0.x,p0.y+33,u.name.replace(/^(Le |La |L’)/,'')+(u.gold?' ★':'')]);
+ if(u.name&&nightAmt<.5)LABELS.push([p0.x,p0.y+33,u.name.replace(/^(Le |La |L’)/,'')+(u.gold?' '+stars(u):'')]);
 }
 function drawUnitInner(i,u,now){
  const{x,y}=tc(i),dx=x-CEN.x,dy=y-CEN.y,out=Math.atan2(dy,dx);const a=facing[i]??out,s=rng(i+3);
@@ -609,7 +610,7 @@ function render(){
  const sb=$('#shelB');sb.style.width=Math.max(0,G.shelter)/Z.maxS(G)*100+'%';sb.className=G.shelter<=3?'low':'';
  $('#event').innerHTML=`<b>${G.event.n}</b><span>${G.event.d}${G.side>=0?` · Fusée : ils viendront de ${Z.SIDES[G.side]}`:''}</span>`;
  const mN=G.muts.length,soon=Z.mutNight(G.night);
- $('#horde').innerHTML=(S.busy?'':hordeHtml())+`<span class="tags">${mN||soon?`<span class="mutc${soon?' soon':''}" title="Mutations de la horde">${svg('mut')}${mN}${soon?' · mute à l’aube':''}</span>`:''}<span class="scrap" title="Ferraille">${svg('scrap')}${G.scrap}</span></span>`;
+ $('#horde').innerHTML=(S.busy?'':hordeHtml())+`<span class="tags">${mN||soon?`<span class="mutc${soon?' soon':''}" title="Mutations de la horde">${svg('mut')}${mN}${Z.frenzy(G)?` · +${Z.frenzy(G)*10} %`:''}${soon?' · mute à l’aube':''}</span>`:''}<span class="scrap" title="Ferraille">${svg('scrap')}${G.scrap}</span></span>`;
  const left=G.energy??Z.ENERGY;
  const hand=$('#hand');hand.style.setProperty('--n',Math.max(5,Math.min(6,S.hand.length)));
  hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card r-${rar(t)}${S.sel===k?' sel':''}${G.upg[t]?' up':''}" data-k="${k}" style="--cc:${cc(t)}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}><span class="cost">${Z.costOf(G,t)}</span>${famTag(t)}${svg(t)}<span class="nm">${cardName(t)}</span><span class="v">${Z.U[t].react&&!S.busy?'Nuit':Z.U[t].v}</span></button>`).join('');
@@ -633,13 +634,13 @@ cv.addEventListener('click',e=>{
 });
 // fiche d'une unité : prénom, métier, trait, victimes, PV
 function unitLine(u){const tr=Z.TRAITS[u.trait],D=Z.U[u.t],lv=(u.lvA||0)+(u.lvD||0),k=u.kills||0;
- return (u.name?`<b>${u.name}</b>, ${cardName(u.t)}`:`<b>${cardName(u.t)}</b>`)+(u.gold?' <b class="gold">★ doré</b>':'')+(D.evo?' <b class="evo">✦ évolution</b>':'')
+ return (u.name?`<b>${u.name}</b>, ${cardName(u.t)}`:`<b>${cardName(u.t)}</b>`)+(u.gold?` <b class="gold">${stars(u)} doré</b>`:'')+(D.evo?' <b class="evo">✦ évolution</b>':'')
   +(tr?` · <b>${tr.n}</b> (${tr.d})`:'')+(D.dmg?` · ${plural(k,'zombie tué','zombies tués')}, niveau suivant à ${(Math.floor(k/Z.LVL)+1)*Z.LVL}`:'')
   +(lv?` · niveau ${lv} (+${u.lvA||0} dégât, +${(u.lvD||0)*3} PV)`:'')+` · ${u.hp}/${Z.maxHp(G,u)} PV.`}
 // fusion ou évolution juste après une pose ou un déplacement : effets, son, et découverte enregistrée dans la collection
 function mergeFx(m){if(!m||typeof m!=='object')return;const p=tc(m.i),now=performance.now();
  const pull=(j,c)=>{const q=tc(j);facing[j]=null;addFX({type:'tracer',x1:q.x,y1:q.y,x2:p.x,y2:p.y,c,w:3,dur:450});burst(q.x,q.y,c,12,.09,2)};
- if(m.k==='fuse'){m.from.forEach(j=>pull(j,'#f2c23d'));addFX({type:'ring',x:p.x,y:p.y,r:64,c:'#f2c23d',dur:650});addFX({type:'flash',x:p.x,y:p.y,r:32,c:'rgba(255,210,90,.8)',dur:420,light:T*1.5});floatTxt(p.x,p.y-22,`Fusion ! ${cardName(m.t)} ★`,'#f2c23d',16);SFX.play('fuse')}
+ if(m.k==='fuse'){m.from.forEach(j=>pull(j,'#f2c23d'));addFX({type:'ring',x:p.x,y:p.y,r:64,c:'#f2c23d',dur:650});addFX({type:'flash',x:p.x,y:p.y,r:32,c:'rgba(255,210,90,.8)',dur:420,light:T*1.5});floatTxt(p.x,p.y-22,`Fusion ! ${cardName(m.t)} ${'★'.repeat(m.gold||1)}`,'#f2c23d',16);SFX.play('fuse')}
  if(m.k==='evo'){pull(m.j,'#c58cff');addFX({type:'ring',x:p.x,y:p.y,r:72,c:'#c58cff',dur:750});addFX({type:'flash',x:p.x,y:p.y,r:36,c:'rgba(200,150,255,.85)',dur:500,light:T*1.6});burst(p.x,p.y,'#e0c8ff',18,.12,2.5);floatTxt(p.x,p.y-22,`Évolution : ${Z.U[m.t].n} !`,'#d9b8ff',16);SFX.play('evo');
   META.evo=META.evo||[];if(!META.evo.includes(m.t)){META.evo.push(m.t);saveMeta(META);floatTxt(p.x,p.y+6,'Nouvelle découverte','#ffffff',13)}}
  shake(now,4)}
@@ -709,7 +710,7 @@ const pickBtn=(t,a,v)=>`<button type="button" class="pick r-${rar(t)}${G.upg[t]?
 function dawn(){
  const d=S.dawn;if(d&&!d.chimed){d.chimed=1;SFX.play('dawn')}
  if(d&&d.mut&&!d.mutShown){d.mutShown=1;SFX.play('mutate');
-  return show(`<h2 class="ko">La horde mute</h2>${dawnTxt()}<div class="relics"><div class="relic mutx">${svg('mut')}<span><b>${Z.MUTS[d.mut].n}</b>${Z.MUTS[d.mut].d}</span></div></div><p>C’est permanent. La prochaine mutation arrivera dans 4 nuits.</p><button type="button" class="go" data-a="dawn">Continuer</button>`)}
+  return show(`<h2 class="ko">La horde mute</h2>${dawnTxt()}<div class="relics"><div class="relic mutx">${svg('mut')}<span><b>${Z.MUTS[d.mut].n}</b>${Z.MUTS[d.mut].d}</span></div></div>${Z.frenzy(G)?`<div class="relics"><div class="relic mutx">${svg('mut')}<span><b>Frénésie meurtrière</b>Les zombies gagnent +10 % de PV et de dégâts. Total : +${Z.frenzy(G)*10} %.</span></div></div>`:''}<p>C’est permanent. La prochaine mutation arrivera dans 4 nuits${G.night+4>=Z.FRENZY_FROM&&!Z.frenzy(G)?', avec la première frénésie meurtrière':''}.</p><button type="button" class="go" data-a="dawn">Continuer</button>`)}
  // une unité a atteint 20, 40, 60… zombies tués : choix de son amélioration
  const li=Z.lvReady(G);if(li>=0)return dawnStep('lvl',[li]);
  if(Z.relicNight(G.night)||(d&&d.relicReward&&!d.relicDone)){if(d)d.relicDone=1;const r=Z.relicChoices(G,R);if(r.length)return dawnStep('relic',r)}
@@ -781,7 +782,7 @@ function runInfo(){
  const counts={};deckList().forEach(t=>counts[t]=(counts[t]||0)+1);
  show(`<h2 class="pw">${Z.CHARS[G.char].n}</h2><p><b>${G.kills}</b> zombies éliminés · <b>${G.scrap}</b> ferraille</p>
   <h3>Reliques</h3>${G.relics.length?`<div class="deck">${G.relics.map(r=>`<div class="dk" style="--cc:var(--lantern)">${svg('relic')}<span><b>${Z.RELICS[r].n}</b>${Z.RELICS[r].d}</span></div>`).join('')}</div>`:'<p>Aucune pour l’instant. Tu en trouves une toutes les 5 nuits.</p>'}
-  <h3>Mutations de la horde</h3>${G.muts.length?`<div class="deck">${G.muts.map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${Z.MUTS[m].n}</b>${Z.MUTS[m].d}</span></div>`).join('')}</div>`:'<p>Aucune pour l’instant. La horde mute toutes les 4 nuits.</p>'}
+  <h3>Mutations de la horde</h3>${Z.frenzy(G)?`<p><b>Frénésie meurtrière :</b> +${Z.frenzy(G)*10} % de PV et de dégâts pour tous les zombies.</p>`:''}${G.muts.length?`<div class="deck">${G.muts.map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${Z.MUTS[m].n}</b>${Z.MUTS[m].d}</span></div>`).join('')}</div>`:'<p>Aucune pour l’instant. La horde mute toutes les 4 nuits.</p>'}
   <h3>Factions</h3><div class="deck">${Object.keys(Z.FAM).map(f=>{const F=Z.FAM[f],c=Z.famCounts(G)[f]||0,l=Z.famLevels(G)[f];return `<div class="dk" style="--cc:${l?'var(--lantern)':'var(--muted)'}"><span style="font-size:20px">${F.ic}</span><span><b>${F.n} : ${c}</b>${l?'Actif : '+F.d.slice(0,l).join(' ; '):`Encore ${F.lv[0]-c} pour : ${F.d[0]}`}</span></div>`}).join('')}</div>
   <h3>Tes survivants</h3>${G.grid.some(u=>u&&u.name)?`<div class="deck">${G.grid.filter(u=>u&&u.name).map(u=>`<div class="dk" style="--cc:${cc(u.t)}">${svg(u.t)}<span><b>${u.name}</b>${cardName(u.t)} · ${Z.TRAITS[u.trait].n} (${Z.TRAITS[u.trait].d}) · ${plural(u.kills||0,'zombie','zombies')} · ${u.hp}/${Z.maxHp(G,u)} PV</span></div>`).join('')}</div>`:'<p>Aucun survivant posé.</p>'}
   <h3>Mémorial</h3>${memorialHtml()}
@@ -856,7 +857,7 @@ const ACT={
  load:()=>{const d=loadSave();if(d)resume(d);else prepScreen()},
  title:()=>title(),
  close:()=>hide(),
- deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu prépares ton deck (20 à 30 cartes) avec les cartes de ta collection. Pendant la partie, des renforts s’ajoutent à l’aube et au troc. Les cartes rares et épiques sortent rarement.</p>${deckHtml()}<h2 class="pw">Fusion, évolutions et niveaux</h2><p><b>Fusion :</b> quand 3 unités du même type sont sur la carte, elles fusionnent en une version dorée ★ (PV ×2, +1 dégât ou +1 soin). Les 2 cartes absorbées reviennent dans ta défausse.</p><p><b>Évolutions :</b> certaines paires de cartes posées côte à côte se transforment en une unité unique ✦. À toi de les découvrir.</p><p><b>Niveaux :</b> tous les 20 zombies tués, une unité gagne un niveau : +1 dégât ou +3 PV, au choix à l’aube.</p><h2 class="pw">Les factions</h2><p>Plus tu as d’unités d’une même faction sur la carte, plus elles sont fortes. Le Chef d’une faction (carte légendaire) lui fait gagner un palier tant qu’il est en vie.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:20px">${f.ic}</span><span><b>${f.n}</b>${f.lv[0]} unités : ${f.d[0]}. ${f.lv[1]} unités : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
+ deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu prépares ton deck (20 à 30 cartes) avec les cartes de ta collection. Pendant la partie, des renforts s’ajoutent à l’aube et au troc. Les cartes rares et épiques sortent rarement.</p>${deckHtml()}<h2 class="pw">Fusion, évolutions et niveaux</h2><p><b>Fusion :</b> quand 3 unités du même type et du même nombre d’étoiles sont sur la carte, elles fusionnent en une unité avec une étoile de plus. Chaque étoile ajoute les PV de base de la carte et +1 dégât (ou +1 soin). Les 2 cartes absorbées reviennent dans ta défausse.</p><p><b>Évolutions :</b> certaines paires de cartes posées côte à côte se transforment en une unité unique ✦. À toi de les découvrir.</p><p><b>Niveaux :</b> tous les 20 zombies tués, une unité gagne un niveau : +1 dégât ou +3 PV, au choix à l’aube.</p><h2 class="pw">Les factions</h2><p>Plus tu as d’unités d’une même faction sur la carte, plus elles sont fortes. Le Chef d’une faction (carte légendaire) lui fait gagner un palier tant qu’il est en vie.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:20px">${f.ic}</span><span><b>${f.n}</b>${f.lv[0]} unités : ${f.d[0]}. ${f.lv[1]} unités : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie. À partir de la nuit 8, chaque mutation ajoute aussi la <b>frénésie meurtrière</b> : +10 % de PV et de dégâts pour tous les zombies, cumulable.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
  dawn:()=>dawn(),
  lvl:v=>{const i=S.picks&&S.picks[0];if(i!=null&&Z.levelUp(G,i,v==='atk'?'atk':'def')){const p=tc(i);floatTxt(p.x,p.y-20,v==='atk'?'+1 dégât':'+3 PV','#9fd86b',15);addFX({type:'ring',x:p.x,y:p.y,r:44,c:'#9fd86b',dur:500})}S.phase=null;save();render();dawn()},
  relic:v=>{Z.addRelic(G,v);afterRelic()},
@@ -905,10 +906,10 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Une fois par jour, tu peux <b>déplacer</b> une de tes unités : touche-la, puis touche une case libre.</li>
 <li>Garde de l’énergie pour la nuit : les cartes <b>Réaction</b> (grenade, tir de l’abri…) se jouent pendant l’attaque.</li>
 <li>Regroupe les unités d’une même <b>faction</b> (👮 🎖️ ⛑️ 🔥 🪤 🐕 ⚡ 🏠) pour les renforcer ; leur <b>Chef</b> légendaire les renforce encore, et, certains soirs, choisis ta <b>nuit</b> : prudente ou risquée.</li>
-<li>Pose 3 fois la même unité : elles <b>fusionnent</b> en une version dorée. Certaines paires de cartes posées côte à côte <b>évoluent</b> en unité secrète. Tous les 20 zombies tués, une unité gagne un <b>niveau</b>.</li>
+<li>Pose 3 fois la même unité : elles <b>fusionnent</b> en une version dorée ★ ; 3 unités ★ donnent une ★★, et ainsi de suite. Certaines paires de cartes posées côte à côte <b>évoluent</b> en unité secrète. Tous les 20 zombies tués, une unité gagne un <b>niveau</b>.</li>
 <li>La nuit, les zombies sortent des <b>bois</b> et marchent vers la maison. Tes survivants se défendent tout seuls.</li>
 <li>À l’aube, choisis la carte que tu auras <b>en main le lendemain</b>, puis échange ta <b>ferraille</b> au troc.</li>
-<li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
+<li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon ; à partir de la nuit 8, chaque mutation ajoute aussi une <b>frénésie meurtrière</b> (+10 % de PV et de dégâts). Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
 <button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}

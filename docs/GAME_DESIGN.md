@@ -209,7 +209,7 @@ C'est l'identité du jeu : on s'attache à ses survivants, et on les perd.
 
 Inspiré de *Super Auto Pets*, *Vampire Survivors* et *Rogue Tower* : les unités grandissent pendant la partie.
 
-- **Fusion** : dès que 3 unités normales du même type sont sur la carte (à la pose de la 3ᵉ), elles fusionnent en une version dorée ★ sur la case de la dernière posée. PV ×2, +1 dégât (ou +1 soin, +1 réparation). Les 2 unités absorbées rendent leur carte à la défausse : elles peuvent être tirées de nouveau. L'unité dorée garde le prénom, le trait et les niveaux du survivant le plus aguerri, et cumule les victimes. Pas de fusion pour les pièges, les chefs, les évolutions, ni une unité déjà dorée (un seul palier). Une pose gratuite (événement de l'aube, départ du lieu) ne déclenche pas de fusion.
+- **Fusion** : dès que 3 unités du même type et du même nombre d'étoiles sont sur la carte (à la pose de la 3ᵉ), elles fusionnent en une unité avec une étoile de plus, sur la case de la dernière posée. Chaque étoile ajoute les PV de base de la carte (★ = PV ×2, ★★ = PV ×3…) et +1 dégât (ou +1 soin, +1 réparation). Les fusions s'enchaînent : 3 unités ★ donnent une ★★. Le but : garder une chance de survie dans les parties très longues. Les 2 unités absorbées rendent leur carte à la défausse : elles peuvent être tirées de nouveau. L'unité dorée garde le prénom, le trait et les niveaux du survivant le plus aguerri, et cumule les victimes. Pas de fusion pour les pièges, les chefs, les évolutions. Une pose gratuite (événement de l'aube, départ du lieu) ne déclenche pas de fusion.
 - **Évolutions secrètes** : deux cartes précises posées (ou déplacées) côte à côte se transforment en une unité unique ✦. Ces unités ne sont jamais dans un deck ni tirées. Elles apparaissent dans la Collection une fois découvertes (sauvegardé dans `abri-meta.evo`). Quand l'évolution tombe, ses 2 cartes d'origine reviennent dans la défausse. L'évolution passe avant la fusion.
 
 | Évolution | Cartes | Effet |
@@ -287,6 +287,8 @@ Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque ty
 
 ## Les mutations de la horde
 
+**Frénésie meurtrière** : à partir de la nuit 8, chaque mutation (à l’aube des nuits 8, 12, 16…) ajoute aussi +10 % de PV et +10 % de dégâts à tous les zombies, cumulable (+10 % dès la nuit 9, +30 % dès la nuit 17). Les dégâts en fraction s'accumulent sur chaque zombie : avec +10 %, un zombie à 1 dégât frappe une fois à 2 tous les 10 coups. But : une difficulté qui monte toujours, en face des fusions à plusieurs étoiles.
+
 Toutes les 4 nuits (nuits 4, 8, 12…), la horde gagne une mutation tirée au hasard, permanente pour toute la partie. Elle est annoncée à l'aube, et le bandeau du haut prévient la veille (« mute à l'aube »). Le but : casser les défenses qui semblaient sûres (par exemple une armée de tireurs) sans ajouter de mécanique à gérer pour le joueur.
 
 | Mutation | Effet |
@@ -297,7 +299,7 @@ Toutes les 4 nuits (nuits 4, 8, 12…), la horde gagne une mutation tirée au ha
 | Carapace | Les rôdeurs encaissent 1 dégât de moins par coup (sauf le feu et les explosions) |
 | Régénération | Les zombies récupèrent 1 PV tous les 3 tours |
 | Putréfaction | En mourant, un zombie éclabousse les unités autour de lui : 1 dégât |
-| Frénésie | Les zombies lents et très lents avancent plus vite |
+| Pas pressés | Les zombies lents et très lents avancent plus vite |
 
 ## Les personnages
 
@@ -435,6 +437,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Frénésie meurtrière dès la nuit 8 et fusions à plusieurs étoiles (demande d'Amine : difficulté toujours croissante, mais le joueur garde une chance dans les longues parties).
 
 ## Les questions ouvertes
 
