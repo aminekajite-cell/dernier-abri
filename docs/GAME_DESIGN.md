@@ -246,6 +246,13 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Unités sur un cercle de couleur selon leur rôle : bois (défense), jaune (tireur), rouge-orangé (corps à corps), bleu (soutien), rouge (piège), violet clair (objet).
 - Pour la version commerciale : remplacer les dessins en code par des sprites d'un pack libre de droits (par exemple Kenney.nl).
 
+## Le son
+
+- Tous les sons sont générés en code (Web Audio, `src/audio.js`) : tirs différents selon l'arme, coups au corps à corps, morsures, coups sur l'abri, explosions, grognements, mort d'un survivant, carillon de l'aube, mutation.
+- Ambiance de nuit : vent et grondement sourd dont le volume suit l'obscurité.
+- Un bouton en haut coupe ou remet le son (choix mémorisé).
+- Plus tard : remplacer par des sons d'un pack libre de droits si besoin.
+
 ## L'historique des décisions
 
 - Premier concept « Blackout » (garder une ville alimentée en électricité) : abandonné, jugé pas assez intéressant.

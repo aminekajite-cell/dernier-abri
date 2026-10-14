@@ -111,4 +111,6 @@ button.round{background:none;border:0;padding:4px 6px;border-radius:6px;text-dec
 .dk em.ce{font-style:normal;color:var(--lantern);font-weight:700}
 .hand{grid-auto-rows:auto}
 .panel p.rip{color:#d8a0a0}
+.mute{background:none;border:1px solid var(--line);border-radius:8px;width:34px;height:30px;display:grid;place-items:center;color:var(--muted);padding:0;flex:none}
+.mute svg{width:18px;height:18px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}

@@ -49,7 +49,7 @@ const ICON={
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v12 · 14 oct.';
+const VERSION='v13 · 14 oct.';
 const TICK=430;let SPEED=1;const tickMs=()=>TICK/SPEED;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -134,7 +134,7 @@ function zpos(v,now){const p=clamp((now-v.t0)/v.dur,0,1);let x=v.from.x+(v.to.x-
  return{x,y}}
 function syncZ(now){const ids=new Set();
  for(const z of G.z){ids.add(z.id);let v=V.get(z.id);const j=jit(z.id),c=tc(z.pos),to={x:c.x+j.x,y:c.y+j.y};
-  if(!v){const dx=c.x-CEN.x,dy=c.y-CEN.y,d=Math.hypot(dx,dy)||1;v={id:z.id,k:z.k,pos:z.pos,from:{x:to.x+dx/d*46,y:to.y+dy/d*46},to,t0:now,dur:Z.zspd(G,z.k)*tickMs(),hp:z.hp,max:z.max,born:now};V.set(z.id,v)}
+  if(!v){const dx=c.x-CEN.x,dy=c.y-CEN.y,d=Math.hypot(dx,dy)||1;v={id:z.id,k:z.k,pos:z.pos,from:{x:to.x+dx/d*46,y:to.y+dy/d*46},to,t0:now,dur:Z.zspd(G,z.k)*tickMs(),hp:z.hp,max:z.max,born:now};V.set(z.id,v);if(Math.random()<.35)SFX.play('groan',.7)}
   else if(v.pos!==z.pos){v.from=zpos(v,now);v.to=to;v.t0=now;v.dur=Z.zspd(G,z.k)*tickMs();v.pos=z.pos}
   v.hp=z.hp;v.burn=z.burnT>0}
  for(const v of V.values())if(!ids.has(v.id)&&!v.dying){v.dying=now;const p=zpos(v,now);v.dx=p.x;v.dy=p.y;if(!v.bit)splat(p.x,p.y,true)}
@@ -303,7 +303,7 @@ function frame(now){
 }
 function frameInner(now){
  const dt=Math.min(50,now-last);last=now;fit();
- nightAmt+=(nightTarget-nightAmt)*Math.min(1,dt/450);
+ nightAmt+=(nightTarget-nightAmt)*Math.min(1,dt/450);SFX.night(nightAmt);
  let sx=0,sy=0;if(now-shakeT<260&&!reduce){const k=(1-(now-shakeT)/260)*5;sx=(Math.random()-.5)*k;sy=(Math.random()-.5)*k}
  ctx.setTransform(SC,0,0,SC,sx*SC,sy*SC);
  BARS=[];EYES=[];LABELS=[];
@@ -336,7 +336,10 @@ function safeTxt(x,y,t,c){ctx.font='bold 14px system-ui,sans-serif';ctx.textAlig
 /* ---------- combat events → visuals ---------- */
 function playEvents(ev,types,now){
  const shots=new Set();
+ const SND={gun:'shot',kid:'shot',snp:'snp',sht:'sht',mg:'mg',xbow:'bow',flame:'flame',axe:'melee',dog:'melee',cop:'melee',butch:'melee',monk:'melee'};
  for(const e of ev){
+  try{if(e.k==='hit')SFX.play(SND[types[e.src]]||'hit');else if(e.k==='bite'||e.k==='spit')SFX.play(e.i===Z.C?'shelter':'bite');
+   else if(e.k==='boom')SFX.play('boom');else if(e.k==='lost')SFX.play(e.name?'death':'lost',.3);else if(e.k==='molo')SFX.play('flame');else if(e.k==='howl')SFX.play('groan',.2)}catch(x){}
   if(e.k==='hit'){const v=V.get(e.zid);const tp=v?(v.dying?{x:v.dx,y:v.dy}:zpos(v,now)):tc(e.i);if(v)v.flash=now;
    floatTxt(tp.x,tp.y,e.txt,'#ffffff');burst(tp.x,tp.y,'rgba(140,20,24,.9)',4,.06,2);splat(tp.x,tp.y,false);
    const t=types[e.src],sp=tc(e.src);
@@ -396,7 +399,7 @@ function render(){
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie.`+(G.moved?'':' Touche une unité pour la déplacer (1 fois par jour).');
  const go=$('#go');go.disabled=false;go.textContent=S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy);
 }
-$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;const k=+b.dataset.k;S.sel=S.sel===k?null:k;S.moveFrom=null;S.inspect=null;render()});
+$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;SFX.play('ui');const k=+b.dataset.k;S.sel=S.sel===k?null:k;S.moveFrom=null;S.inspect=null;render()});
 $('#round').addEventListener('click',()=>{if(!S.busy&&ov.hidden)runInfo()});
 cv.addEventListener('click',e=>{
  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*L,y=(e.clientY-r.top)/r.height*L;
@@ -415,7 +418,7 @@ function tapCell(i){
  if(!Z.canPay(G,t)||!Z.canPlace(G,t,i))return;
  S.hand.splice(S.sel,1);Z.place(G,t,i);if(!D.instant)facing[i]=null;S.discard.push(t);S.sel=null;S.moveFrom=null;S.inspect=null;
  if(G.grid[i]&&G.grid[i].name){const q=tc(i);floatTxt(q.x,q.y-14,`${G.grid[i].name} rejoint l’abri`,'#f2b33d')}
- const p=D.instant&&!D.onUnit?CEN:tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#f2b33d',dur:350});
+ const p=D.instant&&!D.onUnit?CEN:tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#f2b33d',dur:350});SFX.play('place');
  const St=Z.stat(G,t);
  if(t==='food')floatTxt(CEN.x,CEN.y,`+${St.gain} PV`,'#9fd86b');
  if(t==='rep')G.grid.forEach((u,j)=>{if(u&&Z.U[u.t].block){const q=tc(j);floatTxt(q.x,q.y,`+${St.gain}`,'#9fd86b')}});
@@ -459,8 +462,8 @@ async function night(){
 /* ---------- l'aube : relique, carte pour demain, boutique ---------- */
 const pickBtn=(t,a,v)=>`<button type="button" class="pick r-${rar(t)}${G.upg[t]?' up':''}" data-a="${a}" data-v="${v}" style="--cc:${cc(t)}"><span class="cost">${Z.cost(t)}</span>${rarTag(t)}${svg(t)}<span class="nm">${cardName(t)}</span><span class="d">${Z.U[t].d}</span></button>`;
 function dawn(){
- const d=S.dawn;
- if(d&&d.mut&&!d.mutShown){d.mutShown=1;
+ const d=S.dawn;if(d&&!d.chimed){d.chimed=1;SFX.play('dawn')}
+ if(d&&d.mut&&!d.mutShown){d.mutShown=1;SFX.play('mutate');
   return show(`<h2 class="ko">La horde mute</h2>${dawnTxt()}<div class="relics"><div class="relic mutx">${svg('mut')}<span><b>${Z.MUTS[d.mut].n}</b>${Z.MUTS[d.mut].d}</span></div></div><p>C’est permanent. La prochaine mutation arrivera dans 4 nuits.</p><button type="button" class="go" data-a="dawn">Continuer</button>`)}
  if(Z.relicNight(G.night)){const r=Z.relicChoices(G);if(r.length)return dawnStep('relic',r)}
  dawnStep('draft');
@@ -498,6 +501,7 @@ function nextDay(){
  fillHand();save();hide();render();
 }
 function end(){
+ SFX.play('death');
  clearSave();const nights=G.night-1;
  let best=0;try{best=+localStorage.getItem('abri-best-nuits')||0;if(nights>best){localStorage.setItem('abri-best-nuits',nights);best=nights}}catch(e){best=Math.max(best,nights)}
  show(`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div><p><b>${G.kills}</b> zombies éliminés. Record : <b>${plural(best,'nuit','nuits')}</b>${nights>=best&&nights>0?' (nouveau record !)':''}.</p><h3>Mémorial</h3>${memorialHtml()}<button type="button" class="go" data-a="new">Rejouer</button>`);
@@ -559,3 +563,8 @@ ${(b=>b?`<p>Ton record : <b>${plural(b,'nuit survécue','nuits survécues')}</b>
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
 <button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
+
+// bouton son
+const muteBtn=$('#mute');
+function muteIcon(){muteBtn.innerHTML=`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/>${SFX.muted?'<path d="M16 9l5 6M21 9l-5 6"/>':'<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/>'}</svg>`;muteBtn.setAttribute('aria-label',SFX.muted?'Activer le son':'Couper le son')}
+muteBtn.addEventListener('click',()=>{SFX.toggle();muteIcon()});muteIcon();

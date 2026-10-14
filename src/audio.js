@@ -1,0 +1,60 @@
+// Sons du jeu, générés en code avec Web Audio (aucun fichier à télécharger).
+// Expose l'objet global SFX : SFX.play('shot'), SFX.night(0..1), SFX.toggle().
+// Tout est protégé : si l'audio n'est pas disponible, le jeu continue sans son.
+const SFX=(()=>{
+ let ac=null,master=null,noiseBuf=null,amb=null,muted=false;
+ try{muted=localStorage.getItem('abri-mute')==='1'}catch(e){}
+ const last={};
+ function init(){
+  if(ac)return ac;
+  try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;ac=new A();
+   master=ac.createGain();master.gain.value=muted?0:.55;master.connect(ac.destination);
+   noiseBuf=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  }catch(e){ac=null}
+  return ac}
+ // le navigateur n'autorise le son qu'après un geste du joueur
+ const unlock=()=>{if(init()&&ac.state==='suspended')ac.resume().catch(()=>{})};
+ ['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,unlock,{passive:true}));
+ function noise(t,dur,{f=1200,q=1,type='bandpass',vol=.5,attack=.002,f2}={}){
+  const s=ac.createBufferSource();s.buffer=noiseBuf;s.loop=true;
+  const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);fl.Q.value=q;
+  const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+attack);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  s.connect(fl);fl.connect(g);g.connect(master);s.start(t,Math.random()*1.5);s.stop(t+dur+.05)}
+ function tone(t,dur,{f=220,f2,type='sine',vol=.4,attack=.005}={}){
+  const o=ac.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+attack);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05)}
+ const S={
+  shot:t=>{noise(t,.09,{f:2400,q:.8,vol:.35});tone(t,.06,{f:180,f2:60,vol:.25})},
+  snp:t=>{noise(t,.25,{f:1600,q:.6,vol:.55});tone(t,.18,{f:140,f2:40,vol:.4})},
+  sht:t=>{noise(t,.22,{f:900,q:.5,vol:.6,type:'lowpass'});tone(t,.12,{f:110,f2:40,vol:.4})},
+  mg:t=>{for(let k=0;k<3;k++)noise(t+k*.05,.05,{f:2600,q:1,vol:.25})},
+  bow:t=>{noise(t,.12,{f:500,f2:2500,q:2,vol:.25})},
+  flame:t=>{noise(t,.3,{f:700,q:.4,vol:.3,type:'lowpass',attack:.03})},
+  melee:t=>{noise(t,.07,{f:600,q:1.5,vol:.35});tone(t,.08,{f:90,f2:50,vol:.3})},
+  hit:t=>{tone(t,.07,{f:120,f2:70,vol:.18});noise(t,.05,{f:400,q:1,vol:.12})},
+  bite:t=>{noise(t,.12,{f:300,q:2,vol:.4});tone(t,.15,{f:70,f2:40,vol:.35,type:'triangle'})},
+  shelter:t=>{tone(t,.35,{f:60,f2:30,vol:.6,type:'triangle'});noise(t,.25,{f:200,type:'lowpass',vol:.5})},
+  boom:t=>{noise(t,1.1,{f:900,f2:80,type:'lowpass',vol:.9,attack:.005});tone(t,.8,{f:80,f2:25,vol:.7})},
+  lost:t=>{noise(t,.25,{f:350,q:3,vol:.45});noise(t+.05,.2,{f:900,q:4,vol:.25})},
+  groan:t=>{const f=70+Math.random()*40;tone(t,.9,{f,f2:f*.7,type:'sawtooth',vol:.08,attack:.15});tone(t,.9,{f:f*1.01,f2:f*.69,type:'sawtooth',vol:.06,attack:.2})},
+  place:t=>{tone(t,.08,{f:220,f2:140,vol:.25,type:'triangle'});noise(t,.04,{f:1500,vol:.1})},
+  ui:t=>tone(t,.05,{f:660,vol:.12,type:'triangle'}),
+  dawn:t=>{[392,494,587,784].forEach((f,k)=>tone(t+k*.12,.6,{f,vol:.12,type:'triangle'}))},
+  mutate:t=>{tone(t,1.2,{f:110,f2:70,type:'sawtooth',vol:.12,attack:.2});tone(t,1.2,{f:117,f2:73,type:'sawtooth',vol:.1,attack:.2})},
+  death:t=>{[330,262,196].forEach((f,k)=>tone(t+k*.25,.5,{f,vol:.12,type:'triangle'}))}
+ };
+ function play(name,gap=.06){
+  if(muted||!init()||!S[name])return;
+  try{const t=ac.currentTime;if(last[name]&&t-last[name]<gap)return;last[name]=t;S[name](t+.01)}catch(e){}}
+ // ambiance de nuit : vent filtré + grondement sourd, dont le volume suit l'obscurité
+ function night(k){
+  if(!ac||muted)return;
+  try{if(!amb){const s=ac.createBufferSource();s.buffer=noiseBuf;s.loop=true;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=380;
+    const g=ac.createGain();g.gain.value=0;const o=ac.createOscillator();o.type='sine';o.frequency.value=48;const og=ac.createGain();og.gain.value=.5;
+    s.connect(fl);fl.connect(g);o.connect(og);og.connect(g);g.connect(master);s.start();o.start();amb={g}}
+   amb.g.gain.setTargetAtTime(.16*k,ac.currentTime,.3)}catch(e){}}
+ function toggle(){muted=!muted;try{localStorage.setItem('abri-mute',muted?'1':'0')}catch(e){}
+  if(init()){master.gain.setTargetAtTime(muted?0:.55,ac.currentTime,.05);if(!muted)unlock()}return muted}
+ return{play,night,toggle,get muted(){return muted}};
+})();

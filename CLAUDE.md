@@ -24,6 +24,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 - `index.html` : la page et la structure de l'interface.
 - `src/engine.js` : le moteur, avec les règles pures (cartes, zombies, vagues, événements, déroulé d'une nuit tour par tour). Aucun accès au DOM, il doit tourner dans Node comme dans le navigateur. Il expose l'objet global `Z`.
 - `src/game.js` : le rendu canvas, les animations, les cartes en main, les écrans de fin de nuit et la boucle de jeu.
+- `src/audio.js` : les sons, générés en code avec Web Audio (objet global `SFX`).
 - `src/style.css` : le style de l'interface.
 - `tools/simulate.js` : la simulation d'équilibrage dans Node.
 - `docs/GAME_DESIGN.md` : le document de conception, à tenir à jour.
@@ -36,7 +37,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 - La boucle d'affichage ne doit jamais s'arrêter sur une erreur : chaque élément est dessiné dans un bloc protégé. Évite les API de canvas récentes sans solution de secours (exemple : `roundRect`, déjà remplacé si absent).
 - Mets à jour `docs/GAME_DESIGN.md` quand une décision de conception change.
 - Fais des commits petits, avec un message clair en français.
-- À chaque mise en ligne, change `VERSION` en haut de `src/game.js` (affichée sur l'écran d'accueil) et le numéro `?v=` des trois fichiers dans `index.html` (sinon le téléphone garde l'ancienne version en cache).
+- À chaque mise en ligne, change `VERSION` en haut de `src/game.js` (affichée sur l'écran d'accueil) et le numéro `?v=` des fichiers dans `index.html` (sinon le téléphone garde l'ancienne version en cache).
 
 ## Prochaines étapes (par ordre de priorité)
 
