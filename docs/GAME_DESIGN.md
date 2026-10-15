@@ -30,10 +30,12 @@ Score : nombre de nuits survécues, avec un record sauvegardé (et le nombre de 
 
 ## La carte
 
-- Grille de 7 × 7 cases.
-- L'anneau extérieur (24 cases) est la forêt : les zombies y apparaissent, le joueur ne peut rien y poser.
+- Grille de 9 × 9 cases (7 × 7 avant la v32).
+- L'anneau extérieur (32 cases) est la forêt : les zombies y apparaissent, le joueur ne peut rien y poser.
 - La case centrale est la maison : 10 PV maximum.
-- Les 24 cases intérieures restantes sont les emplacements du joueur.
+- Les 48 cases intérieures restantes sont les emplacements du joueur.
+- **Murs tracés en ligne** : Barricade, Épave, Clôture, Sacs de sable, Mur de pneus, Barrage de police et Mur modulaire se tracent en glissant sur 1 à 4 cases en ligne droite. La 1ʳᵉ case coûte le prix de la carte, chaque case en plus 1 énergie. Une seule carte pour tout le mur : elle revient dans la défausse quand la dernière case du mur tombe. Les murs ne fusionnent plus (un mur tracé fusionnerait sur lui-même), mais Épave + Barricade posées une par une donnent toujours le Fortin.
+- **Portées réduites** pour compenser la carte plus grande (les zombies marchent plus longtemps sous le feu) : portée 3 → 2, portée 4 → 3, portée illimitée → 5 (Sniper, Mortier, Tireur de nuit). La portée 2 ne change pas.
 - Les zombies avancent case par case vers la maison. Chacun a un style de marche : réduire d'abord l'écart en ligne, en colonne, ou couper en diagonale. Ils arrivent donc de tous les côtés et peuvent frapper l'abri depuis ses 8 cases voisines.
 - Quand le pas préféré est bloqué par une unité, le zombie prend un autre pas libre qui le rapproche aussi de la maison. Il ne frappe que s'il est coincé. Les murs ralentissent et canalisent la horde ; pour la bloquer, il faut un anneau complet. Le Colosse fonce toujours tout droit.
 
@@ -472,6 +474,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Carte 9 × 9, murs tracés en ligne (1 énergie par case en plus), portées réduites ; le jeu vise d'abord Steam (PC), en restant jouable sur téléphone (demande d'Amine).
 - Zombies ordinaires +20 % de PV (le Colosse non : il était déjà la cause des défaites), munitions anti-Colosse au troc, compte à rebours, Lance-roquettes (demande d'Amine : début trop facile, mort systématique au Colosse).
 - Pause en pleine nuit réservée à la nuit du Colosse (2 vagues), avec déplacements libres pendant la pause (demande d'Amine).
 - Le deck est fermé pendant la partie : plus aucune carte ajoutée (l'aube propose 3 cartes de sa propre pioche pour la main du lendemain, plus d'achat de carte au troc, la Nuit de pillage et les événements donnent de la ferraille, des soins ou un survivant). Héritage relevé à 100 victimes (demande d'Amine).

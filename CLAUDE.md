@@ -1,6 +1,6 @@
 # Dernier Abri
 
-Roguelite de cartes de survie zombie, pensé d'abord pour le téléphone, avec une sortie visée sur Steam et mobile.
+Roguelite de cartes de survie zombie, destiné d'abord à Steam (PC), avec une version mobile ensuite.
 Le jour, le joueur pose des cartes autour de sa maison. La nuit, la horde attaque en temps réel et la défense se joue toute seule. La survie est sans fin : le score est le nombre de nuits survécues.
 
 Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant toute modification de règles.
@@ -9,7 +9,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 
 - Amine développe seul, sans expérience de programmation de jeu : c'est toi qui écris le code.
 - Il communique en français et veut des réponses courtes et directes.
-- Il teste surtout sur son téléphone : chaque changement doit rester jouable en portrait, à environ 390 px de large.
+- Il teste souvent sur son téléphone : chaque changement doit rester jouable en portrait à environ 390 px de large, et bien tenir sur un écran d'ordinateur (1280 × 800).
 - Challenge ses idées quand elles nuisent au jeu, et propose des options réalisables.
 
 ## Stack technique
@@ -33,7 +33,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 
 - Garde la séparation moteur / rendu : une règle de jeu va dans `engine.js`, jamais dans `game.js`.
 - Amine teste lui-même le gameplay et l'équilibrage sur son téléphone. Ne lance pas `node tools/simulate.js` sauf s'il le demande : contente-toi de vérifier que le jeu tourne sans erreur. Le bot joue nettement moins bien que lui.
-- Après chaque changement visible, teste le jeu en largeur téléphone et vérifie qu'il n'y a aucune erreur dans la console.
+- Après chaque changement visible, teste le jeu en largeur téléphone et sur écran d'ordinateur, et vérifie qu'il n'y a aucune erreur dans la console.
 - La boucle d'affichage ne doit jamais s'arrêter sur une erreur : chaque élément est dessiné dans un bloc protégé. Évite les API de canvas récentes sans solution de secours (exemple : `roundRect`, déjà remplacé si absent).
 - Mets à jour `docs/GAME_DESIGN.md` quand une décision de conception change.
 - Fais des commits petits, avec un message clair en français.
