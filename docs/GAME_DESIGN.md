@@ -533,3 +533,10 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Ambiance de nuit : nappe musicale grave en la mineur, notes lentes, hiboux, loups au loin, grognements de zombies et craquements de branches, au hasard ; le volume suit l'obscurité (sons générés en code).
 
 **v62** : constructions à tracer = Barricade, Clôture électrique, Sacs de sable, Pneus, Barrage de police, Mur modulaire, Barbelés (l'Épave n'est plus traçable : elle se pose à l'unité et se fond quand même dans les remparts). Toutes sont dessinées en code, jamais en sprite, quel que soit le style graphique, pour que les tracés se raccordent de façon cohérente : la clôture électrique devient un matériau de rempart (poteaux, 3 fils, étincelles si le courant passe) ; les barbelés voisins se relient en une ligne continue de rouleaux avec piquets aux bouts et aux angles.
+
+**v63 : équilibrage**
+- Objectif : tir ≈ 1 dégât par tour et par énergie, corps à corps ≈ 2.
+- Chiens : Chien 2 × 2 dégâts, coût 2 ; Chien policier 2 × 1 + étourdit, coût 1 ; Meute 4 × 2, coût 3 ; Brigade canine 2 × 3.
+- Tireurs : Tireur et Tourelle bricolée 2 dégâts/tour ; Chasseur et Garde champêtre 2 dégâts à chaque tour ; Arbalète 2 × 2 zombies à chaque tour, coût 3 ; Sniper 5 dégâts tous les 2 tours ; Mitrailleuse s'enraye 1 tour sur 4.
+- Construction : Barricade, Sacs de sable et Clôture coûtent 2 ; Épave coûte 2 ; Pneus, Barrage et Mur modulaire donnent 3 cases par carte (4 pour les autres) ; Barbelés restent à 1.
+- Zombies : bonus de PV porté de +20 % à +50 % (Rôdeur 17 PV, Coureur 12, Gonflé 45, Blindé 29), car ils mouraient avant d'atteindre le corps à corps.

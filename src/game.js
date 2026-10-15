@@ -165,7 +165,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v62 · 15 oct.';
+const VERSION='v63 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=650;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1185,7 +1185,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Une fois par jour, tu peux <b>déplacer</b> une de tes unités : touche-la, puis touche une case libre.</li>
 <li>Garde de l’énergie pour la nuit : les cartes <b>Réaction</b> (grenade, tir de l’abri…) se jouent pendant l’attaque.</li>
 <li>Regroupe les unités d’une même <b>faction</b> (👮 🎖️ ⛑️ 🔥 🪤 🐕 ⚡ 🏠) pour les renforcer : côte à côte, chaque voisin de la même faction donne <b>+1</b> (dégât ou soin, +2 au plus) ; leur <b>Chef</b> légendaire les renforce encore, et, certains soirs, choisis ta <b>nuit</b> : prudente ou risquée.</li>
-<li>Les <b>murs et barbelés</b> se tracent : une carte donne <b>4 cases</b> pour la journée, pour le prix de la carte. Pose-les une par une ou d’un glissé en ligne. La carte part à la défausse quand ses 4 cases sont posées, ou le soir. Les autres pièges restent en main la journée et se reposent à leur prix.</li>
+<li>Les <b>murs et barbelés</b> se tracent : une carte donne <b>4 cases</b> pour la journée (3 pour les pneus, le barrage et le mur modulaire), pour le prix de la carte. Pose-les une par une ou d’un glissé en ligne. La carte part à la défausse quand toutes ses cases sont posées, ou le soir. Les autres pièges restent en main la journée et se reposent à leur prix.</li>
 <li>Tu peux aussi <b>glisser une carte</b> de ta main jusqu’à la case voulue.</li>
 <li>Pose 3 fois la même unité : elles <b>fusionnent</b> en une version dorée ★ ; 3 unités ★ donnent une ★★, et ainsi de suite. Certaines paires de cartes posées côte à côte <b>évoluent</b> en unité secrète. Tous les 20 zombies tués, une unité gagne un <b>niveau</b>.</li>
 <li>La nuit, les zombies sortent de la forêt <b>uniquement par les 4 routes</b> et marchent vers la maison : un mur en travers d’une route la ferme. Tes survivants se défendent tout seuls.</li>
