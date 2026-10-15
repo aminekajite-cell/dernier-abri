@@ -95,9 +95,22 @@ const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||
 const ART_DIR='assets/cards/',ART_TEST='';
 const ART_FILES='air amb axe bar barrier brasero bunker butch car carp chief_care chief_comm chief_farm chief_mil chief_police chief_pyro chief_tech chief_trap coffee cook cop doc dog dogs door fen flame flare food grenade gun hospital hunter k9 kid kit lamp lead market mech med mg modwall molo monk mortar nailer napalm orderly patch pharma pitch priest radio ranger rep riot roadmap rocket sand scare sentry shot sht siren snp solar stretch swat teacher tear tesla tire turret vigile workshop xbow trap fire mine wire spike gas smoke bait dyn clay firetrap net bear horn rush molotov k9squad nightsnp heavyflame fortin autogun slaughter canteen gang saint tracker'.split(' ');
 const ART_POP=ART_FILES.filter(t=>t.startsWith('chief_')).concat('k9squad nightsnp heavyflame fortin autogun slaughter canteen gang saint tracker'.split(' '));
-/* sprites vus du dessus (assets/sprites/<id>.webp, fond transparent, tournés vers la droite) : remplacent le dessin en code quand l'image est chargée */
-const SPR={};['gun','bar','trap','z_walk'].forEach(k=>{const im=new Image();im.onload=()=>SPR[k]=im;im.src='assets/sprites/'+k+'.webp'});
-function sprite(k,x,y,rot,sz){const im=SPR[k];if(!im)return false;ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.drawImage(im,-sz/2,-sz/2,sz,sz);ctx.restore();return true}
+/* sprites du plateau (assets/sprites/<id>.webp, fond transparent) : remplacent le dessin en code dès que l'image est chargée.
+   [mode, angle, taille] : rot = vu du dessus, tourné vers la cible (angle = direction regardée dans l'image) ;
+   up = vu de 3/4 face caméra, reste droit et se retourne vers la gauche ou la droite ; flip = objet de 3/4 qui se retourne ;
+   wall = mur dont le côté long est vertical dans l'image, posé en travers de la route ; wallh = côté long horizontal ; fix = ne bouge pas. */
+const SPRD={},SPR={};
+[['rot',0,40,'gun'],['rot',0,46,'snp chief_trap chief_care tracker'],['rot',.15,46,'chief_mil'],['rot',.3,46,'chief_pyro'],['rot',.5,44,'chief_farm'],['rot',.6,44,'chief_tech'],['rot',-.4,44,'chief_comm'],['rot',.1,48,'nightsnp heavyflame'],
+ ['up',0,38,'vigile cop butch med nailer ranger rocket priest stretch teacher flame cook pharma'],['up',0,34,'dog dogs'],['up',0,44,'k9squad gang slaughter'],['up',0,50,'saint'],
+ ['rot',0,34,'z_walk'],['up',0,30,'z_crawl z_howl z_spit z_armor z_fat z_run'],
+ ['wall',0,54,'bar'],['wall',0,52,'car barrier sand door modwall'],['wall',0,44,'tire'],['wallh',0,46,'wire'],
+ ['flip',0,52,'fortin'],['flip',0,38,'sentry autogun turret'],['flip',0,36,'mortar'],
+ ['fix',0,48,'bunker hospital'],['fix',0,44,'workshop market fire'],['fix',0,40,'scare spike net'],['fix',0,38,'lamp'],['fix',0,36,'solar'],['fix',0,34,'radio tesla canteen bear'],
+ ['fix',0,30,'trap brasero smoke'],['fix',0,28,'siren dyn clay firetrap'],['fix',0,26,'gas mine'],['fix',0,22,'bait']
+].forEach(([m,b,z,ids])=>ids.split(' ').forEach(k=>{SPRD[k]=[m,b,z];const im=new Image();im.onload=()=>SPR[k]=im;im.src='assets/sprites/'+k+'.webp'}));
+function drawSpr(k,x,y,a,out,mul){const im=SPR[k],d=SPRD[k];if(!im||!d)return false;const[m,b,z]=d,sz=z*(mul||1),r=im.width/im.height,w=r>=1?sz:sz*r,h=r>=1?sz/r:sz;
+ ctx.save();ctx.translate(x,y);if(m==='rot')ctx.rotate(a-b);else if(m==='wall')ctx.rotate(out);else if(m==='wallh')ctx.rotate(out+Math.PI/2);else if((m==='up'||m==='flip')&&Math.cos(a)<-.1)ctx.scale(-1,1);
+ ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore();return true}
 // seules les cartes très puissantes (chefs légendaires et évolutions secrètes) débordent du cadre
 const popOK=t=>Z.RAR[t]==='leg'||!!(Z.U[t]&&Z.U[t].evo);
 const popUrl=t=>!popOK(t)?'':ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
@@ -129,7 +142,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v45 · 15 oct.';
+const VERSION='v46 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -405,13 +418,11 @@ function drawUnit(i,u,now){
 }
 function drawUnitInner(i,u,now){
  const{x,y}=tc(i),dx=x-CEN.x,dy=y-CEN.y,out=Math.atan2(dy,dx);const a=facing[i]??out,s=rng(i+3);
+ if(SPR[u.t]&&drawSpr(u.t,x,y,a,out))return;
  const sk0=SKINS[(i*7+(u.name||'').length)%SKINS.length];
  if(u.t==='k9squad'){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.translate(-2,11);ctx.scale(.75,.75);dogShape('#3a2a1a','#4a3626','#1e140c',now,90);ctx.restore();person(x-2,y-5,a,LOOK.cop,now,sk0);return}
  if(u.t==='gang'){[[-9,-6],[8,-7],[0,8]].forEach(([ox,oy],k)=>person(x+ox,y+oy,a,{...LOOK.kid,hc:['#b33a3a','#3a6ab3','#3a9a4a'][k]},now,SKINS[(i+k*2)%SKINS.length]));return}
  const alias={fortin:'bunker',autogun:'sentry'}[u.t];if(alias)u={...u,t:alias};
- if(u.t==='gun'&&sprite('gun',x,y,a,40))return;
- if(u.t==='bar'&&sprite('bar',x,y,out,54))return;
- if(u.t==='trap'&&sprite('trap',x,y,0,30))return;
  const L0=LOOK[u.t];
  if(L0){const sk=SKINS[(i*7+(u.name||'').length)%SKINS.length],sw=L0.w==='axe'||L0.w==='cleaver'?Math.sin(now/280)*.12:0;person(x,y,a+sw,L0,now,sk);return}
  switch(u.t){
@@ -528,9 +539,10 @@ function drawZombie(v,now){
  const Lk=ZL[k]||ZL.walk,a=Math.atan2(CEN.y-p.y,CEN.x-p.x),moving=now-v.t0<v.dur,wob=Math.sin(now/(Z.ZT[k].spd===1?90:200)+v.id)*(moving?.22:.06);
  const sz=Lk.sz*1.5,skin=Lk.skin,cloth=Lk.cloth;
  if(v.burn&&!v.dying&&Math.random()<.3)PT.push({x:p.x+(Math.random()-.5)*10,y:p.y-4,vx:0,vy:-.04,t0:now,dur:300,c:Math.random()<.5?'#ff9a2e':'#ffd25a',r:2.5,light:0});
- ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ell(2,4,11*sz,8*sz,'rgba(0,0,0,.4)');ctx.rotate(a+wob);ctx.scale(sz,sz);
- if(v.dying)ctx.rotate(.6);
- if(k==='walk'&&SPR.z_walk){ctx.drawImage(SPR.z_walk,-17,-17,34,34)}
+ ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ell(2,4,11*sz,8*sz,'rgba(0,0,0,.4)');
+ const zk='z_'+k,zup=SPR[zk]&&SPRD[zk][0]==='up';ctx.rotate(zup?wob*.6+(v.dying?.6:0):a+wob);ctx.scale(sz,sz);
+ if(v.dying&&!zup)ctx.rotate(.6);
+ if(SPR[zk]){if(zup&&Math.cos(a)<-.1)ctx.scale(-1,1);drawSpr(zk,0,0,0,0)}
  else if(Lk.dog){dogShape(skin,skin,cloth,now,70);circ(10,-2,1,'#d7262e');circ(10,2,1,'#d7262e');ell(-4,1,2.5,1.6,'#6a1418')}
  else{
   const sw=Math.sin(now/170+v.id)*2.4*(moving?1:.3),reach=v.dying?5:(Lk.low?11:Lk.lean?17:15);
@@ -554,7 +566,7 @@ function drawZombie(v,now){
  }
  if(v.flash&&now-v.flash<110){ctx.globalAlpha=alpha*.8;circ(0,0,11,'#fff')}
  ctx.restore();
- if(!v.dying){const ex=Math.cos(a+wob),ey=Math.sin(a+wob);EYES.push([p.x+ex*5.5*sz,p.y+ey*5.5*sz,-ey,ex,sz,alpha]);if(v.hp<v.max||k==='boss')hpBar(p.x,p.y-17*sz,v.hp/v.max,'#e5484d')}
+ if(!v.dying){const ex=Math.cos(a+wob),ey=Math.sin(a+wob);if(!SPR['z_'+k])EYES.push([p.x+ex*5.5*sz,p.y+ey*5.5*sz,-ey,ex,sz,alpha]);if(v.hp<v.max||k==='boss')hpBar(p.x,p.y-17*sz,v.hp/v.max,'#e5484d')}
  return true;
 }
 
