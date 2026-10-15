@@ -523,4 +523,4 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Équilibrage : tous les DPS à distance gagnent +1 de portée, tous les DPS au corps à corps +2 dégâts par coup (textes des cartes mis à jour).
 - Cartes : faction et rôle en pastilles bien visibles en haut à droite de l'illustration (liseré bleu = tank, vert = soin, rouge = DPS), aussi sur les petites cartes de la main.
 - Collection et éditeur de deck : recherche par nom ou texte, tri (type, coût, rareté, nom, faction), filtre par faction, et dans la collection filtre débloquées / à débloquer.
-- Les murs qui fusionnent en rempart (barricade, épave, sacs de sable, pneus, barrières, mur modulaire, porte) restent dessinés en code, même en style cartoon, pour que les remparts restent cohérents.
+- Murs construits (v57) : dessinés en code avec leur propre matériau (bois, sacs de sable, pneus, béton rayé, tôle, acier, épave rouillée). Des murs voisins se raccordent automatiquement par une section continue (moitié du matériau de chacun), avec des poteaux aux extrémités et aux angles ; un mur seul est un tronçon en travers de la route.

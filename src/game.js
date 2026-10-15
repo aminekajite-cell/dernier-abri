@@ -165,7 +165,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v56 · 15 oct.';
+const VERSION='v57 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -495,42 +495,70 @@ function drawUnitInner(i,u,now){
   case 'dyn':{ctx.save();ctx.translate(x,y);ell(1,4,12,8,'rgba(0,0,0,.3)');[-6,0,6].forEach(p=>oRect(p-2.5,-8,5,16,'#c0392b',1));ctx.fillStyle='#222';ctx.fillRect(-9,-2,18,3);oLine(0,-8,4,-14,'#ccc',.8);if(Math.floor(now/200)%2){circ(4,-14,2.4,'#ffcf4a');circ(4,-14,1,'#fff')}ctx.restore();break}
  }
 }
-/* remparts : des murs voisins fusionnent en un seul ouvrage (palissade continue, poteaux, une seule barre de PV).
-   Les murs simples disparaissent dans le rempart ; les murs spéciaux (clôture, bunker, brasero, fortin) gardent leur dessin. */
+/* murs construits : dessinés en code, chacun avec son matériau (bois, sacs, pneus, béton rayé, tôle, acier, épave).
+   Des murs voisins se raccordent automatiquement : une section continue relie leurs centres (moitié du matériau de chacun),
+   avec un poteau aux extrémités et aux angles, et une seule barre de PV par ouvrage.
+   Un mur seul est un tronçon posé en travers de la route, prêt à se raccorder. */
 const PLAIN=new Set(['bar','car','sand','tire','barrier','modwall','door']),METAL=new Set(['car','modwall','door','barrier']);
+const WMAT={bar:'wood',sand:'sand',tire:'tire',barrier:'stripe',modwall:'metal',door:'steel',car:'rust',fen:'metal',bunker:'stone',brasero:'metal',fortin:'stone'};
+// section de mur dans le repère local : de x0 à x1, épaisseur 2h centrée sur y=0
+function wallSect(m,x0,x1,h,r){const w=x1-x0;if(w<=0)return;
+ ctx.fillStyle=INK;ctx.fillRect(x0-1,-h-2,w+2,2*h+4);
+ if(m==='wood'){for(let x=x0;x<x1;x+=7){const ww=Math.min(6,x1-x),c=['#8a6238','#9a7244','#7d5732'][Math.floor(r()*3)];ctx.fillStyle=c;ctx.fillRect(x,-h,ww,2*h);
+   ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(x,-h,1.4,2*h);ctx.fillStyle=INK;ctx.beginPath();ctx.moveTo(x-.6,-h);ctx.lineTo(x+ww/2,-h-5.5);ctx.lineTo(x+ww+.6,-h);ctx.fill();
+   ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x,-h);ctx.lineTo(x+ww/2,-h-4.3);ctx.lineTo(x+ww,-h);ctx.fill()}
+  [-h*.45,h*.5].forEach(y=>{ctx.fillStyle=INK;ctx.fillRect(x0,y-2.6,w,5.2);ctx.fillStyle='#5f4226';ctx.fillRect(x0,y-1.8,w,3.6);for(let x=x0+4;x<x1;x+=11)circ(x,y,.9,'#d8d8d8')})}
+ else if(m==='sand'){ctx.fillStyle='#6d5a38';ctx.fillRect(x0,-h,w,2*h);[[-h/2,0],[h/2,5]].forEach(([y,o])=>{for(let x=x0-5+o;x<x1+5;x+=10){if(x+5<x0||x-5>x1)continue;
+   ctx.save();ctx.beginPath();ctx.rect(x0,-h-2,w,2*h+4);ctx.clip();oEll(x,y,5.6,h/2-.4,'#c9ab73',1.2);ell(x-1.5,y-1.6,2.6,1.3,'rgba(255,255,255,.22)');line(x-3,y+1.5,x+3,y+1.5,'rgba(0,0,0,.18)',1);ctx.restore()}})}
+ else if(m==='tire'){ctx.fillStyle='#2a2a2a';ctx.fillRect(x0,-h,w,2*h);ctx.save();ctx.beginPath();ctx.rect(x0,-h-2,w,2*h+4);ctx.clip();
+  for(let x=x0+h-2;x<x1+h;x+=2*h-3){oCirc(x,0,h-1,'#1c1c1c',1.2);ctx.strokeStyle='#4a4a4a';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x,0,h-3.5,0,7);ctx.stroke();circ(x,0,h*.42,'#3b4a2c');ell(x-3,-4,3,1.4,'rgba(255,255,255,.12)')}ctx.restore()}
+ else if(m==='stripe'){ctx.fillStyle='#efeae0';ctx.fillRect(x0,-h+2,w,2*h-4);ctx.save();ctx.beginPath();ctx.rect(x0,-h+2,w,2*h-4);ctx.clip();ctx.fillStyle='#c8372d';
+   for(let x=x0-2*h;x<x1+2*h;x+=12){ctx.beginPath();ctx.moveTo(x,-h);ctx.lineTo(x+6,-h);ctx.lineTo(x+6+2*h,h);ctx.lineTo(x+2*h,h);ctx.fill()}ctx.restore();
+   ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(x0,h-4,w,2);ctx.fillStyle='#8c8c86';ctx.fillRect(x0,-h,w,2);ctx.fillRect(x0,h-2,w,2)}
+ else if(m==='metal'||m==='steel'){const a=m==='metal'?['#7d8a8f','#6f7c80']:['#555e66','#4b535a'];for(let x=x0;x<x1;x+=14){const ww=Math.min(13,x1-x);ctx.fillStyle=a[Math.floor((x-x0)/14)%2];ctx.fillRect(x,-h,ww,2*h);
+   ctx.fillStyle='rgba(255,255,255,.13)';ctx.fillRect(x,-h,ww,3);ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(x+ww-1,-h,1,2*h);[[2.5,-h+4],[ww-3,-h+4],[2.5,h-4],[ww-3,h-4]].forEach(([cx,cy])=>circ(x+cx,cy,1,'#cfd6da'));
+   if(m==='steel'){line(x+2,-1,x+ww-2,-1,'rgba(0,0,0,.35)',1.2)}if(r()<.3)circ(x+ww/2+(r()-.5)*6,(r()-.5)*h,1.8+r()*2,'rgba(150,75,30,.55)')}}
+ else if(m==='rust'){ctx.fillStyle='#8a3d24';ctx.fillRect(x0,-h,w,2*h);ctx.fillStyle='#a2502e';ctx.fillRect(x0,-h,w,h*.7);ctx.fillStyle='#2c3640';for(let x=x0+4;x<x1-8;x+=22)ctx.fillRect(x,-h*.25,10,h*.6);
+   ctx.fillStyle='rgba(0,0,0,.25)';for(let x=x0+11;x<x1;x+=22)ctx.fillRect(x,-h,1.2,2*h);for(let k=0;k<w/12;k++)circ(x0+r()*w,(r()-.5)*1.6*h,1.5+r()*2.2,'rgba(60,25,10,.45)')}
+ else{ctx.fillStyle='#8a8a82';ctx.fillRect(x0,-h,w,2*h);ctx.fillStyle='rgba(0,0,0,.2)';for(let x=x0+8;x<x1;x+=16)ctx.fillRect(x,-h,1.2,2*h)}}
+// poteau (extrémité ou angle) selon le matériau
+function wallPost(m,x,y){const metal=m==='metal'||m==='steel'||m==='rust'||m==='stripe';
+ ell(x+4,y+6,16,13,'rgba(0,0,0,.35)');
+ if(m==='sand'){[[-6,4],[6,4],[0,-4]].forEach(([a,b])=>oEll(x+a,y+b,8,6,'#c9ab73',1.3));ell(x-2,y-6,3,1.4,'rgba(255,255,255,.25)');return}
+ if(m==='tire'){oCirc(x,y,12.5,'#1c1c1c',1.4);ctx.strokeStyle='#4a4a4a';ctx.lineWidth=1.5;[9.5,7].forEach(rr=>{ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.stroke()});circ(x,y,4.5,'#3b4a2c');return}
+ if(m==='wood'){oCirc(x,y,10.5,'#6b4a2a',1.8);circ(x,y,7.5,'#8a6238');ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=1;[5,2.5].forEach(rr=>{ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.stroke()});return}
+ const pc={rust:['#6e3426','#9a4a2c'],stripe:['#a9a59a','#e0dcd0'],steel:['#3f464d','#5c656d'],metal:['#5d666e','#87939a']}[m]||['#8f8f86','#a6a69c'];
+ oRound(x-11,y-11,22,22,3,pc[0],1.8);oRound(x-7,y-7,14,14,2,pc[1],1);if(m==='stripe'){ctx.fillStyle='#c8372d';ctx.fillRect(x-7,y-2,14,4)}[[-8,-8],[8,-8],[-8,8],[8,8]].forEach(([a,b])=>circ(x+a,y+b,1.1,'#d6dde2'))}
 function drawRamparts(ramp){const seen=new Set();
- G.grid.forEach((u,i)=>{if(!u||Z.U[u.t].cat!=='wall'||seen.has(i))return;const g=Z.wallGroup(G,i);g.forEach(j=>seen.add(j));if(g.length<2)return;
+ G.grid.forEach((u,i)=>{if(!u||Z.U[u.t].cat!=='wall'||seen.has(i))return;const g=Z.wallGroup(G,i);g.forEach(j=>seen.add(j));
+  if(g.length<2&&!PLAIN.has(u.t))return;
   const links=[];for(const a of g)for(const b of Z.around(a))if(b>a&&g.includes(b)){const[ra,ca]=Z.rc(a),[rb,cb]=Z.rc(b);
    // pas de section en diagonale si le coin est déjà dans le rempart (évite les croisements)
    if(ra!==rb&&ca!==cb&&(g.includes(ra*Z.N+cb)||g.includes(rb*Z.N+ca)))continue;links.push([a,b])}
-  const hp=g.reduce((a,k)=>a+Math.max(0,G.grid[k].hp),0),mx=g.reduce((a,k)=>a+Z.maxHp(G,G.grid[k]),0),f=hp/mx;
-  const metal=k=>METAL.has(G.grid[k].t);
-  // ombre portée de tout l'ouvrage
-  ctx.lineCap='round';links.forEach(([a,b])=>{const p=tc(a),q=tc(b);line(p.x+4,p.y+8,q.x+4,q.y+8,'rgba(0,0,0,.38)',30)});
-  // sections : palissade de rondins taillés en pointe (bois) ou panneaux rivetés (métal), usure selon les PV du rempart
-  links.forEach(([a,b],li)=>{const p=tc(a),q=tc(b),d=Math.hypot(q.x-p.x,q.y-p.y),m=metal(a)||metal(b),r=rng(a*131+b);
-   ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(q.y-p.y,q.x-p.x));
-   ctx.fillStyle=INK;ctx.fillRect(-2,-14,d+4,28);
-   if(m){for(let x=0;x<d;x+=14){const w=Math.min(13,d-x);ctx.fillStyle=(x/14)%2?'#6f7c80':'#7d8a8f';ctx.fillRect(x,-12.5,w,25);ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(x,-12.5,w,4);
-     ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x+w-1,-12.5,1,25);[[2.5,-8],[w-3,-8],[2.5,8],[w-3,8]].forEach(([cx,cy])=>circ(x+cx,cy,1,'#c9d2d8'));
-     if(r()<.35)circ(x+w/2+(r()-.5)*6,(r()-.5)*10,2+r()*2,'rgba(140,70,30,.55)')}}
-   else{for(let x=0;x<d;x+=6.5){const w=Math.min(5.5,d-x),c=['#7d5c38','#8a6a42','#735233'][Math.floor(r()*3)];ctx.fillStyle=c;ctx.fillRect(x,-12,w,24);
-     ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(x,-12,1.5,24);ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x+w-1.2,-12,1.2,24);ctx.fillStyle=INK;ctx.beginPath();ctx.moveTo(x-.5,-12);ctx.lineTo(x+w/2,-17.5);ctx.lineTo(x+w+.5,-12);ctx.fill();
-     ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x,-12);ctx.lineTo(x+w/2,-16.5);ctx.lineTo(x+w,-12);ctx.fill()}
-     // traverses clouées
-     [-5,6].forEach(y=>{ctx.fillStyle='#5a4128';ctx.fillRect(0,y-2,d,4);for(let x=5;x<d;x+=13)circ(x,y,.9,'#c9c9c9')})}
-   // usure : fissures, puis brèches quand le rempart est bas
-   if(f<.66)for(let k=0;k<3;k++){const x=r()*d;line(x,-11,x+(r()-.5)*8,11,'rgba(0,0,0,.6)',1.4)}
-   if(f<.33){const x=d*(.3+r()*.4);ctx.fillStyle='rgba(15,12,10,.85)';ctx.fillRect(x,-12,6+r()*6,24)}
-   ctx.restore()});
-  // tours aux extrémités et aux angles, poteaux ailleurs
-  const deg=k=>links.filter(([a,b])=>a===k||b===k).length;
-  g.forEach(k=>{const p=tc(k),m=metal(k),n=deg(k);if(PLAIN.has(G.grid[k].t))ramp.add(k);
-   if(n!==2||(()=>{const ls=links.filter(([a,b])=>a===k||b===k).map(([a,b])=>a===k?b:a);const[r0,c0]=Z.rc(k),[r1,c1]=Z.rc(ls[0]),[r2,c2]=Z.rc(ls[1]);return (r1-r0)!==(r0-r2)||(c1-c0)!==(c0-c2)})()){
-    ell(p.x+4,p.y+6,18,15,'rgba(0,0,0,.38)');oRect(p.x-15,p.y-15,30,30,m?'#5d666e':'#6b4f30',2);oRect(p.x-10,p.y-10,20,20,m?'#7d8a8f':'#8a6a42',1.2);
-    ctx.fillStyle=INK;[[-15,-15],[8,-15],[-15,8],[8,8]].forEach(([dx,dy])=>ctx.fillRect(p.x+dx,p.y+dy,7,7));ctx.fillStyle=m?'#a9b2ba':'#a07a4a';[[-14,-14],[9,-14],[-14,9],[9,9]].forEach(([dx,dy])=>ctx.fillRect(p.x+dx,p.y+dy,5,5));
-    ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(p.x-10,p.y-10,20,4);line(p.x-6,p.y-6,p.x+6,p.y+6,'rgba(0,0,0,.25)',1.5);line(p.x+6,p.y-6,p.x-6,p.y+6,'rgba(0,0,0,.25)',1.5)}
-   else{oCirc(p.x,p.y,8,m?'#6f7c80':'#5a4128',1.6);circ(p.x-2,p.y-2,3,m?'#a9b2ba':'#8a6a42')}});
+  const hp=g.reduce((a,k)=>a+Math.max(0,G.grid[k].hp),0),mx=g.reduce((a,k)=>a+Z.maxHp(G,G.grid[k]),0),f=hp/mx,mat=k=>WMAT[G.grid[k].t]||'stone',H=11;
+  const wear=(d,r)=>{if(f<.66)for(let k=0;k<3;k++){const x=r()*d;line(x,-H,x+(r()-.5)*8,H,'rgba(0,0,0,.6)',1.4)}
+   if(f<.33){const x=d*(.3+r()*.4);ctx.fillStyle='rgba(15,12,10,.85)';ctx.fillRect(x,-H,6+r()*6,2*H)}};
+  ctx.lineCap='round';
+  if(!links.length){// mur seul : un tronçon en travers de la route
+   const p=tc(i),out=Math.atan2(p.y-CEN.y,p.x-CEN.x)+Math.PI/2,half=T*.42,r=rng(i*977);
+   ctx.save();ctx.translate(p.x,p.y);ctx.rotate(out);ctx.fillStyle='rgba(0,0,0,.38)';ctx.fillRect(-half+4,-H+7,2*half,2*H);ctx.translate(-half,0);
+   wallSect(mat(i),0,2*half,H,r);wear(2*half,r);ctx.restore();
+   const e1={x:p.x-Math.cos(out)*half,y:p.y-Math.sin(out)*half},e2={x:p.x+Math.cos(out)*half,y:p.y+Math.sin(out)*half};
+   wallPost(mat(i),e1.x,e1.y);wallPost(mat(i),e2.x,e2.y)}
+  else{
+   // ombre portée de tout l'ouvrage
+   links.forEach(([a,b])=>{const p=tc(a),q=tc(b);line(p.x+4,p.y+8,q.x+4,q.y+8,'rgba(0,0,0,.38)',2*H+6)});
+   // sections : chaque moitié prend le matériau de son mur
+   links.forEach(([a,b])=>{const p=tc(a),q=tc(b),d=Math.hypot(q.x-p.x,q.y-p.y),r=rng(a*131+b);
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(q.y-p.y,q.x-p.x));
+    if(mat(a)===mat(b))wallSect(mat(a),0,d,H,r);else{wallSect(mat(a),0,d/2,H,r);wallSect(mat(b),d/2,d,H,r);ctx.fillStyle=INK;ctx.fillRect(d/2-1.5,-H-2,3,2*H+4)}
+    wear(d,r);ctx.restore()});
+   // poteaux aux extrémités et aux angles
+   const nb=k=>links.filter(([a,b])=>a===k||b===k).map(([a,b])=>a===k?b:a);
+   g.forEach(k=>{const p=tc(k),ls=nb(k);let corner=ls.length!==2;
+    if(!corner){const[r0,c0]=Z.rc(k),[r1,c1]=Z.rc(ls[0]),[r2,c2]=Z.rc(ls[1]);corner=(r1-r0)!==(r0-r2)||(c1-c0)!==(c0-c2)}
+    if(corner&&PLAIN.has(G.grid[k].t))wallPost(mat(k),p.x,p.y)})}
+  g.forEach(k=>{if(PLAIN.has(G.grid[k].t)){ramp.add(k);const u2=G.grid[k],p=tc(k);if(u2.gold)LABELS.push([p.x,p.y+4,u2.gold>1?u2.gold+'★':'★'])}});
   const top=g.reduce((m,k)=>tc(k).y<tc(m).y?k:m,g[0]),cx=g.reduce((a,k)=>a+tc(k).x,0)/g.length;
   hpBar(cx,tc(top).y-30,f,f>.4?'#9fd86b':'#e5484d')})}
 function drawShelter(now){
