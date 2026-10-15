@@ -5,6 +5,8 @@ Le jeu écrit lui-même tout le texte des cartes : **aucune image ne doit conten
 
 ## Ce qu'il faut savoir avant de commencer
 
+- **Effet qui sort du cadre** : pas besoin de générer une 2ᵉ image. Je détoure moi-même chaque illustration (le personnage seul, fond transparent) pour le faire déborder du cadre. Plus le sujet est net et se détache du fond, meilleur est le résultat.
+
 - Aucune IA ne génère d'un coup un ZIP de plus de 200 images cohérentes. On procède **par lots de 5 à 8 images**, dans **une seule conversation**, en collant le **prompt maître** au début.
 - ChatGPT (avec génération d'images et exécution de code) peut, à la fin, **rassembler les images déjà générées dans un ZIP** : c'est le dernier message ci-dessous.
 - **Nom de fichier = identifiant** (colonne « Fichier »). C'est ce qui me permet de tout brancher dans le jeu sans rien renommer.

@@ -189,10 +189,16 @@ button.ammo[hidden]{display:none}
 .cf{--ink:#2b1a0c;--blood:#6e140c;position:relative;display:block;width:100%;aspect-ratio:1086/1448;container-type:inline-size;color:var(--ink);text-align:center;
  background:url(../assets/cards/frame.webp) center/100% 100% no-repeat;border-radius:4.5%/3.4%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.55));font-family:'Atkinson Hyperlegible',system-ui,sans-serif}
 .cf>*{position:absolute}
-.cf-art{left:5.2%;right:5.2%;top:2.5%;height:59.1%;border-radius:3cqw;background:#0c0c0a center 22%/cover no-repeat;display:grid;place-items:center;color:#8a7a5c;
- box-shadow:inset 0 0 6cqw rgba(0,0,0,.8),inset 0 0 0 .6cqw rgba(0,0,0,.6)}
+.cf-art{left:5.2%;right:5.2%;top:2.5%;height:59.1%;border-radius:3cqw;background:#0c0c0a center 22%/cover no-repeat;display:grid;place-items:center;color:#8a7a5c}
+.cf-vig{left:5.2%;right:5.2%;top:2.5%;height:59.1%;border-radius:3cqw;box-shadow:inset 0 0 6cqw rgba(0,0,0,.8),inset 0 0 0 .6cqw rgba(0,0,0,.6);pointer-events:none}
+/* effet qui sort du cadre : l'illustration et le personnage détouré occupent une même « scène » plus grande que la fenêtre.
+   L'illustration est découpée à la fenêtre ; le personnage, lui, déborde par le haut et les côtés (jamais sur le parchemin). */
+.cf:has(.cf-pop) .cf-art{left:0;right:0;top:-8%;height:auto;bottom:38.4%;border-radius:0;background-position:center 30%;clip-path:inset(15.1% 5.2% 0 5.2% round 3cqw)}
+.cf-pop{left:0;right:0;top:-8%;bottom:38.4%;background:center 30%/cover no-repeat;pointer-events:none;filter:drop-shadow(0 1.2cqw 1.6cqw rgba(0,0,0,.7));transition:transform .25s ease}
+.pick:hover .cf-pop,.pick:focus-visible .cf-pop,#preview .cf-pop{filter:drop-shadow(0 1.6cqw 2.2cqw rgba(0,0,0,.85))}
+@media (prefers-reduced-motion:reduce){.cf-pop{transition:none}}
 .cf-art svg{width:40%;height:40%;opacity:.7}
-.cf-cost{left:7%;top:4.5%;width:17cqw;height:17cqw;border-radius:50%;display:grid;place-items:center;z-index:2;
+.cf-cost{left:7%;top:4.5%;width:17cqw;height:17cqw;border-radius:50%;display:grid;place-items:center;z-index:4;
  background:radial-gradient(circle at 38% 32%,#5c4a34,#2a2016 55%,#120d08);border:.9cqw solid rgba(216,201,166,.75);
  box-shadow:0 0 0 .7cqw rgba(10,8,6,.85),inset 0 -1.2cqw 2cqw rgba(0,0,0,.6),inset 0 1cqw 1.4cqw rgba(255,230,180,.12);
  font:400 11.5cqw/1 'Special Elite',serif;color:#e8d9b4;text-shadow:0 .4cqw .6cqw #000}

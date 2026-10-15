@@ -91,7 +91,9 @@ const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||
    Le jeu écrit lui-même le nom, le coût, les stats et le texte par-dessus (mises à jour et traduction faciles).
    ART_FILES : les cartes qui ont déjà leur image. ART_TEST : si rempli, cette image sert à TOUTES les cartes (essai du rendu).
    Sans image, la carte garde son icône. */
-const ART_DIR='assets/cards/',ART_FILES=['gun'],ART_TEST='gun.webp';
+// ART_POP : les cartes qui ont aussi leur personnage détouré (<identifiant>_pop.webp, fond transparent) : il déborde du cadre
+const ART_DIR='assets/cards/',ART_FILES=['gun'],ART_POP=['gun'],ART_TEST='gun.webp';
+const popUrl=t=>ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
 const artUrl=t=>ART_TEST?ART_DIR+ART_TEST:ART_FILES.includes(t)?ART_DIR+t+'.webp':'';
 /* face de carte complète (style Hearthstone) : illustration dans une fenêtre arrondie, gemme de coût, bandeau du nom,
    texte d'effet, gemmes d'attaque et de PV, faction, rôle et rareté. Tout est écrit par le jeu.
@@ -110,7 +112,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
  const hp=st.hp?`<span class="cf-hp" title="PV"><b>${st.hp}</b></span>`:'';
  const marks=(f?`<i title="${Z.FAM[f].n}">${ink(f)}</i>`:'')+(ro?`<i title="${Z.ROLES[ro].n}">${ink(ro)}</i>`:'');
  return `<span class="cf r-${r}${o.mini?' mini':''}${D.up?' up':''}">
-  <span class="cf-art"${u?` style="background-image:url('${u}')"`:''}>${u?'':svg(t)}</span>
+  <span class="cf-art"${u?` style="background-image:url('${u}')"`:''}>${u?'':svg(t)}</span><span class="cf-vig"></span>${u&&popUrl(t)?`<span class="cf-pop" style="background-image:url('${popUrl(t)}')"></span>`:''}
   ${r!=='com'?`<span class="cf-rar" title="${Z.RARITY[r].n}"></span>`:''}<span class="cf-cost">${cost}</span>
   <span class="cf-name">${D.n}</span>
   ${o.mini?(atk||hp?'':`<span class="cf-v">${o.v||(U0.react?'Nuit':U0.v)}</span>`)+(o.tag?`<span class="cf-tag">${o.tag}</span>`:''):`<span class="cf-rule"></span><span class="cf-txt${U0.d.length>105?' xlong':U0.d.length>70?' long':''}"><span>${U0.d}${D.rng>1&&!/portée/i.test(U0.d)?`. <b>Portée ${D.rng}</b>`:''}</span></span>`}
@@ -118,7 +120,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v41 · 15 oct.';
+const VERSION='v42 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
