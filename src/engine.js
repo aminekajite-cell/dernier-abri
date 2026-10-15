@@ -221,19 +221,19 @@ const Z=(()=>{
  // factions : plus il y a d'unités d'une faction sur la carte, plus elle est forte (2 paliers).
  // Le Chef d'une faction (carte légendaire) lui fait gagner un palier tant qu'il est en vie.
  const FAM={
-  police:{n:'Police',ic:'👮',cards:['riot','k9','barrier','swat','cop','gun','lamp','siren','chief_police'],lv:[3,5],d:['tes policiers perdent 1 PV de moins par coup','tes policiers ont +1 portée']},
-  mil:{n:'Militaires',ic:'🎖️',cards:['mortar','sentry','clay','bunker','snp','mg','sht','mine','dyn','chief_mil'],lv:[3,5],d:['tes militaires font +1 dégât','mines et dynamite : +3 dégâts']},
-  care:{n:'Soignants',ic:'⛑️',cards:['amb','doc','orderly','pharma','hospital','priest','stretch','med','cook','chief_care'],lv:[3,5],d:['soins +1 PV, tes soignants font +1 dégât','à l’aube, toutes tes unités récupèrent 2 PV']},
-  pyro:{n:'Pyromanes',ic:'🔥',cards:['brasero','firetrap','fire','flame','molo','gas','tire','chief_pyro'],lv:[3,5],d:['le feu fait +1 dégât par tour','les zombies qui meurent en brûlant explosent (2 dégâts autour)']},
-  trap:{n:'Trappeurs',ic:'🪤',cards:['net','bear','hunter','trap','spike','wire','smoke','bait','xbow','chief_trap'],lv:[3,5],d:['pièges : +2 dégâts','pièges : +4 dégâts au total']},
-  farm:{n:'Fermiers',ic:'🐕',cards:['dogs','pitch','scare','dog','axe','butch','chief_farm'],lv:[3,5],d:['corps à corps : +1 dégât','corps à corps : +1 PV à chaque zombie tué']},
-  tech:{n:'Bricoleurs',ic:'⚡',cards:['nailer','turret','workshop','modwall','tesla','fen','solar','mech','radio','chief_tech'],lv:[3,5],d:['tes bricoleurs font +1 dégât, clôtures +1','clôtures : étourdissent 1 tour, réparations +1 PV']},
-  comm:{n:'Communauté',ic:'🏠',cards:['ranger','teacher','market','vigile','carp','lead','monk','kid','chief_comm'],lv:[3,5],d:['tes membres de la Communauté ont +1 portée, l’abri +1 PV à l’aube','+1 énergie chaque jour']}
+  police:{n:'Police',ic:'👮',cards:['riot','k9','barrier','swat','cop','gun','lamp','siren','chief_police'],lv:[4,6,8],d:['tes policiers perdent 1 PV de moins par coup','tes policiers ont +1 portée','+1 dégât pour toute la faction']},
+  mil:{n:'Militaires',ic:'🎖️',cards:['mortar','sentry','clay','bunker','snp','mg','sht','mine','dyn','chief_mil'],lv:[4,6,8],d:['tes militaires font +1 dégât','mines et dynamite : +3 dégâts','+1 dégât pour toute la faction']},
+  care:{n:'Soignants',ic:'⛑️',cards:['amb','doc','orderly','pharma','hospital','priest','stretch','med','cook','chief_care'],lv:[4,6,8],d:['soins +1 PV, tes soignants font +1 dégât','à l’aube, toutes tes unités récupèrent 2 PV','+1 dégât pour toute la faction']},
+  pyro:{n:'Pyromanes',ic:'🔥',cards:['brasero','firetrap','fire','flame','molo','gas','tire','chief_pyro'],lv:[4,6,8],d:['le feu fait +1 dégât par tour','les zombies qui meurent en brûlant explosent (2 dégâts autour)','+1 dégât pour toute la faction']},
+  trap:{n:'Trappeurs',ic:'🪤',cards:['net','bear','hunter','trap','spike','wire','smoke','bait','xbow','chief_trap'],lv:[4,6,8],d:['pièges : +2 dégâts','pièges : +4 dégâts au total','+1 dégât pour toute la faction']},
+  farm:{n:'Fermiers',ic:'🐕',cards:['dogs','pitch','scare','dog','axe','butch','chief_farm'],lv:[4,6,8],d:['corps à corps : +1 dégât','corps à corps : +1 PV à chaque zombie tué','+1 dégât pour toute la faction']},
+  tech:{n:'Bricoleurs',ic:'⚡',cards:['nailer','turret','workshop','modwall','tesla','fen','solar','mech','radio','chief_tech'],lv:[4,6,8],d:['tes bricoleurs font +1 dégât, clôtures +1','clôtures : étourdissent 1 tour, réparations +1 PV','+1 dégât pour toute la faction']},
+  comm:{n:'Communauté',ic:'🏠',cards:['ranger','teacher','market','vigile','carp','lead','monk','kid','chief_comm'],lv:[4,6,8],d:['tes membres de la Communauté ont +1 portée, l’abri +1 PV à l’aube','+1 énergie chaque jour','+1 dégât pour toute la faction']}
  };
  const CHIEF={police:'chief_police',mil:'chief_mil',care:'chief_care',pyro:'chief_pyro',trap:'chief_trap',farm:'chief_farm',tech:'chief_tech',comm:'chief_comm'};
  const famOf=t=>Object.keys(FAM).find(f=>FAM[f].cards.includes(t));
  function famCounts(st){const c={};for(const u of st.grid)if(u){const f=famOf(u.t);if(f)c[f]=(c[f]||0)+1}return c}
- function famLevels(st){const c=famCounts(st),l={};for(const f in FAM){l[f]=(c[f]||0)>=FAM[f].lv[1]?2:(c[f]||0)>=FAM[f].lv[0]?1:0;if(has(st,CHIEF[f]))l[f]=Math.min(2,l[f]+1)}return l}
+ function famLevels(st){const c=famCounts(st),l={};for(const f in FAM){l[f]=(c[f]||0)>=FAM[f].lv[2]?3:(c[f]||0)>=FAM[f].lv[1]?2:(c[f]||0)>=FAM[f].lv[0]?1:0;if(has(st,CHIEF[f]))l[f]=Math.min(3,l[f]+1)}return l}
  const facOf=t=>famOf(t);
  // alliances : deux factions avec chacune au moins 3 unités sur la carte débloquent un bonus commun
  const ALLY={
@@ -253,7 +253,7 @@ const Z=(()=>{
  function wallGroup(st,n){const isW=j=>{const v=st.grid[j];return !!(v&&U[v.t].cat==='wall'&&U[v.t].block)};if(!isW(n))return[];const seen=new Set([n]),q=[n];
   while(q.length){const j=q.pop();for(const k of around(j))if(!seen.has(k)&&isW(k)){seen.add(k);q.push(k)}}return[...seen]}
  // solidarité : chaque voisin de la même faction donne +1 (dégât, soin ou réparation), au plus +2
- function sol(st,i,u){const f=famOf(u.t);if(!f)return 0;let n=0;for(const j of around(i)){const v=st.grid[j];if(v&&U[v.t].block&&famOf(v.t)===f&&++n>=2)break}return n}
+ function sol(st,i,u){const f=famOf(u.t);if(!f)return 0;let n=0;for(const j of around(i)){const v=st.grid[j];if(v&&U[v.t].block&&famOf(v.t)===f)n++}return n}
  // choisir sa nuit : à l'aube, 2 nuits au choix, l'une prudente, l'autre risquée mais payante
  const TIERS={
   base:{n:'Nuit',d:'Horde normale.',count:1},
@@ -317,15 +317,16 @@ const Z=(()=>{
  };
  const mutNight=n=>n%4===0;
  const mc=(st,m)=>(st.muts||[]).filter(x=>x===m).length;
- // frénésie meurtrière : à partir de la nuit 4, chaque nuit ajoute +10 % de PV et de dégâts à tous les zombies (cumulable :
- // +10 % la nuit 4, +20 % la nuit 5, etc.)
- const FRENZY_FROM=4,FRENZY=.1;
+ // frénésie meurtrière : à partir de la nuit 4, chaque nuit multiplie les PV et les dégâts des zombies par 1,08 (cumulatif :
+ // +8 % nuit 4, +17 % nuit 5, +71 % nuit 10, +151 % nuit 15, +270 % nuit 20)
+ const FRENZY_FROM=4,FRENZY=.08;
  const frenzy=st=>Math.max(0,(st.night||1)-FRENZY_FROM+1);
+ const frenzyMult=st=>Math.pow(1+FRENZY,frenzy(st));
  function mutate(st,rnd=Math.random){const pool=Object.keys(MUTS).filter(m=>MUTS[m].stack||!mc(st,m));const m=pool[Math.floor(rnd()*pool.length)];(st.muts=st.muts||[]).push(m);return m}
  const zspd=(st,k)=>{const s=ZT[k].spd;return mc(st,'frenesie')&&s>1&&!ZT[k].boss?s-1:s};
  const zdmg=(st,k)=>ZT[k].dmg+(mc(st,'enrage')&&(k==='walk'||k==='run')?1:0);
  // dégâts réels d'un coup : la frénésie ajoute des fractions de dégât que chaque zombie accumule (+1 dégât dès que le reste atteint 1)
- function zhit(st,z){const raw=zdmg(st,z.k)*(1+FRENZY*frenzy(st));let d=Math.floor(raw+1e-9);z.acc=(z.acc||0)+raw-d;if(z.acc>=1-1e-9){d++;z.acc-=1}return d}
+ function zhit(st,z){const raw=zdmg(st,z.k)*frenzyMult(st);let d=Math.floor(raw+1e-9);z.acc=(z.acc||0)+raw-d;if(z.acc>=1-1e-9){d++;z.acc-=1}return d}
  const CHARS={
   surv:{n:'Le survivant',d:'Aucun bonus. Idéal pour apprendre.',deck:['bar','bar','car','gun','gun','axe','trap','food','grenade'],relic:null},
   cop:{n:'La policière',d:'Commence avec la Lunette de visée : tes tireurs ont +1 portée.',deck:['bar','fen','gun','gun','snp','cop','lamp','food','grenade'],relic:'lunette'},
@@ -563,7 +564,7 @@ const Z=(()=>{
   return w}
  // les zombies ordinaires ont +20 % de PV (ils mouraient trop vite en début de partie) ; le Colosse n'est pas concerné
  const ZHP=1; // ancien bonus de PV des zombies, désormais intégré aux PV de base (v64)
- function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*(T.boss?1:ZHP)*hpMult(st.night)*(1+.2*mc(st,'peau'))*(1+FRENZY*frenzy(st))*((PLACES[st.place]||{}).hp||1));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
+ function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*(T.boss?1:ZHP)*hpMult(st.night)*(1+.2*mc(st,'peau'))*frenzyMult(st)*((PLACES[st.place]||{}).hp||1));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
   // nuit du Colosse : la horde arrive en 2 vagues (le Colosse dans la 2ᵉ), avec une pause entre les deux où l'on déplace librement ses unités.
  // Toutes les autres nuits arrivent d'un seul tenant.
  const WAVES_N=2;
@@ -597,10 +598,12 @@ const Z=(()=>{
    for(const z of ts){const c=st.z.filter(o=>o.hp>0&&cheb(o.pos,z.pos)<=1).length;if(c>bc){bc=c;best=z}}
    const at=best.pos;ev.push({i,k:'fire'},D.blast?{i:at,k:'boom'}:{i:at,k:'molo',src:i});
    st.z.filter(o=>o.hp>0&&cheb(o.pos,at)<=1).forEach(o=>{got(hit(st,o,dmg,ev,i,1));if(D.molo)o.burnT=Math.max(o.burnT||0,2)});return}
+  // le bonus (dmg − dégâts de base) compte une fois par attaque : il est réparti entre les tirs ou morsures
+  const H=D.hits||1,bonus=Math.max(0,dmg-D.dmg),dh=h=>D.dmg+Math.floor(bonus/H)+(h<bonus%H?1:0);
   const done=new Set();
-  for(let h=0;h<(D.hits||1);h++){let ts=inR();if(D.distinct)ts=ts.filter(z=>!done.has(z.id));if(!ts.length)break;
+  for(let h=0;h<H;h++){let ts=inR();if(D.distinct)ts=ts.filter(z=>!done.has(z.id));if(!ts.length)break;
    ts.sort((a,b)=>cheb(a.pos,C)-cheb(b.pos,C)||a.hp-b.hp);const z=ts[0];done.add(z.id);
-   const killed=hit(st,z,D.heavy&&(ZT[z.k].boss||z.k==='fat')?dmg*D.heavy:dmg,ev,i,pierce);ev.push({i,k:'fire'});got(killed);
+   const killed=hit(st,z,D.heavy&&(ZT[z.k].boss||z.k==='fat')?dh(h)*D.heavy:dh(h),ev,i,pierce);ev.push({i,k:'fire'});got(killed);
    if((D.ignite||(u.t==='tesla'&&ally(st,'short')))&&z.hp>0)z.burnT=Math.max(z.burnT||0,D.ignite||3);
    if(D.stun&&z.hp>0)z.cd+=D.stun;
    if((D.push||(D.cat==='melee'&&ally(st,'patrol')))&&z.hp>0&&!ZT[z.k].boss){const b=back(z.pos),bu=st.grid[b];if(!(bu&&U[bu.t].block))z.pos=b}
@@ -642,7 +645,7 @@ const Z=(()=>{
    if(D.rng&&st.tick%D.every===0&&!(D.jam&&st.tick%D.jam===0)&&!(D.needPow&&!pow)){
     const reps=1+(st.tick%3===0&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].lead)?1:0)+(st.rushT>0?1:0);
     const F=famOf(u.t),rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+(D.cat==='shoot'&&ally(st,'martial')?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&F==='police'?1:0)+(fl.comm&&F==='comm'&&D.rng>1?1:0)),
-     dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+sol(st,i,u)+(fl.mil&&F==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0)+(fl.tech&&F==='tech'?1:0)+(fl.care&&F==='care'?1:0)+(D.cat==='melee'&&ally(st,'hunt')?1:0)+(roleOf(u.t)==='dps'&&nbRoles(st,i).has('tank')?1:0)+(squad(st,i)?1:0);
+     dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+sol(st,i,u)+(fl.mil&&F==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0)+(fl.tech&&F==='tech'?1:0)+(fl.care&&F==='care'?1:0)+(D.cat==='melee'&&ally(st,'hunt')?1:0)+(roleOf(u.t)==='dps'&&nbRoles(st,i).has('tank')?1:0)+(squad(st,i)?1:0)+(F&&fl[F]>=3?1:0);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}
    if(D.heal&&(D.hfast||st.tick%2===0)){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+(D.heal+(fl.care?1:0)+(u.gold||0)+(sol(st,i,u)?1:0)+(squad(st,i)?1:0))*(roleOf(ns[0].t)==='tank'?2:1));ev.push({i,k:'heal'})}}
    if(D.mech&&!D.mechAll){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j]));if(ns.length){const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0)+(u.gold||0)+(sol(st,i,u)?1:0));ev.push({i:ns[0],k:'heal'})}}
@@ -704,6 +707,6 @@ const Z=(()=>{
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
  return{inRange,manh,SAP_WALL,ROLES,roleOf,TAUNT,squad,nbRoles,lureTarget,pathStep,field,N,C,MID,LINE,LINE_MAX,TRACE,CHARGES,chargesOf,isTrace,charges,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,rc,isEdge,isForest,ROADS,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  DAWN,dawnEvent,resolveDawn,rc,isEdge,isForest,ROADS,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,frenzyMult,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

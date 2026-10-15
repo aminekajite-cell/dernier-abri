@@ -545,3 +545,10 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Le Colosse : 58 PV au lieu de 112 (deux munitions anti-Colosse suffisent à l'abattre).
 - Frénésie meurtrière : à partir de la nuit 4, chaque nuit ajoute +10 % de PV et de dégâts à tous les zombies (+10 % nuit 4, +20 % nuit 5… +60 % nuit 9). Elle n'est plus liée aux mutations.
 - Plus de choix de la nuit à affronter : la nuit suivante est toujours imposée.
+
+**v66 : les combos se construisent, la horde suit**
+- Principe : pas de plafond aux combos. Le joueur doit pouvoir suivre la montée des zombies en construisant ses combos au fil des nuits, sans la dépasser trop tôt.
+- Les bonus de dégâts (faction, solidarité, voisins, niveaux, étoiles, traits…) comptent une fois par attaque : pour une unité à plusieurs tirs ou morsures, ils sont répartis entre les coups.
+- Paliers de faction à 4, 6 et 8 unités (au lieu de 3 et 5). Nouveau palier 3 : +1 dégât pour toute la faction. Un Chef donne toujours +1 palier (jusqu'au palier 3).
+- Solidarité sans limite : +1 par voisin de la même faction (au lieu de +2 au maximum).
+- Frénésie meurtrière multiplicative : dès la nuit 4, PV et dégâts des zombies ×1,08 par nuit, cumulatif (+17 % nuit 5, +71 % nuit 10, +152 % nuit 15, +270 % nuit 20).
