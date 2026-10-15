@@ -100,19 +100,25 @@ const CATL={wall:'Défense',shoot:'Tireur',melee:'Corps à corps',help:'Soutien'
 const TRAPK=['trap','mine','spike','gas','clay','firetrap','dyn','burn','wire'];
 function cardStats(D){const o={};if(D.dmg)o.atk=D.dmg+(D.hits>1?'×'+D.hits:'');else{const k=TRAPK.find(k=>D[k]);if(k)o.atk=D[k];else if(D.heal||D.mech)o.heal=D.heal||D.mech}
  if(D.block&&D.hp)o.hp=D.hp;return o}
+// pictogrammes à l'encre (factions, rôles, stats) : monochromes, pour se fondre dans le parchemin
+const INKI={police:ICON.cop,mil:ICON.relic,care:ICON.med,pyro:ICON.fire,trap:ICON.trap,farm:ICON.dog,tech:ICON.rush,comm:'<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6"/>',
+ tank:ICON.riot,heal:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',dps:'<path d="M4 4l10 10M14 14l2-2M14 14l-2 2M20 4L10 14M10 14l-2-2M10 14l2 2M5 17l2 2M19 17l-2 2"/>',
+ atk:'<path d="M4 20l9-9M13 11l2-6 4-1-1 4-6 2zM6 14l4 4"/>'};
+const ink=k=>`<svg class="ink" viewBox="0 0 24 24" aria-hidden="true">${INKI[k]}</svg>`;
 function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=cardStats(D),f=Z.famOf(t),ro=Z.roleOf(t),u=artUrl(t),cost=o.cost??(o.base?Z.cost(t):Z.costOf(G,t));
- const gems=(st.atk!=null?`<span class="cf-atk${String(st.atk).length>2?' sm':''}" title="Dégâts">${st.atk}</span>`:st.heal?`<span class="cf-atk heal" title="Soin">+${st.heal}</span>`:'')+(st.hp?`<span class="cf-hp" title="PV">${st.hp}</span>`:'');
- return `<span class="cf r-${r}${o.mini?' mini':''}${D.up?' up':''}" style="--cc:${cc(t)}">
-  <span class="cf-frame"></span><span class="cf-art"${u?` style="background-image:url('${u}')"`:''}>${u?'':svg(t)}</span>
-  ${r!=='com'?`<span class="cf-rar" title="${Z.RARITY[r].n}"></span>`:''}
-  <span class="cf-cost">${cost}</span>${f?`<span class="cf-fam" title="${Z.FAM[f].n}">${Z.FAM[f].ic}</span>`:''}${ro?`<span class="cf-role" title="${Z.ROLES[ro].n}">${Z.ROLES[ro].ic}</span>`:''}
+ const atk=st.atk!=null?`<span class="cf-atk" title="Dégâts">${ink('atk')}<b>${st.atk}</b></span>`:st.heal?`<span class="cf-atk heal" title="Soin">${ink('heal')}<b>+${st.heal}</b></span>`:'';
+ const hp=st.hp?`<span class="cf-hp" title="PV"><b>${st.hp}</b></span>`:'';
+ const marks=(f?`<i title="${Z.FAM[f].n}">${ink(f)}</i>`:'')+(ro?`<i title="${Z.ROLES[ro].n}">${ink(ro)}</i>`:'');
+ return `<span class="cf r-${r}${o.mini?' mini':''}${D.up?' up':''}">
+  <span class="cf-art"${u?` style="background-image:url('${u}')"`:''}>${u?'':svg(t)}</span>
+  ${r!=='com'?`<span class="cf-rar" title="${Z.RARITY[r].n}"></span>`:''}<span class="cf-cost">${cost}</span>
   <span class="cf-name">${D.n}</span>
-  ${o.mini?(gems?'':`<span class="cf-v">${o.v||(U0.react?'Nuit':U0.v)}</span>`)+(o.tag?`<span class="cf-tag">${o.tag}</span>`:''):`<span class="cf-txt"><span>${U0.d}${D.rng>1&&!/portée/i.test(U0.d)?`. <b>Portée ${D.rng}</b>`:''}</span></span><span class="cf-type">${CATL[U0.cat]||''}${f?' · '+Z.FAM[f].n:''}${ro?' · '+Z.ROLES[ro].n:''}</span>`}
-  ${gems}</span>`}
+  ${o.mini?(atk||hp?'':`<span class="cf-v">${o.v||(U0.react?'Nuit':U0.v)}</span>`)+(o.tag?`<span class="cf-tag">${o.tag}</span>`:''):`<span class="cf-rule"></span><span class="cf-txt${U0.d.length>105?' xlong':U0.d.length>70?' long':''}"><span>${U0.d}${D.rng>1&&!/portée/i.test(U0.d)?`. <b>Portée ${D.rng}</b>`:''}</span></span>`}
+  <span class="cf-foot">${atk||'<span></span>'}<span class="cf-marks">${marks}${o.mini?'':`<em>${CATL[U0.cat]||''}</em>`}</span>${hp||'<span></span>'}</span></span>`}
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v40 · 15 oct.';
+const VERSION='v41 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
