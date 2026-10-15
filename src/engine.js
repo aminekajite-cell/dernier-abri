@@ -482,11 +482,11 @@ const Z=(()=>{
  // déplacer une de ses unités : une fois par jour, vers une case libre où elle pourrait être posée
  function canMove(st,a,b){const u=st.grid[a];return (!st.moved||st.freeMove)&&!!u&&a!==b&&!st.grid[b]&&canPlace(st,u.t,b)}
  function move(st,a,b){if(!canMove(st,a,b))return false;st.grid[b]=st.grid[a];st.grid[a]=null;st.moved=1;return merge(st,b)||true}
- // constructions à tracer (murs et barbelés) : une carte = 4 cases pour la journée, pour le prix de la carte.
+ // constructions à tracer (barricade, clôture, sacs de sable, pneus, barrage, mur modulaire, barbelés) : une carte = 4 cases pour la journée, pour le prix de la carte.
  // Les cases se posent comme on veut : une par une, ou en ligne droite (1 à 4 cases d'un glissé), tant qu'il en reste.
  // La carte est payée à la 1ʳᵉ pose ; les cases suivantes sont gratuites. Elle part à la défausse quand ses 4 cases sont posées,
  // ou le soir. Plusieurs exemplaires de la même carte additionnent leurs cases.
- const LINE=['bar','car','fen','sand','tire','barrier','modwall','wire'],LINE_MAX=4,TRACE=LINE,CHARGES=4;
+ const LINE=['bar','fen','sand','tire','barrier','modwall','wire'],LINE_MAX=4,TRACE=LINE,CHARGES=4;
  const isTrace=t=>TRACE.includes(t);
  // cases encore disponibles aujourd'hui pour une carte à tracer (déjà payée si reuse, sinon une nouvelle carte : 4 cases)
  const charges=(st,t,reuse)=>reuse?((st.charges||{})[t]||0):CHARGES;

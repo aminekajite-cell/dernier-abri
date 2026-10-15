@@ -165,7 +165,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v61 · 15 oct.';
+const VERSION='v62 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=650;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -441,7 +441,7 @@ function drawUnit(i,u,now){
 }
 function drawUnitInner(i,u,now){
  const{x,y}=tc(i),dx=x-CEN.x,dy=y-CEN.y,out=Math.atan2(dy,dx);const a=facing[i]??out,s=rng(i+3);
- if(!PLAIN.has(u.t)&&drawSpr(u.t,x,y,a,out))return;
+ if(!PLAIN.has(u.t)&&u.t!=='wire'&&drawSpr(u.t,x,y,a,out))return;
  const sk0=SKINS[(i*7+(u.name||'').length)%SKINS.length];
  if(u.t==='k9squad'){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.translate(-2,11);ctx.scale(.75,.75);dogShape('#3a2a1a','#4a3626','#1e140c',now,90);ctx.restore();person(x-2,y-5,a,LOOK.cop,now,sk0);return}
  if(u.t==='gang'){[[-9,-6],[8,-7],[0,8]].forEach(([ox,oy],k)=>person(x+ox,y+oy,a,{...LOOK.kid,hc:['#b33a3a','#3a6ab3','#3a9a4a'][k]},now,SKINS[(i+k*2)%SKINS.length]));return}
@@ -499,11 +499,11 @@ function drawUnitInner(i,u,now){
    Des murs voisins se raccordent automatiquement : une section continue relie leurs centres (moitié du matériau de chacun),
    avec un poteau aux extrémités et aux angles, et une seule barre de PV par ouvrage.
    Un mur seul est un tronçon posé en travers de la route, prêt à se raccorder. */
-const PLAIN=new Set(['bar','car','sand','tire','barrier','modwall','door']),METAL=new Set(['car','modwall','door','barrier']);
-const WMAT={bar:'wood',sand:'sand',tire:'tire',barrier:'stripe',modwall:'metal',door:'steel',car:'rust',fen:'metal',bunker:'stone',brasero:'metal',fortin:'stone'};
+const PLAIN=new Set(['bar','car','fen','sand','tire','barrier','modwall','door']),METAL=new Set(['car','modwall','door','barrier']);
+const WMAT={bar:'wood',sand:'sand',tire:'tire',barrier:'stripe',modwall:'metal',door:'steel',car:'rust',fen:'electric',bunker:'stone',brasero:'metal',fortin:'stone'};
 // section de mur dans le repère local : de x0 à x1, épaisseur 2h centrée sur y=0
 function wallSect(m,x0,x1,h,r){const w=x1-x0;if(w<=0)return;
- ctx.fillStyle=INK;ctx.fillRect(x0-1,-h-2,w+2,2*h+4);
+ if(m!=='electric'){ctx.fillStyle=INK;ctx.fillRect(x0-1,-h-2,w+2,2*h+4)}
  if(m==='wood'){for(let x=x0;x<x1;x+=7){const ww=Math.min(6,x1-x),c=['#8a6238','#9a7244','#7d5732'][Math.floor(r()*3)];ctx.fillStyle=c;ctx.fillRect(x,-h,ww,2*h);
    ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(x,-h,1.4,2*h);ctx.fillStyle=INK;ctx.beginPath();ctx.moveTo(x-.6,-h);ctx.lineTo(x+ww/2,-h-5.5);ctx.lineTo(x+ww+.6,-h);ctx.fill();
    ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x,-h);ctx.lineTo(x+ww/2,-h-4.3);ctx.lineTo(x+ww,-h);ctx.fill()}
@@ -520,12 +520,18 @@ function wallSect(m,x0,x1,h,r){const w=x1-x0;if(w<=0)return;
    if(m==='steel'){line(x+2,-1,x+ww-2,-1,'rgba(0,0,0,.35)',1.2)}if(r()<.3)circ(x+ww/2+(r()-.5)*6,(r()-.5)*h,1.8+r()*2,'rgba(150,75,30,.55)')}}
  else if(m==='rust'){ctx.fillStyle='#8a3d24';ctx.fillRect(x0,-h,w,2*h);ctx.fillStyle='#a2502e';ctx.fillRect(x0,-h,w,h*.7);ctx.fillStyle='#2c3640';for(let x=x0+4;x<x1-8;x+=22)ctx.fillRect(x,-h*.25,10,h*.6);
    ctx.fillStyle='rgba(0,0,0,.25)';for(let x=x0+11;x<x1;x+=22)ctx.fillRect(x,-h,1.2,2*h);for(let k=0;k<w/12;k++)circ(x0+r()*w,(r()-.5)*1.6*h,1.5+r()*2.2,'rgba(60,25,10,.45)')}
+ else if(m==='electric'){// clôture électrique : poteaux de bois, 3 fils tendus, isolateurs ; étincelles si le courant passe
+  const on=powered();
+  [-h*.6,0,h*.6].forEach(y=>{line(x0,y,x1,y,INK,2.6);line(x0,y,x1,y,on?'#a9c4d6':'#777',1.2)});
+  for(let x=x0+8;x<x1-2;x+=16){oCirc(x,0,3.2,'#6b4a2a',1.2);[-h*.6,0,h*.6].forEach(y=>circ(x,y,1.3,'#e8e0c8'))}
+  if(on&&nightAmt>.3&&r()<.5){const x=x0+r()*w;line(x,-h*.6,x+3,0,'#bff3ff',1)}}
  else{ctx.fillStyle='#8a8a82';ctx.fillRect(x0,-h,w,2*h);ctx.fillStyle='rgba(0,0,0,.2)';for(let x=x0+8;x<x1;x+=16)ctx.fillRect(x,-h,1.2,2*h)}}
 // poteau (extrémité ou angle) selon le matériau
 function wallPost(m,x,y){const metal=m==='metal'||m==='steel'||m==='rust'||m==='stripe';
  ell(x+4,y+6,16,13,'rgba(0,0,0,.35)');
  if(m==='sand'){[[-6,4],[6,4],[0,-4]].forEach(([a,b])=>oEll(x+a,y+b,8,6,'#c9ab73',1.3));ell(x-2,y-6,3,1.4,'rgba(255,255,255,.25)');return}
  if(m==='tire'){oCirc(x,y,12.5,'#1c1c1c',1.4);ctx.strokeStyle='#4a4a4a';ctx.lineWidth=1.5;[9.5,7].forEach(rr=>{ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.stroke()});circ(x,y,4.5,'#3b4a2c');return}
+ if(m==='electric'){oCirc(x,y,8,'#6b4a2a',1.6);circ(x,y,5,'#8a6238');oCirc(x,y,3,'#d8d0b8',1);if(powered())circ(x,y,1.4,'#9fe8ff');return}
  if(m==='wood'){oCirc(x,y,10.5,'#6b4a2a',1.8);circ(x,y,7.5,'#8a6238');ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=1;[5,2.5].forEach(rr=>{ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.stroke()});return}
  const pc={rust:['#6e3426','#9a4a2c'],stripe:['#a9a59a','#e0dcd0'],steel:['#3f464d','#5c656d'],metal:['#5d666e','#87939a']}[m]||['#8f8f86','#a6a69c'];
  oRound(x-11,y-11,22,22,3,pc[0],1.8);oRound(x-7,y-7,14,14,2,pc[1],1);if(m==='stripe'){ctx.fillStyle='#c8372d';ctx.fillRect(x-7,y-2,14,4)}[[-8,-8],[8,-8],[-8,8],[8,8]].forEach(([a,b])=>circ(x+a,y+b,1.1,'#d6dde2'))}
@@ -547,7 +553,7 @@ function drawRamparts(ramp){const seen=new Set();
    wallPost(mat(i),e1.x,e1.y);wallPost(mat(i),e2.x,e2.y)}
   else{
    // ombre portée de tout l'ouvrage
-   links.forEach(([a,b])=>{const p=tc(a),q=tc(b);line(p.x+4,p.y+8,q.x+4,q.y+8,'rgba(0,0,0,.38)',2*H+6)});
+   links.forEach(([a,b])=>{const p=tc(a),q=tc(b);const el=mat(a)==='electric'&&mat(b)==='electric';line(p.x+4,p.y+8,q.x+4,q.y+8,el?'rgba(0,0,0,.18)':'rgba(0,0,0,.38)',el?8:2*H+6)});
    // sections : chaque moitié prend le matériau de son mur
    links.forEach(([a,b])=>{const p=tc(a),q=tc(b),d=Math.hypot(q.x-p.x,q.y-p.y),r=rng(a*131+b);
     ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(q.y-p.y,q.x-p.x));
@@ -561,6 +567,20 @@ function drawRamparts(ramp){const seen=new Set();
   g.forEach(k=>{if(PLAIN.has(G.grid[k].t)){ramp.add(k);const u2=G.grid[k],p=tc(k);if(u2.gold)LABELS.push([p.x,p.y+4,u2.gold>1?u2.gold+'★':'★'])}});
   const top=g.reduce((m,k)=>tc(k).y<tc(m).y?k:m,g[0]),cx=g.reduce((a,k)=>a+tc(k).x,0)/g.length;
   hpBar(cx,tc(top).y-30,f,f>.4?'#9fd86b':'#e5484d')})}
+/* barbelés : dessinés en code ; des barbelés voisins se raccordent en une ligne continue de rouleaux, piquets aux bouts et aux angles */
+function wireSect(d,r){ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(0,-7,d,14);
+ for(let o=-1;o<=1;o+=2){ctx.beginPath();for(let x=0;x<=d;x+=2){const y=o*5*Math.cos(x/6.5*Math.PI);ctx.lineTo(x,y)}ctx.strokeStyle=INK;ctx.lineWidth=2.8;ctx.stroke();ctx.strokeStyle='#a8adb2';ctx.lineWidth=1.2;ctx.stroke()}
+ line(0,0,d,0,INK,2.4);line(0,0,d,0,'#8d9196',1);for(let x=4;x<d;x+=7){line(x-1.6,-1.8,x+1.6,1.8,'#c9cdd1',1);line(x-1.6,1.8,x+1.6,-1.8,'#c9cdd1',1)}}
+function wirePost(x,y){oRect(x-3,y-3,6,6,'#5a4632',1.3);circ(x-1,y-1,1,'#8a6a45')}
+function drawWires(){const W=i=>!!(G.grid[i]&&G.grid[i].t==='wire'),seen=new Set();
+ G.grid.forEach((u,i)=>{if(!u||u.t!=='wire'||seen.has(i))return;const g=[i],q=[i];seen.add(i);
+  while(q.length){const a=q.pop();for(const b of Z.around(a))if(W(b)&&!seen.has(b)){seen.add(b);g.push(b);q.push(b)}}
+  const links=[];for(const a of g)for(const b of Z.around(a))if(b>a&&g.includes(b)){const[ra,ca]=Z.rc(a),[rb,cb]=Z.rc(b);if(ra!==rb&&ca!==cb&&(g.includes(ra*Z.N+cb)||g.includes(rb*Z.N+ca)))continue;links.push([a,b])}
+  if(!links.length){const p=tc(i),out=Math.atan2(p.y-CEN.y,p.x-CEN.x)+Math.PI/2,half=T*.42;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(out);ctx.translate(-half,0);wireSect(2*half,rng(i));ctx.restore();
+   wirePost(p.x-Math.cos(out)*half,p.y-Math.sin(out)*half);wirePost(p.x+Math.cos(out)*half,p.y+Math.sin(out)*half);return}
+  links.forEach(([a,b])=>{const p=tc(a),q2=tc(b),d=Math.hypot(q2.x-p.x,q2.y-p.y);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(q2.y-p.y,q2.x-p.x));wireSect(d,rng(a*31+b));ctx.restore()});
+  const nb=k=>links.filter(([a,b])=>a===k||b===k).map(([a,b])=>a===k?b:a);
+  g.forEach(k=>{const ls=nb(k);let corner=ls.length!==2;if(!corner){const[r0,c0]=Z.rc(k),[r1,c1]=Z.rc(ls[0]),[r2,c2]=Z.rc(ls[1]);corner=(r1-r0)!==(r0-r2)||(c1-c0)!==(c0-c2)}if(corner){const p=tc(k);wirePost(p.x,p.y)}})})}
 function drawShelter(now){
  const x=CEN.x,y=CEN.y,f=G.shelter/Z.maxS(G);ctx.save();ctx.translate(x,y);
  ell(6,8,38,32,'rgba(0,0,0,.45)');
@@ -696,7 +716,8 @@ function frameInner(now){
  safe(()=>{ctx.strokeStyle='rgba(242,179,61,.45)';ctx.lineWidth=3;ctx.setLineDash([3,5]);G.grid.forEach((u,i)=>{if(!u||!Z.U[u.t].block)return;const f=Z.famOf(u.t);if(!f)return;
   Z.around(i).forEach(j=>{const v=G.grid[j];if(j>i&&v&&Z.U[v.t].block&&Z.famOf(v.t)===f){const a=tc(i),b=tc(j);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}})});ctx.setLineDash([])});
  safe(()=>drawShelter(now));
- G.grid.forEach((u,i)=>{if(u&&!Z.U[u.t].block)safe(()=>drawUnit(i,u,now))});
+ safe(()=>drawWires());
+ G.grid.forEach((u,i)=>{if(u&&!Z.U[u.t].block&&u.t!=='wire')safe(()=>drawUnit(i,u,now))});
  const zs=[...V.values()].sort((a,b)=>zpos(a,now).y-zpos(b,now).y);
  zs.forEach(v=>safe(()=>{if(!drawZombie(v,now))V.delete(v.id)}));
  const ramp=new Set();safe(()=>drawRamparts(ramp));
