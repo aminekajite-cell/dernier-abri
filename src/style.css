@@ -254,17 +254,12 @@ button.ammo[hidden]{display:none}
 #preview{position:fixed;left:max(12px,calc(50% - 330px - 250px));top:120px;width:230px;z-index:5;pointer-events:none;filter:drop-shadow(0 10px 24px rgba(0,0,0,.6))}
 #preview[hidden]{display:none}
 @media (max-width:1199px){#preview{display:none}}
-.cf.mini .cf-marks{visibility:hidden}
-/* pastilles faction / rôle */
-.cf-badges{right:8%;top:6.5%;z-index:4;display:flex;flex-direction:column;gap:1.6cqw}
-.cf-badges i{display:grid;place-items:center;width:13cqw;height:13cqw;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a3a28,#1c140c);color:#f1e3c2;box-shadow:0 0 0 .7cqw #b89a62,0 1cqw 2cqw rgba(0,0,0,.6)}
-.cf-badges .ink{width:8.4cqw;height:8.4cqw;stroke-width:2.4}
-.cf-badges .ro-tank{box-shadow:0 0 0 .9cqw #6aa6e0,0 1cqw 2cqw rgba(0,0,0,.6)}
-.cf-badges .ro-heal{box-shadow:0 0 0 .9cqw #7cc56a,0 1cqw 2cqw rgba(0,0,0,.6)}
-.cf-badges .ro-dps{box-shadow:0 0 0 .9cqw #e0604a,0 1cqw 2cqw rgba(0,0,0,.6)}
-.cf.mini .cf-badges{right:9%;top:6%;gap:2cqw}
-.cf.mini .cf-badges i{width:18cqw;height:18cqw}
-.cf.mini .cf-badges .ink{width:12cqw;height:12cqw}
+/* faction / rôle à l'encre en bas de la carte */
+.cf .cf-marks{opacity:1;gap:1.4cqw}
+.cf .cf-marks i .ink{width:8.6cqw;height:8.6cqw;stroke-width:2.6}
+.cf-marks .mk-tank{color:#1f4e8c}.cf-marks .mk-heal{color:#2d6e2a}.cf-marks .mk-dps{color:#8e1d12}
+.cf.mini .cf-marks{visibility:visible}
+.cf.mini .cf-marks i .ink{width:15cqw;height:15cqw}
 
 /* recherche et tri des cartes */
 .cfbar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px;position:sticky;top:-1px;z-index:6;padding:8px 0;background:var(--panel,#141a12)}
