@@ -173,3 +173,6 @@ button.ammo[hidden]{display:none}
 .card.reuse .v{color:var(--lantern)}
 .hand .card{touch-action:none}
 .card.ghost{position:fixed;z-index:50;width:72px;height:96px;transform:translate(-50%,-60%) rotate(-4deg);pointer-events:none;opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+
+/* rôle de l'unité (Tank, Soin, DPS) en bas à gauche de la carte */
+.card .role{position:absolute;top:16px;right:3px;font-size:10px;line-height:1}

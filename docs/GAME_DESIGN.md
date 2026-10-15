@@ -39,7 +39,7 @@ Score : nombre de nuits survécues, avec un record sauvegardé (et le nombre de 
 - **Glisser-déposer** : toute carte de la main peut être glissée jusqu'à sa case (en plus du choix puis clic).
 - **Portées réduites** pour compenser la carte plus grande (les zombies marchent plus longtemps sous le feu) : portée 3 → 2, portée 4 → 3, portée illimitée → 5 (Sniper, Mortier, Tireur de nuit). La portée 2 ne change pas.
 - **Chemins des zombies** : chaque tour, le jeu calcule pour toute la carte la distance jusqu'à la cible (l'abri, ou un leurre comme la Sirène). Entrer sur une case libre coûte 1 ; une case occupée coûte en plus ses PV (pour un rempart, les PV de tout le rempart). Les zombies contournent donc tant que le détour est plus court que de casser, sinon ils attaquent le point le plus faible. On ne passe pas en diagonale entre deux obstacles. Les rampants passent sous les murs. Le Colosse fonce toujours tout droit et détruit ce qu'il frappe. À égalité de chemin, le style de marche de chaque zombie décide, pour qu'ils n'arrivent pas tous par le même côté.
-- **Remparts** : des murs voisins (8 cases autour) fusionnent en un seul ouvrage : palissade continue, poteaux, une seule barre de PV. Les PV sont mis en commun (le mur le plus solide encaisse chaque coup). Les murs simples se fondent dans le rempart ; Clôture, Bunker, Brasero et Fortin gardent leur dessin.
+- **Remparts** : des murs voisins (8 cases autour) fusionnent en un seul ouvrage : palissade de rondins taillés en pointe (bois) ou panneaux rivetés (métal), tours aux extrémités et aux angles, une seule barre de PV ; fissures puis brèches quand les PV baissent. Les PV sont mis en commun (le mur le plus solide encaisse chaque coup). Les murs simples se fondent dans le rempart ; Clôture, Bunker, Brasero et Fortin gardent leur dessin.
 
 ## Les cartes
 
@@ -134,6 +134,13 @@ Tous les paliers sont à 3 et 5 unités.
 **Solidarité** : chaque voisin (les 8 cases autour) de la même faction donne +1 dégât, ou +1 soin, ou +1 réparation, au plus +2. Un trait pointillé relie les voisins solidaires sur la carte.
 
 **Riposte du corps à corps** : une unité de corps à corps frappée au contact rend aussitôt le coup (ses dégâts habituels). Le corps à corps a aussi été renforcé : Bûcheron 7 PV / 3 dégâts, Chien 5 PV, Policier 6 PV / 2, Boucher 6 PV / 3, Moine 8 PV / 2 en zone, Agent anti-émeute 11 PV / 2, Chien policier 6 PV, Meute 7 PV, Fermier à la fourche 7 PV / 3, La Fermière 11 PV. Le Lance-flammes passe à portée 2 et 5 PV.
+
+**Rôles (Tank, Soin, DPS)** : une icône sur chaque carte d'unité.
+- 🛡️ **Tank** (Policier, Moine, Agent anti-émeute, Fermier à la fourche, Ambulancier, La Fermière, Le Saint ; +3 PV chacun) : **provoque** les zombies à 3 cases ou moins, qui le visent au lieu de l'abri ; **bloque 1 coup sur 3**.
+- ❤️ **Soin** (Infirmière, Pharmacienne, Brancardier, Hôpital, Prêtre, Infirmier costaud, Médecin de garde, La Doctoresse, Cantine) : soigne **le double** sur un Tank.
+- ⚔️ **DPS** (tous les tireurs et le corps à corps offensif) : **+1 dégât** s'il a un Tank voisin (à couvert).
+- **Escouade** : une unité qui a, avec ses voisins, un Tank, un Soin et un DPS gagne +1 dégât (ou +1 soin).
+- Quand on touche un Tank pendant la journée, sa zone de provocation s'affiche.
 
 **Alliances** : quand deux factions ont chacune au moins 3 unités sur la carte, elles débloquent un bonus commun (badge 🤝 sous la horde).
 
@@ -476,6 +483,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Rôles Tank / Soin / DPS avec provocation à 3 cases et escouades, remparts redessinés (demande d'Amine).
 - Zombies qui calculent leur chemin (contourner ou casser au plus faible), murs voisins fusionnés en remparts, Fortin = Épave + Bunker (demande d'Amine).
 - Cartes de construction réutilisables dans la journée puis défaussées le soir, glisser-déposer des cartes, plus aucune portée illimitée (demande d'Amine).
 - Carte 9 × 9, murs tracés en ligne (1 énergie par case en plus), portées réduites ; le jeu vise d'abord Steam (PC), en restant jouable sur téléphone (demande d'Amine).
