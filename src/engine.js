@@ -175,7 +175,7 @@ const Z=(()=>{
   spit:{n:'Cracheur',hp:11,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
   armor:{n:'Blindé',hp:19,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
   howl:{n:'Hurleur',hp:15,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
-  sap:{n:'Sapeur',hp:12,spd:2,dmg:3,sap:1,info:'bardé d’explosifs, il fonce sur les murs et se fait sauter : 15 dégâts au rempart, 3 autour. Tué avant, il explose quand même (3 autour)'},
+  sap:{n:'Sapeur',hp:12,spd:2,dmg:3,sap:1,info:'fonce sur les murs et explose : 15 dégâts au rempart, 3 autour, même s’il est tué avant'},
   boss:{n:'Le Colosse',hp:112,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
  };
  const ZK=Object.keys(ZT);

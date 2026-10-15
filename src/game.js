@@ -92,7 +92,9 @@ const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||
    ART_FILES : les cartes qui ont déjà leur image. ART_TEST : si rempli, cette image sert à TOUTES les cartes (essai du rendu).
    Sans image, la carte garde son icône. */
 // ART_POP : les cartes qui ont aussi leur personnage détouré (<identifiant>_pop.webp, fond transparent) : il déborde du cadre
-const ART_DIR='assets/cards/',ART_FILES=['gun'],ART_POP=['gun'],ART_TEST='gun.webp';
+const ART_DIR='assets/cards/',ART_TEST='';
+const ART_FILES='air amb axe bar barrier brasero bunker butch car carp chief_care chief_comm chief_farm chief_mil chief_police chief_pyro chief_tech chief_trap coffee cook cop doc dog dogs door fen flame flare food grenade gun hospital hunter k9 kid kit lamp lead market mech med mg modwall molo monk mortar nailer napalm orderly patch pharma pitch priest radio ranger rep riot roadmap rocket sand scare sentry shot sht siren snp solar stretch swat teacher tear tesla tire turret vigile workshop xbow'.split(' ');
+const ART_POP=ART_FILES.filter(t=>t.startsWith('chief_'));
 // seules les cartes très puissantes (chefs légendaires et évolutions secrètes) débordent du cadre
 const popOK=t=>Z.RAR[t]==='leg'||!!(Z.U[t]&&Z.U[t].evo);
 const popUrl=t=>!popOK(t)?'':ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
@@ -112,17 +114,19 @@ const ink=k=>`<svg class="ink" viewBox="0 0 24 24" aria-hidden="true">${INKI[k]}
 function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=cardStats(D),f=Z.famOf(t),ro=Z.roleOf(t),u=artUrl(t),cost=o.cost??(o.base?Z.cost(t):Z.costOf(G,t));
  const atk=st.atk!=null?`<span class="cf-atk" title="Dégâts">${ink('atk')}<b>${st.atk}</b></span>`:st.heal?`<span class="cf-atk heal" title="Soin">${ink('heal')}<b>+${st.heal}</b></span>`:'';
  const hp=st.hp?`<span class="cf-hp" title="PV"><b>${st.hp}</b></span>`:'';
+ // texte de la carte : pour un chef, la faction est déjà indiquée par le pictogramme, on raccourcit
+ const txt=U0.chief?U0.d.replace(/^Che(?:f|ffe) d[^:]*: /,'').replace(/\. (?:Les?|La) [^.]* gagne(?:nt)? un palier$/,'. Faction : +1 palier'):U0.d;
  const marks=(f?`<i title="${Z.FAM[f].n}">${ink(f)}</i>`:'')+(ro?`<i title="${Z.ROLES[ro].n}">${ink(ro)}</i>`:'');
  return `<span class="cf r-${r}${o.mini?' mini':''}${D.up?' up':''}">
   <span class="cf-art"${u?` style="background-image:url('${u}')"`:''}>${u?'':svg(t)}</span><span class="cf-vig"></span>${u&&popUrl(t)?`<span class="cf-pop" style="background-image:url('${popUrl(t)}')"></span>`:''}
   ${r!=='com'?`<span class="cf-rar" title="${Z.RARITY[r].n}"></span>`:''}<span class="cf-cost">${cost}</span>
   <span class="cf-name">${D.n}</span>
-  ${o.mini?(atk||hp?'':`<span class="cf-v">${o.v||(U0.react?'Nuit':U0.v)}</span>`)+(o.tag?`<span class="cf-tag">${o.tag}</span>`:''):`<span class="cf-rule"></span><span class="cf-txt${U0.d.length>105?' xlong':U0.d.length>70?' long':''}"><span>${U0.d}${D.rng>1&&!/portée/i.test(U0.d)?`. <b>Portée ${D.rng}</b>`:''}</span></span>`}
+  ${o.mini?(atk||hp?'':`<span class="cf-v">${o.v||(U0.react?'Nuit':U0.v)}</span>`)+(o.tag?`<span class="cf-tag">${o.tag}</span>`:''):`<span class="cf-rule"></span><span class="cf-txt${txt.length>80?' xlong':txt.length>55?' long':''}"><span>${txt}${D.rng>1&&!/portée/i.test(U0.d)?`. <b>Portée ${D.rng}</b>`:''}</span></span>`}
   <span class="cf-foot">${atk||'<span></span>'}<span class="cf-marks">${marks}${o.mini?'':`<em>${CATL[U0.cat]||''}</em>`}</span>${hp||'<span></span>'}</span></span>`}
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v43 · 15 oct.';
+const VERSION='v44 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -923,7 +927,12 @@ function end(){
 }
 const CATN={wall:'Défenses',shoot:'Tireurs',melee:'Corps à corps',help:'Soutien',trap:'Pièges',item:'Objets'};
 const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${art(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em> · ${Z.U[t].d}${famLine(t)}</span></div>`).join('')}</div>`).join('');
-const zedHtml=()=>`<div class="deck">${Object.entries(Z.ZT).map(([k,z])=>`<div class="dk" style="--cc:var(--z-${k})"><svg class="ic" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="7"/></svg><span><b>${z.n}</b>${z.hp} PV, ${z.dmg} dégât${z.dmg>1?'s':''} par coup, ${z.info}</span></div>`).join('')}</div>`;
+// carte d'un zombie : même cadre, illustration de assets/zombies/, attaque et PV de base
+function zombieFace(k){const z=Z.ZT[k],hp=Math.round(z.hp*(z.boss?1:Z.ZHP));
+ return `<span class="cf zomb"><span class="cf-art" style="background-image:url('assets/zombies/${k}.webp')"></span><span class="cf-vig"></span>
+  <span class="cf-name">${z.n}</span><span class="cf-rule"></span><span class="cf-txt${z.info.length>80?' xlong':z.info.length>50?' long':''}"><span>${z.info.charAt(0).toUpperCase()+z.info.slice(1)}</span></span>
+  <span class="cf-foot"><span class="cf-atk" title="Dégâts">${ink('atk')}<b>${z.dmg}</b></span><span class="cf-marks"><em>Zombie</em></span><span class="cf-hp" title="PV"><b>${hp}</b></span></span></span>`}
+const zedHtml=()=>`<div class="cgrid">${Z.ZK.map(k=>`<div class="citem">${zombieFace(k)}</div>`).join('')}</div>`;
 const memorialHtml=()=>(G.fallen||[]).length?`<div class="deck">${G.fallen.map(f=>`<div class="dk" style="--cc:var(--muted)">${svg(f.t)}<span><b>✝ ${f.name}</b>${Z.U[f.t].n} · ${Z.TRAITS[f.trait]?Z.TRAITS[f.trait].n+' · ':''}${plural(f.kills,'zombie','zombies')} · tombé la nuit ${f.night}</span></div>`).join('')}</div>`:`<p>${G.shelter>0?'Personne n’est tombé. Pour l’instant.':'Aucun survivant n’est tombé au combat.'}</p>`;
 function runInfo(){
  const counts={};deckList().forEach(t=>counts[t]=(counts[t]||0)+1);
