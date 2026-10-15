@@ -5,7 +5,11 @@ Le jeu écrit lui-même tout le texte des cartes : **aucune image ne doit conten
 
 ## Ce qu'il faut savoir avant de commencer
 
-- **Effet qui sort du cadre** : pas besoin de générer une 2ᵉ image. Je détoure moi-même chaque illustration (le personnage seul, fond transparent) pour le faire déborder du cadre. Plus le sujet est net et se détache du fond, meilleur est le résultat.
+- **Effet qui sort du cadre** : réservé aux cartes très puissantes (les 8 chefs légendaires et les 10 évolutions secrètes, marquées « hero card »). Pas besoin de 2ᵉ image : je détoure moi-même le personnage pour le faire déborder du cadre. Plus il se détache du fond, meilleur est le résultat.
+- **Regard vers le joueur** : sur toutes les cartes, le personnage regarde droit vers le joueur, comme s'il cassait le 4ᵉ mur.
+
+- **Effet qui sort du cadre** : réservé aux cartes très puissantes (les 8 chefs légendaires et les 10 évolutions secrètes, marquées « hero card »). Pas besoin de 2ᵉ image : je détoure moi-même le personnage pour le faire déborder du cadre. Plus il se détache du fond, meilleur est le résultat.
+- **Regard vers le joueur** : sur toutes les cartes, le personnage regarde droit vers le joueur, comme s'il cassait le 4ᵉ mur.
 
 - Aucune IA ne génère d'un coup un ZIP de plus de 200 images cohérentes. On procède **par lots de 5 à 8 images**, dans **une seule conversation**, en collant le **prompt maître** au début.
 - ChatGPT (avec génération d'images et exécution de code) peut, à la fin, **rassembler les images déjà générées dans un ZIP** : c'est le dernier message ci-dessous.
@@ -20,12 +24,19 @@ For the whole conversation, keep EXACTLY the same art direction:
 - Painted semi-realistic digital illustration, thick dark outlines, strong shadows.
 - Night scene: cold blue moonlight, warm orange rim light from fire, mist, dark forest.
 - Muted, desaturated colors. Gritty, worn, survival mood. No cartoon, no pixel art, no anime.
+- BREAK THE FOURTH WALL: every character looks straight into the camera, eye contact with the viewer,
+  as if staring at the player holding the card. Tense, intense expression. Objects and traps are shown
+  close-up, facing the viewer, as if pushed toward the camera.
 - NEVER any text, letters, numbers, logo, watermark, frame or border in the image.
 
-There are 3 kinds of images. Follow the spec of each kind:
-1. CARD ILLUSTRATION: portrait 3:4 (768x1024). Subject centered in the upper-middle, plenty of margin, dark misty background.
-2. ZOMBIE CARD: same as card illustration, the zombie is the subject, menacing.
-3. SPRITE (for the game board): top-down view, seen from directly above, the character or object facing RIGHT,
+There are 4 kinds of images. Follow the spec of each kind:
+1. CARD ILLUSTRATION: portrait 3:4 (768x1024). Subject centered in the upper-middle, plenty of margin,
+   the subject clearly separated from a darker, simpler background.
+2. HERO CARD (legendary and secret cards only): same as card illustration, but the subject is BIGGER and closer,
+   head and weapon reaching the top edge of the image, dynamic pose leaning toward the viewer,
+   strong contrast between subject and background (the subject will be cut out to break out of the card frame).
+3. ZOMBIE CARD: same as card illustration, the zombie stares at the viewer, menacing, lunging toward the camera.
+4. SPRITE (for the game board): top-down view, seen from directly above, the character or object facing RIGHT,
    transparent background (PNG with alpha), 256x256, centered, no shadow on the ground, same colors and outline style.
 
 I will send batches as lines "filename | kind | subject". Generate one image per line, save each one with EXACTLY that
@@ -85,10 +96,10 @@ cards/vigile.png | card illustration | a security guard with a flashlight and a 
 cards/doc.png | card illustration | a doctor on night duty with a pistol and a stethoscope
 cards/nailer.png | card illustration | a handyman firing a pneumatic nail gun
 cards/ranger.png | card illustration | a country game warden with a hunting rifle and a badge
-cards/chief_police.png | card illustration | a grizzled police commissioner in a long coat with a revolver and a golden badge, heroic pose
-cards/chief_mil.png | card illustration | a tough female army sergeant with a light machine gun, heroic pose
-cards/chief_pyro.png | card illustration | a pyromaniac in a fire suit with a flamethrower, flames everywhere, heroic pose
-cards/chief_trap.png | card illustration | an old poacher in a fur hat with a long hunting rifle and traps on his belt, heroic pose
+cards/chief_police.png | hero card | a grizzled police commissioner in a long coat with a revolver and a golden badge, heroic pose
+cards/chief_mil.png | hero card | a tough female army sergeant with a light machine gun, heroic pose
+cards/chief_pyro.png | hero card | a pyromaniac in a fire suit with a flamethrower, flames everywhere, heroic pose
+cards/chief_trap.png | hero card | an old poacher in a fur hat with a long hunting rifle and traps on his belt, heroic pose
 cards/rocket.png | card illustration | a survivor aiming a rocket launcher, backblast smoke
 ```
 
@@ -106,7 +117,7 @@ cards/dogs.png | card illustration | a pack of three farm dogs snarling
 cards/pitch.png | card illustration | a farmer with a pitchfork in a plaid shirt
 cards/amb.png | card illustration | an ambulance driver in a reflective jacket blocking with a stretcher
 cards/orderly.png | card illustration | a burly hospital orderly in scrubs with taped fists
-cards/chief_farm.png | card illustration | a strong female farmer with an axe and two dogs, heroic pose
+cards/chief_farm.png | hero card | a strong female farmer with an axe and two dogs, heroic pose
 ```
 
 ### Soutien
@@ -129,9 +140,9 @@ cards/workshop.png | card illustration | a cluttered workshop bench with tools a
 cards/teacher.png | card illustration | a schoolteacher holding a book and a lantern, children behind her
 cards/market.png | card illustration | a makeshift barter market stall with scrap and supplies
 cards/carp.png | card illustration | a carpenter with a hammer and planks
-cards/chief_care.png | card illustration | a determined female doctor in a bloodstained coat with a scalpel, heroic pose
-cards/chief_tech.png | card illustration | an engineer in a welding helmet with a giant wrench and nail gun, heroic pose
-cards/chief_comm.png | card illustration | a small-town mayor in a sash rallying people with a pistol raised, heroic pose
+cards/chief_care.png | hero card | a determined female doctor in a bloodstained coat with a scalpel, heroic pose
+cards/chief_tech.png | hero card | an engineer in a welding helmet with a giant wrench and nail gun, heroic pose
+cards/chief_comm.png | hero card | a small-town mayor in a sash rallying people with a pistol raised, heroic pose
 ```
 
 ### Pièges
@@ -180,16 +191,16 @@ cards/rush.png | card illustration | a survivor with dilated eyes, adrenaline sy
 ### Évolutions secrètes
 
 ```
-cards/k9squad.png | card illustration | a police officer and his German shepherd charging together
-cards/nightsnp.png | card illustration | a sniper lit by a floodlight beam on a rooftop
-cards/heavyflame.png | card illustration | a heavily armored flamethrower trooper with twin fuel tanks
-cards/fortin.png | card illustration | a fortified car wreck welded to a concrete bunker
-cards/autogun.png | card illustration | an automatic gun turret built by a mechanic, multiple barrels
-cards/slaughter.png | card illustration | a massive butcher-lumberjack with a cleaver and an axe
-cards/canteen.png | card illustration | a field canteen with a nurse and a cook serving soup
-cards/gang.png | card illustration | a gang of kids with slingshots on a rooftop
-cards/saint.png | card illustration | a glowing monk-priest standing unhurt in the middle of the horde
-cards/tracker.png | card illustration | a camouflaged tracker with a crossbow and a hunting rifle
+cards/k9squad.png | hero card | a police officer and his German shepherd charging together
+cards/nightsnp.png | hero card | a sniper lit by a floodlight beam on a rooftop
+cards/heavyflame.png | hero card | a heavily armored flamethrower trooper with twin fuel tanks
+cards/fortin.png | hero card | a fortified car wreck welded to a concrete bunker
+cards/autogun.png | hero card | an automatic gun turret built by a mechanic, multiple barrels
+cards/slaughter.png | hero card | a massive butcher-lumberjack with a cleaver and an axe
+cards/canteen.png | hero card | a field canteen with a nurse and a cook serving soup
+cards/gang.png | hero card | a gang of kids with slingshots on a rooftop
+cards/saint.png | hero card | a glowing monk-priest standing unhurt in the middle of the horde
+cards/tracker.png | hero card | a camouflaged tracker with a crossbow and a hunting rifle
 ```
 
 ## Cartes de zombies
