@@ -540,3 +540,8 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Tireurs : Tireur et Tourelle bricolée 2 dégâts/tour ; Chasseur et Garde champêtre 2 dégâts à chaque tour ; Arbalète 2 × 2 zombies à chaque tour, coût 3 ; Sniper 5 dégâts tous les 2 tours ; Mitrailleuse s'enraye 1 tour sur 4.
 - Construction : Barricade, Sacs de sable et Clôture coûtent 2 ; Épave coûte 2 ; Pneus, Barrage et Mur modulaire donnent 3 cases par carte (4 pour les autres) ; Barbelés restent à 1.
 - Zombies : +50 % de PV, intégrés aux PV de base (v64, plus de bonus séparé) : Rôdeur 17, Coureur 12, Gonflé 45, Chien zombie 6, Rampant 12, Cracheur 17, Blindé 29, Hurleur 23, Sapeur 18 ; Colosse inchangé (112).
+
+**v65**
+- Le Colosse : 58 PV au lieu de 112 (deux munitions anti-Colosse suffisent à l'abattre).
+- Frénésie meurtrière : à partir de la nuit 4, chaque nuit ajoute +10 % de PV et de dégâts à tous les zombies (+10 % nuit 4, +20 % nuit 5… +60 % nuit 9). Elle n'est plus liée aux mutations.
+- Plus de choix de la nuit à affronter : la nuit suivante est toujours imposée.

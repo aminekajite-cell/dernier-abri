@@ -178,7 +178,7 @@ const Z=(()=>{
   armor:{n:'Blindé',hp:29,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
   howl:{n:'Hurleur',hp:23,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
   sap:{n:'Sapeur',hp:18,spd:2,dmg:3,sap:1,info:'fonce sur les murs et explose : 15 dégâts au rempart, 3 autour, même s’il est tué avant'},
-  boss:{n:'Le Colosse',hp:112,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
+  boss:{n:'Le Colosse',hp:58,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
  };
  const ZK=Object.keys(ZT);
  const EVENTS=[
@@ -263,7 +263,8 @@ const Z=(()=>{
   blood:{n:'Nuit sanglante',d:'Horde +70 %. Une relique à l’aube.',count:1.7,relic:1}
  };
  // le choix de la nuit est rare : 1 aube sur 4 environ, à partir de la nuit 3
- const nightChoice=(st,rnd=Math.random)=>st.night>=3&&rnd()<.25;
+ // plus de choix de la nuit à affronter (v65) : la nuit suivante est toujours imposée
+ const nightChoice=()=>false;
  function nightOffers(st,rnd=Math.random){const ev=()=>(rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))]).id;
   const e1=ev();let e2=ev();for(let k=0;k<5&&e2===e1;k++)e2=ev();
   return[{tier:rnd()<.5?'calm':'normal',event:e1},{tier:rnd()<.6?'raid':'blood',event:e2}]}
@@ -316,10 +317,11 @@ const Z=(()=>{
  };
  const mutNight=n=>n%4===0;
  const mc=(st,m)=>(st.muts||[]).filter(x=>x===m).length;
- // frénésie meurtrière : à partir de la nuit 8, chaque mutation s'accompagne de +10 % de PV et de dégâts pour tous les zombies (cumulable)
- const FRENZY_FROM=8,FRENZY=.1;
- const frenzy=st=>st.frenzy||0;
- function mutate(st,rnd=Math.random){const pool=Object.keys(MUTS).filter(m=>MUTS[m].stack||!mc(st,m));const m=pool[Math.floor(rnd()*pool.length)];(st.muts=st.muts||[]).push(m);if(st.night>=FRENZY_FROM)st.frenzy=frenzy(st)+1;return m}
+ // frénésie meurtrière : à partir de la nuit 4, chaque nuit ajoute +10 % de PV et de dégâts à tous les zombies (cumulable :
+ // +10 % la nuit 4, +20 % la nuit 5, etc.)
+ const FRENZY_FROM=4,FRENZY=.1;
+ const frenzy=st=>Math.max(0,(st.night||1)-FRENZY_FROM+1);
+ function mutate(st,rnd=Math.random){const pool=Object.keys(MUTS).filter(m=>MUTS[m].stack||!mc(st,m));const m=pool[Math.floor(rnd()*pool.length)];(st.muts=st.muts||[]).push(m);return m}
  const zspd=(st,k)=>{const s=ZT[k].spd;return mc(st,'frenesie')&&s>1&&!ZT[k].boss?s-1:s};
  const zdmg=(st,k)=>ZT[k].dmg+(mc(st,'enrage')&&(k==='walk'||k==='run')?1:0);
  // dégâts réels d'un coup : la frénésie ajoute des fractions de dégât que chaque zombie accumule (+1 dégât dès que le reste atteint 1)
