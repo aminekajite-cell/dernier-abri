@@ -112,7 +112,7 @@ const Z=(()=>{
   k9squad:{n:'Brigade canine',cat:'melee',hp:8,block:1,rng:1,dmg:2,every:1,hits:2,stun:1,push:1,evo:1,v:'2 ×2 · Étourdit',d:'Un policier et son chien : 2 morsures de 2 dégâts par tour, qui étourdissent et repoussent'},
   nightsnp:{n:'Tireur de nuit',cat:'shoot',hp:4,block:1,rng:5,dmg:3,every:1,evo:1,v:'3 · P5',d:'Un sniper et son projecteur : 3 dégâts à chaque tour, portée 5'},
   heavyflame:{n:'Lance-flammes lourd',cat:'shoot',hp:7,block:1,rng:2,dmg:2,every:1,aoe:1,ignite:3,evo:1,v:'Feu zone · P2',d:'2 dégâts à tous les zombies à 2 cases, qui brûlent ensuite 3 tours'},
-  fortin:{n:'Fortin',cat:'wall',hp:26,block:1,rng:1,dmg:2,every:1,evo:1,v:'26 PV · 2',d:'Épave blindée de planches : bloque, 26 PV, et frappe les zombies au contact'},
+  fortin:{n:'Fortin',cat:'wall',hp:30,block:1,rng:1,dmg:3,every:1,evo:1,v:'30 PV · 3',d:'Épave et bunker soudés : bloque, 30 PV, et frappe les zombies au contact (3 dégâts)'},
   autogun:{n:'Tourelle automatique',cat:'shoot',hp:7,block:1,rng:2,dmg:1,every:1,hits:3,evo:1,v:'1 ×3 · P2',d:'Montée par le mécanicien : 3 tirs de 1 dégât par tour, portée 2'},
   slaughter:{n:'Équarrisseur',cat:'melee',hp:9,block:1,rng:1,dmg:3,every:1,aoe:1,feed:1,evo:1,v:'3 zone · Soin',d:'3 dégâts à tous les zombies autour, récupère 1 PV par zombie tué'},
   canteen:{n:'Cantine de campagne',cat:'help',hp:6,block:1,heal:2,hfast:1,cook:2,evo:1,v:'Soin 2 · +2 abri',d:'Soigne 2 PV à une unité voisine à chaque tour, et l’abri récupère 2 PV à chaque aube'},
@@ -122,7 +122,7 @@ const Z=(()=>{
  };
  // les évolutions ne sont jamais tirées : elles restent hors des cartes jouables
  const KEYS=Object.keys(U).filter(t=>!U[t].evo);
- const EVO={k9squad:['cop','dog'],nightsnp:['snp','lamp'],heavyflame:['flame','gas'],fortin:['car','bar'],autogun:['gun','mech'],slaughter:['axe','butch'],canteen:['med','cook'],gang:['kid','teacher'],saint:['monk','priest'],tracker:['xbow','hunter']};
+ const EVO={k9squad:['cop','dog'],nightsnp:['snp','lamp'],heavyflame:['flame','gas'],fortin:['car','bunker'],autogun:['gun','mech'],slaughter:['axe','butch'],canteen:['med','cook'],gang:['kid','teacher'],saint:['monk','priest'],tracker:['xbow','hunter']};
  const EVO_KEYS=Object.keys(EVO);
  // survivants nommés : chaque humain ou chien posé reçoit un prénom et un trait, compte ses victimes, et meurt pour de bon
  const HUMANS='gun snp sht xbow flame mg molo kid axe cop butch monk med cook mech lead riot swat pharma priest stretch hunter pitch teacher vigile carp amb doc orderly nailer ranger'.split(' ');
@@ -351,6 +351,27 @@ const Z=(()=>{
   const order=style===2?[diag,ar>=ac?row:col,ar>=ac?col:row]:style===1?[ac>=ar?col:row,diag,ac>=ar?row:col]:[ar>=ac?row:col,diag,ar>=ac?col:row];
   return order.filter((m,k)=>m>=0&&order.indexOf(m)===k)}
  const next=(p,t,style)=>moves(p,t,style)[0];
+ /* ---------- chemins des zombies ----------
+    Chaque tour, une carte des distances jusqu'à la cible (l'abri ou un leurre) est calculée pour toute la carte.
+    Entrer sur une case libre coûte 1 ; une case occupée par un obstacle coûte en plus ses PV (pour un rempart, les PV de tout le rempart).
+    Les zombies contournent donc tant que le détour est plus court que de casser, sinon ils attaquent le point le plus faible.
+    En diagonale, on ne passe pas entre deux obstacles. Les rampants passent sous les murs. Le Colosse, lui, fonce tout droit. */
+ function blockCosts(st,t,crawl){const bc=new Array(N*N).fill(0),gs={};
+  for(let j=0;j<N*N;j++){if(j===t)continue;if(j===C){bc[j]=999;continue}const v=st.grid[j];if(!v||!U[v.t].block)continue;
+   if(U[v.t].cat==='wall'){if(crawl)continue;if(gs[j]===undefined){const g=wallGroup(st,j),sum=g.reduce((a,k)=>a+Math.max(1,st.grid[k].hp),0);g.forEach(k=>gs[k]=sum)}bc[j]=gs[j]}
+   else bc[j]=Math.max(1,v.hp)}
+  return bc}
+ const diagOK=(a,b,bc)=>{const[ra,ca]=rc(a),[rb,cb]=rc(b);return ra===rb||ca===cb||!(bc[idx(ra,cb)]>0&&bc[idx(rb,ca)]>0)};
+ function field(st,t,crawl){const key=t+(crawl?'c':''),cache=st._df||(st._df={});if(cache[key])return cache[key];
+  const bc=blockCosts(st,t,crawl),D=new Array(N*N).fill(Infinity),done=new Array(N*N).fill(false);D[t]=0;
+  for(;;){let u=-1,b=Infinity;for(let j=0;j<N*N;j++)if(!done[j]&&D[j]<b){b=D[j];u=j}if(u<0)break;done[u]=true;
+   for(const x of around(u)){if(done[x]||!diagOK(x,u,bc))continue;const nd=D[u]+1+bc[u];if(nd<D[x])D[x]=nd}}
+  return cache[key]={D,bc}}
+ // le pas suivant d'un zombie : la case voisine qui minimise (coût d'entrée + distance restante) ; à égalité, son style de marche décide
+ function pathStep(st,p,t,crawl,style){const{D,bc}=field(st,t,crawl),pref=moves(p,t,style);let best=-1,bv=Infinity;
+  const cand=[...pref,...around(p).filter(j=>!pref.includes(j))];
+  for(const j of cand){if(!diagOK(p,j,bc))continue;const v=1+bc[j]+D[j];if(v<bv-1e-9){bv=v;best=j}}
+  return best<0?pref[0]:best}
  // un pas en s'éloignant de la maison (recul)
  function back(p){let[r,c]=rc(p);const dr=r-MID,dc=c-MID;if(Math.abs(dr)>=Math.abs(dc))r+=Math.sign(dr);else c+=Math.sign(dc);return idx(Math.max(0,Math.min(N-1,r)),Math.max(0,Math.min(N-1,c)))}
  function shuffle(a,rnd=Math.random){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -567,7 +588,7 @@ const Z=(()=>{
   if(D.net){z.cd+=D.net;ev.push({i:n,k:'eat',zid:z.id});u.hp--;if(u.hp<=0)st.grid[n]=null}
   if(D.smoke){st.z.filter(o=>o.hp>0&&cheb(o.pos,n)<=1).forEach(o=>o.cd+=D.smoke);ev.push({i:n,k:'smoke'});st.grid[n]=null}
   if(D.bait){z.cd+=D.bait;ev.push({i:n,k:'eat',zid:z.id});u.hp--;if(u.hp<=0)st.grid[n]=null}}
- function step(st){const ev=[];st.tick++;st.wtick=(st.wtick||0)+1;const e=st.event.id,pow=power(st),fl=st._fl=famLevels(st);st._al=new Set(allies(st));if(st.rushT>0)st.rushT--;
+ function step(st){const ev=[];st.tick++;st._df={};st.wtick=(st.wtick||0)+1;const e=st.event.id,pow=power(st),fl=st._fl=famLevels(st);st._al=new Set(allies(st));if(st.rushT>0)st.rushT--;
   st.pending=st.pending.filter(p=>{if((p.wave||1)===(st.wave||1)&&p.at<=st.wtick){spawn(st,p.k,p.pos);return false}return true});
   const alive=()=>st.z.filter(z=>z.hp>0);
   for(const z of alive()){z.inFire=0}
@@ -589,13 +610,12 @@ const Z=(()=>{
    if(D.dyn&&st.tick===8){st.grid[i]=null;explode(st,i,D.dyn+(fl.mil>=2?3:0),ev)}
   }
   for(const z of st.z){if(z.hp<=0)continue;z.cd--;if(z.cd>0)continue;const T=ZT[z.k];z.cd=zspd(st,z.k);
-   const tgt=lureTarget(st,z.pos),ms=moves(z.pos,tgt,z.style),blocks=j=>{const v=st.grid[j];return !!(v&&U[v.t].block&&!(T.crawl&&U[v.t].cat==='wall'))};
-   // contournement : si le pas préféré est bloqué, le zombie prend un autre pas libre (le Colosse fonce toujours tout droit)
-   let n=ms[0];if(n!==C&&blocks(n)&&!T.boss){const alt=ms.find(j=>j===C||!blocks(j));if(alt!==undefined)n=alt}
+   const tgt=lureTarget(st,z.pos);
+   let n=T.boss?moves(z.pos,tgt,z.style)[0]:pathStep(st,z.pos,tgt,T.crawl,z.style);
    if(n===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const dm=zhit(st,z);st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'bite',zid:z.id});if(!T.boss){z.hp=0;z.bit=1}continue}
    const u=st.grid[n];
    if(u&&U[u.t].block&&!(T.crawl&&U[u.t].cat==='wall')){strike(st,z,n,u,ev,false,pow);continue}
-   if(T.spit){const n2=next(n,tgt,z.style);
+   if(T.spit){const n2=pathStep(st,n,tgt,T.crawl,z.style);
     if(n2===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const dm=zhit(st,z);st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'spit',zid:z.id,from:z.pos});continue}
     const u2=st.grid[n2];if(u2&&U[u2.t].block){strike(st,z,n2,u2,ev,true,pow);continue}}
    z.pos=n;enter(st,z,n,u,ev)
@@ -638,7 +658,7 @@ const Z=(()=>{
   for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;st.kills++;st.scrap+=ZT[z.k].boss?15:1;ev.push({i:z.pos,k:'die',zid:z.id,boss:!!ZT[z.k].boss})}
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
- return{N,C,MID,LINE,LINE_MAX,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
+ return{pathStep,field,N,C,MID,LINE,LINE_MAX,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
   DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

@@ -89,7 +89,7 @@ const stars=u=>'★'.repeat(u.gold||0);
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v33 · 15 oct.';
+const VERSION='v34 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -418,6 +418,22 @@ function drawUnitInner(i,u,now){
   case 'dyn':{ctx.save();ctx.translate(x,y);ell(1,4,12,8,'rgba(0,0,0,.3)');[-6,0,6].forEach(p=>oRect(p-2.5,-8,5,16,'#c0392b',1));ctx.fillStyle='#222';ctx.fillRect(-9,-2,18,3);oLine(0,-8,4,-14,'#ccc',.8);if(Math.floor(now/200)%2){circ(4,-14,2.4,'#ffcf4a');circ(4,-14,1,'#fff')}ctx.restore();break}
  }
 }
+/* remparts : des murs voisins fusionnent en un seul ouvrage (palissade continue, poteaux, une seule barre de PV).
+   Les murs simples disparaissent dans le rempart ; les murs spéciaux (clôture, bunker, brasero, fortin) gardent leur dessin. */
+const PLAIN=new Set(['bar','car','sand','tire','barrier','modwall','door']),METAL=new Set(['car','modwall','door','barrier']);
+function drawRamparts(ramp){const seen=new Set();
+ G.grid.forEach((u,i)=>{if(!u||Z.U[u.t].cat!=='wall'||seen.has(i))return;const g=Z.wallGroup(G,i);g.forEach(j=>seen.add(j));if(g.length<2)return;
+  const links=[];for(const a of g)for(const b of Z.around(a))if(b>a&&g.includes(b)){const[ra,ca]=Z.rc(a),[rb,cb]=Z.rc(b);
+   // pas de poutre en diagonale si le coin est déjà dans le rempart (évite les croisements)
+   if(ra!==rb&&ca!==cb&&(g.includes(ra*Z.N+cb)||g.includes(rb*Z.N+ca)))continue;links.push([a,b])}
+  const col=k=>METAL.has(G.grid[k].t)?['#5d666e','#7d8a8f']:['#6b4f30','#94704a'];
+  ctx.lineCap='round';
+  links.forEach(([a,b])=>{const p=tc(a),q=tc(b);line(p.x+3,p.y+5,q.x+3,q.y+5,'rgba(0,0,0,.35)',20)});
+  links.forEach(([a,b])=>{const p=tc(a),q=tc(b),c=col(METAL.has(G.grid[a].t)?a:b);line(p.x,p.y,q.x,q.y,INK,20);line(p.x,p.y,q.x,q.y,c[0],16);line(p.x,p.y-3,q.x,q.y-3,c[1],4);
+   const d=Math.hypot(q.x-p.x,q.y-p.y),n=Math.floor(d/9);for(let k=1;k<n;k++){const x=p.x+(q.x-p.x)*k/n,y=p.y+(q.y-p.y)*k/n;circ(x,y,1.2,'rgba(0,0,0,.35)')}});
+  g.forEach(k=>{const p=tc(k),c=col(k);oCirc(p.x,p.y,10,c[0],1.6);circ(p.x-2,p.y-2,4,c[1]);if(PLAIN.has(G.grid[k].t))ramp.add(k)});
+  const hp=g.reduce((a,k)=>a+Math.max(0,G.grid[k].hp),0),mx=g.reduce((a,k)=>a+Z.maxHp(G,G.grid[k]),0),top=g.reduce((m,k)=>tc(k).y<tc(m).y?k:m,g[0]),p=tc(top);
+  const cx=g.reduce((a,k)=>a+tc(k).x,0)/g.length;hpBar(cx,p.y-24,hp/mx,hp/mx>.4?'#9fd86b':'#e5484d')})}
 function drawShelter(now){
  const x=CEN.x,y=CEN.y,f=G.shelter/Z.maxS(G);ctx.save();ctx.translate(x,y);
  ell(6,8,38,32,'rgba(0,0,0,.45)');
@@ -547,13 +563,12 @@ function frameInner(now){
  // solidarité : un trait entre deux voisins de la même faction
  safe(()=>{ctx.strokeStyle='rgba(242,179,61,.45)';ctx.lineWidth=3;ctx.setLineDash([3,5]);G.grid.forEach((u,i)=>{if(!u||!Z.U[u.t].block)return;const f=Z.famOf(u.t);if(!f)return;
   Z.around(i).forEach(j=>{const v=G.grid[j];if(j>i&&v&&Z.U[v.t].block&&Z.famOf(v.t)===f){const a=tc(i),b=tc(j);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}})});ctx.setLineDash([])});
- // murs reliés : une poutre entre deux murs voisins
- safe(()=>{ctx.strokeStyle='rgba(138,106,69,.75)';ctx.lineWidth=7;ctx.lineCap='round';G.grid.forEach((u,i)=>{if(!u||Z.U[u.t].cat!=='wall')return;Z.around(i).forEach(j=>{const v=G.grid[j];if(j>i&&v&&Z.U[v.t].cat==='wall'){const a=tc(i),b=tc(j);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}})})});
  safe(()=>drawShelter(now));
  G.grid.forEach((u,i)=>{if(u&&!Z.U[u.t].block)safe(()=>drawUnit(i,u,now))});
  const zs=[...V.values()].sort((a,b)=>zpos(a,now).y-zpos(b,now).y);
  zs.forEach(v=>safe(()=>{if(!drawZombie(v,now))V.delete(v.id)}));
- G.grid.forEach((u,i)=>{if(u&&Z.U[u.t].block)safe(()=>drawUnit(i,u,now))});
+ const ramp=new Set();safe(()=>drawRamparts(ramp));
+ G.grid.forEach((u,i)=>{if(u&&Z.U[u.t].block&&!ramp.has(i))safe(()=>drawUnit(i,u,now))});
  drawFX(now);
  drawDark(now);
  if(nightAmt>.05){ctx.save();ctx.shadowColor='#ff2a2a';ctx.shadowBlur=6;for(const[x,y,nx,ny,sz,al]of EYES){ctx.globalAlpha=al*nightAmt;circ(x+nx*2*sz,y+ny*2*sz,1.3*sz,'#ff4a3a');circ(x-nx*2*sz,y-ny*2*sz,1.3*sz,'#ff4a3a')}ctx.restore()}
@@ -635,9 +650,10 @@ function render(){
  const mN=G.muts.length,soon=Z.mutNight(G.night);
  $('#horde').innerHTML=(S.busy?'':hordeHtml())+`<span class="tags">${mN||soon?`<span class="mutc${soon?' soon':''}" title="Mutations de la horde">${svg('mut')}${mN}${Z.frenzy(G)?` · +${Z.frenzy(G)*10} %`:''}${soon?' · mute à l’aube':''}</span>`:''}${G.ammo?`<span class="ammoc" title="Munitions anti-Colosse">${svg('ammo')}${G.ammo}/${Z.AMMO_MAX}</span>`:''}<span class="scrap" title="Ferraille">${svg('scrap')}${G.scrap}</span></span>`;
  const left=G.energy??Z.ENERGY;
- const hand=$('#hand'),nH=S.hand.length+(S.used||[]).length;hand.style.setProperty('--n',Math.max(5,Math.min(6,nH)));
+ const hand=$('#hand'),nH=S.hand.length+new Set(S.used||[]).size;hand.style.setProperty('--n',Math.max(5,Math.min(6,nH)));
  hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card r-${rar(t)}${S.sel===k?' sel':''}${G.upg[t]?' up':''}" data-k="${k}" style="--cc:${cc(t)}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}><span class="cost">${Z.costOf(G,t)}</span>${famTag(t)}${svg(t)}<span class="nm">${cardName(t)}</span><span class="v">${Z.U[t].react&&!S.busy?'Nuit':Z.U[t].v}</span></button>`).join('')
-  +(S.used||[]).map((t,k)=>`<button type="button" class="card reuse r-${rar(t)}${S.sel===-1-k?' sel':''}" data-u="${k}" style="--cc:${cc(t)}" ${S.busy||Z.buildCost(G,t,true)>(G.energy??0)?'disabled':''}><span class="cost">${Z.buildCost(G,t,true)}</span>${svg(t)}<span class="nm">${cardName(t)}</span><span class="v">Encore</span></button>`).join('');
+  +[...new Set(S.used||[])].map(t=>{const k=S.used.indexOf(t),n=S.used.filter(x=>x===t).length,on=S.sel!==null&&S.sel<0&&S.used[-1-S.sel]===t;
+   return `<button type="button" class="card reuse r-${rar(t)}${on?' sel':''}" data-u="${k}" style="--cc:${cc(t)}" ${S.busy||Z.buildCost(G,t,true)>(G.energy??0)?'disabled':''}><span class="cost">${Z.buildCost(G,t,true)}</span>${svg(t)}<span class="nm">${cardName(t)}</span><span class="v">Encore${n>1?' ×'+n:''}</span></button>`}).join('');
  const fc=Z.famCounts(G),fl=Z.famLevels(G);$('#fams').innerHTML=Object.keys(Z.FAM).filter(f=>fc[f]).map(f=>`<span class="fam l${fl[f]}" title="${Z.FAM[f].n}">${Z.FAM[f].ic} ${fc[f]}${fl[f]?' '+'★'.repeat(fl[f]):'/'+Z.FAM[f].lv[0]}</span>`).join('')+Z.allies(G).map(k=>`<span class="fam ally" title="${Z.ALLY[k].d}">🤝 ${Z.ALLY[k].n}</span>`).join('');
  const info=$('#info');info.className='info';
  if(S.busy&&S.sel!==null&&S.sel>=0){const t=S.hand[S.sel];info.innerHTML=`<b>${cardName(t)}</b> : ${Z.U[t].d}. `+(Z.U[t].react==='unit'?'Touche une unité blessée.':'Touche une case de la carte.')}
@@ -688,7 +704,7 @@ function unitLine(u){const tr=Z.TRAITS[u.trait],D=Z.U[u.t],lv=(u.lvA||0)+(u.lvD|
  return (u.name?`<b>${u.name}</b>, ${cardName(u.t)}`:`<b>${cardName(u.t)}</b>`)+(u.gold?` <b class="gold">${stars(u)} doré</b>`:'')+(D.evo?' <b class="evo">✦ évolution</b>':'')
   +(tr?` · <b>${tr.n}</b> (${tr.d})`:'')+(D.dmg?` · ${plural(k,'zombie tué','zombies tués')}, niveau suivant à ${(Math.floor(k/Z.LVL)+1)*Z.LVL}`:'')
   +(lv?` · niveau ${lv} (+${u.lvA||0} dégât, +${(u.lvD||0)*3} PV)`:'')+(so=>so?` · ${Z.FAM[Z.famOf(u.t)].ic} solidarité +${so}`:'')(Z.sol(G,G.grid.indexOf(u),u))+(u.leg?` · porte le souvenir de <b>${u.leg}</b> (+1 dégât, +2 PV)`:'')
-  +(g=>g.length>1?` · rempart de ${g.length} murs : le plus solide encaisse les coups`:'')(Z.wallGroup(G,G.grid.indexOf(u)))+` · ${u.hp}/${Z.maxHp(G,u)} PV.`}
+  +(g=>g.length>1?` · <b>rempart de ${g.length} murs</b> : ${g.reduce((a,k)=>a+G.grid[k].hp,0)}/${g.reduce((a,k)=>a+Z.maxHp(G,G.grid[k]),0)} PV en commun`:'')(Z.wallGroup(G,G.grid.indexOf(u)))+` · ${u.hp}/${Z.maxHp(G,u)} PV.`}
 // fusion ou évolution juste après une pose ou un déplacement : effets, son, et découverte enregistrée dans la collection
 function mergeFx(m){if(!m||typeof m!=='object')return;const p=tc(m.i),now=performance.now();
  const pull=(j,c)=>{const q=tc(j);facing[j]=null;addFX({type:'tracer',x1:q.x,y1:q.y,x2:p.x,y2:p.y,c,w:3,dur:450});burst(q.x,q.y,c,12,.09,2)};
@@ -918,7 +934,7 @@ const ACT={
  load:()=>{const d=loadSave();if(d)resume(d);else prepScreen()},
  title:()=>title(),
  close:()=>hide(),
- deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu prépares ton deck (20 à 30 cartes) avec les cartes de ta collection. Pendant la partie, tu ne joues que les cartes de ton deck : à l’aube, tu choisis l’une d’elles pour l’avoir en main le lendemain.</p>${deckHtml()}<h2 class="pw">Fusion, évolutions et niveaux</h2><p><b>Fusion :</b> quand 3 unités du même type et du même nombre d’étoiles sont sur la carte, elles fusionnent en une unité avec une étoile de plus. Chaque étoile ajoute les PV de base de la carte et +1 dégât (ou +1 soin). Les 2 cartes absorbées reviennent dans ta défausse.</p><p><b>Évolutions :</b> certaines paires de cartes posées côte à côte se transforment en une unité unique ✦. À toi de les découvrir.</p><p><b>Niveaux :</b> tous les 20 zombies tués, une unité gagne un niveau : +1 dégât ou +3 PV, au choix à l’aube.</p><h2 class="pw">Les factions</h2><p><b>Solidarité :</b> chaque voisin de la même faction donne +1 dégât (ou +1 soin, +1 réparation), au plus +2. <b>Riposte :</b> une unité de corps à corps frappée au contact rend le coup aussitôt.</p><p>Plus tu as d’unités d’une même faction sur la carte, plus elles sont fortes. Le Chef d’une faction (carte légendaire) lui fait gagner un palier tant qu’il est en vie.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:20px">${f.ic}</span><span><b>${f.n}</b>${f.lv[0]} unités : ${f.d[0]}. ${f.lv[1]} unités : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">Les alliances</h2><p>Quand deux factions ont chacune au moins 3 unités sur la carte, elles débloquent un bonus commun.</p><div class="deck">${Object.values(Z.ALLY).map(a=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:18px">${a.f.map(f=>Z.FAM[f].ic).join('')}</span><span><b>${a.n}</b>${a.d}</span></div>`).join('')}</div><h2 class="pw">Les murs reliés</h2><p>Des murs posés côte à côte forment un rempart : quand un mur est frappé, c’est le plus solide du rempart qui encaisse le coup.</p><h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie. À partir de la nuit 8, chaque mutation ajoute aussi la <b>frénésie meurtrière</b> : +10 % de PV et de dégâts pour tous les zombies, cumulable.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
+ deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu prépares ton deck (20 à 30 cartes) avec les cartes de ta collection. Pendant la partie, tu ne joues que les cartes de ton deck : à l’aube, tu choisis l’une d’elles pour l’avoir en main le lendemain.</p>${deckHtml()}<h2 class="pw">Fusion, évolutions et niveaux</h2><p><b>Fusion :</b> quand 3 unités du même type et du même nombre d’étoiles sont sur la carte, elles fusionnent en une unité avec une étoile de plus. Chaque étoile ajoute les PV de base de la carte et +1 dégât (ou +1 soin). Les 2 cartes absorbées reviennent dans ta défausse.</p><p><b>Évolutions :</b> certaines paires de cartes posées côte à côte se transforment en une unité unique ✦. À toi de les découvrir.</p><p><b>Niveaux :</b> tous les 20 zombies tués, une unité gagne un niveau : +1 dégât ou +3 PV, au choix à l’aube.</p><h2 class="pw">Les factions</h2><p><b>Solidarité :</b> chaque voisin de la même faction donne +1 dégât (ou +1 soin, +1 réparation), au plus +2. <b>Riposte :</b> une unité de corps à corps frappée au contact rend le coup aussitôt.</p><p>Plus tu as d’unités d’une même faction sur la carte, plus elles sont fortes. Le Chef d’une faction (carte légendaire) lui fait gagner un palier tant qu’il est en vie.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:20px">${f.ic}</span><span><b>${f.n}</b>${f.lv[0]} unités : ${f.d[0]}. ${f.lv[1]} unités : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">Les alliances</h2><p>Quand deux factions ont chacune au moins 3 unités sur la carte, elles débloquent un bonus commun.</p><div class="deck">${Object.values(Z.ALLY).map(a=>`<div class="dk" style="--cc:var(--lantern)"><span style="font-size:18px">${a.f.map(f=>Z.FAM[f].ic).join('')}</span><span><b>${a.n}</b>${a.d}</span></div>`).join('')}</div><h2 class="pw">Les remparts</h2><p>Des murs posés côte à côte fusionnent en un seul rempart : ses PV sont mis en commun (le mur le plus solide encaisse chaque coup). Les zombies calculent leur chemin : ils contournent tes défenses si le détour est plus court que de les casser, sinon ils attaquent le point le plus faible.</p><h2 class="pw">La horde</h2><p>Chaque nuit, ils sont plus nombreux et plus résistants. Le Colosse attaque toutes les 10 nuits.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 4 nuits, la horde gagne une de ces mutations, pour toute la partie. À partir de la nuit 8, chaque mutation ajoute aussi la <b>frénésie meurtrière</b> : +10 % de PV et de dégâts pour tous les zombies, cumulable.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
  dawn:()=>dawn(),
  lvl:v=>{const i=S.picks&&S.picks[0];if(i!=null&&Z.levelUp(G,i,v==='atk'?'atk':'def')){const p=tc(i);floatTxt(p.x,p.y-20,v==='atk'?'+1 dégât':'+3 PV','#9fd86b',15);addFX({type:'ring',x:p.x,y:p.y,r:44,c:'#9fd86b',dur:500})}S.phase=null;save();render();dawn()},
  relic:v=>{Z.addRelic(G,v);afterRelic()},
