@@ -93,8 +93,11 @@ const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||
    Sans image, la carte garde son icône. */
 // ART_POP : les cartes qui ont aussi leur personnage détouré (<identifiant>_pop.webp, fond transparent) : il déborde du cadre
 const ART_DIR='assets/cards/',ART_TEST='';
-const ART_FILES='air amb axe bar barrier brasero bunker butch car carp chief_care chief_comm chief_farm chief_mil chief_police chief_pyro chief_tech chief_trap coffee cook cop doc dog dogs door fen flame flare food grenade gun hospital hunter k9 kid kit lamp lead market mech med mg modwall molo monk mortar nailer napalm orderly patch pharma pitch priest radio ranger rep riot roadmap rocket sand scare sentry shot sht siren snp solar stretch swat teacher tear tesla tire turret vigile workshop xbow'.split(' ');
-const ART_POP=ART_FILES.filter(t=>t.startsWith('chief_'));
+const ART_FILES='air amb axe bar barrier brasero bunker butch car carp chief_care chief_comm chief_farm chief_mil chief_police chief_pyro chief_tech chief_trap coffee cook cop doc dog dogs door fen flame flare food grenade gun hospital hunter k9 kid kit lamp lead market mech med mg modwall molo monk mortar nailer napalm orderly patch pharma pitch priest radio ranger rep riot roadmap rocket sand scare sentry shot sht siren snp solar stretch swat teacher tear tesla tire turret vigile workshop xbow trap fire mine wire spike gas smoke bait dyn clay firetrap net bear horn rush molotov k9squad nightsnp heavyflame fortin autogun slaughter canteen gang saint tracker'.split(' ');
+const ART_POP=ART_FILES.filter(t=>t.startsWith('chief_')).concat('k9squad nightsnp heavyflame fortin autogun slaughter canteen gang saint tracker'.split(' '));
+/* sprites vus du dessus (assets/sprites/<id>.webp, fond transparent, tournés vers la droite) : remplacent le dessin en code quand l'image est chargée */
+const SPR={};['gun','bar','trap','z_walk'].forEach(k=>{const im=new Image();im.onload=()=>SPR[k]=im;im.src='assets/sprites/'+k+'.webp'});
+function sprite(k,x,y,rot,sz){const im=SPR[k];if(!im)return false;ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.drawImage(im,-sz/2,-sz/2,sz,sz);ctx.restore();return true}
 // seules les cartes très puissantes (chefs légendaires et évolutions secrètes) débordent du cadre
 const popOK=t=>Z.RAR[t]==='leg'||!!(Z.U[t]&&Z.U[t].evo);
 const popUrl=t=>!popOK(t)?'':ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
@@ -126,7 +129,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v44 · 15 oct.';
+const VERSION='v45 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -406,6 +409,9 @@ function drawUnitInner(i,u,now){
  if(u.t==='k9squad'){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.translate(-2,11);ctx.scale(.75,.75);dogShape('#3a2a1a','#4a3626','#1e140c',now,90);ctx.restore();person(x-2,y-5,a,LOOK.cop,now,sk0);return}
  if(u.t==='gang'){[[-9,-6],[8,-7],[0,8]].forEach(([ox,oy],k)=>person(x+ox,y+oy,a,{...LOOK.kid,hc:['#b33a3a','#3a6ab3','#3a9a4a'][k]},now,SKINS[(i+k*2)%SKINS.length]));return}
  const alias={fortin:'bunker',autogun:'sentry'}[u.t];if(alias)u={...u,t:alias};
+ if(u.t==='gun'&&sprite('gun',x,y,a,40))return;
+ if(u.t==='bar'&&sprite('bar',x,y,out,54))return;
+ if(u.t==='trap'&&sprite('trap',x,y,0,30))return;
  const L0=LOOK[u.t];
  if(L0){const sk=SKINS[(i*7+(u.name||'').length)%SKINS.length],sw=L0.w==='axe'||L0.w==='cleaver'?Math.sin(now/280)*.12:0;person(x,y,a+sw,L0,now,sk);return}
  switch(u.t){
@@ -524,7 +530,8 @@ function drawZombie(v,now){
  if(v.burn&&!v.dying&&Math.random()<.3)PT.push({x:p.x+(Math.random()-.5)*10,y:p.y-4,vx:0,vy:-.04,t0:now,dur:300,c:Math.random()<.5?'#ff9a2e':'#ffd25a',r:2.5,light:0});
  ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ell(2,4,11*sz,8*sz,'rgba(0,0,0,.4)');ctx.rotate(a+wob);ctx.scale(sz,sz);
  if(v.dying)ctx.rotate(.6);
- if(Lk.dog){dogShape(skin,skin,cloth,now,70);circ(10,-2,1,'#d7262e');circ(10,2,1,'#d7262e');ell(-4,1,2.5,1.6,'#6a1418')}
+ if(k==='walk'&&SPR.z_walk){ctx.drawImage(SPR.z_walk,-17,-17,34,34)}
+ else if(Lk.dog){dogShape(skin,skin,cloth,now,70);circ(10,-2,1,'#d7262e');circ(10,2,1,'#d7262e');ell(-4,1,2.5,1.6,'#6a1418')}
  else{
   const sw=Math.sin(now/170+v.id)*2.4*(moving?1:.3),reach=v.dying?5:(Lk.low?11:Lk.lean?17:15);
   const h1=[reach+sw,-6.5+sw*.3],h2=[reach-sw,6.5-sw*.3];
