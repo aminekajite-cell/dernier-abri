@@ -529,5 +529,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 
 **v60 : la construction compte**
 - Les zombies sortent de la forêt uniquement par les 4 routes (milieu de chaque bord). Le reste du bord est la forêt : ils ne peuvent pas y marcher. Une ligne de 3 murs juste devant une route la ferme vraiment : les zombies doivent la casser. Placer ses murs devient un choix tactique (quelles routes fermer, lesquelles laisser en couloir de tir). Les lieux à côtés limités et les nuits « d'un seul côté » n'utilisent que les routes concernées.
-- Un mur tracé en ligne (1 à 4 cases) coûte le prix d'une seule case.
+- Constructions à tracer (v61 : barricade, épave, clôture, sacs de sable, pneus, barrières, mur modulaire, barbelés) : une carte donne 4 cases pour la journée, pour le prix de la carte. On les pose comme on veut, une par une ou d’un glissé en ligne, tant qu’il en reste. La carte part à la défausse quand ses 4 cases sont posées, ou le soir. Plusieurs exemplaires de la même carte additionnent leurs cases. Les autres pièges restent en main la journée et se reposent à leur prix normal.
 - Ambiance de nuit : nappe musicale grave en la mineur, notes lentes, hiboux, loups au loin, grognements de zombies et craquements de branches, au hasard ; le volume suit l'obscurité (sons générés en code).

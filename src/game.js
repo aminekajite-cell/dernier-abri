@@ -165,7 +165,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v60 · 15 oct.';
+const VERSION='v61 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=650;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -683,7 +683,7 @@ function frameInner(now){
  BARS=[];EYES=[];LABELS=[];
  ctx.drawImage(ground,0,0,L,L);try{drawPlace(now)}catch(e){}ctx.drawImage(decal,0,0,L,L);
  if(!S.busy&&S.drag){const t=selCard();ctx.fillStyle='rgba(242,179,61,.28)';ctx.strokeStyle='#f2b33d';ctx.lineWidth=2;S.drag.cells.forEach(j=>{const p=tc(j);ctx.fillRect(p.x-T/2+3,p.y-T/2+3,T-6,T-6);ctx.strokeRect(p.x-T/2+3,p.y-T/2+3,T-6,T-6)});
-  const q=tc(S.drag.cells[S.drag.cells.length-1]);safeTxt(q.x,q.y+5,`${S.drag.cells.length} · ${Z.lineCost(G,t,S.drag.cells.length,selReuse())}⚡`,'#fff')}
+  const q=tc(S.drag.cells[S.drag.cells.length-1]);safeTxt(q.x,q.y+5,`${S.drag.cells.length}/${Z.charges(G,t,selReuse())} · ${Z.lineCost(G,t,S.drag.cells.length,selReuse())}⚡`,'#fff')}
  if(!S.busy){
   const t=selCard(),mv=S.moveFrom;
   if(mv!==null){const p=tc(mv);ctx.strokeStyle='#7cc7ff';ctx.lineWidth=2.5;ctx.strokeRect(p.x-T/2+2,p.y-T/2+2,T-4,T-4)}
@@ -794,14 +794,15 @@ function render(){
  const hand=$('#hand'),nH=S.hand.length+new Set(S.used||[]).size;hand.style.setProperty('--n',Math.max(5,Math.min(WIDE.matches?10:6,nH)));
  hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card${S.sel===k?' sel':''}" data-k="${k}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}>${cardFace(t,{mini:1,v:Z.U[t].react&&!S.busy?'Nuit':''})}</button>`).join('')
   +[...new Set(S.used||[])].map(t=>{const k=S.used.indexOf(t),n=S.used.filter(x=>x===t).length,on=S.sel!==null&&S.sel<0&&S.used[-1-S.sel]===t;
-   return `<button type="button" class="card reuse${on?' sel':''}" data-u="${k}" ${S.busy||Z.buildCost(G,t,true)>(G.energy??0)?'disabled':''}>${cardFace(t,{mini:1,cost:Z.buildCost(G,t,true),tag:'Encore'+(n>1?' ×'+n:'')})}</button>`}).join('');
+   const tr=Z.isTrace(t),ch=tr?Z.charges(G,t,true):0;
+   return `<button type="button" class="card reuse${on?' sel':''}" data-u="${k}" ${S.busy||Z.buildCost(G,t,true)>(G.energy??0)||(tr&&!ch)?'disabled':''}>${cardFace(t,{mini:1,cost:Z.buildCost(G,t,true),tag:tr?`Encore ${ch} case${ch>1?'s':''}`:'Encore'+(n>1?' ×'+n:'')})}</button>`}).join('');
  const fc=Z.famCounts(G),fl=Z.famLevels(G);$('#fams').innerHTML=Object.keys(Z.FAM).filter(f=>fc[f]).map(f=>`<span class="fam l${fl[f]}" title="${Z.FAM[f].n}">${Z.FAM[f].ic} ${fc[f]}${fl[f]?' '+'★'.repeat(fl[f]):'/'+Z.FAM[f].lv[0]}</span>`).join('')+Z.allies(G).map(k=>`<span class="fam ally" title="${Z.ALLY[k].d}">🤝 ${Z.ALLY[k].n}</span>`).join('');
  const info=$('#info');info.className='info';
  if(S.busy&&S.sel!==null&&S.sel>=0){const t=S.hand[S.sel];info.innerHTML=`<b>${cardName(t)}</b> : ${Z.U[t].d}. `+(Z.U[t].react==='unit'?'Touche une unité blessée.':'Touche une case de la carte.')}
  else if(S.pause&&S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
  else if(S.pause)info.innerHTML=`<b>Pause : vague ${S.pause} sur ${G.waves} repoussée.</b> Déplace tes unités librement : touche une unité, puis une case libre. `+`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`;
  else if(S.busy){const left=G.z.length+G.pending.length,hasR=S.hand.some(t=>Z.U[t].react);info.innerHTML=`<b>${plural(left,'zombie','zombies')}</b> encore dehors.`+(hasR?` <span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`:'')}
- else if(S.sel!==null&&!S.busy){const t=selCard(),D=Z.U[t];info.innerHTML=`<b>${cardName(t)}</b> (${selCost()} énergie${selReuse()?', réutilisée':''}) : ${D.d}.`+(Z.isBuild(t)?' Carte de construction : elle reste en main aujourd’hui pour être reposée.':'')+(D.onUnit?' Touche une unité blessée.':D.instant?' Touche l’abri.':D.near?' Touche une case collée à l’abri.':Z.LINE.includes(t)?` Touche une case, ou glisse pour tracer un mur de ${Z.LINE_MAX} cases au plus pour le prix d’une seule case).`:' Touche un emplacement.')}
+ else if(S.sel!==null&&!S.busy){const t=selCard(),D=Z.U[t];info.innerHTML=`<b>${cardName(t)}</b> (${selCost()} énergie${selReuse()?', réutilisée':''}) : ${D.d}.`+(Z.isTrace(t)?` Carte à tracer : ${Z.charges(G,t,selReuse())} case${Z.charges(G,t,selReuse())>1?'s':''} à poser aujourd’hui${selReuse()?'':' pour le prix de la carte'}, une par une ou d’un glissé.`:Z.isBuild(t)?' Carte de construction : elle reste en main aujourd’hui pour être reposée.':'')+(D.onUnit?' Touche une unité blessée.':D.instant?' Touche l’abri.':D.near?' Touche une case collée à l’abri.':Z.LINE.includes(t)?' Touche une case, ou glisse pour tracer une ligne.':' Touche un emplacement.')}
  else if(S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
  else if(S.inspect!==null&&G.grid[S.inspect])info.innerHTML=unitLine(G.grid[S.inspect])+(G.moved?' (déjà un déplacement aujourd’hui)':'');
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie.`+(G.moved?'':' Touche une unité pour la déplacer (1 fois par jour).');
@@ -844,8 +845,10 @@ cv.addEventListener('pointerup',e=>{if(!S.drag)return;const cells=S.drag.cells;S
 cv.addEventListener('pointercancel',()=>{S.drag=null});
 // une carte de construction posée pour la 1ʳᵉ fois passe de la main aux cartes « Encore » et reste choisie
 function useBuild(t){if(S.sel>=0){S.hand.splice(S.sel,1);S.used.push(t);S.sel=-S.used.length}}
-function placeLineUI(cells){const t=selCard(),re=selReuse();if(Z.lineCost(G,t,cells.length,re)>G.energy)return;tuto(1);useBuild(t);Z.placeLine(G,t,cells,R,re);syncBoard();S.moveFrom=null;S.inspect=null;
- cells.forEach(j=>{facing[j]=null;const p=tc(j);addFX({type:'ring',x:p.x,y:p.y,r:30,c:'#f2b33d',dur:350})});const q=tc(cells[cells.length-1]);floatTxt(q.x,q.y-14,`Mur de ${cells.length} cases`,'#f2b33d');SFX.play('place');save();render()}
+// carte à tracer dont toutes les cases sont posées : elle quitte la main (défausse)
+function spentTrace(t){if(!Z.isTrace(t)||Z.charges(G,t,true)>0)return;const n=S.used.filter(x=>x===t).length;S.used=S.used.filter(x=>x!==t);for(let k=0;k<n;k++)S.discard.push(t);S.sel=null}
+function placeLineUI(cells){const t=selCard(),re=selReuse();if(Z.lineCost(G,t,cells.length,re)>G.energy)return;tuto(1);useBuild(t);Z.placeLine(G,t,cells,R,re);spentTrace(t);syncBoard();S.moveFrom=null;S.inspect=null;
+ cells.forEach(j=>{facing[j]=null;const p=tc(j);addFX({type:'ring',x:p.x,y:p.y,r:30,c:'#f2b33d',dur:350})});const q=tc(cells[cells.length-1]);floatTxt(q.x,q.y-14,`${cells.length} cases`+(Z.charges(G,t,true)>0?` · encore ${Z.charges(G,t,true)}`:''),'#f2b33d');SFX.play('place');save();render()}
 // fiche d'une unité : prénom, métier, trait, victimes, PV
 function unitLine(u){const tr=Z.TRAITS[u.trait],D=Z.U[u.t],lv=(u.lvA||0)+(u.lvD||0),k=u.kills||0,i=G.grid.indexOf(u),ro=Z.roleOf(u.t);
  const rl=ro?` · ${Z.ROLES[ro].ic} <b>${Z.ROLES[ro].n}</b>`+(ro==='tank'?` (provoque à ${Z.TAUNT} cases, bloque 1 coup sur 3)`:ro==='heal'?' (soin double sur un Tank)':Z.nbRoles(G,i).has('tank')?' (à couvert : +1 dégât)':'')+(Z.squad(G,i)?' · <b>escouade</b> (+1)':''):'';
@@ -877,7 +880,7 @@ function tapCell(i){
   return}
  const t=selCard(),D=Z.U[t],re=selReuse(),build=Z.isBuild(t);
  if(selCost()>(G.energy??0)||!Z.canPlace(G,t,i))return;
- tuto(1);if(build)useBuild(t);else S.hand.splice(S.sel,1);const mg=Z.place(G,t,i,R,false,{reuse:re});if(!D.instant)facing[i]=null;if(D.instant)S.discard.push(t);syncBoard();if(!build)S.sel=null;S.moveFrom=null;S.inspect=mg?i:null;
+ tuto(1);if(build)useBuild(t);else S.hand.splice(S.sel,1);const mg=Z.place(G,t,i,R,false,{reuse:re});spentTrace(t);if(!D.instant)facing[i]=null;if(D.instant)S.discard.push(t);syncBoard();if(!build)S.sel=null;S.moveFrom=null;S.inspect=mg?i:null;
  if(!mg&&G.grid[i]&&G.grid[i].name){const q=tc(i);floatTxt(q.x,q.y-14,`${G.grid[i].name} rejoint l’abri`,'#f2b33d')}
  if(!mg&&G.grid[i]&&G.grid[i].leg){const q=tc(i);floatTxt(q.x,q.y+14,`Souvenir de ${G.grid[i].leg} : +1 dégât, +2 PV`,'#f2c23d',14);addFX({type:'ring',x:q.x,y:q.y,r:50,c:'#f2c23d',dur:600})}
  const p=D.instant&&!D.onUnit?CEN:tc(i);addFX({type:'ring',x:p.x,y:p.y,r:34,c:'#f2b33d',dur:350});SFX.play('place');
@@ -1161,7 +1164,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Une fois par jour, tu peux <b>déplacer</b> une de tes unités : touche-la, puis touche une case libre.</li>
 <li>Garde de l’énergie pour la nuit : les cartes <b>Réaction</b> (grenade, tir de l’abri…) se jouent pendant l’attaque.</li>
 <li>Regroupe les unités d’une même <b>faction</b> (👮 🎖️ ⛑️ 🔥 🪤 🐕 ⚡ 🏠) pour les renforcer : côte à côte, chaque voisin de la même faction donne <b>+1</b> (dégât ou soin, +2 au plus) ; leur <b>Chef</b> légendaire les renforce encore, et, certains soirs, choisis ta <b>nuit</b> : prudente ou risquée.</li>
-<li>Les murs se <b>tracent en ligne</b> : glisse sur 1 à 4 cases, pour le prix d’une seule. Une carte de <b>construction</b> (mur ou piège) reste en main toute la journée : repose-la autant que ton énergie le permet (mur : 1 énergie la case). Elle part à la défausse le soir.</li>
+<li>Les <b>murs et barbelés</b> se tracent : une carte donne <b>4 cases</b> pour la journée, pour le prix de la carte. Pose-les une par une ou d’un glissé en ligne. La carte part à la défausse quand ses 4 cases sont posées, ou le soir. Les autres pièges restent en main la journée et se reposent à leur prix.</li>
 <li>Tu peux aussi <b>glisser une carte</b> de ta main jusqu’à la case voulue.</li>
 <li>Pose 3 fois la même unité : elles <b>fusionnent</b> en une version dorée ★ ; 3 unités ★ donnent une ★★, et ainsi de suite. Certaines paires de cartes posées côte à côte <b>évoluent</b> en unité secrète. Tous les 20 zombies tués, une unité gagne un <b>niveau</b>.</li>
 <li>La nuit, les zombies sortent de la forêt <b>uniquement par les 4 routes</b> et marchent vers la maison : un mur en travers d’une route la ferme. Tes survivants se défendent tout seuls.</li>

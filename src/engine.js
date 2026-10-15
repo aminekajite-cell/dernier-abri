@@ -434,7 +434,7 @@ const Z=(()=>{
   if(deck.length>DECK_MAX)return`${DECK_MAX} cartes au maximum.`;
   const c={};for(const t of deck){c[t]=(c[t]||0)+1;if(owned&&!owned.includes(t))return`${U[t].n} n’est pas dans ta collection.`;if(c[t]>copyMax(t))return`${U[t].n} : ${copyMax(t)} exemplaire(s) au maximum.`}
   return''}
- function newDay(st,rnd,offer){st.night++;st.energy=ENERGY+(st.nextE||0)+(famLevels(st).comm>=2?1:0);st.nextE=0;st.moved=0;st.rushT=0;
+ function newDay(st,rnd,offer){st.night++;st.charges={};st.energy=ENERGY+(st.nextE||0)+(famLevels(st).comm>=2?1:0);st.nextE=0;st.moved=0;st.rushT=0;
   if(offer){st.event=EVENTS.find(e=>e.id===offer.event)||EVENTS[0];st.tier=offer.tier}else{st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))];st.tier='base'}}
  const has=(st,t)=>st.grid.some(u=>u&&u.t===t);
  const costOf=(st,t)=>(PLACES[st.place]||{}).free&&PLACES[st.place].free.includes(t)?0:cost(t);
@@ -482,27 +482,33 @@ const Z=(()=>{
  // déplacer une de ses unités : une fois par jour, vers une case libre où elle pourrait être posée
  function canMove(st,a,b){const u=st.grid[a];return (!st.moved||st.freeMove)&&!!u&&a!==b&&!st.grid[b]&&canPlace(st,u.t,b)}
  function move(st,a,b){if(!canMove(st,a,b))return false;st.grid[b]=st.grid[a];st.grid[a]=null;st.moved=1;return merge(st,b)||true}
- // murs tracés en ligne : 1 à 4 cases en ligne droite, pour le prix d'une seule case (les cases en plus sont gratuites).
- // Une seule carte pour tout le mur : elle revient dans la défausse quand la dernière case du mur tombe.
- const LINE=['bar','car','fen','sand','tire','barrier','modwall'],LINE_MAX=4;
- // cartes de construction (murs et pièges) : après la 1ʳᵉ pose, la carte reste en main pour la journée et se réutilise.
- // Réutiliser un mur coûte 1 énergie par case, un piège son prix normal. Les constructions ne rendent pas de carte en tombant :
- // la carte part à la défausse à la fin du jour.
+ // constructions à tracer (murs et barbelés) : une carte = 4 cases pour la journée, pour le prix de la carte.
+ // Les cases se posent comme on veut : une par une, ou en ligne droite (1 à 4 cases d'un glissé), tant qu'il en reste.
+ // La carte est payée à la 1ʳᵉ pose ; les cases suivantes sont gratuites. Elle part à la défausse quand ses 4 cases sont posées,
+ // ou le soir. Plusieurs exemplaires de la même carte additionnent leurs cases.
+ const LINE=['bar','car','fen','sand','tire','barrier','modwall','wire'],LINE_MAX=4,TRACE=LINE,CHARGES=4;
+ const isTrace=t=>TRACE.includes(t);
+ // cases encore disponibles aujourd'hui pour une carte à tracer (déjà payée si reuse, sinon une nouvelle carte : 4 cases)
+ const charges=(st,t,reuse)=>reuse?((st.charges||{})[t]||0):CHARGES;
+ function useCharges(st,t,n,reuse){if(!isTrace(t))return;const c=st.charges||(st.charges={});if(!reuse)c[t]=(c[t]||0)+CHARGES;c[t]=Math.max(0,c[t]-n)}
+ // autres cartes de construction (pièges) : après la 1ʳᵉ pose, la carte reste en main pour la journée et se repose à son prix normal.
+ // Les constructions ne rendent pas de carte en tombant : la carte part à la défausse à la fin du jour.
  const isBuild=t=>!!U[t]&&!U[t].evo&&(U[t].cat==='wall'||U[t].cat==='trap');
- const buildCost=(st,t,reuse)=>reuse&&U[t].cat==='wall'?1:costOf(st,t);
+ const buildCost=(st,t,reuse)=>reuse?(isTrace(t)?0:U[t].cat==='wall'?1:costOf(st,t)):costOf(st,t);
  const lineCost=(st,t,n,reuse)=>buildCost(st,t,reuse);
  function lineCells(st,t,a,b,reuse){if(!LINE.includes(t)||!canPlace(st,t,a))return[a];const[ar,ac]=rc(a),[br,bc]=rc(b);
-  const horiz=Math.abs(bc-ac)>=Math.abs(br-ar),d=horiz?Math.sign(bc-ac):Math.sign(br-ar),len=Math.min(LINE_MAX,1+Math.abs(horiz?bc-ac:br-ar)),out=[a];
-  for(let k=1;k<len&&d;k++){const j=horiz?idx(ar,ac+d*k):idx(ar+d*k,ac);if(!canPlace(st,t,j)||lineCost(st,t,out.length+1,reuse)>(st.energy??ENERGY))break;out.push(j)}return out}
+  const max=Math.min(LINE_MAX,charges(st,t,reuse));
+  const horiz=Math.abs(bc-ac)>=Math.abs(br-ar),d=horiz?Math.sign(bc-ac):Math.sign(br-ar),len=Math.min(max,1+Math.abs(horiz?bc-ac:br-ar)),out=[a];
+  for(let k=1;k<len&&d;k++){const j=horiz?idx(ar,ac+d*k):idx(ar+d*k,ac);if(!canPlace(st,t,j))break;out.push(j)}return out}
  function placeLine(st,t,cells,rnd=Math.random,reuse){if(cells.length<2)return place(st,t,cells[0],rnd,false,{reuse});const c=lineCost(st,t,cells.length,reuse);if(c>(st.energy??ENERGY))return null;
-  cells.forEach(j=>{place(st,t,j,rnd,true);st.grid[j].gen=1});st.energy-=c;return null}
+  cells.forEach(j=>{place(st,t,j,rnd,true);st.grid[j].gen=1});st.energy-=c;useCharges(st,t,cells.length,reuse);return null}
  function canPlace(st,t,i){const D=U[t];if(D.react)return false;
   if(D.onUnit)return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<maxHp(st,st.grid[i]));
   if(D.instant)return i===C;
   if(isEdge(i)||i===C)return false;
   if(D.near)return cheb(i,C)===1;
   return true}
- function place(st,t,i,rnd=Math.random,free,opt){const D=stat(st,t);if(!free)st.energy=(st.energy??ENERGY)-buildCost(st,t,opt&&opt.reuse);if(D.instant){applyItem(st,t,i,rnd);return}
+ function place(st,t,i,rnd=Math.random,free,opt){const D=stat(st,t);if(!free){st.energy=(st.energy??ENERGY)-buildCost(st,t,opt&&opt.reuse);useCharges(st,t,1,opt&&opt.reuse)}if(D.instant){applyItem(st,t,i,rnd);return}
   const u={t,hp:D.hp};
   if(named(t)){const used=new Set(st.grid.filter(Boolean).map(v=>v.name).concat((st.fallen||[]).map(f=>f.name)));
    const dg=t==='dog'||t==='k9'||t==='dogs',pool=(dg?DOG_NAMES:NAMES).filter(n=>!used.has(n));const list=pool.length?pool:(dg?DOG_NAMES:NAMES);
@@ -691,7 +697,7 @@ const Z=(()=>{
   for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;st.kills++;st.scrap+=ZT[z.k].boss?15:1;ev.push({i:z.pos,k:'die',zid:z.id,boss:!!ZT[z.k].boss})}
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
- return{inRange,manh,SAP_WALL,ROLES,roleOf,TAUNT,squad,nbRoles,lureTarget,pathStep,field,N,C,MID,LINE,LINE_MAX,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
+ return{inRange,manh,SAP_WALL,ROLES,roleOf,TAUNT,squad,nbRoles,lureTarget,pathStep,field,N,C,MID,LINE,LINE_MAX,TRACE,CHARGES,isTrace,charges,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
   DAWN,dawnEvent,resolveDawn,rc,isEdge,isForest,ROADS,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;
