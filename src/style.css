@@ -255,3 +255,21 @@ button.ammo[hidden]{display:none}
 #preview[hidden]{display:none}
 @media (max-width:1199px){#preview{display:none}}
 .cf.mini .cf-marks{visibility:hidden}
+/* pastilles faction / rôle */
+.cf-badges{right:8%;top:6.5%;z-index:4;display:flex;flex-direction:column;gap:1.6cqw}
+.cf-badges i{display:grid;place-items:center;width:13cqw;height:13cqw;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a3a28,#1c140c);color:#f1e3c2;box-shadow:0 0 0 .7cqw #b89a62,0 1cqw 2cqw rgba(0,0,0,.6)}
+.cf-badges .ink{width:8.4cqw;height:8.4cqw;stroke-width:2.4}
+.cf-badges .ro-tank{box-shadow:0 0 0 .9cqw #6aa6e0,0 1cqw 2cqw rgba(0,0,0,.6)}
+.cf-badges .ro-heal{box-shadow:0 0 0 .9cqw #7cc56a,0 1cqw 2cqw rgba(0,0,0,.6)}
+.cf-badges .ro-dps{box-shadow:0 0 0 .9cqw #e0604a,0 1cqw 2cqw rgba(0,0,0,.6)}
+.cf.mini .cf-badges{right:9%;top:6%;gap:2cqw}
+.cf.mini .cf-badges i{width:18cqw;height:18cqw}
+.cf.mini .cf-badges .ink{width:12cqw;height:12cqw}
+
+/* recherche et tri des cartes */
+.cfbar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px;position:sticky;top:-1px;z-index:6;padding:8px 0;background:var(--panel,#141a12)}
+.cfbar input,.cfbar select{font:inherit;font-size:15px;color:inherit;background:#0f130d;border:1px solid var(--line,#3a4434);border-radius:8px;padding:8px 10px;min-height:40px}
+.cfbar input{flex:1 1 100%}
+.cfbar select{flex:1 1 30%;min-width:0}
+@media (min-width:700px){.cfbar input{flex:2 1 200px}.cfbar select{flex:1 1 140px}}
+.citem-w[hidden],.cfsec[hidden]{display:none}

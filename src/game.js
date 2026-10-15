@@ -154,17 +154,18 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
  const hp=st.hp?`<span class="cf-hp" title="PV"><b>${st.hp}</b></span>`:'';
  // texte de la carte : pour un chef, la faction est déjà indiquée par le pictogramme, on raccourcit
  const txt=U0.chief?U0.d.replace(/^Che(?:f|ffe) d[^:]*: /,'').replace(/\. (?:Les?|La) [^.]* gagne(?:nt)? un palier$/,'. Faction : +1 palier'):U0.d;
- const marks=(f?`<i title="${Z.FAM[f].n}">${ink(f)}</i>`:'')+(ro?`<i title="${Z.ROLES[ro].n}">${ink(ro)}</i>`:'');
+ // faction et rôle : pastilles bien visibles en haut à droite de l'illustration (rôle : liseré coloré tank / soin / DPS)
+ const marks='',badges=(f?`<i class="bd-fam" title="${Z.FAM[f].n}">${ink(f)}</i>`:'')+(ro?`<i class="ro-${ro}" title="${Z.ROLES[ro].n}">${ink(ro)}</i>`:'');
  return `<span class="cf r-${r}${o.mini?' mini':''}${D.up?' up':''}">
   <span class="cf-art"${u?` style="background-image:url('${u}')"`:''}>${u?'':svg(t)}</span><span class="cf-vig"></span>${u&&popUrl(t)?`<span class="cf-pop" style="background-image:url('${popUrl(t)}')"></span>`:''}
-  ${r!=='com'?`<span class="cf-rar" title="${Z.RARITY[r].n}"></span>`:''}<span class="cf-cost">${cost}</span>
+  ${r!=='com'?`<span class="cf-rar" title="${Z.RARITY[r].n}"></span>`:''}<span class="cf-cost">${cost}</span>${badges?`<span class="cf-badges">${badges}</span>`:''}
   <span class="cf-name">${D.n}</span>
   ${o.mini?(atk||hp?'':`<span class="cf-v">${o.v||(U0.react?'Nuit':U0.v)}</span>`)+(o.tag?`<span class="cf-tag">${o.tag}</span>`:''):`<span class="cf-rule"></span><span class="cf-txt${txt.length>80?' xlong':txt.length>55?' long':''}"><span>${txt}${D.rng>1&&!/portée/i.test(U0.d)?`. <b>Portée ${D.rng}</b>`:''}</span></span>`}
   <span class="cf-foot">${atk||'<span></span>'}<span class="cf-marks">${marks}${o.mini?'':`<em>${CATL[U0.cat]||''}</em>`}</span>${hp||'<span></span>'}</span></span>`}
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v55 · 15 oct.';
+const VERSION='v56 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -440,7 +441,7 @@ function drawUnit(i,u,now){
 }
 function drawUnitInner(i,u,now){
  const{x,y}=tc(i),dx=x-CEN.x,dy=y-CEN.y,out=Math.atan2(dy,dx);const a=facing[i]??out,s=rng(i+3);
- if(drawSpr(u.t,x,y,a,out))return;
+ if(!PLAIN.has(u.t)&&drawSpr(u.t,x,y,a,out))return;
  const sk0=SKINS[(i*7+(u.name||'').length)%SKINS.length];
  if(u.t==='k9squad'){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.translate(-2,11);ctx.scale(.75,.75);dogShape('#3a2a1a','#4a3626','#1e140c',now,90);ctx.restore();person(x-2,y-5,a,LOOK.cop,now,sk0);return}
  if(u.t==='gang'){[[-9,-6],[8,-7],[0,8]].forEach(([ox,oy],k)=>person(x+ox,y+oy,a,{...LOOK.kid,hc:['#b33a3a','#3a6ab3','#3a9a4a'][k]},now,SKINS[(i+k*2)%SKINS.length]));return}
@@ -1029,15 +1030,34 @@ function prepScreen(){const u=Z.unlocks(META);if(!u.chars.includes(PREP.ch))PREP
   <p>${Z.PLACES[PREP.pl].d}</p>
   ${legacyTxt()}<button type="button" class="go" data-a="start" ${err?'disabled':''}>Commencer</button>
   <button type="button" class="skip" data-a="coll">Collection (${META.points} points)</button><button type="button" class="skip" data-a="title">Retour</button>`)}
+/* recherche et tri des cartes (collection et éditeur de deck) */
+const CF={q:'',sort:'cat',fam:'',own:''};
+const RORD={com:0,rare:1,epic:2,leg:3};
+const norm=x=>x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function cfBar(own){return `<div class="cfbar"><input type="search" data-f="q" placeholder="Chercher une carte…" value="${CF.q.replace(/"/g,'&quot;')}" aria-label="Chercher une carte">
+ <select data-f="sort" aria-label="Trier"><option value="cat">Par type</option><option value="cost">Par coût</option><option value="rar">Par rareté</option><option value="name">Par nom</option><option value="fam">Par faction</option></select>
+ <select data-f="fam" aria-label="Faction"><option value="">Toutes les factions</option>${Object.keys(Z.FAM).map(f=>`<option value="${f}">${Z.FAM[f].ic} ${Z.FAM[f].n}</option>`).join('')}<option value="-">Sans faction</option></select>
+ ${own?`<select data-f="own" aria-label="Débloquées"><option value="">Toutes</option><option value="y">Débloquées</option><option value="n">À débloquer</option></select>`:''}</div>`}
+function cfGrid(ts,item){
+ ts=ts.filter(t=>!CF.fam||(CF.fam==='-'?!Z.famOf(t):Z.famOf(t)===CF.fam));
+ const key=t=>`<div class="citem-w" data-n="${norm(Z.U[t].n+' '+(Z.U[t].d||''))}">${item(t)}</div>`;
+ if(CF.sort==='cat')return Object.keys(CATN).map(c=>{const g=ts.filter(t=>Z.U[t].cat===c);return g.length?`<section class="cfsec"><h3>${CATN[c]}</h3><div class="cgrid">${g.map(key).join('')}</div></section>`:''}).join('')||'<p>Aucune carte.</p>';
+ const by={cost:t=>Z.cost(t),rar:t=>-RORD[Z.RAR[t]||'com'],name:()=>0,fam:t=>Z.famOf(t)?Object.keys(Z.FAM).indexOf(Z.famOf(t)):99}[CF.sort];
+ const s=ts.slice().sort((a,b)=>by(a)-by(b)||Z.U[a].n.localeCompare(Z.U[b].n,'fr'));
+ return s.length?`<section class="cfsec"><div class="cgrid">${s.map(key).join('')}</div></section>`:'<p>Aucune carte.</p>'}
+// filtre texte sans redessiner (le champ garde le focus)
+function cfApply(){const q=norm(CF.q.trim());panel.querySelectorAll('.citem-w').forEach(e=>e.hidden=!!q&&!e.dataset.n.includes(q));
+ panel.querySelectorAll('.cfsec').forEach(s=>s.hidden=!s.querySelector('.citem-w:not([hidden])'))}
+function cfSync(){panel.querySelectorAll('[data-f]').forEach(e=>{if(e.tagName==='SELECT')e.value=CF[e.dataset.f]});cfApply()}
 function deckEditor(keep){const d=META.decks[META.slot],cnt=deckCount(d),err=Z.deckError(d,META.cards);
  show(`<h2 class="pw">Deck ${META.slot+1}</h2><p><b>${d.length}</b> / ${Z.DECK_MAX} cartes (minimum ${Z.DECK_MIN}). ${err?`<span class="bad">${err}</span>`:'✓ Prêt.'} Commune ×3, rare ×2, épique ×1 au maximum.</p>
-  ${Object.keys(CATN).map(c=>{const ts=META.cards.filter(t=>Z.U[t].cat===c);if(!ts.length)return'';return `<h3>${CATN[c]}</h3><div class="cgrid">${ts.map(t=>`<div class="citem${cnt[t]?' in':''}">${cardFace(t,{base:1})}<span class="qty"><button type="button" data-a="dkm" data-v="${t}" ${cnt[t]?'':'disabled'}>−</button><b>${cnt[t]||0}/${Z.copyMax(t)}</b><button type="button" data-a="dkp" data-v="${t}" ${(cnt[t]||0)>=Z.copyMax(t)||d.length>=Z.DECK_MAX?'disabled':''}>+</button></span></div>`).join('')}</div>`}).join('')}
-  <button type="button" class="go" data-a="new">Terminé</button><button type="button" class="skip" data-a="dkreset">Remettre le deck de départ</button><button type="button" class="skip" data-a="coll">Collection</button>`,keep)}
+  ${cfBar(false)}${cfGrid(META.cards.slice(),t=>`<div class="citem${cnt[t]?' in':''}">${cardFace(t,{base:1})}<span class="qty"><button type="button" data-a="dkm" data-v="${t}" ${cnt[t]?'':'disabled'}>−</button><b>${cnt[t]||0}/${Z.copyMax(t)}</b><button type="button" data-a="dkp" data-v="${t}" ${(cnt[t]||0)>=Z.copyMax(t)||d.length>=Z.DECK_MAX?'disabled':''}>+</button></span></div>`)}
+  <button type="button" class="go" data-a="new">Terminé</button><button type="button" class="skip" data-a="dkreset">Remettre le deck de départ</button><button type="button" class="skip" data-a="coll">Collection</button>`,keep);cfSync()}
 function collectionScreen(keep){const own=META.cards;
  show(`<h2 class="pw">Collection</h2><p>Tu as <b>${META.points}</b> points de survie. Chaque partie en rapporte : 10 par nuit survécue, plus 1 tous les 4 zombies. Une carte débloquée l’est pour toujours.</p>
-  ${Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="cgrid">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>{const has=own.includes(t),pr=Z.CARD_PRICE[Z.RAR[t]||'com'];return `<div class="citem${has?' in':' locked'}">${cardFace(t,{base:1})}<span class="qty">${has?'<b>✓ Débloquée</b>':`<button type="button" class="buy" data-a="unlock" data-v="${t}" ${META.points>=pr?'':'disabled'}>${pr} pts</button>`}</span></div>`}).join('')}</div>`).join('')}
+  ${cfBar(true)}${cfGrid(Z.KEYS.filter(t=>!CF.own||(CF.own==='y')===own.includes(t)),t=>{const has=own.includes(t),pr=Z.CARD_PRICE[Z.RAR[t]||'com'];return `<div class="citem${has?' in':' locked'}">${cardFace(t,{base:1})}<span class="qty">${has?'<b>✓ Débloquée</b>':`<button type="button" class="buy" data-a="unlock" data-v="${t}" ${META.points>=pr?'':'disabled'}>${pr} pts</button>`}</span></div>`})}
   ${evoHtml()}
-  <button type="button" class="go" data-a="new">Préparer une partie</button><button type="button" class="skip" data-a="title">Accueil</button>`,keep)}
+  <button type="button" class="go" data-a="new">Préparer une partie</button><button type="button" class="skip" data-a="title">Accueil</button>`,keep);cfSync()}
 // évolutions secrètes : visibles dans la collection une fois découvertes en partie
 function evoHtml(){const ev=META.evo||[];return `<h3>Évolutions secrètes (${ev.length}/${Z.EVO_KEYS.length})</h3><p>Deux cartes précises posées côte à côte se transforment en une unité unique. Elle n’entre jamais dans un deck ; quand elle tombe, ses deux cartes reviennent dans ta défausse.</p>
  <div class="deck">${Z.EVO_KEYS.map(k=>ev.includes(k)?`<div class="dk in" style="--cc:#c58cff">${svg(k)}<span><b>✦ ${Z.U[k].n}</b><em class="ce">${Z.EVO[k].map(t=>Z.U[t].n).join(' + ')}</em><br>${Z.U[k].d}</span></div>`:`<div class="dk locked" style="--cc:var(--muted)">${svg('relic')}<span><b>???</b>Pas encore découverte.</span></div>`).join('')}</div>`}
@@ -1082,6 +1102,9 @@ const ACT={
  'daily-go':()=>{const day=today(),c=dailySetup(day),r=rng(seedFrom('deck-'+day)),d=[],ks=Z.KEYS.slice();while(d.length<24){const t=ks[Math.floor(r()*ks.length)];if(d.filter(x=>x===t).length<Z.copyMax(t))d.push(t)}newGame(c.ch,c.pl,day,d);save();hide();render()},
  peek:v=>{const k=S.draw.lastIndexOf(v);if(k>=0){S.draw.splice(k,1);S.hand.push(v)}save();hide();render()}
 };
+// barre de recherche / tri : le texte filtre sur place, les listes redessinent l'écran ouvert
+panel.addEventListener('input',e=>{const f=e.target.dataset&&e.target.dataset.f;if(f==='q'){CF.q=e.target.value;cfApply()}});
+panel.addEventListener('change',e=>{const f=e.target.dataset&&e.target.dataset.f;if(!f||f==='q')return;CF[f]=e.target.value;(panel.querySelector('[data-a=dkreset]')?deckEditor:collectionScreen)(true)});
 panel.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=ACT[b.dataset.a];if(f)f(b.dataset.v)});
 $('#go').addEventListener('click',()=>{if(S.pause)resumeWave();else if(S.busy){SPEED=SPEED===1?2:1;render()}else night()});
 
