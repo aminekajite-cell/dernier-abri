@@ -459,6 +459,9 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 
 ## Le style graphique
 
+**Illustrations des cartes (en test)** : une image par carte, générée par IA, **sans aucun texte ni cadre**, au format portrait 3:4 (768 × 1024), déposée dans `assets/cards/<identifiant>.webp`. Le jeu écrit lui-même le nom, le coût, les stats, la rareté, la faction et le rôle par-dessus, ce qui garde les mises à jour et la traduction faciles. Dans `src/game.js`, `ART_FILES` liste les cartes qui ont leur image, et `ART_TEST` applique une seule image à toutes les cartes pour essayer le rendu. Sans image, la carte garde son icône. À déclarer sur Steam (contenu généré par IA).
+
+
 - Tout est dessiné en code, dans un seul style : contour sombre autour de chaque forme, ombre portée, ombrage, petits détails (sang, rouille, coutures), palette sombre et désaturée.
 - Survivants : une silhouette commune vue de dessus, habillée selon le métier (tenue, couvre-chef, arme, accessoire) avec une couleur de peau variable.
 - Zombies : une silhouette commune, chaque type a sa taille, sa peau, ses vêtements et un détail reconnaissable (casque du blindé, pustules du gonflé, os du Colosse…).

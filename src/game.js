@@ -87,9 +87,16 @@ const ICON={
 Object.assign(ICON,{rocket:'<path d="M3 15l12-8 3 3-8 12zM15 7l3-3 2 2-3 3M6 14l-3 1 1-3"/>',ammo:'<path d="M9 3h6v4l1 2v12H8V9l1-2zM8 13h8"/>',amb:ICON.stretch,doc:ICON.pharma,orderly:ICON.med,nailer:ICON.turret,ranger:ICON.hunter,k9squad:ICON.k9,nightsnp:ICON.snp+'<path d="M2 2l3 3M22 2l-3 3"/>',heavyflame:ICON.flame,fortin:ICON.bunker,autogun:ICON.sentry,slaughter:ICON.butch,canteen:ICON.cook,gang:ICON.kid,saint:'<circle cx="12" cy="5" r="3"/><path d="M12 9v12M7 13h10"/>',tracker:ICON.xbow});
 const stars=u=>'★'.repeat(u.gold||0);
 const svg=t=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]||ICON.relic}</svg>`;
+/* illustrations des cartes : une image sans texte par carte, dans assets/cards/<identifiant>.webp.
+   Le jeu écrit lui-même le nom, le coût, les stats et le texte par-dessus (mises à jour et traduction faciles).
+   ART_FILES : les cartes qui ont déjà leur image. ART_TEST : si rempli, cette image sert à TOUTES les cartes (essai du rendu).
+   Sans image, la carte garde son icône. */
+const ART_DIR='assets/cards/',ART_FILES=[],ART_TEST='';
+const artUrl=t=>ART_TEST?ART_DIR+ART_TEST:ART_FILES.includes(t)?ART_DIR+t+'.webp':'';
+const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v36 · 15 oct.';
+const VERSION='v37 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -685,9 +692,9 @@ function render(){
  $('#horde').innerHTML=(S.busy?'':hordeHtml())+`<span class="tags">${mN||soon?`<span class="mutc${soon?' soon':''}" title="Mutations de la horde">${svg('mut')}${mN}${Z.frenzy(G)?` · +${Z.frenzy(G)*10} %`:''}${soon?' · mute à l’aube':''}</span>`:''}${G.ammo?`<span class="ammoc" title="Munitions anti-Colosse">${svg('ammo')}${G.ammo}/${Z.AMMO_MAX}</span>`:''}<span class="scrap" title="Ferraille">${svg('scrap')}${G.scrap}</span></span>`;
  const left=G.energy??Z.ENERGY;
  const hand=$('#hand'),nH=S.hand.length+new Set(S.used||[]).size;hand.style.setProperty('--n',Math.max(5,Math.min(WIDE.matches?10:6,nH)));
- hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card r-${rar(t)}${S.sel===k?' sel':''}${G.upg[t]?' up':''}" data-k="${k}" style="--cc:${cc(t)}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}><span class="cost">${Z.costOf(G,t)}</span>${famTag(t)}${roleTag(t)}${svg(t)}<span class="nm">${cardName(t)}</span><span class="v">${Z.U[t].react&&!S.busy?'Nuit':Z.U[t].v}</span></button>`).join('')
+ hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card r-${rar(t)}${S.sel===k?' sel':''}${G.upg[t]?' up':''}" data-k="${k}" style="--cc:${cc(t)}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}><span class="cost">${Z.costOf(G,t)}</span>${famTag(t)}${roleTag(t)}${art(t)}<span class="nm">${cardName(t)}</span><span class="v">${Z.U[t].react&&!S.busy?'Nuit':Z.U[t].v}</span></button>`).join('')
   +[...new Set(S.used||[])].map(t=>{const k=S.used.indexOf(t),n=S.used.filter(x=>x===t).length,on=S.sel!==null&&S.sel<0&&S.used[-1-S.sel]===t;
-   return `<button type="button" class="card reuse r-${rar(t)}${on?' sel':''}" data-u="${k}" style="--cc:${cc(t)}" ${S.busy||Z.buildCost(G,t,true)>(G.energy??0)?'disabled':''}><span class="cost">${Z.buildCost(G,t,true)}</span>${svg(t)}<span class="nm">${cardName(t)}</span><span class="v">Encore${n>1?' ×'+n:''}</span></button>`}).join('');
+   return `<button type="button" class="card reuse r-${rar(t)}${on?' sel':''}" data-u="${k}" style="--cc:${cc(t)}" ${S.busy||Z.buildCost(G,t,true)>(G.energy??0)?'disabled':''}><span class="cost">${Z.buildCost(G,t,true)}</span>${art(t)}<span class="nm">${cardName(t)}</span><span class="v">Encore${n>1?' ×'+n:''}</span></button>`}).join('');
  const fc=Z.famCounts(G),fl=Z.famLevels(G);$('#fams').innerHTML=Object.keys(Z.FAM).filter(f=>fc[f]).map(f=>`<span class="fam l${fl[f]}" title="${Z.FAM[f].n}">${Z.FAM[f].ic} ${fc[f]}${fl[f]?' '+'★'.repeat(fl[f]):'/'+Z.FAM[f].lv[0]}</span>`).join('')+Z.allies(G).map(k=>`<span class="fam ally" title="${Z.ALLY[k].d}">🤝 ${Z.ALLY[k].n}</span>`).join('');
  const info=$('#info');info.className='info';
  if(S.busy&&S.sel!==null&&S.sel>=0){const t=S.hand[S.sel];info.innerHTML=`<b>${cardName(t)}</b> : ${Z.U[t].d}. `+(Z.U[t].react==='unit'?'Touche une unité blessée.':'Touche une case de la carte.')}
@@ -815,7 +822,7 @@ async function night(){
 }
 
 /* ---------- l'aube : relique, carte pour demain, boutique ---------- */
-const pickBtn=(t,a,v)=>`<button type="button" class="pick r-${rar(t)}${G.upg[t]?' up':''}" data-a="${a}" data-v="${v}" style="--cc:${cc(t)}"><span class="cost">${Z.costOf(G,t)}</span>${rarTag(t)}${svg(t)}<span class="nm">${cardName(t)}</span><span class="d">${Z.U[t].d}${famLine(t)}${roleLine(t)}</span></button>`;
+const pickBtn=(t,a,v)=>`<button type="button" class="pick r-${rar(t)}${G.upg[t]?' up':''}" data-a="${a}" data-v="${v}" style="--cc:${cc(t)}"><span class="cost">${Z.costOf(G,t)}</span>${rarTag(t)}${art(t)}<span class="nm">${cardName(t)}</span><span class="d">${Z.U[t].d}${famLine(t)}${roleLine(t)}</span></button>`;
 function dawn(){
  const d=S.dawn;if(d&&!d.chimed){d.chimed=1;SFX.play('dawn')}
  if(d&&d.mut&&!d.mutShown){d.mutShown=1;SFX.play('mutate');
@@ -860,7 +867,7 @@ function shopScreen(){
 }
 const deckTypes=()=>[...new Set(deckList())];
 const pileTypes=()=>[...new Set(pileList())];
-function listScreen(title,txt,types,a){show(`<h2 class="pw">${title}</h2><p>${txt}</p><div class="deck pickable">${types.map(t=>`<button type="button" class="dk" data-a="${a}" data-v="${t}" style="--cc:${cc(t)}">${svg(t)}<span><b>${cardName(t)}${a==='up-pick'?` → ${Z.upgDesc(t)}`:''}</b>${Z.U[t].d}</span></button>`).join('')}</div><button type="button" class="skip" data-a="shop">Retour</button>`)}
+function listScreen(title,txt,types,a){show(`<h2 class="pw">${title}</h2><p>${txt}</p><div class="deck pickable">${types.map(t=>`<button type="button" class="dk" data-a="${a}" data-v="${t}" style="--cc:${cc(t)}">${art(t)}<span><b>${cardName(t)}${a==='up-pick'?` → ${Z.upgDesc(t)}`:''}</b>${Z.U[t].d}</span></button>`).join('')}</div><button type="button" class="skip" data-a="shop">Retour</button>`)}
 function removeCard(t){for(const pile of[S.discard,S.draw,S.hand]){const k=pile.indexOf(t);if(k>=0){pile.splice(k,1);return true}}return false}
 // choisir la nuit suivante : une prudente, une risquée qui rapporte
 function nightScreen(offers){S.phase='night';S.picks=offers||Z.nightOffers(G,R);save();
@@ -883,7 +890,7 @@ function end(){
  show(`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div><p><b>${G.kills}</b> zombies éliminés. Record : <b>${plural(best,'nuit','nuits')}</b>${newRec?' (nouveau record !)':''}.</p>${dailyTxt}${legs.length?`<p>🎖️ <b>Héritage :</b> ${legs.map(f=>`${f.name} (${Z.U[f.t].n}, ${f.kills} zombies)`).join(', ')} ${legs.length>1?'laissent':'laisse'} un souvenir pour ta prochaine partie : le premier ${legs.length>1?'survivant du même métier':Z.U[legs[0].t].n} posé aura +1 dégât et +2 PV.</p>`:''}${pts?`<p>+<b>${pts}</b> points de survie (total : ${META.points}). Débloque de nouvelles cartes dans la <b>Collection</b>.</p>`:''}${fresh.length?`<h3>Débloqué !</h3><ul>${fresh.map(f=>`<li><b>${f}</b></li>`).join('')}</ul>`:''}<h3>Mémorial</h3>${memorialHtml()}<button type="button" class="go" data-a="new">Rejouer</button><button type="button" class="skip" data-a="coll">Collection</button>`);
 }
 const CATN={wall:'Défenses',shoot:'Tireurs',melee:'Corps à corps',help:'Soutien',trap:'Pièges',item:'Objets'};
-const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${svg(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em> · ${Z.U[t].d}${famLine(t)}</span></div>`).join('')}</div>`).join('');
+const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${art(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em> · ${Z.U[t].d}${famLine(t)}</span></div>`).join('')}</div>`).join('');
 const zedHtml=()=>`<div class="deck">${Object.entries(Z.ZT).map(([k,z])=>`<div class="dk" style="--cc:var(--z-${k})"><svg class="ic" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="7"/></svg><span><b>${z.n}</b>${z.hp} PV, ${z.dmg} dégât${z.dmg>1?'s':''} par coup, ${z.info}</span></div>`).join('')}</div>`;
 const memorialHtml=()=>(G.fallen||[]).length?`<div class="deck">${G.fallen.map(f=>`<div class="dk" style="--cc:var(--muted)">${svg(f.t)}<span><b>✝ ${f.name}</b>${Z.U[f.t].n} · ${Z.TRAITS[f.trait]?Z.TRAITS[f.trait].n+' · ':''}${plural(f.kills,'zombie','zombies')} · tombé la nuit ${f.night}</span></div>`).join('')}</div>`:`<p>${G.shelter>0?'Personne n’est tombé. Pour l’instant.':'Aucun survivant n’est tombé au combat.'}</p>`;
 function runInfo(){
@@ -895,13 +902,13 @@ function runInfo(){
   <h3>Alliances</h3><p>Deux factions avec chacune au moins ${Z.ALLY_MIN} unités sur la carte.</p><div class="deck">${Object.entries(Z.ALLY).map(([k,a])=>{const on=Z.allies(G).includes(k);return `<div class="dk" style="--cc:${on?'var(--lantern)':'var(--muted)'}"><span style="font-size:18px">${a.f.map(f=>Z.FAM[f].ic).join('')}</span><span><b>${on?'✓ ':''}${a.n}</b>${a.d}</span></div>`}).join('')}</div>
   <h3>Tes survivants</h3>${G.grid.some(u=>u&&u.name)?`<div class="deck">${G.grid.filter(u=>u&&u.name).map(u=>`<div class="dk" style="--cc:${cc(u.t)}">${svg(u.t)}<span><b>${u.name}</b>${cardName(u.t)} · ${Z.TRAITS[u.trait].n} (${Z.TRAITS[u.trait].d}) · ${plural(u.kills||0,'zombie','zombies')} · ${u.hp}/${Z.maxHp(G,u)} PV</span></div>`).join('')}</div>`:'<p>Aucun survivant posé.</p>'}
   <h3>Mémorial</h3>${memorialHtml()}
-  <h3>Ton deck (${deckList().length} cartes)</h3><div class="deck">${Object.entries(counts).map(([t,n])=>`<div class="dk" style="--cc:${cc(t)}">${svg(t)}<span><b>${n>1?n+' × ':''}${cardName(t)}</b>${Z.U[t].d}${G.upg[t]?` (amélioré : ${Z.upgDesc(t)})`:''}</span></div>`).join('')}</div>
+  <h3>Ton deck (${deckList().length} cartes)</h3><div class="deck">${Object.entries(counts).map(([t,n])=>`<div class="dk" style="--cc:${cc(t)}">${art(t)}<span><b>${n>1?n+' × ':''}${cardName(t)}</b>${Z.U[t].d}${G.upg[t]?` (amélioré : ${Z.upgDesc(t)})`:''}</span></div>`).join('')}</div>
   <button type="button" class="go" data-a="close">Fermer</button>`);
 }
 function charScreen(){
  const ok=Z.unlocks(META).chars;
  show(`<h2 class="pw">Choisis ton survivant</h2><p>Chacun commence avec son propre deck de 8 cartes. Total de nuits survécues : <b>${META.total}</b>.</p>
-  <div class="chars">${Object.entries(Z.CHARS).map(([k,c])=>ok.includes(k)?`<button type="button" class="char" data-a="char" data-v="${k}"><b>${c.n}</b><span>${c.d}</span><span class="mini">${c.deck.map(t=>`<i style="color:${cc(t)}">${svg(t)}</i>`).join('')}</span></button>`
+  <div class="chars">${Object.entries(Z.CHARS).map(([k,c])=>ok.includes(k)?`<button type="button" class="char" data-a="char" data-v="${k}"><b>${c.n}</b><span>${c.d}</span><span class="mini">${c.deck.map(t=>`<i style="color:${cc(t)}">${art(t)}</i>`).join('')}</span></button>`
    :`<button type="button" class="char" disabled><b>🔒 ${c.n}</b><span>Se débloque à ${Z.UNLOCK.chars[k]} nuits survécues au total.</span></button>`).join('')}</div>
   <button type="button" class="skip" data-a="title">Retour</button>`);
 }
@@ -942,11 +949,11 @@ function prepScreen(){const u=Z.unlocks(META);if(!u.chars.includes(PREP.ch))PREP
   <button type="button" class="skip" data-a="coll">Collection (${META.points} points)</button><button type="button" class="skip" data-a="title">Retour</button>`)}
 function deckEditor(keep){const d=META.decks[META.slot],cnt=deckCount(d),err=Z.deckError(d,META.cards);
  show(`<h2 class="pw">Deck ${META.slot+1}</h2><p><b>${d.length}</b> / ${Z.DECK_MAX} cartes (minimum ${Z.DECK_MIN}). ${err?`<span class="bad">${err}</span>`:'✓ Prêt.'} Commune ×3, rare ×2, épique ×1 au maximum.</p>
-  ${Object.keys(CATN).map(c=>{const ts=META.cards.filter(t=>Z.U[t].cat===c);if(!ts.length)return'';return `<h3>${CATN[c]}</h3><div class="deck">${ts.map(t=>`<div class="dk ed${cnt[t]?' in':''}" style="--cc:${cc(t)}">${svg(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em>${famLine(t)}${roleLine(t)}<br>${Z.U[t].d}</span><span class="qty"><button type="button" data-a="dkm" data-v="${t}" ${cnt[t]?'':'disabled'}>−</button><b>${cnt[t]||0}/${Z.copyMax(t)}</b><button type="button" data-a="dkp" data-v="${t}" ${(cnt[t]||0)>=Z.copyMax(t)||d.length>=Z.DECK_MAX?'disabled':''}>+</button></span></div>`).join('')}</div>`}).join('')}
+  ${Object.keys(CATN).map(c=>{const ts=META.cards.filter(t=>Z.U[t].cat===c);if(!ts.length)return'';return `<h3>${CATN[c]}</h3><div class="deck">${ts.map(t=>`<div class="dk ed${cnt[t]?' in':''}" style="--cc:${cc(t)}">${art(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em>${famLine(t)}${roleLine(t)}<br>${Z.U[t].d}</span><span class="qty"><button type="button" data-a="dkm" data-v="${t}" ${cnt[t]?'':'disabled'}>−</button><b>${cnt[t]||0}/${Z.copyMax(t)}</b><button type="button" data-a="dkp" data-v="${t}" ${(cnt[t]||0)>=Z.copyMax(t)||d.length>=Z.DECK_MAX?'disabled':''}>+</button></span></div>`).join('')}</div>`}).join('')}
   <button type="button" class="go" data-a="new">Terminé</button><button type="button" class="skip" data-a="dkreset">Remettre le deck de départ</button><button type="button" class="skip" data-a="coll">Collection</button>`,keep)}
 function collectionScreen(keep){const own=META.cards;
  show(`<h2 class="pw">Collection</h2><p>Tu as <b>${META.points}</b> points de survie. Chaque partie en rapporte : 10 par nuit survécue, plus 1 tous les 4 zombies. Une carte débloquée l’est pour toujours.</p>
-  ${Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>{const has=own.includes(t),pr=Z.CARD_PRICE[Z.RAR[t]||'com'];return `<div class="dk ed${has?' in':' locked'}" style="--cc:${cc(t)}">${svg(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em>${famLine(t)}${roleLine(t)}<br>${Z.U[t].d}</span><span class="qty">${has?'<b>✓</b>':`<button type="button" class="buy" data-a="unlock" data-v="${t}" ${META.points>=pr?'':'disabled'}>${pr} pts</button>`}</span></div>`}).join('')}</div>`).join('')}
+  ${Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>{const has=own.includes(t),pr=Z.CARD_PRICE[Z.RAR[t]||'com'];return `<div class="dk ed${has?' in':' locked'}" style="--cc:${cc(t)}">${art(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em>${famLine(t)}${roleLine(t)}<br>${Z.U[t].d}</span><span class="qty">${has?'<b>✓</b>':`<button type="button" class="buy" data-a="unlock" data-v="${t}" ${META.points>=pr?'':'disabled'}>${pr} pts</button>`}</span></div>`}).join('')}</div>`).join('')}
   ${evoHtml()}
   <button type="button" class="go" data-a="new">Préparer une partie</button><button type="button" class="skip" data-a="title">Accueil</button>`,keep)}
 // évolutions secrètes : visibles dans la collection une fois découvertes en partie
