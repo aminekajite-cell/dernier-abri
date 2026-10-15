@@ -552,3 +552,20 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Paliers de faction à 4, 6 et 8 unités (au lieu de 3 et 5). Nouveau palier 3 : +1 dégât pour toute la faction. Un Chef donne toujours +1 palier (jusqu'au palier 3).
 - Solidarité sans limite : +1 par voisin de la même faction (au lieu de +2 au maximum).
 - Frénésie meurtrière multiplicative : dès la nuit 4, PV et dégâts des zombies ×1,08 par nuit, cumulatif (+17 % nuit 5, +71 % nuit 10, +152 % nuit 15, +270 % nuit 20).
+
+**v67 : équilibrage V1 (survie infinie honnête)**
+- Principe : aucune nuit impossible, aucun multiplicateur exponentiel. La difficulté vient du nombre de zombies, de leur variété, des mutations, des événements, de la pression sur plusieurs routes et des brèches. Pas de plafond aux combos, pas d'adaptation cachée au build du joueur.
+- Frénésie meurtrière supprimée.
+- PV des zombies : PV de base jusqu'à la nuit 3, puis +8 % des PV de base par nuit (additif, arrondi au-dessus). Rôdeur : 17 → 27 (nuit 10) → 41 (20) → 81 (50).
+- Dégâts des zombies : +1 toutes les 20 nuits.
+- Nombre de zombies après la nuit 10 : croissance doublée (Rôdeur +1,2 par nuit…). Nuit de pression toutes les 5 nuits : +25 % de zombies.
+- Mutations toutes les 5 nuits, au hasard, cumulables : Peau épaisse +15 % PV, Horde nombreuse +15 % de zombies, Enragés +1 dégât, Carapace −1 dégât subi (max −3), Régénération +1 PV/3 tours par cumul, Putréfaction +1 dégât par cumul, Pas pressés (jusqu'à 1 case par tour).
+- Brèche : quand un zombie blesse l'abri, tous les autres avancent aussitôt d'une case (une fois par tour).
+- L'événement de la nuit est connu dès le matin (déjà le cas).
+- Niveaux : 20 kills, puis 25, 30, 35… de plus, sans plafond. Fusion : +120 % des PV de base par étoile (au lieu de +100 %).
+- Solidarité : +1 dégât par paire de voisins de la même faction.
+- Zones limitées : Fusil à pompe 4 zombies max, Lance-flammes lourd 6 max, Frappe aérienne 10 dégâts en rayon 2 autour de la case visée.
+- Mitrailleuse 2 × 3, s'enraye 1 tour sur 3. Chien policier : seule la 1ʳᵉ morsure du tour étourdit. Une seule réparation par case et par tour.
+- Constructions : Barricade 7, Sacs 6, Barrage 7, Épave 14, Bunker 16, Porte 18, Fortin 32 PV.
+- Colosse : 58 PV à la nuit 10, puis +8 % de ses PV par nuit (88 à la nuit 20). Munition : 15 + 25 % de ses PV max.
+- Communauté palier 2 : la 1ʳᵉ carte de chaque jour coûte 1 énergie de moins (au lieu de +1 énergie par jour).

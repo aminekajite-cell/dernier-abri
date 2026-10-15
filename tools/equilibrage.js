@@ -44,13 +44,13 @@ Ce que j'attends de toi :
 - Escouade : une unité qui a, avec ses voisins, un Tank, un Soin et un DPS gagne +1 dégât (ou +1 soin).
 
 ### Bonus de dégâts (ils s'additionnent sans plafond)
-Dégâts d'une attaque = dégâts de base + projecteur voisin (+1) + niveaux (+1 par niveau d'attaque) + étoiles de fusion (+1 par étoile) + trait (Précis +1, Aguerri +1 après 10 kills) + souvenir d'héritage (+1) + solidarité (+1 par voisin de la même faction, sans limite) + faction au palier 1 (+1 pour Militaires, Bricoleurs, Soignants ; +1 au corps à corps pour Fermiers) + faction au palier 3 (+1 pour toute la faction) + alliance chasse (+1 au corps à corps) + Tank voisin pour un DPS (+1) + escouade (+1).
+Dégâts d'une attaque = dégâts de base + projecteur voisin (+1) + niveaux (+1 par niveau d'attaque) + étoiles de fusion (+1 par étoile) + trait (Précis +1, Aguerri +1 après 10 kills) + souvenir d'héritage (+1) + solidarité (+1 par paire de voisins de la même faction, sans limite) + faction au palier 1 (+1 pour Militaires, Bricoleurs, Soignants ; +1 au corps à corps pour Fermiers) + faction au palier 3 (+1 pour toute la faction) + alliance chasse (+1 au corps à corps) + Tank voisin pour un DPS (+1) + escouade (+1).
 Pour une unité qui tire ou mord plusieurs fois, ce bonus total compte une fois par attaque et se répartit entre les coups.
 Le Chef de groupe et le Maire donnent des attaques en plus ; la carte Adrénaline double les attaques pendant 3 tours.
 
 ### Progression des unités
-- Niveaux : tous les ${Z.LVL} zombies tués, une unité choisit +1 dégât ou +3 PV.
-- Fusion : 3 unités identiques avec le même nombre d'étoiles fusionnent en une unité avec une étoile de plus (+ PV de base et +1 dégât par étoile).
+- Niveaux : à ${Z.lvKills(1)} zombies tués, puis ${Z.lvKills(2)-Z.lvKills(1)}, ${Z.lvKills(3)-Z.lvKills(2)}, ${Z.lvKills(4)-Z.lvKills(3)}… de plus (sans plafond), une unité choisit +1 dégât ou +3 PV.
+- Fusion : 3 unités identiques avec le même nombre d'étoiles fusionnent en une unité avec une étoile de plus (+120 % des PV de base et +1 dégât par étoile, sans plafond).
 - Évolutions secrètes (deux cartes côte à côte → une unité unique) : ${Z.EVO_KEYS.map(k=>Z.U[k].n+' = '+Z.EVO[k].map(t=>Z.U[t].n).join(' + ')).join(' ; ')}.
 - Traits aléatoires des survivants : ${Object.values(Z.TRAITS).map(t=>t.n+' ('+t.d+')').join(', ')}.
 
@@ -68,10 +68,12 @@ ${Object.values(Z.RELICS).map(r=>`- ${r.n} : ${r.d}.`).join('\n')}
 
 - Nombre de zombies par nuit (nuits 1 à 10), puis + croissance par nuit au-delà :
 ${Object.keys(Z.WAVES).map(k=>`  - ${Z.ZT[k].n} : ${Z.WAVES[k].join(', ')} ; ensuite +${String(Z.GROW[k]).replace(".",",")} par nuit`).join('\n')}
-- Le Colosse : ${Z.ZT.boss.hp} PV, 1 la nuit 10, 2 la nuit 20, etc. Les nuits du Colosse se jouent en ${Z.WAVES_N} vagues avec une pause pour déplacer ses troupes. Munitions anti-Colosse : ${Z.AMMO_DMG} dégâts, ${Z.AMMO_MAX} en stock maximum.
-- PV des zombies : ${Z.HPS?`+${Z.HPS*100} % par nuit jusqu'à la nuit 10, puis `:'pas de hausse jusqu’à la nuit 10, puis '}+12 % par nuit (additif) après la nuit 10, en plus de la frénésie.
-- Frénésie meurtrière : dès la nuit ${Z.FRENZY_FROM}, PV et dégâts des zombies × ${String(1+Z.FRENZY).replace(".",",")} par nuit, cumulatif (+17 % nuit 5, +71 % nuit 10, +152 % nuit 15, +270 % nuit 20).
-- Mutations : toutes les 4 nuits, la horde gagne une mutation permanente au hasard : ${Object.values(Z.MUTS).map(m=>m.n+' ('+m.d+')').join(' ; ')}.
+- Le Colosse : ${Z.ZT.boss.hp} PV, 1 la nuit 10, 2 la nuit 20, etc. Les nuits du Colosse se jouent en ${Z.WAVES_N} vagues avec une pause pour déplacer ses troupes. Munitions anti-Colosse : ${Z.AMMO_MAX} en stock maximum.
+- PV des zombies : PV de base jusqu'à la nuit 3, puis +8 % des PV de base par nuit (additif, arrondi au-dessus). Le Colosse : ${Z.ZT.boss.hp} PV à la nuit 10, puis +8 % par nuit.
+- Dégâts des zombies : +1 toutes les 20 nuits.
+- Nuits de pression : toutes les 5 nuits, +25 % de zombies. Brèche : quand un zombie blesse l'abri, tous les autres avancent aussitôt d'une case.
+- Pas de frénésie ni de multiplicateur exponentiel. Munition anti-Colosse : 15 dégâts + 25 % des PV max du Colosse.
+- Mutations : toutes les 5 nuits, la horde gagne une mutation permanente au hasard : ${Object.values(Z.MUTS).map(m=>m.n+' ('+m.d+')').join(' ; ')}.
 - Événements de nuit possibles : ${Z.EVENTS.map(e=>e.n+(e.d&&e.id!=='calme'?' ('+e.d+')':'')).join(' ; ')}.
 - Un tour de nuit : chaque unité attaque selon sa cadence, puis chaque zombie avance d'une case selon sa vitesse ou frappe ce qui le bloque.
 

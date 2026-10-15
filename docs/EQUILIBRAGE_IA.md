@@ -40,13 +40,13 @@ Ce que j'attends de toi :
 - Escouade : une unité qui a, avec ses voisins, un Tank, un Soin et un DPS gagne +1 dégât (ou +1 soin).
 
 ### Bonus de dégâts (ils s'additionnent sans plafond)
-Dégâts d'une attaque = dégâts de base + projecteur voisin (+1) + niveaux (+1 par niveau d'attaque) + étoiles de fusion (+1 par étoile) + trait (Précis +1, Aguerri +1 après 10 kills) + souvenir d'héritage (+1) + solidarité (+1 par voisin de la même faction, sans limite) + faction au palier 1 (+1 pour Militaires, Bricoleurs, Soignants ; +1 au corps à corps pour Fermiers) + faction au palier 3 (+1 pour toute la faction) + alliance chasse (+1 au corps à corps) + Tank voisin pour un DPS (+1) + escouade (+1).
+Dégâts d'une attaque = dégâts de base + projecteur voisin (+1) + niveaux (+1 par niveau d'attaque) + étoiles de fusion (+1 par étoile) + trait (Précis +1, Aguerri +1 après 10 kills) + souvenir d'héritage (+1) + solidarité (+1 par paire de voisins de la même faction, sans limite) + faction au palier 1 (+1 pour Militaires, Bricoleurs, Soignants ; +1 au corps à corps pour Fermiers) + faction au palier 3 (+1 pour toute la faction) + alliance chasse (+1 au corps à corps) + Tank voisin pour un DPS (+1) + escouade (+1).
 Pour une unité qui tire ou mord plusieurs fois, ce bonus total compte une fois par attaque et se répartit entre les coups.
 Le Chef de groupe et le Maire donnent des attaques en plus ; la carte Adrénaline double les attaques pendant 3 tours.
 
 ### Progression des unités
-- Niveaux : tous les 20 zombies tués, une unité choisit +1 dégât ou +3 PV.
-- Fusion : 3 unités identiques avec le même nombre d'étoiles fusionnent en une unité avec une étoile de plus (+ PV de base et +1 dégât par étoile).
+- Niveaux : à 20 zombies tués, puis 25, 30, 35… de plus (sans plafond), une unité choisit +1 dégât ou +3 PV.
+- Fusion : 3 unités identiques avec le même nombre d'étoiles fusionnent en une unité avec une étoile de plus (+120 % des PV de base et +1 dégât par étoile, sans plafond).
 - Évolutions secrètes (deux cartes côte à côte → une unité unique) : Brigade canine = Policier + Chien ; Tireur de nuit = Sniper + Projecteur ; Lance-flammes lourd = Lance-flammes + Bonbonne de gaz ; Fortin = Épave + Bunker ; Tourelle automatique = Tireur + Mécanicien ; Équarrisseur = Bûcheron + Boucher ; Cantine de campagne = Infirmière + Cuisinier ; Bande de gamins = Gamin + Institutrice ; Le Saint = Moine + Prêtre ; Traqueur = Arbalète + Chasseur.
 - Traits aléatoires des survivants : Costaud (+2 PV), Fragile (−1 PV), Précis (+1 dégât), Myope (−1 portée), Increvable (survit une fois à un coup fatal), Coriace (récupère 1 PV à chaque aube), Aguerri (+1 dégât après 10 zombies tués).
 
@@ -59,7 +59,7 @@ Paliers : 4, 6 et 8 unités de la faction sur le plateau. Le Chef (carte légend
 - Trappeurs (Filet, Piège à ours, Chasseur, Piège à loup, Fosse à pieux, Barbelés, Fumigène, Appât, Arbalète, Le Braconnier) : 4 unités → pièges : +2 dégâts ; 6 → pièges : +4 dégâts au total ; 8 → +1 dégât pour toute la faction.
 - Fermiers (Meute de chiens, Fermier à la fourche, Épouvantail, Chien, Bûcheron, Boucher, La Fermière) : 4 unités → corps à corps : +1 dégât ; 6 → corps à corps : +1 PV à chaque zombie tué ; 8 → +1 dégât pour toute la faction.
 - Bricoleurs (Cloueur, Tourelle bricolée, Atelier, Mur modulaire, Bobine Tesla, Clôture, Panneau solaire, Mécanicien, Radio, L’Ingénieur) : 4 unités → tes bricoleurs font +1 dégât, clôtures +1 ; 6 → clôtures : étourdissent 1 tour, réparations +1 PV ; 8 → +1 dégât pour toute la faction.
-- Communauté (Garde champêtre, Institutrice, Marché, Vigile, Charpentier, Chef de groupe, Moine, Gamin, Le Maire) : 4 unités → tes membres de la Communauté ont +1 portée, l’abri +1 PV à l’aube ; 6 → +1 énergie chaque jour ; 8 → +1 dégât pour toute la faction.
+- Communauté (Garde champêtre, Institutrice, Marché, Vigile, Charpentier, Chef de groupe, Moine, Gamin, Le Maire) : 4 unités → tes membres de la Communauté ont +1 portée, l’abri +1 PV à l’aube ; 6 → ta 1ʳᵉ carte de chaque jour coûte 1 énergie de moins ; 8 → +1 dégât pour toute la faction.
 
 ### Alliances (deux factions avec chacune au moins 3 unités)
 - Loi martiale (Police + Militaires) : tes tireurs ont +1 portée.
@@ -84,19 +84,21 @@ Paliers : 4, 6 et 8 unités de la faction sur le plateau. Le Chef (carte légend
 ## La horde
 
 - Nombre de zombies par nuit (nuits 1 à 10), puis + croissance par nuit au-delà :
-  - Rôdeur : 2, 2, 4, 4, 4, 4, 5, 5, 5, 5 ; ensuite +0,6 par nuit
-  - Coureur : 0, 0, 1, 1, 1, 1, 2, 2, 2, 2 ; ensuite +0,36 par nuit
-  - Gonflé : 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,24 par nuit
-  - Chien zombie : 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,24 par nuit
-  - Rampant : 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,24 par nuit
-  - Cracheur : 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 ; ensuite +0,18 par nuit
-  - Blindé : 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 ; ensuite +0,24 par nuit
-  - Hurleur : 0, 0, 0, 0, 0, 1, 1, 1, 1, 1 ; ensuite +0,15 par nuit
-  - Sapeur : 0, 0, 0, 1, 1, 1, 1, 2, 2, 2 ; ensuite +0,2 par nuit
-- Le Colosse : 58 PV, 1 la nuit 10, 2 la nuit 20, etc. Les nuits du Colosse se jouent en 2 vagues avec une pause pour déplacer ses troupes. Munitions anti-Colosse : 30 dégâts, 3 en stock maximum.
-- PV des zombies : pas de hausse jusqu’à la nuit 10, puis +12 % par nuit (additif) après la nuit 10, en plus de la frénésie.
-- Frénésie meurtrière : dès la nuit 4, PV et dégâts des zombies × 1,08 par nuit, cumulatif (+17 % nuit 5, +71 % nuit 10, +152 % nuit 15, +270 % nuit 20).
-- Mutations : toutes les 4 nuits, la horde gagne une mutation permanente au hasard : Peau épaisse (Les zombies ont +20 % de PV) ; Horde nombreuse (+20 % de zombies chaque nuit) ; Enragés (Les rôdeurs et les coureurs font +1 dégât par coup) ; Carapace (Les rôdeurs encaissent 1 dégât de moins par coup (sauf le feu et les explosions)) ; Régénération (Les zombies récupèrent 1 PV tous les 3 tours) ; Putréfaction (En mourant, un zombie éclabousse les unités autour de lui : 1 dégât) ; Pas pressés (Les zombies lents et très lents avancent plus vite).
+  - Rôdeur : 2, 2, 4, 4, 4, 4, 5, 5, 5, 5 ; ensuite +1,2 par nuit
+  - Coureur : 0, 0, 1, 1, 1, 1, 2, 2, 2, 2 ; ensuite +0,72 par nuit
+  - Gonflé : 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,48 par nuit
+  - Chien zombie : 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,48 par nuit
+  - Rampant : 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,48 par nuit
+  - Cracheur : 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 ; ensuite +0,36 par nuit
+  - Blindé : 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 ; ensuite +0,48 par nuit
+  - Hurleur : 0, 0, 0, 0, 0, 1, 1, 1, 1, 1 ; ensuite +0,3 par nuit
+  - Sapeur : 0, 0, 0, 1, 1, 1, 1, 2, 2, 2 ; ensuite +0,4 par nuit
+- Le Colosse : 58 PV, 1 la nuit 10, 2 la nuit 20, etc. Les nuits du Colosse se jouent en 2 vagues avec une pause pour déplacer ses troupes. Munitions anti-Colosse : 3 en stock maximum.
+- PV des zombies : PV de base jusqu'à la nuit 3, puis +8 % des PV de base par nuit (additif, arrondi au-dessus). Le Colosse : 58 PV à la nuit 10, puis +8 % par nuit.
+- Dégâts des zombies : +1 toutes les 20 nuits.
+- Nuits de pression : toutes les 5 nuits, +25 % de zombies. Brèche : quand un zombie blesse l'abri, tous les autres avancent aussitôt d'une case.
+- Pas de frénésie ni de multiplicateur exponentiel. Munition anti-Colosse : 15 dégâts + 25 % des PV max du Colosse.
+- Mutations : toutes les 5 nuits, la horde gagne une mutation permanente au hasard : Peau épaisse (Les zombies ont +15 % de PV (cumulable)) ; Horde nombreuse (+15 % de zombies chaque nuit (cumulable)) ; Enragés (Les rôdeurs et les coureurs font +1 dégât par coup (cumulable)) ; Carapace (Les rôdeurs encaissent 1 dégât de moins par coup, sauf le feu et les explosions (cumulable jusqu’à 3)) ; Régénération (Les zombies récupèrent 1 PV tous les 3 tours (cumulable : +2, +3…)) ; Putréfaction (En mourant, un zombie éclabousse les unités autour de lui : 1 dégât (cumulable)) ; Pas pressés (Les zombies lents et très lents avancent d’un cran plus vite (jusqu’à 1 case par tour)).
 - Événements de nuit possibles : Nuit calme ; Brouillard (Portée des tireurs −1) ; Pleine lune (+50 % de zombies) ; Pluie (L'essence ne brûle pas) ; Coupure de courant (Projecteurs et clôtures inactifs) ; Horde affamée (Les rôdeurs deviennent des coureurs).
 - Un tour de nuit : chaque unité attaque selon sa cadence, puis chaque zombie avance d'une case selon sa vitesse ou frappe ce qui le bloque.
 
@@ -122,17 +124,17 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 
 | Carte | Coût | Rareté | PV | Dégâts | Portée | Cadence | Rôle | Faction | Capacité |
 |---|---|---|---|---|---|---|---|---|---|
-| Barricade | 2 | commune | 6 | — | — | — | — | — | Planches clouées : bloque les zombies, 6 PV |
-| Épave | 2 | rare | 12 | — | — | — | — | — | Carcasse de voiture : bloque, 12 PV |
+| Barricade | 2 | commune | 7 | — | — | — | — | — | Planches clouées : bloque les zombies, 7 PV |
+| Épave | 2 | rare | 14 | — | — | — | — | — | Carcasse de voiture : bloque, 14 PV |
 | Clôture | 2 | commune | 5 | — | — | — | — | Bricoleurs | Clôture électrique : bloque, 5 PV, 1 dégât à chaque zombie qui la frappe |
-| Sacs de sable | 2 | commune | 5 | — | — | — | — | — | Bloque, 5 PV, ne perd jamais plus de 1 PV par coup |
-| Porte blindée | 3 | épique | 15 | — | — | — | — | — | Bloque, 15 PV, seulement sur une case collée à l’abri |
+| Sacs de sable | 2 | commune | 6 | — | — | — | — | — | Bloque, 6 PV, ne perd jamais plus de 1 PV par coup |
+| Porte blindée | 3 | épique | 18 | — | — | — | — | — | Bloque, 18 PV, seulement sur une case collée à l’abri |
 | Mur de pneus | 2 | rare | 8 | — | — | — | — | Pyromanes | Bloque, 8 PV, laisse une flaque d’essence en tombant |
-| Barrage de police | 2 | commune | 8 | — | — | — | — | Police | Barrières de police : bloque, 8 PV |
-| Bunker | 3 | rare | 14 | 1 | 1 | chaque tour | — | Militaires | Bloque, 14 PV, et tire sur les zombies au contact |
+| Barrage de police | 2 | commune | 7 | — | — | — | — | Police | Barrières de police : bloque, 7 PV |
+| Bunker | 3 | rare | 16 | 1 | 1 | chaque tour | — | Militaires | Bloque, 16 PV, et tire sur les zombies au contact |
 | Brasero | 2 | rare | 5 | — | — | — | — | Pyromanes | Bloque. Tous les 2 tours, 1 dégât et feu aux zombies collés à lui |
 | Mur modulaire | 2 | commune | 9 | — | — | — | — | Bricoleurs | Panneaux de tôle : bloque, 9 PV |
-| ✦ Fortin | — | — | 30 | 3 | 1 | chaque tour | — | — | Épave et bunker soudés : bloque, 30 PV, et frappe les zombies au contact (3 dégâts) |
+| ✦ Fortin | — | — | 32 | 3 | 1 | chaque tour | — | — | Épave et bunker soudés : bloque, 32 PV, et frappe les zombies au contact (3 dégâts) |
 
 ### Tireurs (distance)
 
@@ -140,10 +142,10 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 |---|---|---|---|---|---|---|---|---|---|
 | Tireur | 2 | commune | 3 | 2 | 3 | chaque tour | DPS | Police | 2 dégâts par tour, portée 3 |
 | Sniper | 3 | rare | 2 | 5 | 5 | 1 tour sur 2 | DPS | Militaires | 5 dégâts tous les 2 tours, portée 5 |
-| Fusil à pompe | 3 | épique | 4 | 2 | 2 | chaque tour | DPS | Militaires | 2 dégâts à tous les zombies à 2 cases |
+| Fusil à pompe | 3 | épique | 4 | 2 | 2 | chaque tour | DPS | Militaires | 2 dégâts aux 4 zombies les plus proches à 2 cases |
 | Arbalète | 3 | rare | 3 | 2 ×2 | 3 | chaque tour | DPS | Trappeurs | À chaque tour, 2 dégâts à 2 zombies différents, portée 3 |
 | Lance-flammes | 2 | rare | 5 | 1 | 3 | chaque tour | DPS | Pyromanes | 1 dégât à 3 cases et enflamme le zombie : 1 dégât par tour pendant 3 tours, 5 PV |
-| Mitrailleuse | 3 | épique | 3 | 1 ×3 | 3 | chaque tour | DPS | Militaires | 3 tirs de 1 dégât par tour, portée 3, s’enraye 1 tour sur 4 |
+| Mitrailleuse | 3 | épique | 3 | 2 ×3 | 3 | chaque tour | DPS | Militaires | 3 tirs de 2 dégâts par tour, portée 3, s’enraye 1 tour sur 3 |
 | Cocktails | 3 | épique | 2 | 2 | 3 | 1 tour sur 3 | DPS | Pyromanes | Tous les 3 tours, un cocktail sur le groupe le plus serré : 2 dégâts et feu, portée 3 |
 | Gamin | 1 | commune | 1 | 1 ×2 | 3 | chaque tour | DPS | Communauté | Lance-pierre : 2 tirs de 1 dégât par tour, portée 3, mais 1 seul PV |
 | Tireur d’élite du GIGN | 3 | épique | 4 | 2 | 3 | chaque tour | DPS | Police | 2 dégâts par tour, portée 3 |
@@ -162,7 +164,7 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Le Braconnier | 3 | légendaire | 4 | 3 | 4 | 1 tour sur 2 | DPS | Trappeurs | Chef des Trappeurs : 3 dégâts tous les 2 tours, portée 4. Les Trappeurs gagnent un palier |
 | Lance-roquettes | 3 | épique | 4 | 2 | 3 | 1 tour sur 2 | DPS | — | Tous les 2 tours, une roquette : 2 dégâts, et 5 fois plus (10) contre le Colosse et les Gonflés. Portée 3 |
 | ✦ Tireur de nuit | — | — | 4 | 3 | 5 | chaque tour | DPS | — | Un sniper et son projecteur : 3 dégâts à chaque tour, portée 5 |
-| ✦ Lance-flammes lourd | — | — | 7 | 2 | 3 | chaque tour | DPS | — | 2 dégâts à tous les zombies à 3 cases, qui brûlent ensuite 3 tours |
+| ✦ Lance-flammes lourd | — | — | 7 | 2 | 3 | chaque tour | DPS | — | 2 dégâts à 6 zombies au plus à 3 cases, qui brûlent ensuite 3 tours |
 | ✦ Tourelle automatique | — | — | 7 | 1 ×3 | 3 | chaque tour | DPS | — | Montée par le mécanicien : 3 tirs de 1 dégât par tour, portée 3 |
 | ✦ Bande de gamins | — | — | 5 | 1 ×4 | 3 | chaque tour | DPS | — | Toute la classe au lance-pierre : 4 tirs de 1 dégât par tour, portée 3 |
 | ✦ Traqueur | — | — | 5 | 2 ×2 | 4 | chaque tour | DPS | — | À chaque tour, 2 dégâts à 2 zombies différents, portée 4 |
@@ -177,7 +179,7 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Boucher | 2 | rare | 6 | 5 | 1 | chaque tour | DPS | Fermiers | 5 dégâts au contact, récupère 1 PV à chaque zombie tué |
 | Moine | 2 | rare | 11 | 2 | 1 | chaque tour | Tank | Communauté | 2 dégâts à tous les zombies autour de lui, 11 PV |
 | Agent anti-émeute | 2 | rare | 14 | 2 | 1 | chaque tour | Tank | Police | Bouclier : 14 PV, ne perd jamais plus de 2 PV par coup, 2 dégâts et repousse |
-| Chien policier | 1 | commune | 6 | 1 ×2 | 1 | chaque tour | DPS | Police | Mord 2 fois par tour (1 dégât), chaque morsure étourdit le zombie 1 tour |
+| Chien policier | 1 | commune | 6 | 1 ×2 | 1 | chaque tour | DPS | Police | Mord 2 fois par tour (1 dégât) ; la 1ʳᵉ morsure du tour étourdit le zombie 1 tour |
 | Meute de chiens | 3 | rare | 7 | 2 ×4 | 1 | chaque tour | DPS | Fermiers | 4 morsures de 2 dégâts par tour au corps à corps |
 | Fermier à la fourche | 2 | commune | 10 | 3 | 1 | chaque tour | Tank | Fermiers | 3 dégâts au contact et repousse le zombie d’une case, 10 PV |
 | Ambulancier | 2 | commune | 11 | 1 | 1 | chaque tour | Tank | Soignants | Bloque avec son brancard : 11 PV, 1 dégât au contact et repousse le zombie |
@@ -248,7 +250,7 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 |---|---|---|---|---|---|---|---|---|---|
 | Gaz lacrymogène | 1 | commune | — | — | — | — | — | — | Pendant la nuit : les zombies sur la case visée et autour sont perdus 3 tours |
 | Napalm | 2 | rare | — | — | — | — | — | — | Pendant la nuit : la case visée et autour s’embrasent (flaques de feu jusqu’à l’aube) |
-| Frappe aérienne | 3 | épique | — | — | — | — | — | — | Pendant la nuit : 4 dégâts à tous les zombies |
+| Frappe aérienne | 3 | épique | — | — | — | — | — | — | Pendant la nuit : 10 dégâts à tous les zombies à 2 cases ou moins de la case visée |
 | Grenade | 1 | commune | — | — | — | — | — | — | Pendant la nuit : 5 dégâts sur la case visée et autour |
 | Tir de l’abri | 1 | commune | — | — | — | — | — | — | Pendant la nuit : 6 dégâts au zombie le plus proche de l’abri |
 | Réparation express | 1 | commune | — | — | — | — | — | — | Pendant la nuit : une de tes unités récupère 5 PV |
