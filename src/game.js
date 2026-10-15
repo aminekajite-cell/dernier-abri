@@ -115,7 +115,11 @@ function drawSpr(k,x,y,a,out,mul){const im=SPR[k],d=SPRD[k];if(!im||!d)return fa
 const popOK=t=>Z.RAR[t]==='leg'||!!(Z.U[t]&&Z.U[t].evo);
 /* style des illustrations (essai) : « cartoon » utilise assets/cards_cartoon/ pour les cartes qui y ont une image, les autres gardent l'illustration actuelle */
 let ART_STYLE=(()=>{try{return localStorage.getItem('abri-style')||'real'}catch(e){return 'real'}})();
-const CART_FILES='chief_police chief_mil chief_pyro chief_trap chief_farm chief_care chief_tech chief_comm k9squad nightsnp axe snp mg butch xbow priest hunter radio'.split(' ');
+const CART_FILES=('chief_police chief_mil chief_pyro chief_trap chief_farm chief_care chief_tech chief_comm k9squad nightsnp '+
+ 'gun snp sht xbow flame mg molo kid swat mortar sentry hunter turret tesla vigile doc nailer ranger rocket axe dog cop butch monk riot k9 dogs pitch amb orderly '+
+ 'med lamp radio cook mech siren lead solar pharma hospital priest stretch scare workshop teacher market carp canteen '+
+ 'food kit rep roadmap gas molotov grenade shot flare bait patch napalm rush horn air trap wire mine spike tear firetrap fen fire clay sand bar modwall barrier bunker door car').split(' ');
+const CART_ZOMB='walk fat sap armor zdog crawl run howl spit'.split(' ');
 const CART_POP=CART_FILES.slice(0,10);
 const cartoon=t=>ART_STYLE==='cartoon'&&CART_FILES.includes(t);
 const popUrl=t=>!popOK(t)?'':cartoon(t)?(CART_POP.includes(t)?'assets/cards_cartoon/'+t+'_pop.webp':''):ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
@@ -147,7 +151,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v51 · 15 oct.';
+const VERSION='v52 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -953,7 +957,7 @@ const CATN={wall:'Défenses',shoot:'Tireurs',melee:'Corps à corps',help:'Soutie
 const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${art(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em> · ${Z.U[t].d}${famLine(t)}</span></div>`).join('')}</div>`).join('');
 // carte d'un zombie : même cadre, illustration de assets/zombies/, attaque et PV de base
 function zombieFace(k){const z=Z.ZT[k],hp=Math.round(z.hp*(z.boss?1:Z.ZHP));
- return `<span class="cf zomb"><span class="cf-art" style="background-image:url('assets/zombies/${k}.webp')"></span><span class="cf-vig"></span>
+ return `<span class="cf zomb"><span class="cf-art" style="background-image:url('${ART_STYLE==='cartoon'&&CART_ZOMB.includes(k)?'assets/cards_cartoon/z_'+k:'assets/zombies/'+k}.webp')"></span><span class="cf-vig"></span>
   <span class="cf-name">${z.n}</span><span class="cf-rule"></span><span class="cf-txt${z.info.length>80?' xlong':z.info.length>50?' long':''}"><span>${z.info.charAt(0).toUpperCase()+z.info.slice(1)}</span></span>
   <span class="cf-foot"><span class="cf-atk" title="Dégâts">${ink('atk')}<b>${z.dmg}</b></span><span class="cf-marks"><em>Zombie</em></span><span class="cf-hp" title="PV"><b>${hp}</b></span></span></span>`}
 const zedHtml=()=>`<div class="cgrid">${Z.ZK.map(k=>`<div class="citem">${zombieFace(k)}</div>`).join('')}</div>`;
