@@ -6,7 +6,7 @@ body{margin:0;font-size:14px}
   --bg:#0d0f0c; --panel:#161a14; --panel2:#1d2219; --line:#2b3326; --ink:#ebe7da; --muted:#8f9684;
   --lantern:#f2b33d; --blood:#e5484d; --good:#9fd86b;
   --k-wall:#c9a27a; --k-shoot:#f2b33d; --k-melee:#ff7a59; --k-help:#7cc7ff; --k-trap:#e5484d; --k-item:#d6c2ff;
-  --z-walk:#8fd14f; --z-run:#d8e45a; --z-fat:#b98be0; --z-zdog:#c98a4a; --z-crawl:#6fb0b0; --z-spit:#c6e83a; --z-armor:#a9b3bd; --z-howl:#e0a0c0; --z-boss:#ff5a3a;
+  --z-walk:#8fd14f; --z-run:#d8e45a; --z-fat:#b98be0; --z-zdog:#c98a4a; --z-crawl:#6fb0b0; --z-spit:#c6e83a; --z-armor:#a9b3bd; --z-howl:#e0a0c0; --z-sap:#ff8a3a; --z-boss:#ff5a3a;
   --f-disp:'Special Elite','Courier New',monospace;
   --f-body:'Atkinson Hyperlegible',system-ui,-apple-system,sans-serif;
   color-scheme:dark;

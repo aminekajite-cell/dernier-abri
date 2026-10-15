@@ -14,7 +14,7 @@ const Z=(()=>{
   tire:{n:'Mur de pneus',cat:'wall',hp:8,block:1,tire:1,v:'8 PV',d:'Bloque, 8 PV, laisse une flaque d’essence en tombant'},
   // tireurs
   gun:{n:'Tireur',cat:'shoot',hp:3,block:1,rng:2,dmg:1,every:1,v:'1 · P2',d:'1 dégât par tour, portée 2'},
-  snp:{n:'Sniper',cat:'shoot',hp:2,block:1,rng:5,dmg:3,every:2,v:'3 · P5',d:'3 dégâts tous les 2 tours, portée 5'},
+  snp:{n:'Sniper',cat:'shoot',hp:2,block:1,rng:4,dmg:3,every:2,v:'3 · P4',d:'3 dégâts tous les 2 tours, portée 4'},
   sht:{n:'Fusil à pompe',cat:'shoot',hp:4,block:1,rng:1,dmg:2,every:1,aoe:1,v:'2 zone',d:'2 dégâts à tous les zombies autour de lui'},
   xbow:{n:'Arbalète',cat:'shoot',hp:3,block:1,rng:2,dmg:2,every:2,hits:2,distinct:1,v:'2 ×2 · P2',d:'Tous les 2 tours, 2 dégâts à 2 zombies différents, portée 2'},
   flame:{n:'Lance-flammes',cat:'shoot',hp:5,block:1,rng:2,dmg:1,every:1,ignite:3,v:'Feu · P2',d:'1 dégât à 2 cases et enflamme le zombie : 1 dégât par tour pendant 3 tours, 5 PV'},
@@ -57,7 +57,7 @@ const Z=(()=>{
   k9:{n:'Chien policier',cat:'melee',hp:6,block:1,rng:1,dmg:1,every:1,hits:2,stun:1,v:'1 ×2 · Étourdit',d:'Mord 2 fois par tour, chaque morsure étourdit le zombie 1 tour'},
   barrier:{n:'Barrage de police',cat:'wall',hp:8,block:1,v:'8 PV',d:'Barrières de police : bloque, 8 PV'},
   swat:{n:'Tireur d’élite du GIGN',cat:'shoot',hp:4,block:1,rng:2,dmg:2,every:1,v:'2 · P2',d:'2 dégâts par tour, portée 2'},
-  mortar:{n:'Mortier',cat:'shoot',hp:3,block:1,rng:5,dmg:3,every:3,blast:1,v:'3 zone · P5',d:'Tous les 3 tours, un obus sur le groupe le plus serré : 3 dégâts sur la case et autour'},
+  mortar:{n:'Mortier',cat:'shoot',hp:3,block:1,rng:4,dmg:3,every:3,blast:1,v:'3 zone · P4',d:'Tous les 3 tours, un obus sur le groupe le plus serré : 3 dégâts sur la case et autour'},
   sentry:{n:'Sentinelle automatique',cat:'shoot',hp:6,block:1,rng:2,dmg:1,every:1,hits:2,v:'1 ×2 · P2',d:'Tourelle : 2 tirs de 1 dégât par tour, portée 2, 6 PV'},
   clay:{n:'Mine claymore',cat:'trap',hp:1,block:0,clay:4,v:'4 grande zone',d:'Explose au passage : 4 dégâts sur toutes les cases à 2 cases ou moins'},
   bunker:{n:'Bunker',cat:'wall',hp:14,block:1,rng:1,dmg:1,every:1,v:'14 PV · 1',d:'Bloque, 14 PV, et tire sur les zombies au contact'},
@@ -110,7 +110,7 @@ const Z=(()=>{
   flare:{n:'Fusée de détresse',cat:'item',instant:1,flare:1,v:'1 côté',d:'Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté'},
   // évolutions secrètes : jamais dans le deck, elles naissent de deux cartes précises posées côte à côte (voir EVO)
   k9squad:{n:'Brigade canine',cat:'melee',hp:8,block:1,rng:1,dmg:2,every:1,hits:2,stun:1,push:1,evo:1,v:'2 ×2 · Étourdit',d:'Un policier et son chien : 2 morsures de 2 dégâts par tour, qui étourdissent et repoussent'},
-  nightsnp:{n:'Tireur de nuit',cat:'shoot',hp:4,block:1,rng:5,dmg:3,every:1,evo:1,v:'3 · P5',d:'Un sniper et son projecteur : 3 dégâts à chaque tour, portée 5'},
+  nightsnp:{n:'Tireur de nuit',cat:'shoot',hp:4,block:1,rng:4,dmg:3,every:1,evo:1,v:'3 · P4',d:'Un sniper et son projecteur : 3 dégâts à chaque tour, portée 4'},
   heavyflame:{n:'Lance-flammes lourd',cat:'shoot',hp:7,block:1,rng:2,dmg:2,every:1,aoe:1,ignite:3,evo:1,v:'Feu zone · P2',d:'2 dégâts à tous les zombies à 2 cases, qui brûlent ensuite 3 tours'},
   fortin:{n:'Fortin',cat:'wall',hp:30,block:1,rng:1,dmg:3,every:1,evo:1,v:'30 PV · 3',d:'Épave et bunker soudés : bloque, 30 PV, et frappe les zombies au contact (3 dégâts)'},
   autogun:{n:'Tourelle automatique',cat:'shoot',hp:7,block:1,rng:2,dmg:1,every:1,hits:3,evo:1,v:'1 ×3 · P2',d:'Montée par le mécanicien : 3 tirs de 1 dégât par tour, portée 2'},
@@ -175,6 +175,7 @@ const Z=(()=>{
   spit:{n:'Cracheur',hp:11,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
   armor:{n:'Blindé',hp:19,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
   howl:{n:'Hurleur',hp:15,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
+  sap:{n:'Sapeur',hp:12,spd:2,dmg:3,sap:1,info:'bardé d’explosifs, il fonce sur les murs et se fait sauter : 15 dégâts au rempart, 3 autour. Tué avant, il explose quand même (3 autour)'},
   boss:{n:'Le Colosse',hp:112,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
  };
  const ZK=Object.keys(ZT);
@@ -195,9 +196,10 @@ const Z=(()=>{
   crawl:[0,0,1,1,1,1,1,1,1,1],
   spit: [0,0,0,0,1,1,1,1,1,1],
   armor:[0,0,0,0,1,1,1,1,1,1],
-  howl: [0,0,0,0,0,1,1,1,1,1]
+  howl: [0,0,0,0,0,1,1,1,1,1],
+  sap:  [0,0,0,1,1,1,1,2,2,2]
  };
- let GROW={walk:.6,run:.36,fat:.24,zdog:.24,crawl:.24,spit:.18,armor:.24,howl:.15};
+ let GROW={walk:.6,run:.36,fat:.24,zdog:.24,crawl:.24,spit:.18,armor:.24,howl:.15,sap:.2};
  // le Colosse arrive toutes les 10 nuits (1 la nuit 10, 2 la nuit 20…)
  const bossCount=n=>n%10===0?n/10:0;
  function waveCount(k,n){if(k==='boss')return bossCount(n);const t=WAVES[k]||[];if(n<=t.length)return t[n-1]||0;return Math.round((t[t.length-1]||0)+(GROW[k]||0)*(n-t.length))}
@@ -347,6 +349,9 @@ const Z=(()=>{
  const SIDES=['le nord','le sud','l’ouest','l’est'];
  const rc=i=>[Math.floor(i/N),i%N],idx=(r,c)=>r*N+c;
  const isEdge=i=>{const[r,c]=rc(i);return r===0||r===N-1||c===0||c===N-1};
+ // portée : au contact (1), les 8 cases autour ; au-delà, un losange (on compte les pas en ligne droite), plus étroit qu'un carré
+ const manh=(a,b)=>{const[ar,ac]=rc(a),[br,bc]=rc(b);return Math.abs(ar-br)+Math.abs(ac-bc)};
+ const inRange=(p,i,r)=>r<=1?cheb(p,i)<=1:manh(p,i)<=r;
  const cheb=(a,b)=>{const[ar,ac]=rc(a),[br,bc]=rc(b);return Math.max(Math.abs(ar-br),Math.abs(ac-bc))};
  const around=i=>{const[r,c]=rc(i),o=[];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const R=r+dr,K=c+dc;if(R>=0&&R<N&&K>=0&&K<N)o.push(idx(R,K))}return o};
  const EDGES=[...Array(N*N).keys()].filter(isEdge);
@@ -365,18 +370,24 @@ const Z=(()=>{
     Entrer sur une case libre coûte 1 ; une case occupée par un obstacle coûte en plus ses PV (pour un rempart, les PV de tout le rempart).
     Les zombies contournent donc tant que le détour est plus court que de casser, sinon ils attaquent le point le plus faible.
     En diagonale, on ne passe pas entre deux obstacles. Les rampants passent sous les murs. Le Colosse, lui, fonce tout droit. */
+ // mode : 'crawl' (rampant : passe sous les murs), 'sap' (sapeur : les murs ne l'arrêtent pas, il fonce dedans) ou rien
  function blockCosts(st,t,crawl){const bc=new Array(N*N).fill(0),gs={};
   for(let j=0;j<N*N;j++){if(j===t)continue;if(j===C){bc[j]=999;continue}const v=st.grid[j];if(!v||!U[v.t].block)continue;
-   if(U[v.t].cat==='wall'){if(crawl)continue;if(gs[j]===undefined){const g=wallGroup(st,j),sum=g.reduce((a,k)=>a+Math.max(1,st.grid[k].hp),0);g.forEach(k=>gs[k]=sum)}bc[j]=gs[j]}
+   if(U[v.t].cat==='wall'){if(crawl==='crawl')continue;if(crawl==='sap'){bc[j]=1;continue}if(gs[j]===undefined){const g=wallGroup(st,j),sum=g.reduce((a,k)=>a+Math.max(1,st.grid[k].hp),0);g.forEach(k=>gs[k]=sum)}bc[j]=gs[j]}
    else bc[j]=Math.max(1,v.hp)}
   return bc}
  const diagOK=(a,b,bc)=>{const[ra,ca]=rc(a),[rb,cb]=rc(b);return ra===rb||ca===cb||!(bc[idx(ra,cb)]>0&&bc[idx(rb,ca)]>0)};
- function field(st,t,crawl){const key=t+(crawl?'c':''),cache=st._df||(st._df={});if(cache[key])return cache[key];
+ function field(st,t,crawl){const key=t+(crawl||''),cache=st._df||(st._df={});if(cache[key])return cache[key];
   const bc=blockCosts(st,t,crawl),D=new Array(N*N).fill(Infinity),done=new Array(N*N).fill(false);D[t]=0;
   for(;;){let u=-1,b=Infinity;for(let j=0;j<N*N;j++)if(!done[j]&&D[j]<b){b=D[j];u=j}if(u<0)break;done[u]=true;
    for(const x of around(u)){if(done[x]||!diagOK(x,u,bc))continue;const nd=D[u]+1+bc[u];if(nd<D[x])D[x]=nd}}
   return cache[key]={D,bc}}
  // le pas suivant d'un zombie : la case voisine qui minimise (coût d'entrée + distance restante) ; à égalité, son style de marche décide
+ const zmode=T=>T.crawl?'crawl':T.sap?'sap':'';
+ // explosion du sapeur : les unités (et les zombies) autour prennent des dégâts
+ const SAP_WALL=15,SAP_AROUND=3;
+ function sapBlast(st,pos,ev){around(pos).concat(pos).forEach(j=>{const u=st.grid[j];if(u&&U[u.t].block){u.hp-=SAP_AROUND;ev.push({i:j,txt:'−'+SAP_AROUND,k:'bite'});if(u.hp<=0)lose(st,j,u,ev)}});
+  st.z.filter(o=>o.hp>0&&cheb(o.pos,pos)<=1).forEach(o=>hit(st,o,SAP_AROUND,ev,-1,1));if(cheb(pos,C)<=1){st.shelter-=1;ev.push({i:C,txt:'−1',k:'bite'})}ev.push({i:pos,k:'boom'})}
  function pathStep(st,p,t,crawl,style){const{D,bc}=field(st,t,crawl),pref=moves(p,t,style);let best=-1,bv=Infinity;
   const cand=[...pref,...around(p).filter(j=>!pref.includes(j))];
   for(const j of cand){if(!diagOK(p,j,bc))continue;const v=1+bc[j]+D[j];if(v<bv-1e-9){bv=v;best=j}}
@@ -560,7 +571,7 @@ const Z=(()=>{
  const nbRoles=(st,i)=>{const r=new Set();for(const j of around(i)){const v=st.grid[j];if(v)r.add(roleOf(v.t))}return r};
  function squad(st,i){const u=st.grid[i];if(!u)return false;const me=roleOf(u.t);if(!me)return false;const r=nbRoles(st,i);r.add(me);return r.has('tank')&&r.has('heal')&&r.has('dps')}
  function attack(st,i,u,D,rng,dmg,ev){
-  const inR=()=>st.z.filter(z=>z.hp>0&&cheb(z.pos,i)<=rng);
+  const inR=()=>st.z.filter(z=>z.hp>0&&inRange(z.pos,i,rng));
   const got=k=>{if(k){u.kills=(u.kills||0)+1;u.nk=(u.nk||0)+1;
    if(D.cat==='melee'&&ally(st,'fieldcare'))u.hp=Math.min(maxHp(st,u),u.hp+1);
    if(D.healKill)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].block&&v.hp<maxHp(st,v)){v.hp++;ev.push({i:j,k:'heal'})}})}};
@@ -580,7 +591,12 @@ const Z=(()=>{
    if((D.feed||(D.cat==='melee'&&(st._fl||{}).farm>=2))&&killed)u.hp=Math.min(maxHp(st,u),u.hp+1)}
  }
  // un zombie frappe une unité qui bloque (au contact, ou à distance pour le cracheur)
- function strike(st,z,n,u,ev,ranged,pow){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const T=ZT[z.k],D=stat(st,u.t);let d=T.boss?u.hp:zhit(st,z);if(!T.boss&&roleOf(u.t)==='tank'){u.blk=(u.blk||0)+1;if(u.blk%3===0){ev.push({i:n,txt:'bloqué',k:'block',zid:z.id});return}}if(!T.boss&&(st._fl||{}).police&&famOf(u.t)==='police')d=Math.max(1,d-1);if(D.cap&&!T.boss)d=Math.min(d,D.cap);
+ function strike(st,z,n,u,ev,ranged,pow){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const T=ZT[z.k],D=stat(st,u.t);
+  if(T.sap){z.hp=0;z.bit=1;let left=D.cat==='wall'?SAP_WALL:6;
+   // 15 dégâts au rempart (du mur frappé vers les plus solides), 6 à une unité, puis 3 autour
+   const cells=D.cat==='wall'?[n,...wallGroup(st,n).filter(j=>j!==n).sort((a,b)=>st.grid[b].hp-st.grid[a].hp)]:[n];
+   for(const j of cells){const v=st.grid[j];if(!v||left<=0)continue;const d=Math.min(left,v.hp);v.hp-=d;left-=d;ev.push({i:j,txt:'−'+d,k:'bite',zid:z.id});if(v.hp<=0)lose(st,j,v,ev)}
+   sapBlast(st,z.pos,ev);return}let d=T.boss?u.hp:zhit(st,z);if(!T.boss&&roleOf(u.t)==='tank'){u.blk=(u.blk||0)+1;if(u.blk%3===0){ev.push({i:n,txt:'bloqué',k:'block',zid:z.id});return}}if(!T.boss&&(st._fl||{}).police&&famOf(u.t)==='police')d=Math.max(1,d-1);if(D.cap&&!T.boss)d=Math.min(d,D.cap);
   let tn=n,tu=u;if(D.cat==='wall'&&!T.boss)for(const j of wallGroup(st,n))if(st.grid[j].hp>tu.hp){tn=j;tu=st.grid[j]}
   tu.hp-=d;ev.push({i:tn,txt:'−'+d,k:ranged?'spit':'bite',zid:z.id,from:z.pos});
   if(!ranged&&u.t==='fen'&&pow){const el=(st._fl||{}).tech||0;hit(st,z,((st.relics.includes('groupe')||has(st,'solar'))?2:1)+(el?1:0),ev,n);if(el>=2)z.cd+=1;if(ally(st,'short'))z.burnT=Math.max(z.burnT||0,3)}
@@ -623,11 +639,11 @@ const Z=(()=>{
   }
   for(const z of st.z){if(z.hp<=0)continue;z.cd--;if(z.cd>0)continue;const T=ZT[z.k];z.cd=zspd(st,z.k);
    const tgt=lureTarget(st,z.pos);
-   let n=T.boss?moves(z.pos,tgt,z.style)[0]:pathStep(st,z.pos,tgt,T.crawl,z.style);
-   if(n===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const dm=zhit(st,z);st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'bite',zid:z.id});if(!T.boss){z.hp=0;z.bit=1}continue}
+   let n=T.boss?moves(z.pos,tgt,z.style)[0]:pathStep(st,z.pos,tgt,zmode(T),z.style);
+   if(n===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const dm=T.sap?3:zhit(st,z);if(T.sap)ev.push({i:C,k:'boom'});st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'bite',zid:z.id});if(!T.boss){z.hp=0;z.bit=1}continue}
    const u=st.grid[n];
    if(u&&U[u.t].block&&!(T.crawl&&U[u.t].cat==='wall')){strike(st,z,n,u,ev,false,pow);continue}
-   if(T.spit){const n2=pathStep(st,n,tgt,T.crawl,z.style);
+   if(T.spit){const n2=pathStep(st,n,tgt,zmode(T),z.style);
     if(n2===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const dm=zhit(st,z);st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'spit',zid:z.id,from:z.pos});continue}
     const u2=st.grid[n2];if(u2&&U[u2.t].block){strike(st,z,n2,u2,ev,true,pow);continue}}
    z.pos=n;enter(st,z,n,u,ev)
@@ -635,7 +651,8 @@ const Z=(()=>{
   for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;if(!z.bit){const T=ZT[z.k];st.kills++;st.scrap+=T.boss?15:1;ev.push({i:z.pos,k:'die',zid:z.id,boss:!!T.boss});
    if(fl.pyro>=2&&(z.burnT>0||z.inFire)){st.z.filter(o=>o.hp>0&&o!==z&&cheb(o.pos,z.pos)<=1).forEach(o=>hit(st,o,2,ev,-1,1));ev.push({i:z.pos,k:'boom'})}
    if(mc(st,'putride'))around(z.pos).forEach(j=>{const u=st.grid[j];if(u&&U[u.t].block){u.hp--;ev.push({i:j,txt:'−1',k:'bite',zid:z.id});if(u.hp<=0)lose(st,j,u,ev)}});
-   if(T.howl){ev.push({i:z.pos,k:'howl'});for(let k=0;k<T.howl;k++)spawn(st,'walk',z.pos)}}}
+   if(T.howl){ev.push({i:z.pos,k:'howl'});for(let k=0;k<T.howl;k++)spawn(st,'walk',z.pos)}
+   if(T.sap)sapBlast(st,z.pos,ev)}}
   st.z=st.z.filter(z=>z.hp>0);
   const boss=st.z.some(z=>ZT[z.k].boss)||st.pending.some(p=>p.k==='boss');
   const done=(!st.pending.length&&!st.z.length)||st.shelter<=0||st.wtick>(st.cap||90)+(boss?110:0);
@@ -670,7 +687,7 @@ const Z=(()=>{
   for(const z of st.z)if(z.hp<=0&&!z.dead){z.dead=1;st.kills++;st.scrap+=ZT[z.k].boss?15:1;ev.push({i:z.pos,k:'die',zid:z.id,boss:!!ZT[z.k].boss})}
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
- return{ROLES,roleOf,TAUNT,squad,nbRoles,lureTarget,pathStep,field,N,C,MID,LINE,LINE_MAX,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
+ return{inRange,manh,SAP_WALL,ROLES,roleOf,TAUNT,squad,nbRoles,lureTarget,pathStep,field,N,C,MID,LINE,LINE_MAX,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
   DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

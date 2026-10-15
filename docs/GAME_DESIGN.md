@@ -37,6 +37,7 @@ Score : nombre de nuits survécues, avec un record sauvegardé (et le nombre de 
 - **Murs tracés en ligne** : Barricade, Épave, Clôture, Sacs de sable, Mur de pneus, Barrage de police et Mur modulaire se tracent en glissant sur 1 à 4 cases en ligne droite. La 1ʳᵉ case coûte le prix de la carte, chaque case en plus 1 énergie. Une seule carte pour tout le mur. Les murs ne fusionnent plus (un mur tracé fusionnerait sur lui-même), et l'évolution Fortin demande désormais Épave + Bunker.
 - **Cartes de construction** (tous les murs et tous les pièges) : après la 1ʳᵉ pose, la carte reste en main toute la journée (marquée « Encore ») et se repose par clic ou par tracé. Réutiliser un mur coûte 1 énergie par case, un piège son prix normal. Le soir, la carte part à la défausse ; les constructions restent sur la carte et ne rendent plus de carte en tombant. La défausse n'est remélangée que quand la pioche est vide.
 - **Glisser-déposer** : toute carte de la main peut être glissée jusqu'à sa case (en plus du choix puis clic).
+- **Portée en losange** (v36) : au-delà du contact, la portée se compte en pas droits (|lignes| + |colonnes|). À portée 2, un tireur couvre 12 cases au lieu de 24 avec l'ancien carré. Le corps à corps (portée 1) garde les 8 cases autour. Les portées longues passent de 5 à 4. Toucher une unité qui tire affiche sa zone de tir.
 - **Portées réduites** pour compenser la carte plus grande (les zombies marchent plus longtemps sous le feu) : portée 3 → 2, portée 4 → 3, portée illimitée → 5 (Sniper, Mortier, Tireur de nuit). La portée 2 ne change pas.
 - **Chemins des zombies** : chaque tour, le jeu calcule pour toute la carte la distance jusqu'à la cible (l'abri, ou un leurre comme la Sirène). Entrer sur une case libre coûte 1 ; une case occupée coûte en plus ses PV (pour un rempart, les PV de tout le rempart). Les zombies contournent donc tant que le détour est plus court que de casser, sinon ils attaquent le point le plus faible. On ne passe pas en diagonale entre deux obstacles. Les rampants passent sous les murs. Le Colosse fonce toujours tout droit et détruit ce qu'il frappe. À égalité de chemin, le style de marche de chaque zombie décide, pour qu'ils n'arrivent pas tous par le même côté.
 - **Remparts** : des murs voisins (8 cases autour) fusionnent en un seul ouvrage : palissade de rondins taillés en pointe (bois) ou panneaux rivetés (métal), tours aux extrémités et aux angles, une seule barre de PV ; fissures puis brèches quand les PV baissent. Les PV sont mis en commun (le mur le plus solide encaisse chaque coup). Les murs simples se fondent dans le rempart ; Clôture, Bunker, Brasero et Fortin gardent leur dessin.
@@ -297,6 +298,8 @@ Les zombies sont peu nombreux mais coriaces : ils doivent arriver jusqu'aux déf
 Leurs PV restent stables jusqu'à la nuit 10, puis augmentent de 12 % par nuit (en plus des mutations).
 Les zombies apparaissent de façon échelonnée pendant la nuit, à une position aléatoire de la forêt (d'un seul côté après une Fusée de détresse). Les Colosses arrivent à partir du 10ᵉ tour des nuits 10, 20, 30…
 
+**Sapeur** (dès la nuit 4, 1 à 2 par nuit puis de plus en plus) : 12 PV, lent. Bardé d'explosifs, il ne contourne pas les murs : il fonce dedans et se fait sauter. 15 dégâts au rempart (le mur frappé, puis les plus solides du rempart), 6 à une unité, 3 aux unités et aux zombies autour. À l'abri : 3 dégâts. Tué avant, il explose quand même (3 autour, abri −1 s'il est collé). Contre lui : le tuer à distance, ou des murs isolés en avant comme leurres.
+
 ## Les vagues
 
 Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque type (+0,6 rôdeur, +0,36 coureur, +0,24 gonflé, chien, rampant et blindé, +0,18 cracheur, +0,15 hurleur), et un Colosse de plus toutes les 10 nuits.
@@ -483,6 +486,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Portée en losange et portées longues à 4, nouveau zombie Sapeur qui fait sauter les murs (demande d'Amine).
 - Rôles Tank / Soin / DPS avec provocation à 3 cases et escouades, remparts redessinés (demande d'Amine).
 - Zombies qui calculent leur chemin (contourner ou casser au plus faible), murs voisins fusionnés en remparts, Fortin = Épave + Bunker (demande d'Amine).
 - Cartes de construction réutilisables dans la journée puis défaussées le soir, glisser-déposer des cartes, plus aucune portée illimitée (demande d'Amine).
