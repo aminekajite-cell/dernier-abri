@@ -354,7 +354,11 @@ const Z=(()=>{
  const inRange=(p,i,r)=>r<=1?cheb(p,i)<=1:manh(p,i)<=r;
  const cheb=(a,b)=>{const[ar,ac]=rc(a),[br,bc]=rc(b);return Math.max(Math.abs(ar-br),Math.abs(ac-bc))};
  const around=i=>{const[r,c]=rc(i),o=[];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const R=r+dr,K=c+dc;if(R>=0&&R<N&&K>=0&&K<N)o.push(idx(R,K))}return o};
- const EDGES=[...Array(N*N).keys()].filter(isEdge);
+ // les routes : les zombies sortent de la forêt uniquement par les 4 routes (le milieu de chaque bord).
+ // Le reste du bord est la forêt : les zombies ne peuvent pas y marcher, ils doivent passer par l'intérieur.
+ const ROADS=[idx(0,MID),idx(N-1,MID),idx(MID,0),idx(MID,N-1)];
+ const isForest=i=>isEdge(i)&&!ROADS.includes(i);
+ const EDGES=ROADS.slice();
  const INNER=[...Array(N*N).keys()].filter(i=>!isEdge(i)&&i!==C);
  const sideOf=i=>{const[r,c]=rc(i);return r===0?0:r===N-1?1:c===0?2:3};
  // les pas possibles vers la cible (la maison par défaut), du préféré au moins préféré.
@@ -380,7 +384,7 @@ const Z=(()=>{
  function field(st,t,crawl){const key=t+(crawl||''),cache=st._df||(st._df={});if(cache[key])return cache[key];
   const bc=blockCosts(st,t,crawl),D=new Array(N*N).fill(Infinity),done=new Array(N*N).fill(false);D[t]=0;
   for(;;){let u=-1,b=Infinity;for(let j=0;j<N*N;j++)if(!done[j]&&D[j]<b){b=D[j];u=j}if(u<0)break;done[u]=true;
-   for(const x of around(u)){if(done[x]||!diagOK(x,u,bc))continue;const nd=D[u]+1+bc[u];if(nd<D[x])D[x]=nd}}
+   for(const x of around(u)){if(done[x]||isForest(x)||!diagOK(x,u,bc))continue;const nd=D[u]+1+bc[u];if(nd<D[x])D[x]=nd}}
   return cache[key]={D,bc}}
  // le pas suivant d'un zombie : la case voisine qui minimise (coût d'entrée + distance restante) ; à égalité, son style de marche décide
  const zmode=T=>T.crawl?'crawl':T.sap?'sap':'';
@@ -390,7 +394,7 @@ const Z=(()=>{
   st.z.filter(o=>o.hp>0&&cheb(o.pos,pos)<=1).forEach(o=>hit(st,o,SAP_AROUND,ev,-1,1));if(cheb(pos,C)<=1){st.shelter-=1;ev.push({i:C,txt:'−1',k:'bite'})}ev.push({i:pos,k:'boom'})}
  function pathStep(st,p,t,crawl,style){const{D,bc}=field(st,t,crawl),pref=moves(p,t,style);let best=-1,bv=Infinity;
   const cand=[...pref,...around(p).filter(j=>!pref.includes(j))];
-  for(const j of cand){if(!diagOK(p,j,bc))continue;const v=1+bc[j]+D[j];if(v<bv-1e-9){bv=v;best=j}}
+  for(const j of cand){if(isForest(j)||!diagOK(p,j,bc))continue;const v=1+bc[j]+D[j];if(v<bv-1e-9){bv=v;best=j}}
   return best<0?pref[0]:best}
  // un pas en s'éloignant de la maison (recul)
  function back(p){let[r,c]=rc(p);const dr=r-MID,dc=c-MID;if(Math.abs(dr)>=Math.abs(dc))r+=Math.sign(dr);else c+=Math.sign(dc);return idx(Math.max(0,Math.min(N-1,r)),Math.max(0,Math.min(N-1,c)))}
@@ -478,7 +482,7 @@ const Z=(()=>{
  // déplacer une de ses unités : une fois par jour, vers une case libre où elle pourrait être posée
  function canMove(st,a,b){const u=st.grid[a];return (!st.moved||st.freeMove)&&!!u&&a!==b&&!st.grid[b]&&canPlace(st,u.t,b)}
  function move(st,a,b){if(!canMove(st,a,b))return false;st.grid[b]=st.grid[a];st.grid[a]=null;st.moved=1;return merge(st,b)||true}
- // murs tracés en ligne : 1 à 4 cases en ligne droite. La 1ʳᵉ case coûte le prix de la carte, chaque case en plus 1 énergie.
+ // murs tracés en ligne : 1 à 4 cases en ligne droite, pour le prix d'une seule case (les cases en plus sont gratuites).
  // Une seule carte pour tout le mur : elle revient dans la défausse quand la dernière case du mur tombe.
  const LINE=['bar','car','fen','sand','tire','barrier','modwall'],LINE_MAX=4;
  // cartes de construction (murs et pièges) : après la 1ʳᵉ pose, la carte reste en main pour la journée et se réutilise.
@@ -486,7 +490,7 @@ const Z=(()=>{
  // la carte part à la défausse à la fin du jour.
  const isBuild=t=>!!U[t]&&!U[t].evo&&(U[t].cat==='wall'||U[t].cat==='trap');
  const buildCost=(st,t,reuse)=>reuse&&U[t].cat==='wall'?1:costOf(st,t);
- const lineCost=(st,t,n,reuse)=>buildCost(st,t,reuse)+Math.max(0,n-1);
+ const lineCost=(st,t,n,reuse)=>buildCost(st,t,reuse);
  function lineCells(st,t,a,b,reuse){if(!LINE.includes(t)||!canPlace(st,t,a))return[a];const[ar,ac]=rc(a),[br,bc]=rc(b);
   const horiz=Math.abs(bc-ac)>=Math.abs(br-ar),d=horiz?Math.sign(bc-ac):Math.sign(br-ar),len=Math.min(LINE_MAX,1+Math.abs(horiz?bc-ac:br-ar)),out=[a];
   for(let k=1;k<len&&d;k++){const j=horiz?idx(ar,ac+d*k):idx(ar+d*k,ac);if(!canPlace(st,t,j)||lineCost(st,t,out.length+1,reuse)>(st.energy??ENERGY))break;out.push(j)}return out}
@@ -688,6 +692,6 @@ const Z=(()=>{
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
  return{inRange,manh,SAP_WALL,ROLES,roleOf,TAUNT,squad,nbRoles,lureTarget,pathStep,field,N,C,MID,LINE,LINE_MAX,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,rc,isEdge,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
+  DAWN,dawnEvent,resolveDawn,rc,isEdge,isForest,ROADS,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,FRENZY,FRENZY_FROM,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move};
 })();
 if(typeof module!=='undefined')module.exports=Z;

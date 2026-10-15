@@ -526,3 +526,8 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Murs construits (v57) : dessinés en code avec leur propre matériau (bois, sacs de sable, pneus, béton rayé, tôle, acier, épave rouillée). Des murs voisins se raccordent automatiquement par une section continue (moitié du matériau de chacun), avec des poteaux aux extrémités et aux angles ; un mur seul est un tronçon en travers de la route.
 
 **v59** : la nuit s'affiche plus lentement (un tour dure 650 ms au lieu de 430 ms à vitesse ×1). Purement visuel, les règles et l'équilibrage ne changent pas ; les vitesses ×2 et plus restent disponibles.
+
+**v60 : la construction compte**
+- Les zombies sortent de la forêt uniquement par les 4 routes (milieu de chaque bord). Le reste du bord est la forêt : ils ne peuvent pas y marcher. Une ligne de 3 murs juste devant une route la ferme vraiment : les zombies doivent la casser. Placer ses murs devient un choix tactique (quelles routes fermer, lesquelles laisser en couloir de tir). Les lieux à côtés limités et les nuits « d'un seul côté » n'utilisent que les routes concernées.
+- Un mur tracé en ligne (1 à 4 cases) coûte le prix d'une seule case.
+- Ambiance de nuit : nappe musicale grave en la mineur, notes lentes, hiboux, loups au loin, grognements de zombies et craquements de branches, au hasard ; le volume suit l'obscurité (sons générés en code).

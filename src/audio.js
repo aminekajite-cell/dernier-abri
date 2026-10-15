@@ -1,5 +1,5 @@
 // Sons du jeu, générés en code avec Web Audio (aucun fichier à télécharger).
-// Expose l'objet global SFX : SFX.play('shot'), SFX.night(0..1), SFX.toggle().
+// Expose l'objet global SFX : SFX.play('shot'), SFX.night(0..1) (ambiance et musique de nuit), SFX.toggle().
 // Tout est protégé : si l'audio n'est pas disponible, le jeu continue sans son.
 const SFX=(()=>{
  let ac=null,master=null,noiseBuf=null,amb=null,muted=false;
@@ -50,13 +50,47 @@ const SFX=(()=>{
  function play(name,gap=.06){
   if(muted||!init()||!S[name])return;
   try{const t=ac.currentTime;if(last[name]&&t-last[name]<gap)return;last[name]=t;S[name](t+.01)}catch(e){}}
- // ambiance de nuit : vent filtré + grondement sourd, dont le volume suit l'obscurité
+ // ambiance de nuit : vent filtré + grondement sourd + nappe musicale sombre, dont le volume suit l'obscurité ;
+ // par-dessus, des bruits lointains au hasard : hiboux, loups, grognements de zombies, et quelques notes de musique.
+ let music=null,nextEvt=0,nextNote=0;
+ // un son qui glisse d'une fréquence à l'autre en suivant une courbe, avec un léger vibrato (loup, hibou)
+ function glide(t,pts,{type='sine',vol=.08,vib=0,vibF=5,lp=1800}={}){
+  const o=ac.createOscillator();o.type=type;o.frequency.setValueAtTime(pts[0][1],t);pts.slice(1).forEach(([dt,f])=>o.frequency.linearRampToValueAtTime(f,t+dt));
+  const dur=pts[pts.length-1][0];let lfo=null;
+  if(vib){lfo=ac.createOscillator();lfo.frequency.value=vibF;const lg=ac.createGain();lg.gain.value=vib;lfo.connect(lg);lg.connect(o.frequency);lfo.start(t);lfo.stop(t+dur+.1)}
+  const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=lp;
+  const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+Math.min(.25,dur*.2));g.gain.setValueAtTime(vol,t+dur*.75);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.connect(fl);fl.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05)}
+ const AMB={
+  // hibou : « hou… hou-hou-houuu »
+  owl:t=>{const f=360+Math.random()*40,v=.05;[[0,.45],[.75,.22],[1.02,.22],[1.3,.7]].forEach(([d,l])=>glide(t+d,[[0,f*1.04],[l*.3,f],[l,f*.9]],{vol:v,lp:900}))},
+  // loup au loin : un long hurlement qui monte puis redescend, parfois deux loups
+  wolf:t=>{const f=260+Math.random()*60;glide(t,[[0,f],[.6,f*1.9],[2.2,f*1.75],[3.2,f*1.3]],{type:'triangle',vol:.045,vib:9,vibF:5.5,lp:1300});
+   if(Math.random()<.5){const g2=f*1.12;glide(t+1.1,[[0,g2],[.5,g2*1.8],[2,g2*1.6],[2.8,g2*1.2]],{type:'triangle',vol:.03,vib:8,vibF:6,lp:1100})}},
+  // grognement de zombie lointain
+  groan:t=>{const f=60+Math.random()*35;glide(t,[[0,f],[.5,f*1.15],[1.4,f*.75]],{type:'sawtooth',vol:.035,vib:4,vibF:9,lp:420});glide(t+.08,[[0,f*1.5],[.6,f*1.6],[1.3,f*1.1]],{type:'sawtooth',vol:.02,lp:380})},
+  // craquement de branche
+  crack:t=>{noise(t,.06,{f:2200,q:3,vol:.08});noise(t+.07,.04,{f:1800,q:3,vol:.05})}
+ };
+ // notes de musique : gamme mineure grave, sons doux et longs (comme un piano étouffé)
+ const SCALE=[110,123.5,130.8,146.8,164.8,174.6,196,220,246.9,261.6];
+ function note(t,f,vol){tone(t,3.2,{f,vol,type:'sine',attack:.02});tone(t,2.4,{f:f*2,vol:vol*.25,type:'triangle',attack:.02})}
  function night(k){
   if(!ac||muted)return;
   try{if(!amb){const s=ac.createBufferSource();s.buffer=noiseBuf;s.loop=true;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=380;
     const g=ac.createGain();g.gain.value=0;const o=ac.createOscillator();o.type='sine';o.frequency.value=48;const og=ac.createGain();og.gain.value=.5;
     s.connect(fl);fl.connect(g);o.connect(og);og.connect(g);g.connect(master);s.start();o.start();amb={g}}
-   amb.g.gain.setTargetAtTime(.16*k,ac.currentTime,.3)}catch(e){}}
+   amb.g.gain.setTargetAtTime(.16*k,ac.currentTime,.3);
+   // nappe : accord de la mineur très grave qui respire lentement
+   if(!music){const g=ac.createGain();g.gain.value=0;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=600;fl.connect(g);g.connect(master);
+    [55,82.4,110,130.8].forEach((f,i)=>{const o=ac.createOscillator();o.type=i%2?'triangle':'sawtooth';o.frequency.value=f*(1+(i-1.5)*.002);
+     const og=ac.createGain();og.gain.value=i===0?.35:.18;const l=ac.createOscillator();l.frequency.value=.05+i*.03;const lg=ac.createGain();lg.gain.value=og.gain.value*.6;l.connect(lg);lg.connect(og.gain);
+     o.connect(og);og.connect(fl);o.start();l.start()});music={g}}
+   music.g.gain.setTargetAtTime(.07*k,ac.currentTime,.8);
+   const t=ac.currentTime;if(k<.6){nextEvt=t+3;nextNote=t+2;return}
+   if(t>nextEvt){const r=Math.random(),e=r<.32?'owl':r<.55?'wolf':r<.9?'groan':'crack';AMB[e](t+.05);nextEvt=t+4+Math.random()*7}
+   if(t>nextNote){const f=SCALE[Math.floor(Math.random()*SCALE.length)];note(t+.05,f,.035);if(Math.random()<.4)note(t+.9,SCALE[Math.floor(Math.random()*SCALE.length)],.025);nextNote=t+3.5+Math.random()*4}
+  }catch(e){}}
  function toggle(){muted=!muted;try{localStorage.setItem('abri-mute',muted?'1':'0')}catch(e){}
   if(init()){master.gain.setTargetAtTime(muted?0:.55,ac.currentTime,.05);if(!muted)unlock()}return muted}
  return{play,night,toggle,get muted(){return muted}};

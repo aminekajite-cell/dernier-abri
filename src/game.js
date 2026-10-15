@@ -165,7 +165,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v59 · 15 oct.';
+const VERSION='v60 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=650;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -801,7 +801,7 @@ function render(){
  else if(S.pause&&S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
  else if(S.pause)info.innerHTML=`<b>Pause : vague ${S.pause} sur ${G.waves} repoussée.</b> Déplace tes unités librement : touche une unité, puis une case libre. `+`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`;
  else if(S.busy){const left=G.z.length+G.pending.length,hasR=S.hand.some(t=>Z.U[t].react);info.innerHTML=`<b>${plural(left,'zombie','zombies')}</b> encore dehors.`+(hasR?` <span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`:'')}
- else if(S.sel!==null&&!S.busy){const t=selCard(),D=Z.U[t];info.innerHTML=`<b>${cardName(t)}</b> (${selCost()} énergie${selReuse()?', réutilisée':''}) : ${D.d}.`+(Z.isBuild(t)?' Carte de construction : elle reste en main aujourd’hui pour être reposée.':'')+(D.onUnit?' Touche une unité blessée.':D.instant?' Touche l’abri.':D.near?' Touche une case collée à l’abri.':Z.LINE.includes(t)?` Touche une case, ou glisse pour tracer un mur de ${Z.LINE_MAX} cases au plus (+1 énergie par case en plus).`:' Touche un emplacement.')}
+ else if(S.sel!==null&&!S.busy){const t=selCard(),D=Z.U[t];info.innerHTML=`<b>${cardName(t)}</b> (${selCost()} énergie${selReuse()?', réutilisée':''}) : ${D.d}.`+(Z.isBuild(t)?' Carte de construction : elle reste en main aujourd’hui pour être reposée.':'')+(D.onUnit?' Touche une unité blessée.':D.instant?' Touche l’abri.':D.near?' Touche une case collée à l’abri.':Z.LINE.includes(t)?` Touche une case, ou glisse pour tracer un mur de ${Z.LINE_MAX} cases au plus pour le prix d’une seule case).`:' Touche un emplacement.')}
  else if(S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
  else if(S.inspect!==null&&G.grid[S.inspect])info.innerHTML=unitLine(G.grid[S.inspect])+(G.moved?' (déjà un déplacement aujourd’hui)':'');
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie.`+(G.moved?'':' Touche une unité pour la déplacer (1 fois par jour).');
@@ -1161,10 +1161,10 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Une fois par jour, tu peux <b>déplacer</b> une de tes unités : touche-la, puis touche une case libre.</li>
 <li>Garde de l’énergie pour la nuit : les cartes <b>Réaction</b> (grenade, tir de l’abri…) se jouent pendant l’attaque.</li>
 <li>Regroupe les unités d’une même <b>faction</b> (👮 🎖️ ⛑️ 🔥 🪤 🐕 ⚡ 🏠) pour les renforcer : côte à côte, chaque voisin de la même faction donne <b>+1</b> (dégât ou soin, +2 au plus) ; leur <b>Chef</b> légendaire les renforce encore, et, certains soirs, choisis ta <b>nuit</b> : prudente ou risquée.</li>
-<li>Les murs se <b>tracent en ligne</b> : glisse sur 1 à 4 cases (+1 énergie par case en plus). Une carte de <b>construction</b> (mur ou piège) reste en main toute la journée : repose-la autant que ton énergie le permet (mur : 1 énergie la case). Elle part à la défausse le soir.</li>
+<li>Les murs se <b>tracent en ligne</b> : glisse sur 1 à 4 cases, pour le prix d’une seule. Une carte de <b>construction</b> (mur ou piège) reste en main toute la journée : repose-la autant que ton énergie le permet (mur : 1 énergie la case). Elle part à la défausse le soir.</li>
 <li>Tu peux aussi <b>glisser une carte</b> de ta main jusqu’à la case voulue.</li>
 <li>Pose 3 fois la même unité : elles <b>fusionnent</b> en une version dorée ★ ; 3 unités ★ donnent une ★★, et ainsi de suite. Certaines paires de cartes posées côte à côte <b>évoluent</b> en unité secrète. Tous les 20 zombies tués, une unité gagne un <b>niveau</b>.</li>
-<li>La nuit, les zombies sortent des <b>bois</b> et marchent vers la maison. Tes survivants se défendent tout seuls.</li>
+<li>La nuit, les zombies sortent de la forêt <b>uniquement par les 4 routes</b> et marchent vers la maison : un mur en travers d’une route la ferme. Tes survivants se défendent tout seuls.</li>
 <li>Tu ne joues que les cartes de <b>ton deck</b>. À l’aube, choisis l’une d’elles pour l’avoir <b>en main le lendemain</b>, puis échange ta <b>ferraille</b> au troc.</li>
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon ; à partir de la nuit 8, chaque mutation ajoute aussi une <b>frénésie meurtrière</b> (+10 % de PV et de dégâts). Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
