@@ -193,8 +193,8 @@ button.ammo[hidden]{display:none}
 .cf-vig{left:5.9%;right:6.6%;top:4.9%;height:58.1%;border-radius:.6cqw;box-shadow:inset 0 0 6cqw rgba(0,0,0,.8),inset 0 0 0 .6cqw rgba(0,0,0,.6);pointer-events:none}
 /* effet qui sort du cadre : l'illustration et le personnage détouré occupent une même « scène » plus grande que la fenêtre.
    L'illustration est découpée à la fenêtre ; le personnage, lui, déborde par le haut et les côtés (jamais sur le parchemin). */
-.cf:has(.cf-pop) .cf-art{left:0;right:0;top:-8%;height:auto;bottom:37%;border-radius:0;background-position:center 30%;clip-path:inset(18.2% 6.6% 0 5.9% round .6cqw)}
-.cf-pop{left:0;right:0;top:-8%;bottom:37%;background:center 30%/cover no-repeat;pointer-events:none;filter:drop-shadow(0 1.2cqw 1.6cqw rgba(0,0,0,.7));transition:transform .25s ease}
+.cf:has(.cf-pop) .cf-art{left:0;right:0;top:-8%;height:auto;bottom:37%;border-radius:0;background-position:center 2%;background-size:89% auto;clip-path:inset(18.2% 6.6% 0 5.9% round .6cqw)}
+.cf-pop{left:0;right:0;top:-8%;bottom:37%;background:center 2%/89% auto no-repeat;pointer-events:none;filter:drop-shadow(0 1.2cqw 1.6cqw rgba(0,0,0,.7));transition:transform .25s ease}
 .pick:hover .cf-pop,.pick:focus-visible .cf-pop,#preview .cf-pop{filter:drop-shadow(0 1.6cqw 2.2cqw rgba(0,0,0,.85))}
 @media (prefers-reduced-motion:reduce){.cf-pop{transition:none}}
 .cf-art svg{width:40%;height:40%;opacity:.7}
