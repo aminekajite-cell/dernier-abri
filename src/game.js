@@ -112,7 +112,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v39 · 15 oct.';
+const VERSION='v40 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -723,7 +723,7 @@ function render(){
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie.`+(G.moved?'':' Touche une unité pour la déplacer (1 fois par jour).');
  // bouton de tir : un seul élément, mis à jour sans être recréé (sinon le toucher peut se perdre pendant la nuit)
  const fire=FIRE(),on=!!(S.busy&&G.ammo>0&&Z.bossAlive(G));fire.hidden=!on;if(on){const t=`${svg('ammo')} Tirer sur le Colosse (${G.ammo})`;if(fire.innerHTML!==t)fire.innerHTML=t}
- if(WIDE.matches){let pv=$('#preview');if(!pv){pv=document.createElement('div');pv.id='preview';document.body.appendChild(pv)}const t=S.hover||selCard();pv.hidden=!t||!ov.hidden;if(t&&pv.dataset.t!==t+(S.busy?1:0)){pv.dataset.t=t+(S.busy?1:0);pv.innerHTML=cardFace(t)}}
+ updatePreview();
  const tip=$('#tip');if(TUTO<4&&ov.hidden&&(S.busy?TUTO===3:TUTO<3)){tip.hidden=false;tip.textContent=TIPS[TUTO]}else tip.hidden=true;
  const go=$('#go');go.disabled=false;go.textContent=S.pause?`Lancer la vague ${S.pause+1} sur ${G.waves}`:S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy&&!S.pause);
 }
@@ -737,9 +737,11 @@ function fireAmmo(){const ev=Z.fireAmmo(G);if(!ev)return;const now=performance.n
  const z=ev.find(e=>e.k==='shot'),v=z&&V.get(z.zid),p=v?zpos(v,now):CEN;floatTxt(p.x,p.y-30,`−${Z.AMMO_DMG}`,'#ffd25a',22);render()}
 // glisser-déposer : on attrape une carte de la main et on la lâche sur une case de la carte
 let HD=null;
-// survol d'une carte de la main sur ordinateur : aperçu en grand
-$('#hand').addEventListener('pointerover',e=>{const b=e.target.closest('.card');if(!b||e.pointerType!=='mouse')return;S.hover=b.dataset.u!==undefined?S.used[+b.dataset.u]:S.hand[+b.dataset.k];render()});
-$('#hand').addEventListener('pointerleave',()=>{if(S.hover){S.hover=null;render()}});
+// survol d'une carte de la main sur ordinateur : aperçu en grand (sans redessiner la main, sinon le clic se perd)
+function updatePreview(){if(!WIDE.matches)return;let pv=$('#preview');if(!pv){pv=document.createElement('div');pv.id='preview';document.body.appendChild(pv)}const t=S.hover||selCard();pv.hidden=!t||!ov.hidden;
+ const key=t+(S.busy?1:0)+(G.upg[t]?'u':'');if(t&&pv.dataset.t!==key){pv.dataset.t=key;pv.innerHTML=cardFace(t)}}
+$('#hand').addEventListener('pointerover',e=>{const b=e.target.closest('.card');if(!b||e.pointerType!=='mouse')return;S.hover=b.dataset.u!==undefined?S.used[+b.dataset.u]:S.hand[+b.dataset.k];updatePreview()});
+$('#hand').addEventListener('pointerleave',()=>{if(S.hover){S.hover=null;updatePreview()}});
 $('#hand').addEventListener('pointerdown',e=>{const b=e.target.closest('.card');if(!b||b.disabled||S.busy)return;HD={b,x:e.clientX,y:e.clientY,on:false,g:null}});
 addEventListener('pointermove',e=>{if(!HD)return;if(!HD.on&&Math.hypot(e.clientX-HD.x,e.clientY-HD.y)>12){HD.on=true;HD.g=HD.b.cloneNode(true);HD.g.classList.add('ghost');document.body.appendChild(HD.g);
   const k=HD.b.dataset.u!==undefined?-1-(+HD.b.dataset.u):+HD.b.dataset.k;S.sel=k;S.moveFrom=null;S.inspect=null;render()}
