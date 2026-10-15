@@ -108,7 +108,20 @@ const SPRD={},SPR={};
  ['fix',0,48,'bunker hospital'],['fix',0,44,'workshop market fire'],['fix',0,40,'scare spike net'],['fix',0,38,'lamp'],['fix',0,36,'solar'],['fix',0,34,'radio tesla canteen bear'],
  ['fix',0,30,'trap brasero smoke'],['fix',0,28,'siren dyn clay firetrap'],['fix',0,26,'gas mine'],['fix',0,22,'bait']
 ].forEach(([m,b,z,ids])=>ids.split(' ').forEach(k=>{SPRD[k]=[m,b,z];const im=new Image();im.onload=()=>SPR[k]=im;im.src='assets/sprites/'+k+'.webp'}));
-function drawSpr(k,x,y,a,out,mul){const im=SPR[k],d=SPRD[k];if(!im||!d)return false;const[m,b,z]=d,sz=z*(mul||1),r=im.width/im.height,w=r>=1?sz:sz*r,h=r>=1?sz/r:sz;
+/* sprites cartoon (assets/sprites_cartoon/<id>.webp) : utilisés quand le style cartoon est choisi.
+   Vus strictement du dessus, personnages et zombies tournés vers le BAS (angle π/2) ; murs dessinés à l'horizontale. */
+const SPRDC={},SPRC={},DOWN=Math.PI/2;
+[['rot',DOWN,44,'gun snp sht xbow flame mg molo kid swat hunter vigile doc nailer ranger rocket'],['rot',DOWN,46,'mortar sentry turret'],['fix',0,40,'tesla'],
+ ['rot',DOWN,46,'axe cop butch monk riot pitch amb orderly med radio cook mech lead pharma priest stretch teacher carp'],['rot',DOWN,40,'dog k9'],['rot',DOWN,46,'dogs'],
+ ['rot',DOWN,50,'chief_police chief_mil chief_pyro chief_trap chief_farm chief_care chief_tech chief_comm k9squad nightsnp heavyflame slaughter saint tracker'],['rot',DOWN,52,'gang autogun'],
+ ['fix',0,50,'canteen hospital market workshop'],['fix',0,42,'lamp siren solar scare'],
+ ['wallh',0,54,'sand bar barrier modwall fen'],['fix',0,46,'bunker'],['fix',0,40,'tire'],
+ ['fix',0,40,'fire spike net bear wire'],['fix',0,32,'trap mine clay gas smoke bait dyn firetrap'],
+ ['rot',DOWN,34,'z_walk z_run z_sap z_armor z_howl z_crawl z_spit z_boss'],['rot',DOWN,40,'z_fat'],['rot',DOWN,30,'z_zdog']
+].forEach(([m,b,z,ids])=>ids.split(' ').forEach(k=>{SPRDC[k]=[m,b,z];const im=new Image();im.onload=()=>SPRC[k]=im;im.src='assets/sprites_cartoon/'+k+'.webp'}));
+// le sprite à utiliser selon le style choisi (cartoon si disponible, sinon réaliste)
+function sprK(k){if(ART_STYLE==='cartoon'&&SPRC[k])return[SPRC[k],SPRDC[k]];return[SPR[k],SPRD[k]]}
+function drawSpr(k,x,y,a,out,mul){const[im,d]=sprK(k);if(!im||!d)return false;const[m,b,z]=d,sz=z*(mul||1),r=im.width/im.height,w=r>=1?sz:sz*r,h=r>=1?sz/r:sz;
  ctx.save();ctx.translate(x,y);if(m==='rot')ctx.rotate(a-b);else if(m==='wall')ctx.rotate(out);else if(m==='wallh')ctx.rotate(out+Math.PI/2);else if((m==='up'||m==='flip')&&Math.cos(a)<-.1)ctx.scale(-1,1);
  ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore();return true}
 // seules les cartes très puissantes (chefs légendaires et évolutions secrètes) débordent du cadre
@@ -151,7 +164,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v52 · 15 oct.';
+const VERSION='v53 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -427,7 +440,7 @@ function drawUnit(i,u,now){
 }
 function drawUnitInner(i,u,now){
  const{x,y}=tc(i),dx=x-CEN.x,dy=y-CEN.y,out=Math.atan2(dy,dx);const a=facing[i]??out,s=rng(i+3);
- if(SPR[u.t]&&drawSpr(u.t,x,y,a,out))return;
+ if(drawSpr(u.t,x,y,a,out))return;
  const sk0=SKINS[(i*7+(u.name||'').length)%SKINS.length];
  if(u.t==='k9squad'){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.translate(-2,11);ctx.scale(.75,.75);dogShape('#3a2a1a','#4a3626','#1e140c',now,90);ctx.restore();person(x-2,y-5,a,LOOK.cop,now,sk0);return}
  if(u.t==='gang'){[[-9,-6],[8,-7],[0,8]].forEach(([ox,oy],k)=>person(x+ox,y+oy,a,{...LOOK.kid,hc:['#b33a3a','#3a6ab3','#3a9a4a'][k]},now,SKINS[(i+k*2)%SKINS.length]));return}
@@ -549,9 +562,9 @@ function drawZombie(v,now){
  const sz=Lk.sz*1.5,skin=Lk.skin,cloth=Lk.cloth;
  if(v.burn&&!v.dying&&Math.random()<.3)PT.push({x:p.x+(Math.random()-.5)*10,y:p.y-4,vx:0,vy:-.04,t0:now,dur:300,c:Math.random()<.5?'#ff9a2e':'#ffd25a',r:2.5,light:0});
  ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ell(2,4,11*sz,8*sz,'rgba(0,0,0,.4)');
- const zk='z_'+k,zup=SPR[zk]&&SPRD[zk][0]==='up';ctx.rotate(zup?wob*.6+(v.dying?.6:0):a+wob);ctx.scale(sz,sz);
+ const zk='z_'+k,[zim,zd]=sprK(zk),zup=zim&&zd[0]==='up';ctx.rotate(zup?wob*.6+(v.dying?.6:0):a+wob);ctx.scale(sz,sz);
  if(v.dying&&!zup)ctx.rotate(.6);
- if(SPR[zk]){if(zup&&Math.cos(a)<-.1)ctx.scale(-1,1);drawSpr(zk,0,0,0,0)}
+ if(zim){if(zup&&Math.cos(a)<-.1)ctx.scale(-1,1);drawSpr(zk,0,0,0,0)}
  else if(Lk.dog){dogShape(skin,skin,cloth,now,70);circ(10,-2,1,'#d7262e');circ(10,2,1,'#d7262e');ell(-4,1,2.5,1.6,'#6a1418')}
  else{
   const sw=Math.sin(now/170+v.id)*2.4*(moving?1:.3),reach=v.dying?5:(Lk.low?11:Lk.lean?17:15);
@@ -575,7 +588,7 @@ function drawZombie(v,now){
  }
  if(v.flash&&now-v.flash<110){ctx.globalAlpha=alpha*.8;circ(0,0,11,'#fff')}
  ctx.restore();
- if(!v.dying){const ex=Math.cos(a+wob),ey=Math.sin(a+wob);if(!SPR['z_'+k])EYES.push([p.x+ex*5.5*sz,p.y+ey*5.5*sz,-ey,ex,sz,alpha]);if(v.hp<v.max||k==='boss')hpBar(p.x,p.y-17*sz,v.hp/v.max,'#e5484d')}
+ if(!v.dying){const ex=Math.cos(a+wob),ey=Math.sin(a+wob);if(!sprK('z_'+k)[0])EYES.push([p.x+ex*5.5*sz,p.y+ey*5.5*sz,-ey,ex,sz,alpha]);if(v.hp<v.max||k==='boss')hpBar(p.x,p.y-17*sz,v.hp/v.max,'#e5484d')}
  return true;
 }
 
@@ -1105,7 +1118,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon ; à partir de la nuit 8, chaque mutation ajoute aussi une <b>frénésie meurtrière</b> (+10 % de PV et de dégâts). Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><button type="button" class="skip" data-a="artstyle">Style des cartes : ${ART_STYLE==='cartoon'?'cartoon (essai)':'réaliste'}</button><p class="ver">${VERSION}</p>`)}
+<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><button type="button" class="skip" data-a="artstyle">Style graphique : ${ART_STYLE==='cartoon'?'cartoon (essai)':'réaliste'}</button><p class="ver">${VERSION}</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son
