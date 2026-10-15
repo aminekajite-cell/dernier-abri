@@ -113,8 +113,13 @@ function drawSpr(k,x,y,a,out,mul){const im=SPR[k],d=SPRD[k];if(!im||!d)return fa
  ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore();return true}
 // seules les cartes très puissantes (chefs légendaires et évolutions secrètes) débordent du cadre
 const popOK=t=>Z.RAR[t]==='leg'||!!(Z.U[t]&&Z.U[t].evo);
-const popUrl=t=>!popOK(t)?'':ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
-const artUrl=t=>ART_TEST?ART_DIR+ART_TEST:ART_FILES.includes(t)?ART_DIR+t+'.webp':'';
+/* style des illustrations (essai) : « cartoon » utilise assets/cards_cartoon/ pour les cartes qui y ont une image, les autres gardent l'illustration actuelle */
+let ART_STYLE=(()=>{try{return localStorage.getItem('abri-style')||'real'}catch(e){return 'real'}})();
+const CART_FILES='chief_police chief_mil chief_pyro chief_trap chief_farm chief_care chief_tech chief_comm k9squad nightsnp axe snp mg butch xbow priest hunter radio'.split(' ');
+const CART_POP=CART_FILES.slice(0,10);
+const cartoon=t=>ART_STYLE==='cartoon'&&CART_FILES.includes(t);
+const popUrl=t=>!popOK(t)?'':cartoon(t)?(CART_POP.includes(t)?'assets/cards_cartoon/'+t+'_pop.webp':''):ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
+const artUrl=t=>cartoon(t)?'assets/cards_cartoon/'+t+'.webp':ART_TEST?ART_DIR+ART_TEST:ART_FILES.includes(t)?ART_DIR+t+'.webp':'';
 /* face de carte complète (style Hearthstone) : illustration dans une fenêtre arrondie, gemme de coût, bandeau du nom,
    texte d'effet, gemmes d'attaque et de PV, faction, rôle et rareté. Tout est écrit par le jeu.
    o.mini : version de la main (sans le texte d'effet) ; o.base : stats de base (collection), sinon celles de la partie (améliorations). */
@@ -142,7 +147,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v50 · 15 oct.';
+const VERSION='v51 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1020,6 +1025,7 @@ function collectionScreen(keep){const own=META.cards;
 function evoHtml(){const ev=META.evo||[];return `<h3>Évolutions secrètes (${ev.length}/${Z.EVO_KEYS.length})</h3><p>Deux cartes précises posées côte à côte se transforment en une unité unique. Elle n’entre jamais dans un deck ; quand elle tombe, ses deux cartes reviennent dans ta défausse.</p>
  <div class="deck">${Z.EVO_KEYS.map(k=>ev.includes(k)?`<div class="dk in" style="--cc:#c58cff">${svg(k)}<span><b>✦ ${Z.U[k].n}</b><em class="ce">${Z.EVO[k].map(t=>Z.U[t].n).join(' + ')}</em><br>${Z.U[k].d}</span></div>`:`<div class="dk locked" style="--cc:var(--muted)">${svg('relic')}<span><b>???</b>Pas encore découverte.</span></div>`).join('')}</div>`}
 const ACT={
+ artstyle:()=>{ART_STYLE=ART_STYLE==='cartoon'?'real':'cartoon';try{localStorage.setItem('abri-style',ART_STYLE)}catch(e){}title()},
  new:()=>prepScreen(),
  prepdeck:v=>{META.slot=+v;saveMeta(META);prepScreen()},
  prepch:v=>{PREP.ch=v;prepScreen()},
@@ -1095,7 +1101,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 4 nuits, la horde <b>mute</b> pour de bon ; à partir de la nuit 8, chaque mutation ajoute aussi une <b>frénésie meurtrière</b> (+10 % de PV et de dégâts). Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
+<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><button type="button" class="skip" data-a="artstyle">Style des cartes : ${ART_STYLE==='cartoon'?'cartoon (essai)':'réaliste'}</button><p class="ver">${VERSION}</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son
