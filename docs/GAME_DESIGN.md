@@ -459,6 +459,8 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 
 ## Le style graphique
 
+**Face des cartes (style Hearthstone, v39)** : tout est dessiné par le jeu autour de l'illustration. Fenêtre d'illustration à haut arrondi, gemme de coût (haut gauche), icônes de faction et de rôle (haut droite), losange de rareté (bleu rare, violet épique, or légendaire), bandeau du nom, cartouche du texte d'effet, ligne de type (catégorie · faction · rôle), gemmes en bas : attaque (orange) ou soin (vert) à gauche, PV (rouge) à droite. La couleur du cadre suit la catégorie. Dans la main, une version réduite sans le texte d'effet ; sur ordinateur, la carte survolée ou choisie s'affiche en grand à gauche. Le choix de l'aube, la collection et l'éditeur de deck montrent les cartes complètes.
+
 **Illustrations des cartes (en test)** : une image par carte, générée par IA, **sans aucun texte ni cadre**, au format portrait 3:4 (768 × 1024), déposée dans `assets/cards/<identifiant>.webp`. Le jeu écrit lui-même le nom, le coût, les stats, la rareté, la faction et le rôle par-dessus, ce qui garde les mises à jour et la traduction faciles. Dans `src/game.js`, `ART_FILES` liste les cartes qui ont leur image, et `ART_TEST` applique une seule image à toutes les cartes pour essayer le rendu. Sans image, la carte garde son icône. À déclarer sur Steam (contenu généré par IA).
 
 
@@ -489,6 +491,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Passage en survie sans fin (demande d'Amine : le jeu finissait trop vite et était trop facile). Ferraille plus rare à dépenser (prix ×2 à ×3), améliorations plus chères à chaque fois, reliques toutes les 5 nuits, rareté des cartes.
 
 - Fusion ×3, évolutions secrètes et niveaux par victimes (demande d'Amine, inspirés des jeux à succès du genre), plus un retour visuel plus fort. Les mutations restent permanentes et cumulatives.
+- Cartes au design complet façon Hearthstone, écriture intégrée à la carte (demande d'Amine).
 - Portée en losange et portées longues à 4, nouveau zombie Sapeur qui fait sauter les murs (demande d'Amine).
 - Rôles Tank / Soin / DPS avec provocation à 3 cases et escouades, remparts redessinés (demande d'Amine).
 - Zombies qui calculent leur chemin (contourner ou casser au plus faible), murs voisins fusionnés en remparts, Fortin = Épave + Bunker (demande d'Amine).
