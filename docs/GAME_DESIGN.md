@@ -539,4 +539,4 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Chiens : Chien 2 × 2 dégâts, coût 2 ; Chien policier 2 × 1 + étourdit, coût 1 ; Meute 4 × 2, coût 3 ; Brigade canine 2 × 3.
 - Tireurs : Tireur et Tourelle bricolée 2 dégâts/tour ; Chasseur et Garde champêtre 2 dégâts à chaque tour ; Arbalète 2 × 2 zombies à chaque tour, coût 3 ; Sniper 5 dégâts tous les 2 tours ; Mitrailleuse s'enraye 1 tour sur 4.
 - Construction : Barricade, Sacs de sable et Clôture coûtent 2 ; Épave coûte 2 ; Pneus, Barrage et Mur modulaire donnent 3 cases par carte (4 pour les autres) ; Barbelés restent à 1.
-- Zombies : bonus de PV porté de +20 % à +50 % (Rôdeur 17 PV, Coureur 12, Gonflé 45, Blindé 29), car ils mouraient avant d'atteindre le corps à corps.
+- Zombies : +50 % de PV, intégrés aux PV de base (v64, plus de bonus séparé) : Rôdeur 17, Coureur 12, Gonflé 45, Chien zombie 6, Rampant 12, Cracheur 17, Blindé 29, Hurleur 23, Sapeur 18 ; Colosse inchangé (112).

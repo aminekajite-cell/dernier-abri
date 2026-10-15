@@ -169,15 +169,15 @@ const Z=(()=>{
  Object.assign(COST,{bar:2,sand:2,fen:2,car:2,dog:2,dogs:3,xbow:3});
  const cost=t=>COST[t]??2;
  const ZT={
-  walk:{n:'Rôdeur',hp:11,spd:2,dmg:1,info:'lent'},
-  run:{n:'Coureur',hp:8,spd:1,dmg:1,info:'rapide'},
-  fat:{n:'Gonflé',hp:30,spd:3,dmg:2,info:'très lent, 2 dégâts par coup'},
-  zdog:{n:'Chien zombie',hp:4,spd:1,dmg:1,info:'rapide et fragile'},
-  crawl:{n:'Rampant',hp:8,spd:2,dmg:1,crawl:1,info:'passe sous les défenses (barricades, épaves…)'},
-  spit:{n:'Cracheur',hp:11,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
-  armor:{n:'Blindé',hp:19,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
-  howl:{n:'Hurleur',hp:15,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
-  sap:{n:'Sapeur',hp:12,spd:2,dmg:3,sap:1,info:'fonce sur les murs et explose : 15 dégâts au rempart, 3 autour, même s’il est tué avant'},
+  walk:{n:'Rôdeur',hp:17,spd:2,dmg:1,info:'lent'},
+  run:{n:'Coureur',hp:12,spd:1,dmg:1,info:'rapide'},
+  fat:{n:'Gonflé',hp:45,spd:3,dmg:2,info:'très lent, 2 dégâts par coup'},
+  zdog:{n:'Chien zombie',hp:6,spd:1,dmg:1,info:'rapide et fragile'},
+  crawl:{n:'Rampant',hp:12,spd:2,dmg:1,crawl:1,info:'passe sous les défenses (barricades, épaves…)'},
+  spit:{n:'Cracheur',hp:17,spd:2,dmg:1,spit:1,info:'crache sur ce qui est à 2 cases devant lui'},
+  armor:{n:'Blindé',hp:29,spd:2,dmg:1,armor:1,info:'encaisse 1 dégât de moins par coup, sauf le feu'},
+  howl:{n:'Hurleur',hp:23,spd:2,dmg:1,howl:2,info:'appelle 2 rôdeurs en mourant'},
+  sap:{n:'Sapeur',hp:18,spd:2,dmg:3,sap:1,info:'fonce sur les murs et explose : 15 dégâts au rempart, 3 autour, même s’il est tué avant'},
   boss:{n:'Le Colosse',hp:112,spd:3,dmg:2,boss:1,info:'boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir'}
  };
  const ZK=Object.keys(ZT);
@@ -560,7 +560,7 @@ const Z=(()=>{
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   return w}
  // les zombies ordinaires ont +20 % de PV (ils mouraient trop vite en début de partie) ; le Colosse n'est pas concerné
- const ZHP=1.5;
+ const ZHP=1; // ancien bonus de PV des zombies, désormais intégré aux PV de base (v64)
  function spawn(st,k,pos){const T=ZT[k],hp=Math.round(T.hp*(T.boss?1:ZHP)*hpMult(st.night)*(1+.2*mc(st,'peau'))*(1+FRENZY*frenzy(st))*((PLACES[st.place]||{}).hp||1));const z={id:++st.zid,k,pos,hp,max:hp,cd:zspd(st,k),style:st.zid%3};st.z.push(z);st.spawned=(st.spawned||0)+1;return z}
   // nuit du Colosse : la horde arrive en 2 vagues (le Colosse dans la 2ᵉ), avec une pause entre les deux où l'on déplace librement ses unités.
  // Toutes les autres nuits arrivent d'un seul tenant.
