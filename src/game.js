@@ -131,8 +131,8 @@ let ART_STYLE=(()=>{try{return localStorage.getItem('abri-style')||'real'}catch(
 const CART_FILES=('chief_police chief_mil chief_pyro chief_trap chief_farm chief_care chief_tech chief_comm k9squad nightsnp '+
  'gun snp sht xbow flame mg molo kid swat mortar sentry hunter turret tesla vigile doc nailer ranger rocket axe dog cop butch monk riot k9 dogs pitch amb orderly '+
  'med lamp radio cook mech siren lead solar pharma hospital priest stretch scare workshop teacher market carp canteen '+
- 'food kit rep roadmap gas molotov grenade shot flare bait patch napalm rush horn air trap wire mine spike tear firetrap fen fire clay sand bar modwall barrier bunker door car').split(' ');
-const CART_ZOMB='walk fat sap armor zdog crawl run howl spit'.split(' ');
+ 'fortin autogun tracker brasero dyn bear food kit rep roadmap gas molotov grenade shot flare bait patch napalm rush horn air trap wire mine spike tear firetrap fen fire clay sand bar modwall barrier bunker door car').split(' ');
+const CART_ZOMB='walk fat sap armor zdog crawl run howl spit boss'.split(' ');
 const CART_POP=CART_FILES.slice(0,10);
 const cartoon=t=>ART_STYLE==='cartoon'&&CART_FILES.includes(t);
 const popUrl=t=>!popOK(t)?'':cartoon(t)?(CART_POP.includes(t)?'assets/cards_cartoon/'+t+'_pop.webp':''):ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
@@ -164,7 +164,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v53 · 15 oct.';
+const VERSION='v54 · 15 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=430;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
