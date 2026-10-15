@@ -1,353 +1,280 @@
 # Prompts des illustrations et sprites
 
-Fichier de travail pour faire générer toutes les images du jeu par une IA d'image (ChatGPT / DALL·E, Midjourney, Leonardo…).
+Fichier de travail pour faire générer les images du jeu par une IA d'image (ChatGPT, Midjourney, Leonardo…).
 Le jeu écrit lui-même tout le texte des cartes : **aucune image ne doit contenir de texte**.
 
-## Ce qu'il faut savoir avant de commencer
+## Où on en est
 
-- **Effet qui sort du cadre** : réservé aux cartes très puissantes (les 8 chefs légendaires et les 10 évolutions secrètes, marquées « hero card »). Pas besoin de 2ᵉ image : je détoure moi-même le personnage pour le faire déborder du cadre. Plus il se détache du fond, meilleur est le résultat.
-- **Regard vers le joueur** : sur toutes les cartes, le personnage regarde droit vers le joueur, comme s'il cassait le 4ᵉ mur.
+- Cadre, 10 cartes de zombies et 77 illustrations de cartes : faits, en bonne résolution.
+- 26 illustrations sont en basse résolution (découpées dans un collage) : **à refaire**, voir les parties A et B.
+- Les 18 cartes qui sortent du cadre (8 chefs, 10 évolutions) sont **à refaire avec une nouvelle posture** : partie A.
+- Sprites : 4 faits (Tireur, Barricade, Piège à loup, Rôdeur), **94 à faire** : partie C.
 
-- **Effet qui sort du cadre** : réservé aux cartes très puissantes (les 8 chefs légendaires et les 10 évolutions secrètes, marquées « hero card »). Pas besoin de 2ᵉ image : je détoure moi-même le personnage pour le faire déborder du cadre. Plus il se détache du fond, meilleur est le résultat.
-- **Regard vers le joueur** : sur toutes les cartes, le personnage regarde droit vers le joueur, comme s'il cassait le 4ᵉ mur.
+## Méthode
 
-- Aucune IA ne génère d'un coup un ZIP de plus de 200 images cohérentes. On procède **par lots de 5 à 8 images**, dans **une seule conversation**, en collant le **prompt maître** au début.
-- ChatGPT (avec génération d'images et exécution de code) peut, à la fin, **rassembler les images déjà générées dans un ZIP** : c'est le dernier message ci-dessous.
-- **Nom de fichier = identifiant** (colonne « Fichier »). C'est ce qui me permet de tout brancher dans le jeu sans rien renommer.
-- Vérifie le **droit d'usage commercial** de l'outil, et pense à **déclarer le contenu IA sur Steam**.
+1. Une conversation par partie (A, B, C). Colle le **prompt maître** de la partie en premier message.
+2. Ensuite **une seule ligne par message**. Une image par message, c'est ce qui garde la pleine résolution (pas de collage).
+3. Garde l'**ordre de la liste**. Envoie-moi les images par lots de 10, en me disant le nom de la première (exemple : « C, à partir de car »).
+4. Si l'IA refuse une image (« trop violent ») : recolle le rappel en bas de page, ou passe sur Leonardo.ai ou Midjourney avec le même prompt maître.
 
-## Prompt maître (à coller une seule fois, au début de la conversation)
+---
+
+## A. Chefs et évolutions : cartes qui sortent du cadre (18 images)
+
+Le jeu détoure le personnage et fait déborder **sa tête et ses épaules au-dessus du cadre**, et ses armes sur les côtés. Pour que ça marche :
+- la tête doit être **haute dans l'image**, mais **jamais coupée** par le bord ;
+- le bas de l'image (le dernier cinquième) est caché par le parchemin : rien d'important dessous ;
+- le fond doit être **simple et sombre**, sans fumée ni flammes devant la silhouette (sinon le détourage rate).
+
+### Prompt maître A
 
 ```
 You are the art department of a dark survival horror card game about an infection outbreak, called "Dernier Abri".
-For the whole conversation, keep EXACTLY the same art direction:
+Keep EXACTLY the same art direction for the whole conversation:
+- Painted semi-realistic digital illustration, thick dark outlines, strong shadows, muted desaturated colors,
+  gritty worn survival mood. No cartoon, no pixel art, no anime.
+- Stylized PG-13 horror like a board game: no blood, no gore, no wounds.
+- NEVER any text, letters, numbers, logo, watermark, frame or border.
+
+These are HERO CARDS: the character will be cut out by software and will BREAK OUT OF THE CARD FRAME.
+Follow this composition EXACTLY for every image:
+- Portrait 3:4 (1024x1365 or larger). ONE image per message, never a collage or grid.
+- Upper-body shot (waist up), the character BIG and close, filling about 85% of the width.
+- The top of the head sits about 8% below the top edge: a small empty margin above the head, the head is NEVER cut.
+  The eyes are at about one quarter of the image height.
+- The character leans toward the viewer and looks straight into the camera (breaks the fourth wall), intense expression.
+- Weapons, tools and arms stretch out sideways toward the left and right edges, coming very close to the edges but NOT cut.
+  One hand or weapon may come toward the camera, foreshortened.
+- The bottom fifth of the image will be hidden: keep nothing important there.
+- Background: plain, dark, blurred night fog (deep blue-grey), very simple, clearly darker than the character.
+  NO smoke, flames, sparks, particles, branches or objects in front of or touching the silhouette.
+  Fire, if any, stays far behind the character, small and blurred.
+- Strong warm rim light all around the silhouette so its outline is crisp and easy to cut out.
+
+I will send one line per message: "filename | subject". Generate the image, name it with that filename, do not ask questions.
+```
+
+### Lignes A (une par message)
+
+```
+chief_police.png | a grizzled police commissioner in a long dark coat, revolver held out to the right, golden badge raised toward the viewer in his left hand
+chief_mil.png | a tough female army sergeant, light machine gun held across her chest, barrel pointing to the right edge, helmet strap undone
+chief_pyro.png | a pyromaniac in a scorched fire suit and goggles pushed on the forehead, flamethrower nozzle pointing to the left edge, fuel tank on the back
+chief_trap.png | an old poacher in a fur hat, long hunting rifle across the shoulders held with both hands, steel traps hanging from his belt
+chief_farm.png | a strong female farmer raising an axe to the right, two farm dogs' heads beside her at shoulder level on the left
+chief_care.png | a determined female doctor in a long white coat, scalpel raised in one hand, a medical bag held out to the left
+chief_tech.png | an engineer with a welding helmet flipped up, giant wrench on one shoulder, nail gun pointed to the left edge
+chief_comm.png | a small-town mayor in a tricolor sash, shouting, pistol raised high to the right, other arm stretched out to the left rallying people
+k9squad.png | a police officer leaning forward with his German shepherd, the dog's head in front of his chest, both staring at the viewer
+nightsnp.png | a hooded sniper holding a long scoped rifle diagonally across the image, scope near the right edge, a small floodlight glow far behind
+heavyflame.png | a heavily armored flamethrower trooper in a gas mask, twin fuel tanks over the shoulders, nozzle pointing to the left edge
+fortin.png | a wrecked car welded to a concrete bunker, seen from the front, low and wide, a gun barrel sticking out of the firing slit toward the viewer
+autogun.png | a homemade automatic turret with several barrels pointing at the viewer, ammo belts hanging left and right, seen from the front
+slaughter.png | a massive butcher-lumberjack, a cleaver raised on the left and an axe raised on the right, wide intimidating stance
+canteen.png | a field canteen cook-nurse with a red cross armband, holding a steaming ladle toward the viewer, a big pot in the other arm
+gang.png | three teenage kids side by side, heads at the same height, slingshots stretched toward the viewer, red, blue and green caps
+saint.png | a calm monk-priest in an orange robe with a wooden cross, arms spread wide to the left and right edges, soft light around him
+tracker.png | a camouflaged tracker with face paint, crossbow aimed to the right, hunting rifle slung on the back, its barrel above the left shoulder
+```
+
+---
+
+## B. Cartes à refaire en pleine résolution (16 images)
+
+Pas d'effet de sortie du cadre ici : composition classique.
+
+### Prompt maître B
+
+```
+You are the art department of a dark survival horror card game about an infection outbreak, called "Dernier Abri".
+Keep EXACTLY the same art direction for the whole conversation:
 - Painted semi-realistic digital illustration, thick dark outlines, strong shadows.
 - Night scene: cold blue moonlight, warm orange rim light from fire, mist, dark forest.
 - Muted, desaturated colors. Gritty, worn, survival mood. No cartoon, no pixel art, no anime.
-- BREAK THE FOURTH WALL: every character looks straight into the camera, eye contact with the viewer,
-  as if staring at the player holding the card. Tense, intense expression. Objects and traps are shown
-  close-up, facing the viewer, as if pushed toward the camera.
-- Stylized horror like a mainstream horror movie poster or a board game: NO blood, NO gore, NO wounds,
-  NO injuries, NO dead bodies. The infected look pale and sickly with glowing eyes, never wounded.
-- NEVER any text, letters, numbers, logo, watermark, frame or border in the image.
+- Objects and traps are shown close-up, facing the viewer, as if pushed toward the camera.
+  Characters look straight into the camera.
+- Stylized PG-13 horror like a board game: no blood, no gore, no wounds. The infected are pale with glowing eyes.
+- NEVER any text, letters, numbers, logo, watermark, frame or border.
+- Portrait 3:4 (1024x1365 or larger). ONE image per message, never a collage or grid.
+- Subject centered in the upper-middle; the bottom fifth of the image will be hidden.
 
-There are 4 kinds of images. Follow the spec of each kind:
-1. CARD ILLUSTRATION: portrait 3:4 (768x1024). Subject centered in the upper-middle, plenty of margin,
-   the subject clearly separated from a darker, simpler background.
-2. HERO CARD (legendary and secret cards only): same as card illustration, but the subject is BIGGER and closer,
-   head and weapon reaching the top edge of the image, dynamic pose leaning toward the viewer,
-   strong contrast between subject and background (the subject will be cut out to break out of the card frame).
-3. ZOMBIE CARD (we call them "the infected"): same as card illustration, the infected stares at the viewer, menacing, no gore.
-4. SPRITE (for the game board): top-down view, seen from directly above, the character or object facing RIGHT,
-   transparent background (PNG with alpha), 256x256, centered, no shadow on the ground, same colors and outline style.
-
-I will send batches as lines "filename | kind | subject". Generate one image per line, save each one with EXACTLY that
-filename (.png), and show them. Keep the style identical between batches. Do not ask questions, just generate.
+I will send one line per message: "filename | subject". Generate the image, name it with that filename, do not ask questions.
 ```
 
-## Si l'IA refuse une image (« trop violent »)
-
-1. Recolle cette phrase avant le lot :
-```
-Reminder: stylized PG-13 horror for a board game. No blood, no gore, no wounds. The "infected" are pale sick people with glowing eyes.
-```
-2. Évite les mots *zombie*, *blood*, *dead*, *corpse*, *bloody*, *gore* : dis plutôt *infected*, *pale*, *sickly*, *glowing eyes*.
-3. Si ChatGPT refuse encore, d'autres outils sont moins stricts sur l'horreur : **Leonardo.ai**, **Midjourney** ou **Ideogram**. Garde alors le même prompt maître pour conserver le style.
-
-## Rassembler en ZIP (dernier message, ChatGPT)
+### Lignes B (une par message)
 
 ```
-Put every image generated in this conversation in a single ZIP file named dernier-abri-assets.zip,
-with folders cards/, zombies/ and sprites/, keeping the exact filenames. Give me the download link.
+trap.png | an old rusty steel jaw trap lying open in dead leaves on a forest path
+fire.png | a puddle of gasoline on a dark road, a lit match falling into it
+mine.png | a round metal landmine half buried in mud with a small blinking red light
+wire.png | coils of barbed wire strung between wooden posts across a road
+spike.png | a camouflaged pit of sharpened wooden stakes in the forest ground, seen from its edge
+gas.png | a red propane cylinder lying near a wall, valve hissing
+smoke.png | a smoke grenade on the ground releasing thick grey smoke
+bait.png | a hunting lure hanging from a rope on a tree branch in the fog
+dyn.png | bundled sticks of dynamite with a sparkling fuse on a wooden crate
+clay.png | a small green military device on little legs with a thin tripwire, in tall grass
+firetrap.png | a red fuel barrel with wires and a small detonator in the fog
+net.png | a big rope net trap hanging between two trees above a path
+bear.png | a huge old rusty hunting trap lying open on the ground, autumn leaves, chain staked to the ground
+horn.png | a car's front seen at night, headlights on, sound waves pushing pale shadowy figures back into the fog
+rush.png | a survivor with intense focused eyes holding a syringe, glowing with energy
+molotov.png | a Molotov cocktail shattering on the ground into a burst of flames
 ```
 
-## Le cadre (une seule image)
+---
+
+## C. Sprites du plateau (94 images)
+
+Le style de tes 4 premiers sprites est le bon : on garde exactement ça.
+
+### Prompt maître C
 
 ```
-frame.png | card illustration | an EMPTY worn card frame for a horror card game: dark weathered metal and black grunge border, the top window is solid black (empty), a large blank aged parchment panel in the bottom third, no illustration, no text, no symbols
+You are the art department of a dark survival horror card game about an infection outbreak, called "Dernier Abri".
+We make SPRITES for the game board. Keep EXACTLY the same style for the whole conversation:
+- Painted semi-realistic style, thick dark outlines, strong shading, muted desaturated colors, gritty and worn.
+- Stylized PG-13: no blood, no gore, no wounds. The infected are pale and sickly with glowing eyes.
+- Seen from DIRECTLY ABOVE (top-down, bird's-eye view), like a top-down shooter game.
+- TRANSPARENT background (PNG with alpha). No ground, no grass, no floor, no cast shadow, no scenery around the subject.
+- Square image, ONE subject only, centered, filling about 85% of the image. ONE image per message, never a collage.
+- People and animals FACE RIGHT: head and weapon pointing to the right side of the image.
+- Walls and barricades: the long side is VERTICAL, from the top to the bottom of the image.
+- NEVER any text, letters, numbers, logo, watermark or border.
+
+I will send one line per message: "filename | subject". Generate the image, name it with that filename, do not ask questions.
 ```
 
-## Cartes (illustrations)
-
-Un lot = 5 à 8 lignes copiées d'un coup.
-
-### Défenses
+### Défenses (le côté long à la verticale)
 
 ```
-cards/bar.png | card illustration | a crude barricade of nailed wooden planks across a dark forest road
-cards/car.png | card illustration | a burnt-out rusty car wreck pushed across a road as a barrier
-cards/fen.png | card illustration | an improvised electric fence crackling with blue sparks, wires and car batteries
-cards/sand.png | card illustration | a wall of stacked sandbags with a tarp
-cards/door.png | card illustration | a heavy armored steel door bolted into a wall of debris
-cards/tire.png | card illustration | a wall of stacked old tires soaked in fuel
-cards/barrier.png | card illustration | red and white police barriers blocking a street
-cards/bunker.png | card illustration | a small concrete bunker with a firing slit
-cards/brasero.png | card illustration | a burning brazier in a metal barrel
-cards/modwall.png | card illustration | modular sheet metal wall panels bolted together
+car.png | a burnt-out rusty car wreck, seen from above, lying vertically
+fen.png | an improvised electric fence: three posts in a vertical line with wires between them, small blue sparks
+sand.png | a wall of stacked sandbags in a vertical line
+door.png | a heavy armored steel door lying vertically, riveted
+tire.png | three old tires stacked in a vertical line
+barrier.png | a red and white police barrier, vertical
+bunker.png | a small concrete bunker roof seen from above, a dark firing slit on the right side
+brasero.png | a burning brazier in a metal barrel, seen from above, glowing embers
+modwall.png | modular sheet metal wall panels bolted together in a vertical line
+fortin.png | a car wreck welded to a concrete bunker, seen from above, vertical, a gun barrel pointing right
 ```
 
-### Tireurs
+### Tireurs (tournés vers la droite)
 
 ```
-cards/gun.png | card illustration | a lone survivor in a worn olive jacket and cap with an old bolt-action rifle, crouched behind a barricade
-cards/snp.png | card illustration | a hooded sniper lying on a rooftop with a long scoped rifle
-cards/sht.png | card illustration | a grim survivor with a pump shotgun and a bandolier
-cards/xbow.png | card illustration | a hunter aiming a crossbow from behind a tree
-cards/flame.png | card illustration | a survivor in a gas mask with a homemade flamethrower and fuel tank, fire roaring
-cards/mg.png | card illustration | a soldier with a heavy machine gun on a bipod behind sandbags
-cards/molo.png | card illustration | a hooded figure about to throw a burning Molotov cocktail
-cards/kid.png | card illustration | a fierce teenage kid with a slingshot and a red cap
-cards/swat.png | card illustration | an elite tactical police marksman with a scoped rifle and helmet
-cards/mortar.png | card illustration | a soldier loading a mortar shell into a tube
-cards/sentry.png | card illustration | an automatic sentry gun turret on a tripod with an ammo belt
-cards/hunter.png | card illustration | a hunter in an orange cap with a hunting rifle
-cards/turret.png | card illustration | a rusty homemade turret built from scrap and a hunting rifle
-cards/tesla.png | card illustration | a homemade tesla coil throwing lightning arcs
-cards/vigile.png | card illustration | a security guard with a flashlight and a pistol
-cards/doc.png | card illustration | a doctor on night duty with a pistol and a stethoscope
-cards/nailer.png | card illustration | a handyman firing a pneumatic nail gun
-cards/ranger.png | card illustration | a country game warden with a hunting rifle and a badge
-cards/chief_police.png | hero card | a grizzled police commissioner in a long coat with a revolver and a golden badge, heroic pose
-cards/chief_mil.png | hero card | a tough female army sergeant with a light machine gun, heroic pose
-cards/chief_pyro.png | hero card | a pyromaniac in a fire suit with a flamethrower, flames everywhere, heroic pose
-cards/chief_trap.png | hero card | an old poacher in a fur hat with a long hunting rifle and traps on his belt, heroic pose
-cards/rocket.png | card illustration | a survivor aiming a rocket launcher, backblast smoke
+snp.png | a hooded sniper with a long scoped rifle pointing right
+sht.png | a grim survivor with a pump shotgun pointing right, bandolier across the chest
+xbow.png | a hunter aiming a crossbow to the right
+flame.png | a survivor in a gas mask with a flamethrower pointing right, fuel tank on the back
+mg.png | a soldier with a heavy machine gun on a bipod pointing right
+molo.png | a hooded figure holding a burning Molotov cocktail, arm stretched to the right
+kid.png | a teenage kid in a red cap with a slingshot aimed to the right
+swat.png | a tactical police marksman with a helmet and a scoped rifle pointing right
+mortar.png | a soldier crouched next to a mortar tube tilted to the right
+sentry.png | an automatic sentry gun on a tripod, barrel pointing right, ammo belt
+hunter.png | a hunter in an orange cap with a hunting rifle pointing right
+turret.png | a rusty homemade turret built from scrap metal, a hunting rifle barrel pointing right
+tesla.png | a homemade tesla coil seen from above, copper rings, small lightning arcs around it
+vigile.png | a security guard with a flashlight and a pistol pointing right
+doc.png | a doctor in a white coat with a stethoscope and a pistol pointing right
+nailer.png | a handyman with a pneumatic nail gun pointing right
+ranger.png | a game warden in a ranger hat with a hunting rifle pointing right
+rocket.png | a survivor with a rocket launcher on the shoulder pointing right
+chief_police.png | a police commissioner in a long dark coat with a revolver pointing right, golden badge
+chief_mil.png | a female army sergeant in a helmet with a light machine gun pointing right
+chief_pyro.png | a pyromaniac in a fire suit with a flamethrower pointing right
+chief_trap.png | an old poacher in a fur hat with a long hunting rifle pointing right, traps on the belt
+nightsnp.png | a hooded sniper with a long scoped rifle pointing right and a small floodlight beside him
+heavyflame.png | a heavily armored flamethrower trooper with twin fuel tanks on the back, nozzle pointing right
+autogun.png | a homemade multi-barrel automatic turret, barrels pointing right
+gang.png | three kids in red, blue and green caps side by side, slingshots aimed to the right
+tracker.png | a camouflaged tracker with a crossbow aimed to the right
 ```
 
-### Corps à corps
+### Corps à corps (tournés vers la droite)
 
 ```
-cards/axe.png | card illustration | a burly lumberjack in a plaid shirt holding a big axe, determined
-cards/dog.png | card illustration | a loyal scruffy dog growling, guarding a doorway
-cards/cop.png | card illustration | a police officer in a torn uniform with a riot baton
-cards/butch.png | card illustration | a butcher in a stained apron holding a cleaver, stern look
-cards/monk.png | card illustration | a calm monk in an orange robe with bare hands, standing firm against the horde
-cards/riot.png | card illustration | a riot police officer with a big transparent shield and a helmet
-cards/k9.png | card illustration | a police German shepherd in a vest, alert and growling
-cards/dogs.png | card illustration | a pack of three farm dogs growling, protective
-cards/pitch.png | card illustration | a farmer with a pitchfork in a plaid shirt
-cards/amb.png | card illustration | an ambulance driver in a reflective jacket blocking with a stretcher
-cards/orderly.png | card illustration | a burly hospital orderly in scrubs with taped fists
-cards/chief_farm.png | hero card | a strong female farmer with an axe and two dogs, heroic pose
+axe.png | a burly lumberjack in a plaid shirt holding a big axe to the right
+dog.png | a scruffy brown dog with a red collar facing right
+cop.png | a police officer with a riot baton held to the right
+butch.png | a butcher in an apron holding a cleaver to the right
+monk.png | a monk in an orange robe, bare hands raised to the right
+riot.png | a riot police officer with a big transparent shield on the right side and a helmet
+k9.png | a police German shepherd in a vest facing right
+dogs.png | two farm dogs side by side facing right
+pitch.png | a farmer in a plaid shirt with a pitchfork pointing right
+amb.png | an ambulance driver in a reflective jacket pushing a stretcher to the right
+orderly.png | a burly hospital orderly in green scrubs with taped fists, facing right
+chief_farm.png | a strong female farmer with an axe to the right and a dog at her side
+k9squad.png | a police officer and his German shepherd side by side, facing right
+slaughter.png | a massive man with a cleaver and an axe, both held to the right
+saint.png | a monk-priest in an orange robe with a wooden cross, soft light around him, facing right
 ```
 
 ### Soutien
 
 ```
-cards/med.png | card illustration | a tired nurse with a medical bag and a red cross armband
-cards/lamp.png | card illustration | a powerful floodlight on a tripod cutting through the fog
-cards/radio.png | card illustration | an old military radio set with a glowing dial on a table
-cards/cook.png | card illustration | a cook stirring a big pot of soup over a fire in a shelter
-cards/mech.png | card illustration | a mechanic with a wrench and grease-stained overalls repairing a wall
-cards/siren.png | card illustration | a rooftop alarm siren with a flashing red light
-cards/lead.png | card illustration | a group leader raising a pistol and shouting orders
-cards/solar.png | card illustration | a makeshift solar panel wired to car batteries
-cards/pharma.png | card illustration | a pharmacist in a white coat holding pill bottles
-cards/hospital.png | card illustration | a field hospital tent with a red cross
-cards/priest.png | card illustration | a priest with a bible and a cross, praying amid the chaos
-cards/stretch.png | card illustration | a stretcher bearer in a hi-vis vest carrying a stretcher
-cards/scare.png | card illustration | a creepy scarecrow on a pole in a field
-cards/workshop.png | card illustration | a cluttered workshop bench with tools and sparks
-cards/teacher.png | card illustration | a schoolteacher holding a book and a lantern, children behind her
-cards/market.png | card illustration | a makeshift barter market stall with scrap and supplies
-cards/carp.png | card illustration | a carpenter with a hammer and planks
-cards/chief_care.png | hero card | a determined female doctor in a long coat holding a scalpel, heroic pose
-cards/chief_tech.png | hero card | an engineer in a welding helmet with a giant wrench and nail gun, heroic pose
-cards/chief_comm.png | hero card | a small-town mayor in a sash rallying people with a pistol raised, heroic pose
+med.png | a nurse with a medical bag and a red cross armband, facing right
+lamp.png | a floodlight on a tripod seen from above, light pointing right
+radio.png | an old military radio set seen from above, glowing dial, antenna
+cook.png | a cook stirring a big pot of soup, seen from above, facing right
+mech.png | a mechanic in overalls with a big wrench, facing right
+siren.png | an alarm siren on a small stand seen from above, red light
+lead.png | a group leader raising a pistol, facing right
+solar.png | a makeshift solar panel seen from above, wired to a car battery
+pharma.png | a pharmacist in a white coat holding pill bottles, facing right
+hospital.png | a field hospital tent seen from above, white roof with a red cross
+priest.png | a priest in black holding a bible and a cross, facing right
+stretch.png | a stretcher bearer in a hi-vis vest carrying a folded stretcher, facing right
+scare.png | a scarecrow seen from above, arms spread wide, straw hat
+workshop.png | a cluttered workbench with tools seen from above
+teacher.png | a schoolteacher holding a book and a lantern, facing right
+market.png | a barter market stall seen from above, striped awning, crates of supplies
+carp.png | a carpenter with a hammer and planks under the arm, facing right
+chief_care.png | a female doctor in a long white coat holding a scalpel, facing right
+chief_tech.png | an engineer in a welding helmet with a giant wrench, facing right
+chief_comm.png | a mayor in a tricolor sash with a pistol raised, facing right
+canteen.png | a field canteen seen from above: a big soup pot on a stove and a small table
 ```
 
-### Pièges
+### Pièges (vus du dessus, centrés)
 
 ```
-cards/trap.png | card illustration | an old rusty steel trap hidden in dead leaves on a forest path
-cards/fire.png | card illustration | a puddle of gasoline on a dark road, about to ignite
-cards/mine.png | card illustration | a round metal landmine half buried in mud with a small blinking red light
-cards/wire.png | card illustration | coils of barbed wire strung between wooden posts
-cards/spike.png | card illustration | a camouflaged pit of sharpened wooden poles in the forest ground, seen from its edge
-cards/gas.png | card illustration | a red propane cylinder lying near a wall
-cards/smoke.png | card illustration | a smoke grenade releasing thick grey smoke
-cards/bait.png | card illustration | a hunting lure hanging from a rope on a tree branch in the fog
-cards/dyn.png | card illustration | bundled sticks of dynamite with a sparkling fuse on a crate
-cards/clay.png | card illustration | a small green military device on little legs with a thin wire, in tall grass
-cards/firetrap.png | card illustration | a red fuel barrel with wires and a small detonator in the fog
-cards/net.png | card illustration | a big rope net trap hanging between two trees
-cards/bear.png | card illustration | a huge old rusty hunting trap lying open on the ground, autumn leaves
+fire.png | a puddle of gasoline seen from above, iridescent, small flames at the edge
+mine.png | a round metal landmine seen from above, small red light
+wire.png | a coil of barbed wire between two wooden posts, vertical
+spike.png | a pit of sharpened wooden stakes seen from above
+gas.png | a red propane cylinder lying on its side, seen from above
+smoke.png | a smoke grenade seen from above, grey smoke puffing out
+bait.png | a chunk of raw meat bait on the ground, seen from above
+dyn.png | three sticks of dynamite tied together with a lit fuse, seen from above
+clay.png | a small green military device on little legs, seen from above
+firetrap.png | a red fuel barrel seen from above, wires and a detonator on its lid
+net.png | a rope net spread flat on the ground, seen from above
+bear.png | a big open rusty hunting trap seen from above, teeth all around, chain
 ```
 
-### Objets
+### Zombies (tournés vers la droite, bras tendus vers la droite)
 
 ```
-cards/food.png | card illustration | a stack of dented canned food on a shelf
-cards/rep.png | card illustration | a toolbox with hammers, nails and duct tape
-cards/kit.png | card illustration | an open first aid kit with bandages
-cards/coffee.png | card illustration | a steaming tin mug of black coffee by a lantern
-cards/roadmap.png | card illustration | a worn road map with routes circled in red marker
-cards/flare.png | card illustration | a red distress flare burning bright in the night sky
+z_run.png | a lean pale infected person running to the right, arms reaching forward
+z_fat.png | a huge bloated pale infected figure, purple-grey skin, arms reaching right
+z_zdog.png | an infected dog with mangy grey fur and glowing red eyes, facing right
+z_crawl.png | a pale infected figure crawling low on the ground, facing right
+z_spit.png | an infected figure with a swollen green throat, glowing green liquid at the mouth, facing right
+z_armor.png | an infected figure in old riot armor and a cracked helmet, facing right
+z_howl.png | a pale infected figure screaming, head thrown back, facing right
+z_sap.png | an infected miner in a helmet with dynamite sticks strapped on the back, small red light, facing right
+z_boss.png | a gigantic hulking infected brute with bony spikes on the shoulders, glowing eyes, facing right
 ```
-
-### Réactions
-
-```
-cards/tear.png | card illustration | a tear gas canister spewing white gas
-cards/napalm.png | card illustration | a wall of napalm fire engulfing a road
-cards/air.png | card illustration | a military jet flying low at night, bright flashes on the horizon
-cards/grenade.png | card illustration | a hand grenade in mid-air about to explode
-cards/shot.png | card illustration | a rifle barrel poking out of a shelter window, muzzle flash
-cards/patch.png | card illustration | hands quickly hammering planks over a broken wall
-cards/molotov.png | card illustration | a Molotov cocktail shattering into flames
-cards/horn.png | card illustration | a car horn blaring, sound waves pushing shadowy figures back into the fog
-cards/rush.png | card illustration | a survivor with intense focused eyes holding a syringe, glowing with energy
-```
-
-### Évolutions secrètes
-
-```
-cards/k9squad.png | hero card | a police officer and his German shepherd charging together
-cards/nightsnp.png | hero card | a sniper lit by a floodlight beam on a rooftop
-cards/heavyflame.png | hero card | a heavily armored flamethrower trooper with twin fuel tanks
-cards/fortin.png | hero card | a fortified car wreck welded to a concrete bunker
-cards/autogun.png | hero card | an automatic gun turret built by a mechanic, multiple barrels
-cards/slaughter.png | hero card | a massive man holding a cleaver and an axe, heroic and intimidating pose
-cards/canteen.png | hero card | a field canteen with a nurse and a cook serving soup
-cards/gang.png | hero card | a gang of kids with slingshots on a rooftop
-cards/saint.png | hero card | a calm monk-priest glowing with soft light, standing firm in the mist
-cards/tracker.png | hero card | a camouflaged tracker with a crossbow and a hunting rifle
-```
-
-## Cartes de zombies
-
-Pour le bestiaire (écran « Voir les cartes et les zombies »).
-
-```
-zombies/walk.png | zombie card | a pale sickly infected person shambling slowly, torn old clothes, glowing eyes, horror movie poster style
-zombies/run.png | zombie card | a lean pale infected person sprinting toward the viewer, glowing eyes
-zombies/fat.png | zombie card | a huge bloated pale infected figure, swollen, purple-grey skin
-zombies/zdog.png | zombie card | an infected dog with mangy grey fur and glowing red eyes, growling
-zombies/crawl.png | zombie card | a pale infected figure crawling low on the ground through fog
-zombies/spit.png | zombie card | an infected figure with a swollen throat spitting glowing green liquid
-zombies/armor.png | zombie card | an infected figure wearing old riot armor and a cracked helmet, glowing eyes
-zombies/howl.png | zombie card | a pale infected figure screaming at the sky, mist swirling
-zombies/sap.png | zombie card | an infected miner in a helmet carrying a crate of old mining dynamite, a small red light blinking
-zombies/boss.png | zombie card | a gigantic hulking infected brute, three meters tall, bony spikes on its shoulders, glowing eyes, the boss
-```
-
-## Sprites du plateau
-
-Vue du dessus, tournée vers la droite, fond transparent. Le jeu les fait pivoter et les anime lui-même.
-**À faire en dernier** : aujourd'hui le plateau est dessiné en code ; brancher des sprites demande un travail de mon côté, et il vaut mieux tester d'abord 3 ou 4 sprites pour vérifier que la vue du dessus reste lisible.
-
-### Unités, défenses et pièges
-```
-sprites/bar.png | sprite | top-down view of a crude barricade of nailed wooden planks across a dark forest road
-sprites/car.png | sprite | top-down view of a burnt-out rusty car wreck pushed across a road as a barrier
-sprites/fen.png | sprite | top-down view of an improvised electric fence crackling with blue sparks, wires and car batteries
-sprites/sand.png | sprite | top-down view of a wall of stacked sandbags with a tarp
-sprites/door.png | sprite | top-down view of a heavy armored steel door bolted into a wall of debris
-sprites/tire.png | sprite | top-down view of a wall of stacked old tires soaked in fuel
-sprites/gun.png | sprite | top-down view of a lone survivor in a worn olive jacket and cap with an old bolt-action rifle, crouched behind a barricade
-sprites/snp.png | sprite | top-down view of a hooded sniper lying on a rooftop with a long scoped rifle
-sprites/sht.png | sprite | top-down view of a grim survivor with a pump shotgun and a bandolier
-sprites/xbow.png | sprite | top-down view of a hunter aiming a crossbow from behind a tree
-sprites/flame.png | sprite | top-down view of a survivor in a gas mask with a homemade flamethrower and fuel tank, fire roaring
-sprites/mg.png | sprite | top-down view of a soldier with a heavy machine gun on a bipod behind sandbags
-sprites/molo.png | sprite | top-down view of a hooded figure about to throw a burning Molotov cocktail
-sprites/kid.png | sprite | top-down view of a fierce teenage kid with a slingshot and a red cap
-sprites/axe.png | sprite | top-down view of a burly lumberjack in a plaid shirt holding a big axe, determined
-sprites/dog.png | sprite | top-down view of a loyal scruffy dog growling, guarding a doorway
-sprites/cop.png | sprite | top-down view of a police officer in a torn uniform with a riot baton
-sprites/butch.png | sprite | top-down view of a butcher in a stained apron holding a cleaver, stern look
-sprites/monk.png | sprite | top-down view of a calm monk in an orange robe with bare hands, standing firm against the horde
-sprites/med.png | sprite | top-down view of a tired nurse with a medical bag and a red cross armband
-sprites/lamp.png | sprite | top-down view of a powerful floodlight on a tripod cutting through the fog
-sprites/radio.png | sprite | top-down view of an old military radio set with a glowing dial on a table
-sprites/cook.png | sprite | top-down view of a cook stirring a big pot of soup over a fire in a shelter
-sprites/mech.png | sprite | top-down view of a mechanic with a wrench and grease-stained overalls repairing a wall
-sprites/siren.png | sprite | top-down view of a rooftop alarm siren with a flashing red light
-sprites/lead.png | sprite | top-down view of a group leader raising a pistol and shouting orders
-sprites/solar.png | sprite | top-down view of a makeshift solar panel wired to car batteries
-sprites/trap.png | sprite | top-down view of an old rusty steel trap hidden in dead leaves on a forest path
-sprites/fire.png | sprite | top-down view of a puddle of gasoline on a dark road, about to ignite
-sprites/mine.png | sprite | top-down view of a round metal landmine half buried in mud with a small blinking red light
-sprites/wire.png | sprite | top-down view of coils of barbed wire strung between wooden posts
-sprites/spike.png | sprite | top-down view of a camouflaged pit of sharpened wooden poles in the forest ground, seen from its edge
-sprites/gas.png | sprite | top-down view of a red propane cylinder lying near a wall
-sprites/smoke.png | sprite | top-down view of a smoke grenade releasing thick grey smoke
-sprites/bait.png | sprite | top-down view of a hunting lure hanging from a rope on a tree branch in the fog
-sprites/dyn.png | sprite | top-down view of bundled sticks of dynamite with a sparkling fuse on a crate
-sprites/riot.png | sprite | top-down view of a riot police officer with a big transparent shield and a helmet
-sprites/k9.png | sprite | top-down view of a police German shepherd in a vest, alert and growling
-sprites/barrier.png | sprite | top-down view of red and white police barriers blocking a street
-sprites/swat.png | sprite | top-down view of an elite tactical police marksman with a scoped rifle and helmet
-sprites/mortar.png | sprite | top-down view of a soldier loading a mortar shell into a tube
-sprites/sentry.png | sprite | top-down view of an automatic sentry gun turret on a tripod with an ammo belt
-sprites/clay.png | sprite | top-down view of a small green military device on little legs with a thin wire, in tall grass
-sprites/bunker.png | sprite | top-down view of a small concrete bunker with a firing slit
-sprites/pharma.png | sprite | top-down view of a pharmacist in a white coat holding pill bottles
-sprites/hospital.png | sprite | top-down view of a field hospital tent with a red cross
-sprites/priest.png | sprite | top-down view of a priest with a bible and a cross, praying amid the chaos
-sprites/stretch.png | sprite | top-down view of a stretcher bearer in a hi-vis vest carrying a stretcher
-sprites/brasero.png | sprite | top-down view of a burning brazier in a metal barrel
-sprites/firetrap.png | sprite | top-down view of a red fuel barrel with wires and a small detonator in the fog
-sprites/net.png | sprite | top-down view of a big rope net trap hanging between two trees
-sprites/bear.png | sprite | top-down view of a huge old rusty hunting trap lying open on the ground, autumn leaves
-sprites/hunter.png | sprite | top-down view of a hunter in an orange cap with a hunting rifle
-sprites/dogs.png | sprite | top-down view of a pack of three farm dogs growling, protective
-sprites/pitch.png | sprite | top-down view of a farmer with a pitchfork in a plaid shirt
-sprites/scare.png | sprite | top-down view of a creepy scarecrow on a pole in a field
-sprites/turret.png | sprite | top-down view of a rusty homemade turret built from scrap and a hunting rifle
-sprites/workshop.png | sprite | top-down view of a cluttered workshop bench with tools and sparks
-sprites/modwall.png | sprite | top-down view of modular sheet metal wall panels bolted together
-sprites/tesla.png | sprite | top-down view of a homemade tesla coil throwing lightning arcs
-sprites/teacher.png | sprite | top-down view of a schoolteacher holding a book and a lantern, children behind her
-sprites/market.png | sprite | top-down view of a makeshift barter market stall with scrap and supplies
-sprites/vigile.png | sprite | top-down view of a security guard with a flashlight and a pistol
-sprites/carp.png | sprite | top-down view of a carpenter with a hammer and planks
-sprites/amb.png | sprite | top-down view of an ambulance driver in a reflective jacket blocking with a stretcher
-sprites/doc.png | sprite | top-down view of a doctor on night duty with a pistol and a stethoscope
-sprites/orderly.png | sprite | top-down view of a burly hospital orderly in scrubs with taped fists
-sprites/nailer.png | sprite | top-down view of a handyman firing a pneumatic nail gun
-sprites/ranger.png | sprite | top-down view of a country game warden with a hunting rifle and a badge
-sprites/chief_police.png | sprite | top-down view of a grizzled police commissioner in a long coat with a revolver and a golden badge, heroic pose
-sprites/chief_mil.png | sprite | top-down view of a tough female army sergeant with a light machine gun, heroic pose
-sprites/chief_care.png | sprite | top-down view of a determined female doctor in a long coat holding a scalpel, heroic pose
-sprites/chief_pyro.png | sprite | top-down view of a pyromaniac in a fire suit with a flamethrower, flames everywhere, heroic pose
-sprites/chief_trap.png | sprite | top-down view of an old poacher in a fur hat with a long hunting rifle and traps on his belt, heroic pose
-sprites/chief_farm.png | sprite | top-down view of a strong female farmer with an axe and two dogs, heroic pose
-sprites/chief_tech.png | sprite | top-down view of an engineer in a welding helmet with a giant wrench and nail gun, heroic pose
-sprites/chief_comm.png | sprite | top-down view of a small-town mayor in a sash rallying people with a pistol raised, heroic pose
-sprites/rocket.png | sprite | top-down view of a survivor aiming a rocket launcher, backblast smoke
-sprites/k9squad.png | sprite | top-down view of a police officer and his German shepherd charging together
-sprites/nightsnp.png | sprite | top-down view of a sniper lit by a floodlight beam on a rooftop
-sprites/heavyflame.png | sprite | top-down view of a heavily armored flamethrower trooper with twin fuel tanks
-sprites/fortin.png | sprite | top-down view of a fortified car wreck welded to a concrete bunker
-sprites/autogun.png | sprite | top-down view of an automatic gun turret built by a mechanic, multiple barrels
-sprites/slaughter.png | sprite | top-down view of a massive man holding a cleaver and an axe, heroic and intimidating pose
-sprites/canteen.png | sprite | top-down view of a field canteen with a nurse and a cook serving soup
-sprites/gang.png | sprite | top-down view of a gang of kids with slingshots on a rooftop
-sprites/saint.png | sprite | top-down view of a calm monk-priest glowing with soft light, standing firm in the mist
-sprites/tracker.png | sprite | top-down view of a camouflaged tracker with a crossbow and a hunting rifle
-```
-
-### Zombies
-```
-sprites/z_walk.png | sprite | top-down view of a pale sickly infected person shambling slowly, torn old clothes, glowing eyes, horror movie poster style
-sprites/z_run.png | sprite | top-down view of a lean pale infected person sprinting toward the viewer, glowing eyes
-sprites/z_fat.png | sprite | top-down view of a huge bloated pale infected figure, swollen, purple-grey skin
-sprites/z_zdog.png | sprite | top-down view of an infected dog with mangy grey fur and glowing red eyes, growling
-sprites/z_crawl.png | sprite | top-down view of a pale infected figure crawling low on the ground through fog
-sprites/z_spit.png | sprite | top-down view of an infected figure with a swollen throat spitting glowing green liquid
-sprites/z_armor.png | sprite | top-down view of an infected figure wearing old riot armor and a cracked helmet, glowing eyes
-sprites/z_howl.png | sprite | top-down view of a pale infected figure screaming at the sky, mist swirling
-sprites/z_sap.png | sprite | top-down view of an infected miner in a helmet carrying a crate of old mining dynamite, a small red light blinking
-sprites/z_boss.png | sprite | top-down view of a gigantic hulking infected brute, three meters tall, bony spikes on its shoulders, glowing eyes, the boss
-```
-
-### Décor
-```
-sprites/shelter.png | sprite | top-down view of a small house with a red tiled roof, boarded windows, a chimney
-sprites/ground.png | card illustration | seamless top-down texture of dark grass, mud and a dirt road crossing, night, no objects
-```
-
 
 ---
-Total : 1 cadre, 103 illustrations de cartes, 10 cartes de zombies, 100 sprites.
+
+## Si l'IA refuse une image
+
+Recolle ce rappel avant la ligne :
+```
+Reminder: stylized PG-13 horror for a board game. No blood, no gore, no wounds. The "infected" are pale sick people with glowing eyes.
+```
+Évite les mots *zombie*, *blood*, *dead*, *corpse*, *gore* : dis plutôt *infected*, *pale*, *sickly*, *glowing eyes*.
