@@ -590,3 +590,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Déplacement libre** : le jour, tout ce qui est posé (unités, murs, pièges) se déplace sans limite. Les murs recalculent leur bonus de liaison.
 - **Factions** : paliers à 2, 3 et 5 unités (avant 4, 6, 8). Seules les unités comptent, pas les murs ni les pièges. Palier 3 (équipe complète) : +1 dégât et +2 PV pour toute la faction. Alliances dès 2 unités dans chaque faction.
 - **Frénésie meurtrière douce** : moins de zombies en plus chaque nuit (croissance divisée par 2), mais dès la nuit 4 leurs PV montent de 12 % des PV de base par nuit (avant 8 %) et leurs dégâts de +1 toutes les 10 nuits (avant 20). Croissance linéaire, jamais exponentielle. Affichée dans la barre « Cette nuit ».
+
+**v74** : un zombie encore dans la forêt (anneau extérieur) ne peut être ni ciblé ni blessé, par rien (tirs, explosions, réactions, munitions). Il faut qu’il entre sur la carte. Les Cracheurs ne crachent pas depuis la forêt.

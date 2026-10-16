@@ -68,6 +68,9 @@ check('factions : paliers à 2, 3 et 5 unités ; murs et pièges ne comptent pas
 check('équipe complète : +2 PV',()=>{const st=fresh();['snp','mg','sht','mortar'].forEach((t,k)=>st.grid[10+k]={t,hp:3});const u={t:'snp',hp:3};const a=Z.maxHp(st,u);st.grid[20]=u;eq(Z.maxHp(st,u),a+2)});
 check('frénésie : +12 % de PV par nuit dès la nuit 4, +1 dégât toutes les 10 nuits',()=>{ok(Math.abs(Z.hpMult(4)-1.12)<1e-9);eq(Z.dmgBonus(10),1);eq(Z.dmgBonus(9),0)});
 
+check('zombie dans la forêt : intouchable',()=>{const st=fresh();st.grid[1*9+4]={t:'gun',hp:3};Z.startNight(st,rng(5));st.pending=[];
+ st.z=[{id:1,k:'walk',pos:4,hp:5,max:5,cd:99}];for(let k=0;k<3;k++)Z.step(st);eq(st.z[0].hp,5)});
+
 /* ---------- 4. nuits aléatoires ---------- */
 const PLACE=PLAY.filter(t=>!Z.U[t].react&&!Z.U[t].instant&&!Z.U[t].onUnit);
 const NIGHTS=+process.env.NIGHTS||300;let maxZ=0,slow=0,worst=0;

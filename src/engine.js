@@ -496,9 +496,9 @@ const Z=(()=>{
  function pay(st,k){const c=shopCost(st,k);if(st.scrap<c||(k==='ammo'&&(st.ammo||0)>=AMMO_MAX))return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(maxS(st),st.shelter+3);if(k==='ammo')st.ammo=(st.ammo||0)+1;return true}
  // munitions anti-Colosse : achetées au troc, tirées pendant la nuit sur le Colosse (ignorent l'armure)
  const AMMO_MAX=3,AMMO_DMG=30;
- const bossAlive=st=>st.z.some(z=>z.hp>0&&ZT[z.k].boss);
+ const bossAlive=st=>st.z.some(z=>z.hp>0&&ZT[z.k].boss&&!isEdge(z.pos));
  const ammoDmg=z=>15+Math.ceil(.25*z.max);
- function fireAmmo(st){if(!(st.ammo>0))return null;const z=st.z.filter(z=>z.hp>0&&ZT[z.k].boss).sort((a,b)=>a.hp-b.hp)[0];if(!z)return null;st.ammo--;const ev=[];
+ function fireAmmo(st){if(!(st.ammo>0))return null;const z=st.z.filter(z=>z.hp>0&&ZT[z.k].boss&&!isEdge(z.pos)).sort((a,b)=>a.hp-b.hp)[0];if(!z)return null;st.ammo--;const ev=[];
   hit(st,z,ammoDmg(z),ev,-1,1);ev.push({i:C,k:'shot',zid:z.id});
   for(const o of st.z)if(o.hp<=0&&!o.dead){o.dead=1;st.kills++;st.scrap+=ZT[o.k].boss?15:1;ev.push({i:o.pos,k:'die',zid:o.id,boss:!!ZT[o.k].boss})}
   st.z=st.z.filter(z=>z.hp>0);return ev}
@@ -626,14 +626,15 @@ const Z=(()=>{
   st.z=[];st.tick=0}
  const power=st=>st.event.id!=='coupure'||st.relics.includes('groupe')||has(st,'solar');
  const lampB=(st,i,pow)=>pow?around(i).reduce((s,j)=>s+(st.grid[j]&&st.grid[j].t==='lamp'?stat(st,'lamp').buff:0),0):0;
- function hit(st,z,d,ev,src,fire){if(!fire){const a=(ZT[z.k].armor||0)+(z.k==='walk'?Math.min(3,mc(st,'carapace')):0);if(a)d=Math.max(0,d-a)}const was=z.hp;z.hp-=d;ev.push({i:z.pos,txt:d?'−'+d:'0',k:'hit',zid:z.id,src});return was>0&&z.hp<=0}
+ // un zombie encore dans la forêt (anneau extérieur) ne peut pas être touché : il faut qu'il entre sur la carte
+ function hit(st,z,d,ev,src,fire){if(isEdge(z.pos))return false;if(!fire){const a=(ZT[z.k].armor||0)+(z.k==='walk'?Math.min(3,mc(st,'carapace')):0);if(a)d=Math.max(0,d-a)}const was=z.hp;z.hp-=d;ev.push({i:z.pos,txt:d?'−'+d:'0',k:'hit',zid:z.id,src});return was>0&&z.hp<=0}
  function explode(st,i,d,ev){st.z.filter(o=>o.hp>0&&cheb(o.pos,i)<=1).forEach(o=>hit(st,o,d,ev,i,1));ev.push({i,k:'boom'})}
  // la cible d'un zombie : le leurre (Sirène, Épouvantail) ou le Tank le plus proche à portée de provocation, sinon l'abri
  function lureTarget(st,p){let best=C,bd=99;for(let j=0;j<st.grid.length;j++){const u=st.grid[j];if(!u)continue;const r=U[u.t].lure||(roleOf(u.t)==='tank'?TAUNT:0);if(!r)continue;const d=cheb(p,j);if(d<=r&&d<bd){bd=d;best=j}}return best}
  const nbRoles=(st,i)=>{const r=new Set();for(const j of around(i)){const v=st.grid[j];if(v)r.add(roleOf(v.t))}return r};
  function squad(st,i){const u=st.grid[i];if(!u)return false;const me=roleOf(u.t);if(!me)return false;const r=nbRoles(st,i);r.add(me);return r.has('tank')&&r.has('heal')&&r.has('dps')}
  function attack(st,i,u,D,rng,dmg,ev){
-  const inR=()=>st.z.filter(z=>z.hp>0&&inRange(z.pos,i,rng));
+  const inR=()=>st.z.filter(z=>z.hp>0&&!isEdge(z.pos)&&inRange(z.pos,i,rng));
   const got=k=>{if(k){u.kills=(u.kills||0)+1;u.nk=(u.nk||0)+1;
    if(D.cat==='melee'&&ally(st,'fieldcare'))u.hp=Math.min(maxHp(st,u),u.hp+1);
    if(D.healKill)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].block&&v.hp<maxHp(st,v)){v.hp++;ev.push({i:j,k:'heal'})}})}};
@@ -709,7 +710,7 @@ const Z=(()=>{
    if(n===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const dm=T.sap?3:zhit(st,z);if(dm>0&&st._breach!==st.tick){st._breach=st.tick;st.z.forEach(o=>{if(o!==z&&o.hp>0)o.cd=Math.min(o.cd,1)});ev.push({i:C,k:'breach'})}if(T.sap)ev.push({i:C,k:'boom'});st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'bite',zid:z.id});if(!T.boss){z.hp=0;z.bit=1}continue}
    const u=st.grid[n];
    if(u&&U[u.t].block&&!(T.crawl&&U[u.t].cat==='wall')){strike(st,z,n,u,ev,false,pow);continue}
-   if(T.spit){const n2=pathStep(st,n,tgt,zmode(T),z.style);
+   if(T.spit&&!isEdge(z.pos)){const n2=pathStep(st,n,tgt,zmode(T),z.style);
     if(n2===C){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const dm=zhit(st,z);st.shelter-=dm;ev.push({i:C,txt:'−'+dm,k:'spit',zid:z.id,from:z.pos});continue}
     const u2=st.grid[n2];if(u2&&U[u2.t].block){strike(st,z,n2,u2,ev,true,pow);continue}}
    z.pos=n;enter(st,z,n,u,ev)
@@ -740,7 +741,7 @@ const Z=(()=>{
  // réactions pendant la nuit
  function canReact(st,t,i){const D=U[t];if(!D||!D.react||!canPay(st,t))return false;
   if(D.react==='unit')return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<maxHp(st,st.grid[i]));return D.react==='any'||(i>=0&&i<N*N)}
- function react(st,t,i){if(!canReact(st,t,i))return null;const ev=[];st.energy-=costOf(st,t);st.disc=1;const al=()=>st.z.filter(z=>z.hp>0);
+ function react(st,t,i){if(!canReact(st,t,i))return null;const ev=[];st.energy-=costOf(st,t);st.disc=1;const al=()=>st.z.filter(z=>z.hp>0&&!isEdge(z.pos));
   if(t==='grenade')explode(st,i,5,ev);
   if(t==='shot'){const z=al().sort((a,b)=>cheb(a.pos,C)-cheb(b.pos,C)||a.hp-b.hp)[0];if(z){hit(st,z,6,ev,-1,1);ev.push({i:C,k:'shot',zid:z.id})}}
   if(t==='patch'){const u=st.grid[i];u.hp=Math.min(maxHp(st,u),u.hp+5);ev.push({i,k:'heal'})}
