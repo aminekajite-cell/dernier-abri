@@ -133,6 +133,10 @@ out(`## 2. Montée en puissance de la horde\n\n| Nuit | Zombies | PV totaux | D�
 curve.forEach(c=>out(`| ${c.n} | ${c.count} | ${c.hp} | ${c.dmg} |`));
 out(`\n## 3. Valeur des cartes (${ESSAIS} nuits par palier, nuits ${NIGHTS.join(', ')})\n`);
 out(`Valeur = apport moyen (dégâts en plus + zombies tués en plus × 5 + PV de l'abri sauvés × 8) divisé par le coût, comparé aux cartes du même type : 100 = la carte médiane de son type.\n`);
+// classement général : toutes les cartes mesurables, de la plus rentable à la moins rentable (100 = médiane générale)
+{const ms=cards.filter(c=>MEASURABLE(c.t)&&c.t!=='door'),gm=median(ms.map(c=>c.value).filter(v=>v>0))||1;
+ out(`### Classement général (rentabilité par point d'énergie, 100 = la carte médiane)\n\n| Rang | Carte | Type | Coût | Score |\n|---|---|---|---|---|`);
+ [...ms].sort((a,b)=>b.value-a.value).forEach((c,k)=>out(`| ${k+1} | ${U[c.t].n} | ${({wall:'Défense',shoot:'Tireur',melee:'Corps à corps',help:'Soutien',trap:'Piège'})[U[c.t].cat]} | ${Z.cost(c.t)} | ${Math.round(c.value/gm*100)} |`));out('')}
 out(`**Trop fortes (≥ 180)** : ${strong.map(c=>`${U[c.t].n} (${Math.round(c.rel*100)})`).join(', ')||'aucune'}\n`);
 out(`**Trop faibles (≤ 40)** : ${weak.map(c=>`${U[c.t].n} (${Math.round(c.rel*100)})`).join(', ')||'aucune'}\n`);
 out(`| Carte | Type | Coût | Valeur | Dégâts en plus (N3 / N8 / N15) | Zombies tués en plus | PV abri sauvés |\n|---|---|---|---|---|---|---|`);
