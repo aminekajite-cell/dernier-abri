@@ -1,4 +1,4 @@
-// Test du vrai jeu dans un navigateur (Chromium via Playwright), en largeur téléphone (390 px) et sur ordinateur (1280 × 800).
+// Test du vrai jeu dans un navigateur (Chromium via Playwright), sur téléphone (390 × 844), ordinateur (1280 × 800) et téléphone tourné (844 × 390).
 // Il ouvre tous les écrans, pose les cartes de la main, joue plusieurs nuits complètes avec les écrans de l'aube,
 // recharge la partie sauvegardée, et vérifie : aucune erreur dans la console, aucun fichier manquant,
 // pas de défilement horizontal, une image par seconde correcte. Captures d'écran dans tools/test-out/.
@@ -75,7 +75,7 @@ async function run(vp,label){
  errs.forEach(e=>problems.push(`${label} : ${e}`));
  await b.close();return reached}
 
-(async()=>{const r1=await run({width:390,height:844},'telephone'),r2=await run({width:1280,height:800},'ordinateur');
- console.log(`Navigateur : téléphone ${r1} nuit(s) jouée(s), ordinateur ${r2} nuit(s) jouée(s), ${shots} captures dans tools/test-out/.`);
+(async()=>{const r1=await run({width:390,height:844},'telephone'),r2=await run({width:1280,height:800},'ordinateur'),r3=await run({width:844,height:390},'paysage');
+ console.log(`Navigateur : téléphone ${r1} nuit(s) jouée(s), ordinateur ${r2}, téléphone en largeur ${r3}, ${shots} captures dans tools/test-out/.`);
  if(problems.length){console.log([...new Set(problems)].slice(0,40).map(x=>'  ✗ '+x).join('\n'));process.exitCode=1}
  else console.log('  Aucun problème : pas d’erreur console, pas de fichier manquant, pas de défilement horizontal.')})();

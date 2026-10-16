@@ -607,3 +607,7 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 **v77** : le style cartoon devient le seul style (le bouton « Style graphique » disparaît). Les 4 cartes sans illustration cartoon (Mur de pneus, Fumigène, Café, Filet) gardent leur image réaliste en attendant.
 
 **v78** : table de jeu. La main est posée sur une table en bois, entre la **pioche** (à gauche, dos de carte et nombre restant) et la **défausse** (à droite, dernière carte visible). Les unités rappelées forment un tas **Réserve** sous la pioche. Toucher un tas montre son contenu (la pioche dans le désordre). Animations : les cartes piochées glissent de la pioche vers la main, les cartes jouées ou tombées volent vers la défausse, et la défausse revient dans la pioche quand celle-ci est vide.
+
+**v79** : affichage en largeur et plein écran.
+- Dès que l’écran est plus large que haut (PC, tablette, téléphone tourné), la carte occupe toute la hauteur à gauche et l’interface passe à droite (barre du haut, nuit, horde, factions, info, table de jeu, bouton de nuit). Sur PC, la carte choisie s’affiche en grand dans le panneau de droite et la main passe sur 2 rangées. En hauteur, l’affichage reste en colonne.
+- Bouton plein écran (Android, PC). Sur iPhone, le jeu s’installe comme une application via « Partager → Sur l’écran d’accueil » (manifeste, icône de l’abri, ouverture en plein écran) ; un rappel s’affiche sur l’écran d’accueil du jeu.

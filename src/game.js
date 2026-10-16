@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v78 · 16 oct.';
+const VERSION='v79 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -899,7 +899,12 @@ function fireAmmo(){const ev=Z.fireAmmo(G);if(!ev)return;const now=performance.n
 // glisser-déposer : on attrape une carte de la main et on la lâche sur une case de la carte
 let HD=null;
 // survol d'une carte de la main sur ordinateur : aperçu en grand (sans redessiner la main, sinon le clic se perd)
-function updatePreview(){if(!WIDE.matches)return;let pv=$('#preview');if(!pv){pv=document.createElement('div');pv.id='preview';document.body.appendChild(pv)}const t=S.hover||selCard();pv.hidden=!t||!ov.hidden;
+// en largeur avec assez de hauteur : la carte choisie s'affiche en grand dans le panneau de droite
+const LANDTALL=matchMedia('(orientation:landscape) and (min-aspect-ratio:5/4) and (min-width:560px) and (min-height:640px)');
+function updatePreview(){const land=LANDTALL.matches;if(!WIDE.matches&&!land)return;let pv=$('#preview');if(!pv){pv=document.createElement('div');pv.id='preview';document.body.appendChild(pv)}
+ const t=S.hover||selCard()||(land&&S.bsel!=null&&G.bench[S.bsel]?G.bench[S.bsel].t:null)||(land&&(S.inspect??S.moveFrom)!=null&&G.grid[S.inspect??S.moveFrom]?G.grid[S.inspect??S.moveFrom].t:null);pv.hidden=!t||!ov.hidden;pv.classList.toggle('land',land);
+ if(land){const a=$('#fams').getBoundingClientRect(),b=$('#info').getBoundingClientRect(),sd=$('.side2').getBoundingClientRect(),hh=b.top-a.bottom-24,w=Math.max(0,Math.min(sd.width*.55,hh*1086/1448));
+  pv.style.width=w+'px';pv.style.left=(sd.left+sd.width/2-w/2)+'px';pv.style.top=(a.bottom+12+(hh-w*1448/1086)/2)+'px';if(w<120)pv.hidden=true}else{pv.style.width=pv.style.left=pv.style.top=''}
  const key=t+(S.busy?1:0)+(G.upg[t]?'u':'');if(t&&pv.dataset.t!==key){pv.dataset.t=key;pv.innerHTML=cardFace(t)}}
 $('#hand').addEventListener('pointerover',e=>{const b=e.target.closest('.card');if(!b||e.pointerType!=='mouse')return;S.hover=b.dataset.b!==undefined?(G.bench[+b.dataset.b]||{}).t:b.dataset.u!==undefined?S.used[+b.dataset.u]:S.hand[+b.dataset.k];updatePreview()});
 $('#hand').addEventListener('pointerleave',()=>{if(S.hover){S.hover=null;updatePreview()}});
@@ -1252,10 +1257,17 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 5 nuits, la horde <b>mute</b> pour de bon et la nuit est une <b>nuit de pression</b> (+25 % de zombies). Si un zombie blesse l’abri, c’est la <b>brèche</b> : toute la horde avance d’un coup. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
+<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button>${iosHint()?'<p class="ver">Sur iPhone : Partager → « Sur l’écran d’accueil » pour jouer en plein écran.</p>':''}<p class="ver">${VERSION}</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son
 const muteBtn=$('#mute');
 function muteIcon(){muteBtn.innerHTML=`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/>${SFX.muted?'<path d="M16 9l5 6M21 9l-5 6"/>':'<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/>'}</svg>`;muteBtn.setAttribute('aria-label',SFX.muted?'Activer le son':'Couper le son')}
 muteBtn.addEventListener('click',()=>{SFX.toggle();muteIcon()});muteIcon();
+function iosHint(){return /iPhone|iPod/.test(navigator.userAgent)&&!(matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches||navigator.standalone)}
+// plein écran : bouton sur les navigateurs qui le permettent (Android, PC). Sur iPhone, passer par « Sur l’écran d’accueil ».
+const fsBtn=$('#fs'),DE=document.documentElement,fsReq=DE.requestFullscreen||DE.webkitRequestFullscreen,
+ standalone=matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches||navigator.standalone;
+if(fsReq&&!standalone){fsBtn.hidden=false;fsBtn.addEventListener('click',()=>{try{const on=document.fullscreenElement||document.webkitFullscreenElement;
+ if(on)(document.exitFullscreen||document.webkitExitFullscreen).call(document);else{const r=fsReq.call(DE,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>{})}}catch(e){}})}
+
