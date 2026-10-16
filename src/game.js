@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v79 · 16 oct.';
+const VERSION='v80 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -273,10 +273,23 @@ if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.protot
 const cv=$('#map'),ctx=cv.getContext('2d');
 const dark=document.createElement('canvas'),dctx=dark.getContext('2d');
 let SC=1,DPR=1;
-function fit(){const w=cv.clientWidth||320;DPR=Math.min(2,devicePixelRatio||1);const px=Math.round(w*DPR);if(cv.width!==px){cv.width=cv.height=px;dark.width=dark.height=px}SC=px/L}
+function fit(){const w=cv.clientWidth||320;if(!fit.w0||fit.w0!==w){fit.w0=w;setTimeout(drawWoods,0)}DPR=Math.min(2,devicePixelRatio||1);const px=Math.round(w*DPR);if(cv.width!==px){cv.width=cv.height=px;dark.width=dark.height=px}SC=px/L}
 const tc=i=>{const[r,c]=Z.rc(i);return{x:c*T+T/2,y:r*T+T/2}};
 function rng(seed){return()=>(seed=(seed*16807)%2147483647)/2147483647}
 
+/* en largeur : la forêt prolonge le plateau jusqu'aux bords de l'écran (fond dessiné derrière la carte, redessiné au redimensionnement) */
+function drawWoods(){const w=$('#woods');if(!w)return;const W=w.clientWidth,H=w.clientHeight;if(!W||!H||getComputedStyle(w).display==='none')return;
+ const d=Math.min(2,devicePixelRatio||1);if(w.width===Math.round(W*d)&&w.height===Math.round(H*d))return;w.width=Math.round(W*d);w.height=Math.round(H*d);
+ const g=w.getContext('2d');g.scale(d,d);const r=rng(23),m=cv.getBoundingClientRect(),o=w.getBoundingClientRect(),k=m.width/L,cx=m.left-o.left+m.width/2,cy=m.top-o.top+m.height/2;
+ g.fillStyle='#34432a';g.fillRect(0,0,W,H);for(let i=0;i<W*H/60;i++){g.fillStyle=['#46583a','#2c3a22','#40422e'][Math.floor(r()*3)];g.globalAlpha=.5;g.fillRect(r()*W,r()*H,1+r()*2*k,1+r()*2*k)}g.globalAlpha=1;
+ // les routes continuent hors du plateau
+ g.strokeStyle='#6a5a3e';g.lineWidth=26*k;g.beginPath();g.moveTo(0,cy);g.lineTo(W,cy);g.moveTo(cx,0);g.lineTo(cx,H);g.stroke();
+ g.strokeStyle='rgba(30,24,16,.5)';g.lineWidth=2*k;g.beginPath();[-6,6].forEach(o2=>{g.moveTo(0,cy+o2*k);g.lineTo(W,cy+o2*k);g.moveTo(cx+o2*k,0);g.lineTo(cx+o2*k,H)});g.stroke();
+ g.fillStyle='rgba(8,10,6,.45)';g.fillRect(0,0,W,H);
+ // arbres serrés, en évitant la route
+ const tree=(x,y,s)=>{g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.arc(x+3*k,y+4*k,s,0,7);g.fill();[['#16200f',1],['#1d2a14',.75],['#25351a',.45]].forEach(([c,q])=>{g.fillStyle=c;g.beginPath();g.arc(x-s*(1-q)*.3,y-s*(1-q)*.3,s*q,0,7);g.fill()})};
+ const step=14*k;for(let y=-step;y<H+step;y+=step)for(let x=-step;x<W+step;x+=step){const px=x+(r()-.5)*step,py=y+(r()-.5)*step;if(Math.abs(py-cy)<18*k||Math.abs(px-cx)<18*k)continue;if(r()<.8)tree(px,py,(7+r()*7)*k)}}
+addEventListener('resize',()=>setTimeout(drawWoods,60));
 /* ground, pre-rendered once */
 const ground=document.createElement('canvas');ground.width=ground.height=L*2;
 (function(){const g=ground.getContext('2d');g.scale(2,2);const r=rng(11);
@@ -900,11 +913,13 @@ function fireAmmo(){const ev=Z.fireAmmo(G);if(!ev)return;const now=performance.n
 let HD=null;
 // survol d'une carte de la main sur ordinateur : aperçu en grand (sans redessiner la main, sinon le clic se perd)
 // en largeur avec assez de hauteur : la carte choisie s'affiche en grand dans le panneau de droite
-const LANDTALL=matchMedia('(orientation:landscape) and (min-aspect-ratio:5/4) and (min-width:560px) and (min-height:640px)');
+const LANDTALL=matchMedia('(orientation:landscape) and (min-aspect-ratio:5/4) and (min-width:560px)');
 function updatePreview(){const land=LANDTALL.matches;if(!WIDE.matches&&!land)return;let pv=$('#preview');if(!pv){pv=document.createElement('div');pv.id='preview';document.body.appendChild(pv)}
  const t=S.hover||selCard()||(land&&S.bsel!=null&&G.bench[S.bsel]?G.bench[S.bsel].t:null)||(land&&(S.inspect??S.moveFrom)!=null&&G.grid[S.inspect??S.moveFrom]?G.grid[S.inspect??S.moveFrom].t:null);pv.hidden=!t||!ov.hidden;pv.classList.toggle('land',land);
- if(land){const a=$('#fams').getBoundingClientRect(),b=$('#info').getBoundingClientRect(),sd=$('.side2').getBoundingClientRect(),hh=b.top-a.bottom-24,w=Math.max(0,Math.min(sd.width*.55,hh*1086/1448));
-  pv.style.width=w+'px';pv.style.left=(sd.left+sd.width/2-w/2)+'px';pv.style.top=(a.bottom+12+(hh-w*1448/1086)/2)+'px';if(w<120)pv.hidden=true}else{pv.style.width=pv.style.left=pv.style.top=''}
+ if(land){const a=$('#fams').getBoundingClientRect(),b=$('#info').getBoundingClientRect(),sd=$('.side2').getBoundingClientRect(),hh=b.top-a.bottom-(innerHeight<520?10:24),w=Math.max(0,Math.min(sd.width*.55,hh*1086/1448));
+  pv.style.width=w+'px';pv.style.left=(sd.left+sd.width/2-w/2)+'px';pv.style.top=(a.bottom+12+(hh-w*1448/1086)/2)+'px';
+  // pas assez de place à droite (téléphone tourné) : la carte s'affiche dans le coin de la forêt, en haut à gauche du plateau
+  if(w<90){const m=cv.getBoundingClientRect(),w2=Math.min(130,m.width*.34);pv.style.width=w2+'px';pv.style.left=(m.left+6)+'px';pv.style.top=(m.top+6)+'px'}}else{pv.style.width=pv.style.left=pv.style.top=''}
  const key=t+(S.busy?1:0)+(G.upg[t]?'u':'');if(t&&pv.dataset.t!==key){pv.dataset.t=key;pv.innerHTML=cardFace(t)}}
 $('#hand').addEventListener('pointerover',e=>{const b=e.target.closest('.card');if(!b||e.pointerType!=='mouse')return;S.hover=b.dataset.b!==undefined?(G.bench[+b.dataset.b]||{}).t:b.dataset.u!==undefined?S.used[+b.dataset.u]:S.hand[+b.dataset.k];updatePreview()});
 $('#hand').addEventListener('pointerleave',()=>{if(S.hover){S.hover=null;updatePreview()}});
