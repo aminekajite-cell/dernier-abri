@@ -603,3 +603,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Objets** : Ravitaillement (+6 ferraille), Largage (pioche 3 cartes), Jerrican (+2 énergie demain), Repos (soigne la réserve), Opérateur radio (+1 à la limite d’unités, une fois par partie).
 - **Réactions** : Talkie-walkie (relève une unité blessée par la plus solide de la réserve), Orage (zombies −2 tours, le feu s’éteint), Bombardier (8 dégâts sur toute une ligne), Boîte à bruit (les zombies marchent vers la case visée 4 tours).
 - En style réaliste, ces cartes affichent leur illustration cartoon (pas d’image réaliste).
+
+**v77** : le style cartoon devient le seul style (le bouton « Style graphique » disparaît). Les 4 cartes sans illustration cartoon (Mur de pneus, Fumigène, Café, Filet) gardent leur image réaliste en attendant.

@@ -128,7 +128,8 @@ function drawSpr(k,x,y,a,out,mul){const[im,d]=sprK(k);if(!im||!d)return false;co
 // seules les cartes très puissantes (chefs légendaires et évolutions secrètes) débordent du cadre
 const popOK=t=>Z.RAR[t]==='leg'||!!(Z.U[t]&&Z.U[t].evo);
 /* style des illustrations (essai) : « cartoon » utilise assets/cards_cartoon/ pour les cartes qui y ont une image, les autres gardent l'illustration actuelle */
-let ART_STYLE=(()=>{try{return localStorage.getItem('abri-style')||'real'}catch(e){return 'real'}})();
+// style graphique : cartoon pour tout le monde (v77). Les cartes sans image cartoon gardent leur image réaliste.
+let ART_STYLE='cartoon';
 const CART_FILES=('chief_police chief_mil chief_pyro chief_trap chief_farm chief_care chief_tech chief_comm k9squad nightsnp '+
  'gun snp sht xbow flame mg molo kid swat mortar sentry hunter turret tesla vigile doc nailer ranger rocket axe dog cop butch monk riot k9 dogs pitch amb orderly '+
  'med lamp radio cook mech siren lead solar pharma hospital priest stretch scare workshop teacher market carp canteen '+
@@ -167,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v76 · 16 oct.';
+const VERSION='v77 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -1223,7 +1224,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 5 nuits, la horde <b>mute</b> pour de bon et la nuit est une <b>nuit de pression</b> (+25 % de zombies). Si un zombie blesse l’abri, c’est la <b>brèche</b> : toute la horde avance d’un coup. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><button type="button" class="skip" data-a="artstyle">Style graphique : ${ART_STYLE==='cartoon'?'cartoon (essai)':'réaliste'}</button><p class="ver">${VERSION}</p>`)}
+<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><p class="ver">${VERSION}</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son

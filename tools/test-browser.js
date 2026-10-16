@@ -29,7 +29,7 @@ async function run(vp,label){
  await step('collection',async()=>{await click('[data-a=coll]');await p.waitForTimeout(300);await p.fill('[data-f=q]','tir');await p.waitForTimeout(150);
   const n=await p.$$eval('.citem-w',es=>es.filter(e=>!e.hidden).length);if(!n)problems.push(`${label} : la recherche « tir » ne trouve rien`);
   await p.selectOption('[data-f=sort]','cost');await p.waitForTimeout(200);await shot('03-collection');await overflow('collection');await click('[data-a=title]')});
- await step('style graphique',async()=>{await click('[data-a=artstyle]');await p.waitForTimeout(200);await click('[data-a=artstyle]')});
+
  // une partie
  await step('nouvelle partie',async()=>{await click('[data-a=new]');await click('[data-a=edit]');await shot('04-deck');await overflow('éditeur de deck');await click('[data-a=new]');await click('[data-a=start]');await p.waitForTimeout(400)});
  const box=await p.$eval('#map',e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width}});const cs=box.w/9;
