@@ -592,3 +592,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Frénésie meurtrière douce** : moins de zombies en plus chaque nuit (croissance divisée par 2), mais dès la nuit 4 leurs PV montent de 12 % des PV de base par nuit (avant 8 %) et leurs dégâts de +1 toutes les 10 nuits (avant 20). Croissance linéaire, jamais exponentielle. Affichée dans la barre « Cette nuit ».
 
 **v74** : un zombie encore dans la forêt (anneau extérieur) ne peut être ni ciblé ni blessé, par rien (tirs, explosions, réactions, munitions). Il faut qu’il entre sur la carte. Les Cracheurs ne crachent pas depuis la forêt.
+
+**v75** : à l’aube, la carte à prendre en main est choisie uniquement dans la pioche (plus dans la défausse).
