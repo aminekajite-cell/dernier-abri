@@ -77,13 +77,17 @@ check('équipement : posé une seule fois par unité, garde l’effet',()=>{cons
  ok(Z.canPlace(st,'gear',2*9+4));Z.place(st,'gear',2*9+4,rng(1));eq(Z.maxHp(st,u),h+4);ok(!Z.canPlace(st,'gear',2*9+4),'2 fois le même équipement')});
 check('Jumelles : seulement sur une unité à distance',()=>{const st=fresh();Z.place(st,'axe',2*9+4,rng(1));ok(!Z.canPlace(st,'binoc',2*9+4))});
 check('Clés : l’unité ne compte plus dans la limite',()=>{const st=fresh();Z.place(st,'gun',2*9+4,rng(1));eq(Z.unitCount(st),1);Z.place(st,'keys',2*9+4,rng(1));eq(Z.unitCount(st),0)});
-check('postes de soutien : hors limite et non cumulables',()=>{const st=fresh();['gun','axe','med','snp','dog'].forEach((t,k)=>Z.place(st,t,2*9+2+k,rng(1)));ok(Z.canPlace(st,'tent',6*9+4));ok(!Z.isUnit('ammobox'))});
+check('postes de soutien : hors limite et non cumulables',()=>{const st=fresh();['gun','axe','med','snp','dog'].forEach((t,k)=>Z.place(st,t,2*9+2+k,rng(1)));ok(Z.canPlace(st,'pump',6*9+4));ok(Z.canPlace(st,'lamp',6*9+5));ok(!Z.isUnit('hospital'))});
 check('Opérateur radio : +1 à la limite, une seule fois',()=>{const st=fresh();const c=Z.unitCap(st);Z.place(st,'radioop',Z.C,rng(1));eq(Z.unitCap(st),c+1);ok(!Z.canPlace(st,'radioop',Z.C))});
 check('Pilules : survit une fois par nuit',()=>{const st=fresh();Z.place(st,'monk',2*9+4,rng(1));Z.place(st,'pills',2*9+4,rng(1));Z.startNight(st,rng(2));st.pending=[];const u=st.grid[2*9+4];
  st.z=[{id:1,k:'fat',pos:1*9+4,hp:999,max:999,cd:1,style:0}];u.hp=1;for(let k=0;k<12&&u.pillN==null;k++)Z.step(st);ok(u.pillN===st.night,'pilules non utilisées')});
 check('Fosse piégée : avale le premier zombie',()=>{const st=fresh();Z.place(st,'pit',3*9+4,rng(1),true);Z.startNight(st,rng(2));st.pending=[];st.z=[{id:1,k:'fat',pos:2*9+4,hp:80,max:80,cd:1,style:0}];Z.step(st);eq(st.z.length,0)});
 check('Talkie-walkie : échange avec la réserve',()=>{const st=fresh();Z.place(st,'gun',2*9+4,rng(1));Z.place(st,'axe',2*9+5,rng(1));Z.recall(st,2*9+5);st.grid[2*9+4].hp=1;Z.startNight(st,rng(2));st.energy=5;
  ok(Z.react(st,'talkie',2*9+4));eq(st.grid[2*9+4].t,'axe');eq(st.bench[0].t,'gun')});
+
+check('escouade : +1 seulement avec un Tank, un Soin et un DPS voisins',()=>{const st=fresh();st.grid[20]={t:'gun',hp:3};st.grid[21]={t:'cop',hp:9};ok(!Z.squad(st,20));st.grid[29]={t:'med',hp:2};ok(Z.squad(st,20))});
+check('les postes de soutien n’ont pas de rôle',()=>{['lamp','hospital','workshop','tower'].forEach(t=>eq(Z.roleOf(t),null))});
+check('un piège posé revient à la défausse (il ne reste plus en main)',()=>{const st=fresh();Z.place(st,'trap',3*9+4,rng(1));ok(!st.grid[3*9+4].gen)});
 
 /* ---------- 4. nuits aléatoires ---------- */
 const PLACE=PLAY.filter(t=>!Z.U[t].react&&!Z.U[t].instant&&!Z.U[t].onUnit);
