@@ -189,19 +189,19 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 
 | Carte | Coût | Rareté | PV | Dégâts | Portée | Cadence | Rôle | Faction | Capacité |
 |---|---|---|---|---|---|---|---|---|---|
-| Infirmière | 1 | commune | 2 | soin +1 | — | — | Soin | Soignants | Soigne 1 PV à une unité voisine tous les 2 tours |
+| Infirmière | 1 | commune | 2 | soin +1 | — | — | Soin | Soignants | Soin à distance : 1 PV tous les 2 tours à l’unité la plus blessée à 2 cases ou moins |
 | Cuisinier | 2 | rare | 2 | — | — | — | — | Soignants | À chaque aube, l’abri récupère 1 PV |
 | Mécanicien | 2 | rare | 3 | — | — | — | — | Bricoleurs | Répare 1 PV à une défense voisine à chaque tour |
 | Chef de groupe | 3 | épique | 3 | — | — | — | — | Communauté | Tous les 3 tours, les unités autour attaquent une fois de plus |
-| Pharmacienne | 2 | rare | 3 | soin +1 | — | — | Soin | Soignants | Soigne 1 PV à une unité voisine à chaque tour |
+| Pharmacienne | 2 | rare | 3 | soin +1 | — | — | Soin | Soignants | Soin au contact : 1 PV à chaque tour à l’unité voisine la plus blessée (8 cases autour) |
 | Prêtre | 2 | rare | 3 | — | — | — | Soin | Soignants | Une fois chacune, les unités voisines qui devraient tomber restent à 1 PV |
-| Brancardier | 1 | commune | 4 | soin +1 | — | — | Soin | Soignants | Soigne 1 PV à une unité voisine tous les 2 tours, 4 PV |
+| Brancardier | 1 | commune | 4 | soin +1 | — | — | Soin | Soignants | Soin à distance : il court chercher les blessés, 1 PV tous les 2 tours à l’unité la plus blessée à 3 cases ou moins, 4 PV |
 | Institutrice | 2 | rare | 3 | — | — | — | — | Communauté | Tant qu’elle tient, tu pioches 1 carte de plus chaque jour |
 | Charpentier | 2 | rare | 4 | — | — | — | — | Communauté | À chaque aube, les défenses voisines récupèrent 2 PV |
-| La Doctoresse | 3 | légendaire | 5 | 2 | 1 | chaque tour | Soin | Soignants | Cheffe des Soignants : soigne 2 PV à chaque tour et frappe au scalpel (2 dégâts au contact). Les Soignants gagnent un palier |
+| La Doctoresse | 3 | légendaire | 5 | 2 | 1 | chaque tour | Soin | Soignants | Cheffe des Soignants : soin à distance de 2 PV à chaque tour (2 cases) et coups de scalpel au contact (2 dégâts). Compte pour 2 Soignants |
 | L’Ingénieur | 3 | légendaire | 6 | 1 ×2 | 1 | chaque tour | — | Bricoleurs | Chef des Bricoleurs : répare 2 PV aux défenses voisines à chaque tour et tire 2 clous par tour (portée 1). Les Bricoleurs gagnent un palier |
 | Le Maire | 3 | légendaire | 5 | 2 | 1 | chaque tour | — | Communauté | Chef de la Communauté : les unités autour attaquent plus souvent, et il tire (2 dégâts, portée 1). La Communauté gagne un palier |
-| ✦ Cantine de campagne | — | — | 6 | soin +2 | — | — | Soin | — | Soigne 2 PV à une unité voisine à chaque tour, et l’abri récupère 2 PV à chaque aube |
+| ✦ Cantine de campagne | — | — | 6 | soin +2 | — | — | Soin | — | Soin au contact : 2 PV à chaque tour à l’unité voisine la plus blessée, et l’abri récupère 2 PV à chaque aube |
 
 ### Pièges
 

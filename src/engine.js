@@ -31,7 +31,7 @@ const Z=(()=>{
   butch:{n:'Boucher',cat:'melee',hp:6,block:1,rng:1,dmg:5,every:1,feed:1,v:'5 · Soin',d:'5 dégâts au contact, récupère 1 PV à chaque zombie tué'},
   monk:{n:'Moine',cat:'melee',hp:11,block:1,rng:1,dmg:2,every:1,aoe:1,v:'2 zone',d:'2 dégâts à tous les zombies autour de lui, 11 PV'},
   // soutien
-  med:{n:'Infirmière',cat:'help',hp:2,block:1,heal:1,v:'Soin',d:'Soigne 1 PV à une unité voisine tous les 2 tours'},
+  med:{n:'Infirmière',cat:'help',hp:2,block:1,heal:1,hrng:2,v:'Soin · P2',d:'Soin à distance : 1 PV tous les 2 tours à l’unité la plus blessée à 2 cases ou moins'},
   lamp:{n:'Projecteur',cat:'post',hp:2,block:1,buff:1,v:'+1',d:'Les unités autour font +1 dégât'},
   radio:{n:'Radio',cat:'post',hp:2,block:1,v:'+1 carte',d:'Tant qu\'elle tient, tu pioches 1 carte de plus chaque jour'},
   cook:{n:'Cuisinier',cat:'help',hp:2,block:1,cook:1,v:'+1 abri',d:'À chaque aube, l’abri récupère 1 PV'},
@@ -64,10 +64,10 @@ const Z=(()=>{
   sentry:{n:'Sentinelle automatique',cat:'shoot',hp:6,block:1,rng:2,dmg:1,every:1,hits:2,v:'1 ×2 · P2',d:'Tourelle : 2 tirs de 1 dégât par tour, portée 2, 6 PV'},
   clay:{n:'Mine claymore',cat:'trap',hp:1,block:0,clay:4,v:'4 grande zone',d:'Explose au passage : 4 dégâts sur toutes les cases à 2 cases ou moins'},
   bunker:{n:'Bunker',cat:'wall',hp:16,block:1,rng:1,dmg:1,every:1,v:'16 PV · 1',d:'Bloque, 16 PV, et tire sur les zombies au contact'},
-  pharma:{n:'Pharmacienne',cat:'help',hp:3,block:1,heal:1,hfast:1,v:'Soin rapide',d:'Soigne 1 PV à une unité voisine à chaque tour'},
-  hospital:{n:'Hôpital de campagne',cat:'post',hp:6,block:1,healAll:1,v:'Soin zone',d:'Tous les 2 tours, toutes les unités voisines récupèrent 1 PV'},
+  pharma:{n:'Pharmacienne',cat:'help',hp:3,block:1,heal:1,hfast:1,v:'Soin rapide',d:'Soin au contact : 1 PV à chaque tour à l’unité voisine la plus blessée (8 cases autour)'},
+  hospital:{n:'Hôpital de campagne',cat:'post',hp:6,block:1,healAll:1,v:'Soin zone',d:'Soin au contact : tous les 2 tours, toutes les unités sur les 8 cases autour récupèrent 1 PV'},
   priest:{n:'Prêtre',cat:'help',hp:3,block:1,bless:1,v:'Protège',d:'Une fois chacune, les unités voisines qui devraient tomber restent à 1 PV'},
-  stretch:{n:'Brancardier',cat:'help',hp:4,block:1,heal:1,v:'Soin',d:'Soigne 1 PV à une unité voisine tous les 2 tours, 4 PV'},
+  stretch:{n:'Brancardier',cat:'help',hp:4,block:1,heal:1,hrng:3,v:'Soin · P3',d:'Soin à distance : il court chercher les blessés, 1 PV tous les 2 tours à l’unité la plus blessée à 3 cases ou moins, 4 PV'},
   brasero:{n:'Brasero',cat:'wall',hp:5,block:1,aura:1,v:'Brûle autour',d:'Bloque. Tous les 2 tours, 1 dégât et feu aux zombies collés à lui'},
   firetrap:{n:'Fût piégé',cat:'trap',hp:1,block:0,firetrap:4,v:'4 zone + feu',d:'Explose au passage : 4 dégâts autour et les zombies brûlent 3 tours'},
   net:{n:'Filet',cat:'trap',hp:2,block:0,net:4,v:'Immobilise',d:'Le zombie qui passe est pris 4 tours, sert 2 fois'},
@@ -96,7 +96,7 @@ const Z=(()=>{
   // chefs de faction (légendaires) : la faction gagne un palier tant que le chef est en vie
   chief_police:{n:'Le Commissaire',cat:'shoot',hp:5,block:1,rng:2,dmg:2,every:1,chief:'police',v:'2 · P2',d:'Chef de la Police : 2 dégâts par tour, portée 2. La Police gagne un palier'},
   chief_mil:{n:'La Sergente',cat:'shoot',hp:5,block:1,rng:2,dmg:1,every:1,hits:3,chief:'mil',v:'1 ×3 · P2',d:'Cheffe des Militaires : 3 tirs par tour, portée 2. Les Militaires gagnent un palier'},
-  chief_care:{n:'La Doctoresse',cat:'help',hp:5,block:1,rng:1,dmg:2,every:1,heal:2,hfast:1,chief:'care',v:'Soin 2 · 2',d:'Cheffe des Soignants : soigne 2 PV à chaque tour et frappe au scalpel (2 dégâts au contact). Les Soignants gagnent un palier'},
+  chief_care:{n:'La Doctoresse',cat:'help',hp:5,block:1,rng:1,dmg:2,every:1,heal:2,hfast:1,hrng:2,chief:'care',v:'Soin 2 · P2',d:'Cheffe des Soignants : soin à distance de 2 PV à chaque tour (2 cases) et coups de scalpel au contact (2 dégâts). Compte pour 2 Soignants'},
   chief_pyro:{n:'Le Pyromane',cat:'shoot',hp:5,block:1,rng:2,dmg:1,every:1,aoe:1,ignite:3,chief:'pyro',v:'Feu zone',d:'Chef des Pyromanes : enflamme tous les zombies à 2 cases. Les Pyromanes gagnent un palier'},
   chief_trap:{n:'Le Braconnier',cat:'shoot',hp:4,block:1,rng:3,dmg:3,every:2,chief:'trap',v:'3 · P3',d:'Chef des Trappeurs : 3 dégâts tous les 2 tours, portée 3. Les Trappeurs gagnent un palier'},
   chief_farm:{n:'La Fermière',cat:'melee',hp:14,block:1,rng:1,dmg:2,every:1,hits:2,chief:'farm',v:'2 ×2',d:'Cheffe des Fermiers : 2 coups de 2 dégâts par tour, 14 PV. Les Fermiers gagnent un palier'},
@@ -156,7 +156,7 @@ const Z=(()=>{
   fortin:{n:'Fortin',cat:'wall',hp:32,block:1,rng:1,dmg:3,every:1,evo:1,v:'32 PV · 3',d:'Épave et bunker soudés : bloque, 32 PV, et frappe les zombies au contact (3 dégâts)'},
   autogun:{n:'Tourelle automatique',cat:'shoot',hp:7,block:1,rng:2,dmg:1,every:1,hits:3,evo:1,v:'1 ×3 · P2',d:'Montée par le mécanicien : 3 tirs de 1 dégât par tour, portée 2'},
   slaughter:{n:'Équarrisseur',cat:'melee',hp:9,block:1,rng:1,dmg:5,every:1,aoe:1,feed:1,evo:1,v:'5 zone · Soin',d:'5 dégâts à tous les zombies autour, récupère 1 PV par zombie tué'},
-  canteen:{n:'Cantine de campagne',cat:'help',hp:6,block:1,heal:2,hfast:1,cook:2,evo:1,v:'Soin 2 · +2 abri',d:'Soigne 2 PV à une unité voisine à chaque tour, et l’abri récupère 2 PV à chaque aube'},
+  canteen:{n:'Cantine de campagne',cat:'help',hp:6,block:1,heal:2,hfast:1,cook:2,evo:1,v:'Soin 2 · +2 abri',d:'Soin au contact : 2 PV à chaque tour à l’unité voisine la plus blessée, et l’abri récupère 2 PV à chaque aube'},
   gang:{n:'Bande de gamins',cat:'shoot',hp:5,block:1,rng:2,dmg:1,every:1,hits:4,evo:1,v:'1 ×4 · P2',d:'Toute la classe au lance-pierre : 4 tirs de 1 dégât par tour, portée 2'},
   saint:{n:'Le Saint',cat:'melee',hp:13,block:1,rng:1,dmg:2,every:1,aoe:1,bless:1,evo:1,v:'2 zone · Protège',d:'2 dégâts à tous les zombies autour, et ses voisins survivent une fois à un coup fatal'},
   tracker:{n:'Traqueur',cat:'shoot',hp:5,block:1,rng:3,dmg:2,every:1,hits:2,distinct:1,evo:1,v:'2 ×2 · P3',d:'À chaque tour, 2 dégâts à 2 zombies différents, portée 3'}
@@ -593,7 +593,7 @@ const Z=(()=>{
  function canPlace(st,t,i,moving){const D=U[t];if(D.react)return false;
   if(!moving&&capFull(st,t,i))return false;
   if(D.equip){const u=st.grid[i];return !!(u&&isUnit(u.t)&&!hasEq(u,t)&&(!D.far||(U[u.t].rng||0)>1)&&(!D.att||!!U[u.t].dmg)&&(!D.gold||(u.gold||0)>0))}
-  if(D.onUnit)return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<maxHp(st,st.grid[i]));
+  if(D.onUnit)return !!(st.grid[i]&&isUnit(st.grid[i].t)&&st.grid[i].hp<maxHp(st,st.grid[i]));
   if(t==='radioop'&&st.capB)return false;
   if(D.instant)return i===C;
   if(isEdge(i)||i===C)return false;
@@ -756,12 +756,12 @@ const Z=(()=>{
     const F=famOf(u.t),rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+(D.cat==='shoot'&&ally(st,'martial')?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&F==='police'?1:0)+(fl.comm&&F==='comm'&&D.rng>1?1:0)+(D.rng>1&&hasEq(u,'binoc')?1:0)+(D.cat==='shoot'&&D.rng>1&&nearPost(st,i,'tower')?1:0)+(e==='brume'&&D.cat==='shoot'&&hasEq(u,'torch')?1:0)),
      dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+sol(st,i,u)+(fl.mil&&F==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0)+(fl.tech&&F==='tech'?1:0)+(fl.care&&F==='care'?1:0)+(D.cat==='melee'&&ally(st,'hunt')?1:0)+(squad(st,i)?1:0)+(F&&fl[F]>=2?1:0)+(D.cat==='shoot'&&st.alarmT>=st.tick?1:0);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}
-   if(D.heal&&(D.hfast||st.tick%2===0)){const ns=around(i).map(j=>st.grid[j]).filter(v=>v&&U[v.t].block&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0)+(u.gold||0)+(squad(st,i)?1:0));ev.push({i,k:'heal'})}}
+   if(D.heal&&(D.hfast||st.tick%2===0)){const ns=(D.hrng>1?st.grid.map((v,j)=>j).filter(j=>j!==i&&inRange(j,i,D.hrng)):around(i)).map(j=>st.grid[j]).filter(v=>v&&isUnit(v.t)&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0)+(u.gold||0)+(squad(st,i)?1:0));ev.push({i,k:'heal'})}}
    if(D.mech&&!D.mechAll){const ns=around(i).filter(j=>st.grid[j]&&U[st.grid[j].t].cat==='wall'&&st.grid[j].hp<maxHp(st,st.grid[j])&&repOK(st,j));if(ns.length){repDone(st,ns[0]);const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0)+(u.gold||0)+(sol(st,i,u)?1:0));ev.push({i:ns[0],k:'heal'})}}
    if(D.selfHeal&&st.tick%2===0&&u.hp<maxHp(st,u)){u.hp++;ev.push({i,k:'heal'})}
-   if(hasEq(u,'medkit')&&st.tick%2===0){const ns=around(i).filter(j=>{const v=st.grid[j];return v&&U[v.t].block&&U[v.t].cat!=='wall'&&v.hp<maxHp(st,v)});if(ns.length){const v=st.grid[ns[0]];v.hp++;ev.push({i:ns[0],k:'heal'})}}
+   if(hasEq(u,'medkit')&&st.tick%2===0){const ns=around(i).filter(j=>{const v=st.grid[j];return v&&isUnit(v.t)&&v.hp<maxHp(st,v)});if(ns.length){const v=st.grid[ns[0]];v.hp++;ev.push({i:ns[0],k:'heal'})}}
    if(D.regen&&st.tick%D.regen===0&&u.hp<maxHp(st,u)){u.hp++;ev.push({i,k:'heal'})}
-   if(D.healAll&&st.tick%2===0)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].block&&v.hp<maxHp(st,v)){v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.care?1:0));ev.push({i:j,k:'heal'})}});
+   if(D.healAll&&st.tick%2===0)around(i).forEach(j=>{const v=st.grid[j];if(v&&isUnit(v.t)&&v.hp<maxHp(st,v)){v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.care?1:0));ev.push({i:j,k:'heal'})}});
    if(D.mechAll)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].cat==='wall'&&v.hp<maxHp(st,v)&&repOK(st,j)){repDone(st,j);v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.tech>=2?1:0));ev.push({i:j,k:'heal'})}});
    if(D.aura&&st.tick%2===0)alive().filter(z=>cheb(z.pos,i)<=1).forEach(z=>{hit(st,z,1+(fl.pyro?1:0),ev,i,1);z.burnT=Math.max(z.burnT||0,2)});
    if(D.burn&&e!=='pluie')alive().filter(z=>z.pos===i).forEach(z=>{z.inFire=1;hit(st,z,D.burn+(fl.pyro?1:0),ev,i,1)});
@@ -796,7 +796,7 @@ const Z=(()=>{
   const fl=famLevels(st),T=TIERS[st.tier]||TIERS.base;
   const mutual=allies(st).includes('mutual');if(mutual)st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+1)});
   const h=st.grid.reduce((a,u)=>a+(u&&U[u.t].cook||0),0)+(st.relics.includes('soupe')?1:0)+(fl.comm?1:0)+(mutual?1:0),before=st.shelter;
-  if(fl.care>=2)st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+2)});
+  if(fl.care>=2)st.grid.forEach(u=>{if(u&&isUnit(u.t))u.hp=Math.min(maxHp(st,u),u.hp+2)});
   st.shelter=Math.min(maxS(st),st.shelter+h);
   st.grid.forEach((u,i)=>{if(u&&U[u.t].carp)around(i).forEach(j=>{const v=st.grid[j];if(v&&U[v.t].cat==='wall')v.hp=Math.min(maxHp(st,v),v.hp+U[u.t].carp)})});
   st.grid.forEach((u,i)=>{if(u&&isUnit(u.t)&&nearPost(st,i,'pump'))u.hp=maxHp(st,u)});

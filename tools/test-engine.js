@@ -93,6 +93,10 @@ check('munition : seulement contre le Colosse sur la carte',()=>{const st=fresh(
  st.z=[{id:9,k:'boss',pos:2*9+4,hp:100,max:100,cd:5,style:0}];ok(Z.canReact(st,'shell',Z.C));Z.react(st,'shell',Z.C);ok(st.z[0].hp<100)});
 check('troc : la munition n’a plus de stock maximum',()=>{const st=fresh();st.scrap=100;ok(Z.pay(st,'ammo'));ok(Z.pay(st,'ammo'));ok(Z.pay(st,'ammo'));ok(Z.pay(st,'ammo'))});
 
+check('soin à distance : l’Infirmière soigne à 2 cases',()=>{const st=fresh();st.grid[2*9+2]={t:'med',hp:2};st.grid[2*9+4]={t:'gun',hp:1};Z.startNight(st,rng(1));st.pending=[];st.z=[];for(let k=0;k<2;k++)Z.step(st);ok(st.grid[2*9+4].hp>1,'pas soigné')});
+check('soin au contact : la Pharmacienne ne soigne pas à 2 cases',()=>{const st=fresh();st.grid[2*9+2]={t:'pharma',hp:3};st.grid[2*9+4]={t:'gun',hp:1};Z.startNight(st,rng(1));st.pending=[];st.z=[];for(let k=0;k<2;k++)Z.step(st);eq(st.grid[2*9+4].hp,1)});
+check('les soigneurs ne soignent pas les murs',()=>{const st=fresh();st.grid[2*9+2]={t:'pharma',hp:3};st.grid[2*9+3]={t:'bar',hp:1};Z.startNight(st,rng(1));st.pending=[];st.z=[];for(let k=0;k<3;k++)Z.step(st);eq(st.grid[2*9+3].hp,1)});
+
 /* ---------- 4. nuits aléatoires ---------- */
 const PLACE=PLAY.filter(t=>!Z.U[t].react&&!Z.U[t].instant&&!Z.U[t].onUnit);
 const NIGHTS=+process.env.NIGHTS||300;let maxZ=0,slow=0,worst=0;

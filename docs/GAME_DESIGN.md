@@ -626,3 +626,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Nuit rouge** : toutes les 5 nuits, +25 % de zombies, puis à l’aube une mutation et une relique (annoncée dans la barre « Cette nuit »).
 - **Munition anti-Colosse** : une carte réaction (achetée au troc, elle arrive en main) qui frappe le Colosse sur la carte.
 - **Événements de l’aube** : environ 1 aube sur 4 (au lieu de presque 1 sur 2).
+
+**v83** : soins. Les soigneurs ne soignent plus que les unités (les murs sont pour les réparateurs : Mécanicien, Atelier, Charpentier, Outils). Deux familles : **soin à distance** (Infirmière portée 2, Brancardier portée 3, La Doctoresse portée 2 ; portée affichée en vert) et **soin au contact** (Pharmacienne, Hôpital de campagne, Cantine, Sacoche de soins : les 8 cases autour). La Trousse de secours et les soins de l’aube des Soignants ne visent plus que les unités.
