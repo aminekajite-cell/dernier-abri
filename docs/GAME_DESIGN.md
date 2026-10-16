@@ -577,3 +577,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Bonus de liaison : chaque mur gagne +1 PV max par mur voisin relié, jusqu'à +3. Le bonus s'ajoute à la pose et se perd quand un voisin tombe.
 - Sapeur : 15 dégâts au mur frappé, le surplus passe aux murs reliés les plus proches.
 - Une barre de vie par mur ; l'usure et les brèches se dessinent mur par mur. Les zombies visent toujours le point le plus faible (calcul de chemin inchangé).
+
+**v70** : mise à jour automatique. `version.txt` contient le numéro de la dernière version ; au lancement, si la page chargée est plus ancienne (cache de GitHub Pages ou du téléphone), le jeu se recharge avec une adresse neuve qui contourne les caches (une seule tentative par version).
