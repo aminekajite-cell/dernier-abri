@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v95 · 16 oct.';
+const VERSION='v96 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -884,7 +884,7 @@ function playEvents(ev,types,now){
 /* ---------- UI ---------- */
 // jeu de société : la fiche de nuit (événement, jetons de zombies, frénésie, tampon) et la piste des nuits
 function ficheHtml(){const w=Z.waveList(G),fz=Z.frenzy(G),dm=Z.dmgBonus(G.night),boss=Z.bigNight(G,w);
- const stamp=boss?'<i class="stamp boss">Colosse</i>':Z.pressure(G.night)?'<i class="stamp red">Nuit rouge</i>':Z.respite(G.night)?'<i class="stamp calm">Répit</i>':'';
+ const stamp=S.busy?'':boss?'<i class="stamp boss">Colosse</i>':Z.pressure(G.night)?'<i class="stamp red">Nuit rouge</i>':Z.respite(G.night)?'<i class="stamp calm">Répit</i>':'';
  const toks=S.busy?'':Z.ZK.filter(k=>w[k]).map(k=>`<span class="ztk" title="${plural(w[k],...ZN[k])}"><span class="ztk-i" style="background-image:url('assets/sprites_cartoon/z_${k}.webp')"></span><b>${w[k]}</b></span>`).join('');
  const fzt=fz&&!S.busy?`<span class="ztk fz" title="Frénésie meurtrière : +${fz} % de PV${dm?`, +${dm} dégât`:''}"><span class="ztk-i">🩸</span><b>+${fz}%</b></span>`:'';
  return `<div class="fiche-top"><b>${G.event.n}</b><span>${G.event.d}${G.side>=0?` · Fusée : ils viendront de ${Z.SIDES[G.side]}`:''}</span></div>${toks||fzt?`<div class="ztoks">${toks}${fzt}</div>`:''}${stamp}`}
