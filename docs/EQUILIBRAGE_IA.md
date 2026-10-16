@@ -21,7 +21,7 @@ Ce que j'attends de toi :
 ## Règles générales
 
 - Plateau de 9×9 cases, l'abri au centre (10 PV). Le bord est une forêt infranchissable, sauf 4 routes au milieu de chaque bord : les zombies n'entrent que par ces routes.
-- Chaque jour : 4 énergie, pioche de 5 cartes (main de 8 au maximum). On pose des cartes autour de l'abri, puis la nuit se joue toute seule en temps réel, tour par tour.
+- Chaque jour : 5 énergie, pioche de 5 cartes (main de 8 au maximum). On pose des cartes autour de l'abri, puis la nuit se joue toute seule en temps réel, tour par tour.
 - Deck fermé de 20 à 30 cartes, construit avant la partie avec les cartes débloquées. Exemplaires max : commune 3, rare 2, épique 1, légendaire 1.
 - Deck de départ : Barricade, Barricade, Barricade, Clôture, Épave, Tireur, Tireur, Tireur, Sniper, Bûcheron, Bûcheron, Chien, Infirmière, Piège à loup, Piège à loup, Mine, Conserves, Outils, Grenade, Grenade.
 - À l'aube : choisir une carte du deck à avoir en main le lendemain, un événement à choix, et un troc contre de la ferraille.

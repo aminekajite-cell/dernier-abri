@@ -165,7 +165,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v67 · 15 oct.';
+const VERSION='v68 · 16 oct.';
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 const TICK=650;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1178,7 +1178,7 @@ function dailyScreen(){const day=today(),c=dailySetup(day),b=dailyBest(day);
   ${b!==null?`<p>Ton meilleur score aujourd’hui : <b>${plural(b,'nuit','nuits')}</b>.</p>`:''}<p>Les défis ne comptent pas pour les déblocages.</p>
   <button type="button" class="go" data-a="daily-go">Jouer le défi</button><button type="button" class="skip" data-a="title">Retour</button>`)}
 function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de fin. Survis <b>une nuit de plus</b>, encore et encore : chaque nuit, la horde est plus nombreuse et plus coriace.</p>
-<ul><li>Le jour, dépense tes <b>4 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
+<ul><li>Le jour, dépense tes <b>5 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
 <li>Chaque survivant a un <b>prénom</b> et un trait. S’il tombe, il est perdu pour de bon.</li>
 <li>Chaque unité a un <b>rôle</b> : 🛡️ <b>Tank</b> (attire les zombies à 3 cases, bloque 1 coup sur 3), ❤️ <b>Soin</b> (soigne le double sur un Tank), ⚔️ <b>DPS</b> (+1 dégât à côté d’un Tank). Un Tank, un Soin et un DPS voisins forment une <b>escouade</b> (+1).</li>
 <li>Les unités de <b>corps à corps</b> rendent chaque coup reçu au contact. Des <b>murs</b> côte à côte forment un rempart qui partage les coups. Deux factions à 3 unités chacune forment une <b>alliance</b>.</li>

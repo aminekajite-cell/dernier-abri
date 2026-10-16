@@ -10,7 +10,7 @@ Plateformes visées : Steam (PC) puis mobile.
 ## La boucle de jeu
 
 1. **Début** : tu prépares la partie : un de tes 3 decks (20 à 30 cartes, construits avec ta collection), un personnage (qui donne parfois une relique) et un lieu.
-2. **Jour** : tu as **4 énergies**. Chaque carte coûte de 0 à 3 énergies selon sa puissance ; tu joues autant de cartes que ton énergie le permet (le Café, gratuit, donne +2 énergies). Les cartes non jouées **restent en main** pour les jours suivants. Chaque jour, la main est complétée jusqu'à 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos), avec au moins 1 nouvelle carte et 8 cartes au maximum. Une fois par jour, tu peux aussi **déplacer** une de tes unités vers une case libre.
+2. **Jour** : tu as **5 énergies**. Chaque carte coûte de 0 à 3 énergies selon sa puissance ; tu joues autant de cartes que ton énergie le permet (le Café, gratuit, donne +2 énergies). Les cartes non jouées **restent en main** pour les jours suivants. Chaque jour, la main est complétée jusqu'à 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos), avec au moins 1 nouvelle carte et 8 cartes au maximum. Une fois par jour, tu peux aussi **déplacer** une de tes unités vers une case libre.
 3. **Nuit** : les zombies apparaissent sur l'anneau extérieur (les bois) et marchent vers la maison. Tes unités attaquent automatiquement. Les zombies frappent tout ce qui bloque leur chemin. Le bouton du bas passe la nuit en vitesse ×2.
 4. **Aube** :
    - toutes les 4 nuits, la horde mute (bonus permanent pour les zombies) ;
@@ -569,3 +569,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Constructions : Barricade 7, Sacs 6, Barrage 7, Épave 14, Bunker 16, Porte 18, Fortin 32 PV.
 - Colosse : 58 PV à la nuit 10, puis +8 % de ses PV par nuit (88 à la nuit 20). Munition : 15 + 25 % de ses PV max.
 - Communauté palier 2 : la 1ʳᵉ carte de chaque jour coûte 1 énergie de moins (au lieu de +1 énergie par jour).
+
+**v68** : 5 énergie par jour au lieu de 4.

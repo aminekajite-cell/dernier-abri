@@ -166,7 +166,7 @@ const Z=(()=>{
  function levelUp(st,i,kind){const u=st.grid[i];if(!u||lvPending(u)<=0)return false;
   if(kind==='atk')u.lvA=(u.lvA||0)+1;else{u.lvD=(u.lvD||0)+1;u.hp=maxHp(st,u)}return true}
  // énergie : chaque jour on a ENERGY points, chaque carte coûte de 0 à 3 selon sa puissance
- const ENERGY=4,HAND_MAX=8;
+ const ENERGY=5,HAND_MAX=8;
  const COST={rocket:3,amb:2,doc:2,orderly:2,nailer:2,ranger:2,riot:2,k9:1,barrier:2,swat:3,mortar:3,sentry:2,clay:2,bunker:3,pharma:2,hospital:3,priest:2,stretch:1,brasero:2,firetrap:1,net:1,bear:2,hunter:2,dogs:2,pitch:2,scare:1,turret:2,workshop:3,modwall:2,tesla:3,teacher:2,market:2,vigile:1,carp:2,tear:1,napalm:2,air:3,chief_police:3,chief_mil:3,chief_care:3,chief_pyro:3,chief_trap:3,chief_farm:3,chief_tech:3,chief_comm:3,coffee:0,grenade:1,shot:1,patch:1,molotov:2,horn:2,rush:2};
  'bar fen sand trap fire wire smoke bait food kid dog med roadmap kit flare'.split(' ').forEach(t=>COST[t]=1);
  'gun axe cop tire spike mine lamp radio cook mech butch monk flame xbow rep gas'.split(' ').forEach(t=>COST[t]=2);
