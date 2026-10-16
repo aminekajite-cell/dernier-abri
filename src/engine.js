@@ -151,7 +151,10 @@ const Z=(()=>{
  };
  const named=t=>HUMANS.includes(t)||t==='dog'||t==='k9'||t==='dogs'||!!(U[t]&&U[t].chief);
  // PV max : la version dorée (fusion) a deux fois plus de PV, chaque niveau défensif ajoute 3 PV
- const maxHp=(st,u)=>Math.max(1,Math.ceil(stat(st,u.t).hp*(1+1.2*(u.gold||0)))+((TRAITS[u.trait]||{}).hpB||0)+(u.lvD||0)*3+(u.leg?2:0));
+ // murs reliés : chaque mur gagne +1 PV max par mur voisin (jusqu'à +3)
+ const isWallU=v=>!!(v&&U[v.t]&&U[v.t].cat==='wall'&&U[v.t].block);
+ const linkB=(st,j)=>j<0?0:Math.min(3,around(j).filter(k=>isWallU(st.grid[k])).length);
+ const maxHp=(st,u)=>Math.max(1,(st&&st.grid&&isWallU(u)?linkB(st,st.grid.indexOf(u)):0)+Math.ceil(stat(st,u.t).hp*(1+1.2*(u.gold||0)))+((TRAITS[u.trait]||{}).hpB||0)+(u.lvD||0)*3+(u.leg?2:0));
  const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)+(u.lvA||0)+(u.gold||0)+(u.leg?1:0)};
  // héritage : un survivant tombé après 100 victimes laisse un souvenir ; dans la partie suivante, la première unité de son métier gagne +1 dégât et +2 PV
  const LEGACY_KILLS=100;
@@ -533,10 +536,13 @@ const Z=(()=>{
    u.trait=tr[Math.floor(rnd()*tr.length)];u.kills=0;u.hp=maxHp(st,u)}
   if(!free&&isBuild(t))u.gen=1;
   const lg=(st.legacy||[]).find(l=>l.t===t&&!l.used);if(lg&&D.block){lg.used=1;u.leg=lg.name;u.hp=maxHp(st,u)}
-  st.grid[i]=u;return free?null:merge(st,i)}
+  // un mur posé : lui et ses murs voisins gagnent leur bonus de liaison (+1 PV par voisin relié, jusqu'à +3)
+  const wn=isWallU(u)?around(i).filter(k=>isWallU(st.grid[k])).map(k=>[k,linkB(st,k)]):[];
+  st.grid[i]=u;if(isWallU(u)){u.hp+=linkB(st,i);wn.forEach(([k,b])=>{const v=st.grid[k];v.hp+=linkB(st,k)-b})}
+  return free?null:merge(st,i)}
  /* ---------- fusion et évolutions ----------
     Fusion : 3 unités du même type et du même nombre d'étoiles fusionnent en une unité avec une étoile de plus
-    (chaque étoile : +100 % des PV de base, +1 dégât ou +1 soin). Les fusions s'enchaînent (3 ★ donnent ★★, etc.).
+    (chaque étoile : +120 % des PV de base, +1 dégât ou +1 soin). Les fusions s'enchaînent (3 ★ donnent ★★, etc.).
     Les 2 unités absorbées rendent leur carte à la défausse : elles pourront être tirées de nouveau.
     Évolution : deux cartes précises posées côte à côte deviennent une unité unique (EVO). Ses 2 cartes reviennent quand elle tombe. */
  const basic=u=>!!u&&!u.gold&&!U[u.t].evo;
@@ -558,6 +564,7 @@ const Z=(()=>{
  function lose(st,j,u,ev){if(u.trait==='increvable'&&!u.saved){u.hp=1;u.saved=1;ev.push({i:j,k:'saved',name:u.name});return false}
   if(U[u.t].block&&!u.blessed&&around(j).some(k=>st.grid[k]&&U[st.grid[k].t].bless)){u.hp=1;u.blessed=1;ev.push({i:j,k:'saved',name:u.name||U[u.t].n});return false}
   st.grid[j]=null;ev.push({i:j,k:'lost',t:u.t,name:u.name});
+  if(isWallU(u))around(j).forEach(k=>{const v=st.grid[k];if(isWallU(v))v.hp=Math.min(v.hp,maxHp(st,v))});
   if(u.name)(st.fallen=st.fallen||[]).push({name:u.name,t:u.t,trait:u.trait,kills:u.kills||0,night:st.night});return true}
  function applyItem(st,t,i,rnd){const D=stat(st,t);
   if(t==='food')st.shelter=Math.min(maxS(st),st.shelter+D.gain);
@@ -625,11 +632,11 @@ const Z=(()=>{
  // un zombie frappe une unité qui bloque (au contact, ou à distance pour le cracheur)
  function strike(st,z,n,u,ev,ranged,pow){if(!z.reach){z.reach=1;st.reached=(st.reached||0)+1}const T=ZT[z.k],D=stat(st,u.t);
   if(T.sap){z.hp=0;z.bit=1;let left=D.cat==='wall'?SAP_WALL:6;
-   // 15 dégâts au rempart (du mur frappé vers les plus solides), 6 à une unité, puis 3 autour
-   const cells=D.cat==='wall'?[n,...wallGroup(st,n).filter(j=>j!==n).sort((a,b)=>st.grid[b].hp-st.grid[a].hp)]:[n];
+   // 15 dégâts au mur frappé (le surplus passe aux murs reliés les plus proches), 6 à une unité, puis 3 autour
+   const cells=D.cat==='wall'?[n,...wallGroup(st,n).filter(j=>j!==n).sort((a,b)=>cheb(a,n)-cheb(b,n))]:[n];
    for(const j of cells){const v=st.grid[j];if(!v||left<=0)continue;const d=Math.min(left,v.hp);v.hp-=d;left-=d;ev.push({i:j,txt:'−'+d,k:'bite',zid:z.id});if(v.hp<=0)lose(st,j,v,ev)}
    sapBlast(st,z.pos,ev);return}let d=T.boss?u.hp:zhit(st,z);if(!T.boss&&roleOf(u.t)==='tank'){u.blk=(u.blk||0)+1;if(u.blk%3===0){ev.push({i:n,txt:'bloqué',k:'block',zid:z.id});return}}if(!T.boss&&(st._fl||{}).police&&famOf(u.t)==='police')d=Math.max(1,d-1);if(D.cap&&!T.boss)d=Math.min(d,D.cap);
-  let tn=n,tu=u;if(D.cat==='wall'&&!T.boss)for(const j of wallGroup(st,n))if(st.grid[j].hp>tu.hp){tn=j;tu=st.grid[j]}
+  const tn=n,tu=u;
   tu.hp-=d;ev.push({i:tn,txt:'−'+d,k:ranged?'spit':'bite',zid:z.id,from:z.pos});
   if(!ranged&&u.t==='fen'&&pow){const el=(st._fl||{}).tech||0;hit(st,z,((st.relics.includes('groupe')||has(st,'solar'))?2:1)+(el?1:0),ev,n);if(el>=2)z.cd+=1;if(ally(st,'short'))z.burnT=Math.max(z.burnT||0,3)}
   // riposte : une unité de corps à corps frappée au contact rend le coup aussitôt

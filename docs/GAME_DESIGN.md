@@ -571,3 +571,9 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Communauté palier 2 : la 1ʳᵉ carte de chaque jour coûte 1 énergie de moins (au lieu de +1 énergie par jour).
 
 **v68** : 5 énergie par jour au lieu de 4.
+
+**v69 : remparts sans partage des PV**
+- Chaque mur garde ses PV : le mur que le zombie frappe encaisse le coup (avant, le mur le plus solide du rempart encaissait tout, donc tous les murs baissaient ensemble et tombaient d'un coup).
+- Bonus de liaison : chaque mur gagne +1 PV max par mur voisin relié, jusqu'à +3. Le bonus s'ajoute à la pose et se perd quand un voisin tombe.
+- Sapeur : 15 dégâts au mur frappé, le surplus passe aux murs reliés les plus proches.
+- Une barre de vie par mur ; l'usure et les brèches se dessinent mur par mur. Les zombies visent toujours le point le plus faible (calcul de chemin inchangé).

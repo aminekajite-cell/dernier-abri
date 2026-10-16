@@ -31,7 +31,7 @@ Ce que j'attends de toi :
 ### Constructions
 - Cartes à tracer : Barricade, Clôture, Sacs de sable, Mur de pneus, Barrage de police, Mur modulaire, Barbelés. Une carte donne 4 cases pour la journée (3 pour Mur de pneus, Barrage de police, Mur modulaire), pour le prix de la carte. Les cases se posent une par une ou en ligne ; la carte part à la défausse une fois ses cases posées ou le soir.
 - Les autres pièges restent en main la journée et se reposent à leur prix normal.
-- Des murs voisins forment un rempart : PV mis en commun.
+- Des murs voisins forment un rempart : chaque mur garde ses PV (le mur frappé encaisse) et gagne +1 PV max par mur voisin relié, jusqu’à +3.
 - Les zombies calculent leur chemin : entrer sur une case libre coûte 1, sur un mur ou une unité coûte ses PV (pour un rempart, les PV de tout le rempart). Ils contournent si le détour coûte moins cher que de casser.
 
 ### Rôles
