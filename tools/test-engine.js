@@ -24,7 +24,7 @@ for(const t of KEYS){const D=Z.U[t];
  check(`carte ${t} : illustration présente`,()=>ok(fs.existsSync(path.join(ROOT,'assets/cards',t+'.webp'))||fs.existsSync(path.join(ROOT,'assets/cards_cartoon',t+'.webp')),'assets/cards/'+t+'.webp manquant'));
 }
 for(const k of Object.keys(Z.ZT)){const T=Z.ZT[k];check(`zombie ${k} : stats valides`,()=>ok(T.n&&fin(T.hp)&&T.hp>0&&fin(T.dmg)&&fin(T.spd)&&T.spd>=1))}
-for(const f of Object.keys(Z.FAM))check(`faction ${f} : cartes existantes, 3 paliers`,()=>{Z.FAM[f].cards.forEach(t=>ok(Z.U[t],t+' inconnue'));eq(Z.FAM[f].lv.length,3);eq(Z.FAM[f].d.length,3)});
+for(const f of Object.keys(Z.FAM))check(`faction ${f} : cartes existantes, 2 paliers`,()=>{Z.FAM[f].cards.forEach(t=>ok(Z.U[t],t+' inconnue'));eq(Z.FAM[f].lv.length,2);eq(Z.FAM[f].d.length,2)});
 for(const k of Z.EVO_KEYS)check(`évolution ${k} : recette valide`,()=>Z.EVO[k].forEach(t=>ok(Z.U[t],t+' inconnue')));
 check('deck de départ valide',()=>eq(Z.deckError(Z.STARTER_DECK,Z.STARTER_CARDS),''));
 check('les 4 routes sont au bord, hors forêt',()=>Z.ROADS.forEach(i=>ok(Z.isEdge(i)&&!Z.isForest(i))));
@@ -63,10 +63,12 @@ check('déplacement libre, plusieurs fois par jour, murs compris',()=>{const st=
  ok(Z.move(st,2*9+4,2*9+5));ok(Z.move(st,2*9+5,2*9+6));ok(Z.move(st,3*9+3,6*9+3),'mur non déplacé')});
 check('déplacement à la limite d’unités permis',()=>{const st=fresh();['gun','axe','med','snp','dog'].forEach((t,k)=>Z.place(st,t,2*9+2+k,rng(1)));ok(Z.move(st,2*9+2,6*9+2))});
 check('mur déplacé : bonus de liaison recalculé',()=>{const st=fresh();[3,4].forEach(c=>Z.place(st,'bar',9+c,rng(1),true));eq(st.grid[13].hp,8);Z.move(st,13,6*9+6);eq(st.grid[6*9+6].hp,7);eq(st.grid[12].hp,7)});
-check('factions : paliers à 2, 3 et 5 unités ; murs et pièges ne comptent pas',()=>{const st=fresh();eq(Z.FAM.mil.lv,[2,3,5]);
- st.grid[10]={t:'mine',hp:1};st.grid[11]={t:'sentry',hp:3};eq(Z.famLevels(st).mil,0);st.grid[12]={t:'snp',hp:3};eq(Z.famLevels(st).mil,1)});
-check('équipe complète : +2 PV',()=>{const st=fresh();['snp','mg','sht','mortar'].forEach((t,k)=>st.grid[10+k]={t,hp:3});const u={t:'snp',hp:3};const a=Z.maxHp(st,u);st.grid[20]=u;eq(Z.maxHp(st,u),a+2)});
-check('frénésie : +12 % de PV par nuit dès la nuit 4, +1 dégât toutes les 10 nuits',()=>{ok(Math.abs(Z.hpMult(4)-1.12)<1e-9);eq(Z.dmgBonus(10),1);eq(Z.dmgBonus(9),0)});
+check('factions : paliers à 2 et 5 survivants ; constructions et machines ne comptent pas',()=>{const st=fresh();eq(Z.FAM.mil.lv,[2,5]);
+ st.grid[10]={t:'mine',hp:1};st.grid[11]={t:'sentry',hp:3};st.grid[12]={t:'snp',hp:3};eq(Z.famLevels(st).mil,0);st.grid[13]={t:'mg',hp:3};eq(Z.famLevels(st).mil,1);
+ st.grid[14]={t:'sht',hp:3};st.grid[15]={t:'snp',hp:3};eq(Z.famLevels(st).mil,1);st.grid[16]={t:'mg',hp:3};eq(Z.famLevels(st).mil,2)});
+check('Chef : compte pour 2 survivants',()=>{const st=fresh();st.grid[10]={t:'chief_mil',hp:5};eq(Z.famLevels(st).mil,1)});
+check('équipe complète : +2 PV',()=>{const st=fresh();['snp','mg','sht','snp'].forEach((t,k)=>st.grid[10+k]={t,hp:3});const u={t:'snp',hp:3};const a=Z.maxHp(st,u);st.grid[20]=u;eq(Z.maxHp(st,u),a+2)});
+check('frénésie : +10 % de PV à la nuit 10 et à chaque nuit suivante, +1 dégât toutes les 10 nuits',()=>{eq(Z.hpMult(9),1);ok(Math.abs(Z.hpMult(10)-1.1)<1e-9);ok(Math.abs(Z.hpMult(15)-1.6)<1e-9);eq(Z.dmgBonus(10),1);eq(Z.dmgBonus(9),0)});
 
 check('zombie dans la forêt : intouchable',()=>{const st=fresh();st.grid[1*9+4]={t:'gun',hp:3};Z.startNight(st,rng(5));st.pending=[];
  st.z=[{id:1,k:'walk',pos:4,hp:5,max:5,cd:99}];for(let k=0;k<3;k++)Z.step(st);eq(st.z[0].hp,5)});
