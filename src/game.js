@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v92 · 16 oct.';
+const VERSION='v93 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -297,6 +297,7 @@ function drawWoods(){const w=$('#woods');if(!w)return;const W=w.clientWidth,H=w.
  const step=14*k;for(let y=-step;y<H+step;y+=step)for(let x=-step;x<W+step;x+=step){const px=x+(r()-.5)*step,py=y+(r()-.5)*step;if(Math.abs(py-cy)<18*k||Math.abs(px-cx)<18*k)continue;if(r()<.8)tree(px,py,(7+r()*7)*k)}}
 addEventListener('resize',()=>setTimeout(drawWoods,60));
 /* ground, pre-rendered once */
+const MIDN=(Z.N-1)/2;
 const ground=document.createElement('canvas');ground.width=ground.height=L*2;
 (function(){const g=ground.getContext('2d');g.scale(2,2);const r=rng(11);
  g.fillStyle='#34432a';g.fillRect(0,0,L,L);
@@ -325,6 +326,9 @@ const ground=document.createElement('canvas');ground.width=ground.height=L*2;
  for(let k=0;k<9;k++){const x=T*1.2+r()*(L-2.4*T),y=T*1.2+r()*(L-2.4*T);if(Math.abs(x-L/2)<24||Math.abs(y-L/2)<24)continue;g.save();g.translate(x,y);g.rotate(r()*3);g.fillStyle='#0e110b';g.fillRect(-9.5,-2.5,19,5);g.fillStyle='#6b5236';g.fillRect(-8.5,-1.5,17,3);g.restore()}
  // inner border: broken fence line
  g.strokeStyle='rgba(120,100,70,.35)';g.lineWidth=1.5;g.setLineDash([7,6]);g.strokeRect(T+.5,T+.5,L-2*T-1,L-2*T-1);g.setLineDash([]);
+ // jeu de société : cases imprimées sur le plateau (filet sombre + reflet clair), coins arrondis discrets
+ for(let rr=1;rr<Z.N-1;rr++)for(let c=1;c<Z.N-1;c++){if(rr===MIDN&&c===MIDN)continue;const x=c*T,y=rr*T;
+  g.strokeStyle='rgba(10,12,6,.38)';g.lineWidth=1.4;g.strokeRect(x+2.5,y+2.5,T-5,T-5);g.strokeStyle='rgba(255,240,200,.07)';g.lineWidth=1;g.strokeRect(x+3.6,y+3.6,T-7.2,T-7.2)}
 })();
 const decal=document.createElement('canvas');decal.width=decal.height=L*2;const gx=decal.getContext('2d');gx.scale(2,2);
 function clearDecals(){gx.clearRect(0,0,L,L)}
@@ -483,8 +487,12 @@ function drawBars(){for(const[x,y,f,c]of BARS){ctx.fillStyle='rgba(0,0,0,.75)';c
 const EQIC={gear:'🦺',binoc:'🔭',bandage:'🩹',medkit:'⛑',torch:'🔦',pills:'💊',pack:'🎒',tape:'➰',keys:'🔑'};
 function drawUnit(i,u,now){
  const p0=tc(i),D0=Z.stat(G,u.t),cc=CATC[D0.cat];
- // socle : un disque discret de la couleur du rôle
- ctx.save();ctx.globalAlpha=D0.block?.16:.1;circ(p0.x,p0.y,26,cc);ctx.globalAlpha=.55;ctx.strokeStyle=cc;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(p0.x,p0.y,26,0,7);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+ // jeu de société : les unités et les postes sont des pions en carton (épaisseur, face crème, liseré de la couleur du type) ;
+ // les pièges restent « imprimés » sur le plateau avec un disque discret
+ if(Z.isUnit(u.t)||D0.cat==='post'){ctx.save();const R0=25;ell(p0.x+3,p0.y+7,R0+1,R0*.8,'rgba(0,0,0,.45)');circ(p0.x,p0.y+3.5,R0,'#5b4630');circ(p0.x,p0.y,R0,'#d8c7a0');
+  ctx.strokeStyle=cc;ctx.lineWidth=4;ctx.beginPath();ctx.arc(p0.x,p0.y,R0-2.5,0,7);ctx.stroke();ctx.strokeStyle='rgba(60,40,20,.55)';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(p0.x,p0.y,R0,0,7);ctx.stroke();
+  circ(p0.x,p0.y,R0-5,'rgba(60,45,25,.18)');ctx.restore()}
+ else{ctx.save();ctx.globalAlpha=D0.block?.16:.1;circ(p0.x,p0.y,26,cc);ctx.globalAlpha=.55;ctx.strokeStyle=cc;ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(p0.x,p0.y,26,0,7);ctx.stroke();ctx.setLineDash([]);ctx.restore()}
  // version dorée (fusion) ou évolution : un anneau qui pulse
  if(u.gold||D0.evo){ctx.save();ctx.strokeStyle=u.gold?'#f2c23d':'#c58cff';ctx.lineWidth=3;ctx.globalAlpha=.55+.3*Math.sin(now/300);ctx.beginPath();ctx.arc(p0.x,p0.y,28,0,7);ctx.stroke();ctx.restore()}
  ctx.save();ctx.translate(p0.x,p0.y);const sc=1.45+.12*Math.min(3,u.gold||0);ctx.scale(sc,sc);ctx.translate(-p0.x,-p0.y);
@@ -684,7 +692,9 @@ function drawZombie(v,now){
  const Lk=ZL[k]||ZL.walk,a=Math.atan2(CEN.y-p.y,CEN.x-p.x),moving=now-v.t0<v.dur,wob=Math.sin(now/(Z.ZT[k].spd===1?90:200)+v.id)*(moving?.22:.06);
  const sz=Lk.sz*1.5,skin=Lk.skin,cloth=Lk.cloth;
  if(v.burn&&!v.dying&&Math.random()<.3)PT.push({x:p.x+(Math.random()-.5)*10,y:p.y-4,vx:0,vy:-.04,t0:now,dur:300,c:Math.random()<.5?'#ff9a2e':'#ffd25a',r:2.5,light:0});
- ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ell(2,4,11*sz,8*sz,'rgba(0,0,0,.4)');
+ ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ell(2,5,12*sz,9*sz,'rgba(0,0,0,.45)');
+ // jeu de société : socle noir et rouge de figurine
+ ell(0,3*sz,10.5*sz,7.5*sz,'#1a0e0c');ell(0,2*sz,10.5*sz,7.5*sz,k==='boss'?'#8e1d1a':'#5a1715');ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(0,2*sz,10.5*sz,7.5*sz,0,0,7);ctx.stroke();
  const zk='z_'+k,[zim,zd]=sprK(zk),zup=zim&&zd[0]==='up';ctx.rotate(zup?wob*.6+(v.dying?.6:0):a+wob);ctx.scale(sz,sz);
  if(v.dying&&!zup)ctx.rotate(.6);
  if(zim){if(zup&&Math.cos(a)<-.1)ctx.scale(-1,1);drawSpr(zk,0,0,0,0)}
