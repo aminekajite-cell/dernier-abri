@@ -72,11 +72,11 @@ check('frénésie : un niveau après chaque Colosse (+60 % PV, +1 dégât)',()=>
 check('nuit de répit : 30 % de zombies en moins après un Colosse',()=>{const st=fresh();st.night=11;const a=Z.waveList(st).walk;st.night=12;ok(a<Z.waveList(st).walk,'pas de répit')});
 check('horde : croissance logarithmique (ralentit)',()=>{const g=(a,b)=>Z.waveCount('walk',b)-Z.waveCount('walk',a);ok(g(20,30)>=g(50,60),'croissance qui accélère');ok(Z.waveCount('walk',60)<20,'trop de zombies')});
 check('mutation = affixe : une seule à la fois, qui change',()=>{const st=fresh();const r=rng(4);const a=Z.mutate(st,r),b=Z.mutate(st,r);eq(st.muts.length,1);ok(a!==b)});
-check('convalescence : 1ʳᵉ chute = réserve blessée un jour, 2ᵉ chute = mort',()=>{const st=fresh();st.night=10;Z.place(st,'gun',2*9+4,rng(1));const u=st.grid[2*9+4];u.lvA=2;u.gold=1;
+check('convalescence : 1ʳᵉ chute = réserve blessée 3 nuits, 2ᵉ chute = mort',()=>{const st=fresh();st.night=10;Z.place(st,'gun',2*9+4,rng(1));const u=st.grid[2*9+4];u.lvA=2;u.gold=1;
  Z.startNight(st,rng(1));st.pending=[];st.z=[];st.putrid=0;u.hp=-1;st.muts=['putride'];
  st.z=[{id:1,k:'walk',pos:3*9+4,hp:0,max:5,cd:9,style:0}];Z.step(st);
  ok(!st.grid[2*9+4],'toujours sur la carte');eq(st.bench.length,1);ok(st.bench[0]===u&&u.gold===1&&u.lvA===2,'unité modifiée');ok(!Z.canPlaceBench(st,0,6*9+4),'reposable trop tôt');
- Z.endNight(st);Z.newDay(st,rng(1));ok(!Z.canPlaceBench(st,0,6*9+4),'reposable le lendemain');Z.endNight(st);Z.newDay(st,rng(1));ok(Z.canPlaceBench(st,0,6*9+4),'pas revenue');eq(u.hp,Z.maxHp(st,u))});
+ for(let d=0;d<3;d++){Z.endNight(st);Z.newDay(st,rng(1));ok(!Z.canPlaceBench(st,0,6*9+4),'reposable trop tôt (jour '+st.night+')')}Z.endNight(st);Z.newDay(st,rng(1));ok(Z.canPlaceBench(st,0,6*9+4),'pas revenue');eq(u.hp,Z.maxHp(st,u))});
 
 check('zombie dans la forêt : intouchable',()=>{const st=fresh();st.grid[1*9+4]={t:'gun',hp:3};Z.startNight(st,rng(5));st.pending=[];
  st.z=[{id:1,k:'walk',pos:4,hp:5,max:5,cd:99}];for(let k=0;k<3;k++)Z.step(st);eq(st.z[0].hp,5)});

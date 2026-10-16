@@ -638,3 +638,9 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Frénésie meurtrière** : un niveau de plus après chaque Colosse, cumulable (niveau 1 dès la nuit 11, 2 dès la nuit 21…). Chaque niveau : +60 % des PV de base et +1 dégât pour tous les zombies, Colosse compris. C’est elle qui porte la difficulté, plus le nombre.
 - **Mutations** : toutes les 5 nuits, une nouvelle mutation remplace la précédente, comme un affixe. Une seule active à la fois.
 - **Convalescence** : une unité qui tombe pour la 1ʳᵉ fois part blessée en réserve. Elle garde étoiles, niveaux, prénom, trait et équipements, ne peut pas être reposée le lendemain, et revient avec tous ses PV le surlendemain. Elle garde une cicatrice : à la chute suivante, elle meurt pour de bon (mémorial). La carte Repos guérit les blessés tout de suite ; le Talkie-walkie ne peut pas faire entrer un blessé.
+
+**v87** :
+- **Convalescence de 3 nuits** : une unité tombée la nuit N revient au jour N+4, avec tous ses PV.
+- **Route du Colosse** : pendant la pause de sa nuit, sa route s’affiche en rouge (flèche animée de la route jusqu’à l’abri).
+- **Conseils au bon moment** : une bulle, une seule fois par joueur, la première fois qu’une situation arrive (fusion, évolution, bonus de faction, équipe complète, escouade, limite d’unités, poste, équipement, unité blessée, nuit rouge, Colosse, pause, nuit de répit, mutation). Les cartes, elles, se débloquent déjà progressivement (22 au départ, les autres achetées avec les points).
+- **Sensations** : chiffres de dégâts plus gros et orange à partir de 10 (avec secousse), éclaboussure et anneau à chaque mort, éclair et secousse à la mort des gros zombies, secousse plus forte quand l’abri est touché.

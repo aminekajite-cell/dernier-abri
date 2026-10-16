@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v86 · 16 oct.';
+const VERSION='v87 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -642,6 +642,15 @@ function drawWires(){const W=i=>!!(G.grid[i]&&G.grid[i].t==='wire'),seen=new Set
   links.forEach(([a,b])=>{const p=tc(a),q2=tc(b),d=Math.hypot(q2.x-p.x,q2.y-p.y);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(q2.y-p.y,q2.x-p.x));wireSect(d,rng(a*31+b));ctx.restore()});
   const nb=k=>links.filter(([a,b])=>a===k||b===k).map(([a,b])=>a===k?b:a);
   g.forEach(k=>{const ls=nb(k);let corner=ls.length!==2;if(!corner){const[r0,c0]=Z.rc(k),[r1,c1]=Z.rc(ls[0]),[r2,c2]=Z.rc(ls[1]);corner=(r1-r0)!==(r0-r2)||(c1-c0)!==(c0-c2)}if(corner){const p=tc(k);wirePost(p.x,p.y)}})})}
+// pendant la pause de la nuit du Colosse : sa route en rouge (il fonce tout droit de sa route vers l'abri)
+function drawBossRoute(now){if(!S.pause||!G.pending)return;const ps=[...new Set(G.pending.filter(p=>p.k==='boss').map(p=>p.pos))];if(!ps.length)return;
+ const k=.55+.35*Math.sin(now/220);ctx.save();ctx.lineCap='round';
+ ps.forEach(pos=>{const a=tc(pos),b=CEN,ang=Math.atan2(b.y-a.y,b.x-a.x),ex=b.x-Math.cos(ang)*T*.75,ey=b.y-Math.sin(ang)*T*.75;
+  ctx.strokeStyle=`rgba(0,0,0,${.5*k})`;ctx.lineWidth=T*.42;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(ex,ey);ctx.stroke();
+  ctx.strokeStyle=`rgba(229,72,77,${k})`;ctx.lineWidth=T*.3;ctx.setLineDash([T*.35,T*.22]);ctx.lineDashOffset=-now/40;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=`rgba(229,72,77,${k})`;ctx.beginPath();ctx.moveTo(ex+Math.cos(ang)*T*.4,ey+Math.sin(ang)*T*.4);ctx.lineTo(ex+Math.cos(ang+2.4)*T*.4,ey+Math.sin(ang+2.4)*T*.4);ctx.lineTo(ex+Math.cos(ang-2.4)*T*.4,ey+Math.sin(ang-2.4)*T*.4);ctx.fill();
+  safeTxt(a.x+Math.cos(ang)*T*.9,a.y+Math.sin(ang)*T*.9-T*.35,'☠ Colosse','#ff6b6b')});
+ ctx.restore()}
 function drawShelter(now){
  const x=CEN.x,y=CEN.y,f=G.shelter/Z.maxS(G);ctx.save();ctx.translate(x,y);
  ell(6,8,38,32,'rgba(0,0,0,.45)');
@@ -775,6 +784,7 @@ function frameInner(now){
  }
  const safe=f=>{ctx.save();try{f()}catch(e){}ctx.restore()};
  safe(()=>drawShelter(now));
+ safe(()=>drawBossRoute(now));
  safe(()=>drawWires());
  G.grid.forEach((u,i)=>{if(u&&!Z.U[u.t].block&&u.t!=='wire')safe(()=>drawUnit(i,u,now))});
  const zs=[...V.values()].sort((a,b)=>zpos(a,now).y-zpos(b,now).y);
@@ -806,14 +816,16 @@ function playEvents(ev,types,now){
  // victimes : compteur, « Carnage » si au moins 3 morts d'un coup, ralenti à la mort du Colosse
  if(dead.length){KC.n+=dead.length;KC.t=now;
   if(dead.length>=3){const ps=dead.map(e=>tc(e.i)),cx=ps.reduce((a,p)=>a+p.x,0)/ps.length,cy=ps.reduce((a,p)=>a+p.y,0)/ps.length;floatTxt(cx,cy-10,dead.length>=5?`Carnage ×${dead.length} !`:`Triple !${dead.length>3?' ×'+dead.length:''}`,'#ff9a2e',17);shake(now,4)}
-  dead.forEach(e=>{const v=V.get(e.zid),p=v?zpos(v,now):tc(e.i);burst(p.x,p.y,'#d8d0b8',5,.07,1.6);
+  dead.forEach(e=>{const v=V.get(e.zid),p=v?zpos(v,now):tc(e.i);burst(p.x,p.y,'#d8d0b8',5,.07,1.6);burst(p.x,p.y,'rgba(140,20,24,.9)',9,.1,2.4);addFX({type:'ring',x:p.x,y:p.y,r:26,c:'rgba(229,72,77,.8)',dur:260});
+   // gros zombies : éclair et secousse à leur mort
+   if(v&&['fat','armor','howl','sap'].includes(v.k)&&!e.boss){shake(now,4);addFX({type:'flash',x:p.x,y:p.y,r:22,c:'rgba(255,120,80,.6)',dur:180})}
    if(e.boss){slowT=now+1800;shake(now,14);addFX({type:'ring',x:p.x,y:p.y,r:120,c:'#f2b33d',dur:900});addFX({type:'flash',x:p.x,y:p.y,r:50,c:'rgba(255,200,90,.9)',dur:700,light:T*3});burst(p.x,p.y,'rgba(140,20,24,.9)',30,.15,3);floatTxt(CEN.x,CEN.y-50,'LE COLOSSE EST TOMBÉ','#f2b33d',20);SFX.play('boom')}})}
  const SND={sap:'boom',rocket:'sht',doc:'shot',nailer:'mg',ranger:'snp',chief_comm:'shot',chief_tech:'mg',amb:'melee',orderly:'melee',chief_care:'melee',nightsnp:'snp',heavyflame:'flame',fortin:'shot',autogun:'mg',slaughter:'melee',gang:'shot',saint:'melee',tracker:'bow',k9squad:'melee',swat:'snp',vigile:'shot',hunter:'bow',sentry:'mg',turret:'mg',mortar:'sht',tesla:'hit',bunker:'shot',riot:'melee',k9:'melee',dogs:'melee',pitch:'melee',gun:'shot',kid:'shot',snp:'snp',sht:'sht',mg:'mg',xbow:'bow',flame:'flame',axe:'melee',dog:'melee',cop:'melee',butch:'melee',monk:'melee'};
  for(const e of ev){
   try{if(e.k==='hit')SFX.play(SND[types[e.src]]||'hit');else if(e.k==='bite'||e.k==='spit')SFX.play(e.i===Z.C?'shelter':'bite');
    else if(e.k==='boom')SFX.play('boom');else if(e.k==='lost')SFX.play(e.name?'death':'lost',.3);else if(e.k==='ko')SFX.play('lost',.3);else if(e.k==='molo')SFX.play('flame');else if(e.k==='howl')SFX.play('groan',.2)}catch(x){}
   if(e.k==='hit'){const v=V.get(e.zid);const tp=v?(v.dying?{x:v.dx,y:v.dy}:zpos(v,now)):tc(e.i);if(v)v.flash=now;
-   {const dm=parseInt(e.txt.replace('−',''))||0;floatTxt(tp.x,tp.y,e.txt,dm>=4?'#ffd25a':'#ffffff',dm>=4?17:13)}burst(tp.x,tp.y,'rgba(140,20,24,.9)',4,.06,2);splat(tp.x,tp.y,false);
+   {const dm=parseInt(e.txt.replace('−',''))||0;floatTxt(tp.x,tp.y,e.txt,dm>=10?'#ff9a2e':dm>=4?'#ffd25a':'#ffffff',dm>=10?23:dm>=4?17:13);if(dm>=10)shake(now,3)}burst(tp.x,tp.y,'rgba(140,20,24,.9)',4,.06,2);splat(tp.x,tp.y,false);
    const t=types[e.src],sp=tc(e.src);
    if(t)facing[e.src]=Math.atan2(tp.y-sp.y,tp.x-sp.x);
    const key=e.src+':'+e.zid;
@@ -836,7 +848,7 @@ function playEvents(ev,types,now){
   }
   if(e.k==='boom'){const p=tc(e.i);addFX({type:'flash',x:p.x,y:p.y,r:46,c:'rgba(255,160,60,.9)',dur:380,light:T*2.2});addFX({type:'ring',x:p.x,y:p.y,r:70,c:'#ffb35c',dur:420});burst(p.x,p.y,'#ff9a2e',22,.2,3);burst(p.x,p.y,'#3a3a3a',14,.12,4);shake(now,8);gx.fillStyle='rgba(15,12,10,.6)';gx.beginPath();gx.arc(p.x,p.y,22,0,7);gx.fill()}
   if(e.k==='bite'){const v=V.get(e.zid),p=tc(e.i);
-   if(e.i===Z.C){shake(now,5);hurtT=now;if(v){if(v.k==='boss'){v.lunge=now;v.lx=p.x;v.ly=p.y}else v.bit=1}floatTxt(p.x,p.y-8,e.txt,'#ff6b6b');burst(p.x,p.y,'rgba(140,20,24,.9)',8,.08,2)}
+   if(e.i===Z.C){shake(now,8);hurtT=now;if(v){if(v.k==='boss'){v.lunge=now;v.lx=p.x;v.ly=p.y}else v.bit=1}floatTxt(p.x,p.y-8,e.txt,'#ff6b6b');burst(p.x,p.y,'rgba(140,20,24,.9)',8,.08,2)}
    else{if(v){v.lunge=now;v.lx=p.x;v.ly=p.y}floatTxt(p.x,p.y,e.txt,'#ff6b6b');burst(p.x,p.y,types[e.i]==='car'?'#9a9a9a':'#a07a4a',5,.07,2)}}
   if(e.k==='ko'){const p=tc(e.i);burst(p.x,p.y,'rgba(140,20,24,.9)',8,.08,2);floatTxt(p.x,p.y-12,'Blessé : en réserve','#ffb35c',13)}
   if(e.k==='lost'){const p=tc(e.i);burst(p.x,p.y,'#8a6a45',16,.12,3);burst(p.x,p.y,'rgba(140,20,24,.9)',6,.08,2);splat(p.x,p.y,true)}
@@ -886,7 +898,7 @@ function render(){
  const info=$('#info');info.className='info';
  if(S.busy&&S.sel!==null&&S.sel>=0){const t=S.hand[S.sel];info.innerHTML=`<b>${cardName(t)}</b> : ${Z.U[t].d}. `+(Z.U[t].react==='unit'?'Touche une unité blessée.':'Touche une case de la carte.')}
  else if(S.pause&&S.moveFrom!==null&&G.grid[S.moveFrom])info.innerHTML=unitLine(G.grid[S.moveFrom])+' Touche une case libre en bleu pour le déplacer.';
- else if(S.pause)info.innerHTML=`<b>Pause : vague ${S.pause} sur ${G.waves} repoussée.</b> Déplace tes unités librement : touche une unité, puis une case libre. `+`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`;
+ else if(S.pause)info.innerHTML=`<b>Pause : vague ${S.pause} sur ${G.waves} repoussée.</b> Le Colosse arrivera par la route en rouge. Déplace tes cartes librement : touche-en une, puis une case libre. `+`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`;
  else if(S.busy){const left=G.z.length+G.pending.length,hasR=S.hand.some(t=>Z.U[t].react);info.innerHTML=`<b>${plural(left,'zombie','zombies')}</b> encore dehors.`+(hasR?` <span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left0()))}</span> ${left0()} énergie pour tes réactions.`:'')}
  else if(S.bsel!=null&&G.bench[S.bsel]){const u=G.bench[S.bsel];info.innerHTML=unitLine(u)+(u.koUntil?` <b>Blessé :</b> se repose, de retour au jour ${u.koUntil+1}.`:Z.capFull(G,u.t)?` <b>Limite de ${Z.unitCap(G)} unités atteinte</b> : rappelle ou fusionne une unité.`:' En réserve : touche une case en vert pour la reposer gratuitement.')}
  else if(S.sel!==null&&!S.busy){const t=selCard(),D=Z.U[t];info.innerHTML=(Z.isUnit(t)&&Z.capFull(G,t)?`<b>Limite de ${Z.unitCap(G)} unités atteinte.</b> Fusionne, ou rappelle une unité dans la réserve. `:'')+`<b>${cardName(t)}</b> (${selCost()} énergie${selReuse()?', réutilisée':''}) : ${D.d}.`+(Z.isTrace(t)?` Carte à tracer : ${Z.charges(G,t,selReuse())} case${Z.charges(G,t,selReuse())>1?'s':''} à poser aujourd’hui${selReuse()?'':' pour le prix de la carte'}, une par une ou d’un glissé.`:'')+(D.onUnit?' Touche une unité blessée.':D.instant?' Touche l’abri.':D.near?' Touche une case collée à l’abri.':Z.LINE.includes(t)?' Touche une case, ou glisse pour tracer une ligne.':' Touche un emplacement.')}
@@ -894,7 +906,7 @@ function render(){
  else if(S.inspect!==null&&G.grid[S.inspect])info.innerHTML=unitLine(G.grid[S.inspect])+(Z.canRecall(G,S.inspect)?' <button type="button" class="recall" data-a="recall">↩ Rappeler</button>':'');
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie. Touche une carte posée pour la déplacer ou la rappeler.`;
  // bouton de tir : un seul élément, mis à jour sans être recréé (sinon le toucher peut se perdre pendant la nuit)
- updatePreview();
+ updatePreview();checkHints();
  const tip=$('#tip');if(TUTO<4&&ov.hidden&&(S.busy?TUTO===3:TUTO<3)){tip.hidden=false;tip.textContent=TIPS[TUTO]}else tip.hidden=true;
  const go=$('#go');go.disabled=false;go.textContent=S.pause?`Lancer la vague ${S.pause+1} sur ${G.waves}`:S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy&&!S.pause);
 }
@@ -955,11 +967,39 @@ function unitLine(u){const tr=Z.TRAITS[u.trait],D=Z.U[u.t],lv=(u.lvA||0)+(u.lvD|
   +(tr?` · <b>${tr.n}</b> (${tr.d})`:'')+(D.dmg?` · ${plural(k,'zombie tué','zombies tués')}, niveau suivant à ${Z.lvKills(Z.lvOf(k)+1)}`:'')
   +(lv?` · niveau ${lv} (+${u.lvA||0} dégât, +${(u.lvD||0)*3} PV)`:'')+(u.leg?` · porte le souvenir de <b>${u.leg}</b> (+1 dégât, +2 PV)`:'')
   +(g=>g.length>1?` · <b>rempart de ${g.length} murs</b> : ${g.reduce((a,k)=>a+G.grid[k].hp,0)}/${g.reduce((a,k)=>a+Z.maxHp(G,G.grid[k]),0)} PV en commun`:'')(Z.wallGroup(G,G.grid.indexOf(u)))+(u.scar?' · <b>cicatrice</b> : la prochaine chute sera fatale':'')+(Z.eqOf(u).length?` · équipé : ${Z.eqOf(u).map(t=>EQIC[t]+' '+Z.U[t].n).join(', ')}`:'')+` · ${u.hp}/${Z.maxHp(G,u)} PV.`}
+/* conseils au bon moment : une bulle, une seule fois par joueur, la première fois qu'une situation se présente */
+const HINTS={
+ fuse:'⭐ <b>Fusion !</b> 3 unités identiques deviennent une seule unité avec une étoile de plus : plus de PV, +1 dégât, et 2 places libérées.',
+ evo:'✦ <b>Évolution !</b> Certaines paires de cartes posées côte à côte se transforment en une unité unique. Il en existe d’autres à découvrir.',
+ fam1:'🎖️ <b>Bonus de faction.</b> 2 survivants de la même faction débloquent son 1ᵉʳ bonus. À 5 survivants : 2ᵉ bonus et équipe complète (+1 dégât, +2 PV).',
+ fam2:'🎖️ <b>Équipe complète !</b> 5 survivants de la même faction : 2ᵉ bonus, +1 dégât et +2 PV pour toute la faction.',
+ squad:'🛡️❤️⚔️ <b>Escouade !</b> Un Tank, un Soin et un DPS voisins gagnent chacun +1 dégât (ou +1 soin).',
+ cap:'👥 <b>Limite d’unités atteinte.</b> Fusionne des unités identiques, ou rappelle-en une dans la réserve (touche-la, puis « Rappeler »). Murs, pièges et postes ne comptent pas.',
+ post:'🏗️ <b>Poste de soutien.</b> Les postes (projecteur, hôpital, atelier…) aident sans combattre et ne comptent pas dans la limite d’unités. Les réparateurs les réparent.',
+ equip:'🎒 <b>Équipement.</b> Il reste sur l’unité, même rappelée. Une unité porte un seul exemplaire de chaque équipement.',
+ ko:'🩹 <b>Unité blessée.</b> Elle part en réserve avec ses étoiles et ses niveaux, et revient après 3 nuits de repos. Attention : sa prochaine chute sera fatale.',
+ red:'🩸 <b>Nuit rouge ce soir.</b> 25 % de zombies en plus. À l’aube : une nouvelle mutation de la horde et une relique pour toi.',
+ boss:'☠️ <b>Le Colosse attaque ce soir.</b> La horde arrive en 2 vagues. Pendant la pause, sa route s’affiche en rouge : mets-y murs, Tank et pièges. Il fait 10 dégâts par coup et frappe l’abri sans mourir.',
+ pause:'⏸️ <b>Pause entre les vagues.</b> Le Colosse arrivera par la route en rouge. Déplace tes cartes sur son chemin, puis relance.',
+ respite:'🌙 <b>Nuit de répit.</b> 30 % de zombies en moins après le Colosse… mais la frénésie meurtrière gagne un niveau : chaque zombie a +60 % de PV et +1 dégât.',
+ mut:'🧬 <b>Mutation.</b> La horde a un affixe pendant 5 nuits (voir l’icône en haut). Puis une autre mutation le remplace.'
+};
+const HQ=[];let hintEl=null,hintT=0;
+function hint(k){if(!HINTS[k])return;META.hints=META.hints||{};if(META.hints[k])return;META.hints[k]=1;saveMeta(META);HQ.push(HINTS[k]);showHint()}
+function showHint(){if(hintEl&&!hintEl.hidden)return;if(!ov.hidden){setTimeout(showHint,1000);return}const t=HQ.shift();if(!t)return;
+ if(!hintEl){hintEl=document.createElement('div');hintEl.className='hint';hintEl.setAttribute('role','status');document.body.appendChild(hintEl);hintEl.addEventListener('click',()=>{hintEl.hidden=true;clearTimeout(hintT);setTimeout(showHint,250)})}
+ hintEl.innerHTML=t+'<small>Touche pour fermer</small>';hintEl.hidden=false;SFX.play('ui');clearTimeout(hintT);hintT=setTimeout(()=>{hintEl.hidden=true;setTimeout(showHint,300)},8000)}
+function checkHints(){try{if(!G||!S)return;const fl=Object.values(Z.famLevels(G));
+ if(fl.some(l=>l>=1))hint('fam1');if(fl.some(l=>l>=2))hint('fam2');
+ if(G.grid.some((u,i)=>u&&Z.squad(G,i)))hint('squad');if(Z.unitCount(G)>=Z.unitCap(G))hint('cap');
+ if(G.grid.some(u=>u&&Z.U[u.t].cat==='post'))hint('post');if(G.grid.some(u=>u&&Z.eqOf(u).length))hint('equip');
+ if((G.bench||[]).some(u=>u.koUntil))hint('ko');if(G.muts&&G.muts.length)hint('mut');if(S.pause)hint('pause');
+ if(!S.busy&&ov.hidden){if(Z.bigNight(G))hint('boss');else if(Z.pressure(G.night))hint('red');if(Z.respite(G.night))hint('respite')}}catch(e){}}
 // fusion ou évolution juste après une pose ou un déplacement : effets, son, et découverte enregistrée dans la collection
 function mergeFx(m){if(!m||typeof m!=='object')return;const p=tc(m.i),now=performance.now();
  const pull=(j,c)=>{const q=tc(j);facing[j]=null;addFX({type:'tracer',x1:q.x,y1:q.y,x2:p.x,y2:p.y,c,w:3,dur:450});burst(q.x,q.y,c,12,.09,2)};
- if(m.k==='fuse'){m.from.forEach(j=>pull(j,'#f2c23d'));addFX({type:'ring',x:p.x,y:p.y,r:64,c:'#f2c23d',dur:650});addFX({type:'flash',x:p.x,y:p.y,r:32,c:'rgba(255,210,90,.8)',dur:420,light:T*1.5});floatTxt(p.x,p.y-22,`Fusion ! ${cardName(m.t)} ${'★'.repeat(m.gold||1)}`,'#f2c23d',16);SFX.play('fuse')}
- if(m.k==='evo'){pull(m.j,'#c58cff');addFX({type:'ring',x:p.x,y:p.y,r:72,c:'#c58cff',dur:750});addFX({type:'flash',x:p.x,y:p.y,r:36,c:'rgba(200,150,255,.85)',dur:500,light:T*1.6});burst(p.x,p.y,'#e0c8ff',18,.12,2.5);floatTxt(p.x,p.y-22,`Évolution : ${Z.U[m.t].n} !`,'#d9b8ff',16);SFX.play('evo');
+ if(m.k==='fuse'){hint('fuse');m.from.forEach(j=>pull(j,'#f2c23d'));addFX({type:'ring',x:p.x,y:p.y,r:64,c:'#f2c23d',dur:650});addFX({type:'flash',x:p.x,y:p.y,r:32,c:'rgba(255,210,90,.8)',dur:420,light:T*1.5});floatTxt(p.x,p.y-22,`Fusion ! ${cardName(m.t)} ${'★'.repeat(m.gold||1)}`,'#f2c23d',16);SFX.play('fuse')}
+ if(m.k==='evo'){hint('evo');pull(m.j,'#c58cff');addFX({type:'ring',x:p.x,y:p.y,r:72,c:'#c58cff',dur:750});addFX({type:'flash',x:p.x,y:p.y,r:36,c:'rgba(200,150,255,.85)',dur:500,light:T*1.6});burst(p.x,p.y,'#e0c8ff',18,.12,2.5);floatTxt(p.x,p.y-22,`Évolution : ${Z.U[m.t].n} !`,'#d9b8ff',16);SFX.play('evo');
   META.evo=META.evo||[];if(!META.evo.includes(m.t)){META.evo.push(m.t);saveMeta(META);floatTxt(p.x,p.y+6,'Nouvelle découverte','#ffffff',13)}}
  shake(now,4)}
 // jouer une réaction pendant la nuit
@@ -1017,7 +1057,7 @@ async function night(){
   if(r.pause)await wavePause(r.pause);
   const lostEv=r.ev.filter(e=>e.k==='lost'),koEv=r.ev.filter(e=>e.k==='ko');
   if(lostEv.length||koEv.length){const info=$('#info');info.className='info warn';const ppl=lostEv.filter(e=>e.name),obj=lostEv.filter(e=>!e.name);
-   info.innerHTML=[koEv.length?`🩹 ${koEv.map(e=>`<b>${e.name||Z.U[e.t].n}</b>`).join(', ')} ${koEv.length>1?'sont blessés et partent':'est blessé et part'} en réserve (repos 1 jour).`:'',ppl.length?`✝ ${ppl.map(e=>`<b>${e.name}</b> (${Z.U[e.t].n})`).join(', ')} ${ppl.length>1?'sont tombés':'est tombé'}.`:'',obj.length?`${obj.map(e=>Z.U[e.t].n).join(', ')} détruit${obj.length>1?'s':''} !`:''].join(' ')}
+   info.innerHTML=[koEv.length?`🩹 ${koEv.map(e=>`<b>${e.name||Z.U[e.t].n}</b>`).join(', ')} ${koEv.length>1?'sont blessés et partent':'est blessé et part'} en réserve (repos 3 nuits).`:'',ppl.length?`✝ ${ppl.map(e=>`<b>${e.name}</b> (${Z.U[e.t].n})`).join(', ')} ${ppl.length>1?'sont tombés':'est tombé'}.`:'',obj.length?`${obj.map(e=>Z.U[e.t].n).join(', ')} détruit${obj.length>1?'s':''} !`:''].join(' ')}
   await wait(tickMs());
  }while(!r.done);
  await wait(700);
@@ -1036,7 +1076,7 @@ const pickBtn=(t,a,v)=>`<button type="button" class="pick" data-a="${a}" data-v=
 function dawn(){
  const d=S.dawn;if(d&&!d.chimed){d.chimed=1;SFX.play('dawn')}
  if(d&&d.mut&&!d.mutShown){d.mutShown=1;SFX.play('mutate');
-  return show(`<h2 class="ko">La horde mute</h2>${dawnTxt()}<div class="relics"><div class="relic mutx">${svg('mut')}<span><b>${Z.MUTS[d.mut].n}</b>${Z.MUTS[d.mut].d}</span></div></div><p>C’est permanent. La prochaine mutation arrivera dans 5 nuits.</p><button type="button" class="go" data-a="dawn">Continuer</button>`)}
+  return show(`<h2 class="ko">La horde mute</h2>${dawnTxt()}<div class="relics"><div class="relic mutx">${svg('mut')}<span><b>${Z.MUTS[d.mut].n}</b>${Z.MUTS[d.mut].d}</span></div></div><p>Elle remplace la précédente pendant 5 nuits, puis une autre mutation prendra sa place.</p><button type="button" class="go" data-a="dawn">Continuer</button>`)}
  // une unité a atteint 20, 40, 60… zombies tués : choix de son amélioration
  const li=Z.lvReady(G);if(li>=0)return dawnStep('lvl',[li]);
  if(Z.relicNight(G.night)||(d&&d.relicReward&&!d.relicDone)){if(d)d.relicDone=1;const r=Z.relicChoices(G,R);if(r.length)return dawnStep('relic',r)}
