@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v80 · 16 oct.';
+const VERSION='v81 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -874,6 +874,8 @@ function render(){
  $('#horde').innerHTML=(S.busy?'':hordeHtml())+`<span class="tags">${mN||soon?`<span class="mutc${soon?' soon':''}" title="Mutations de la horde">${svg('mut')}${mN}${soon?' · mute à l’aube':''}</span>`:''}${G.ammo?`<span class="ammoc" title="Munitions anti-Colosse">${svg('ammo')}${G.ammo}/${Z.AMMO_MAX}</span>`:''}<span class="scrap" title="Ferraille">${svg('scrap')}${G.scrap}</span></span>`;
  const left=G.energy??Z.ENERGY;
  const hand=$('#hand'),nH=S.hand.length+new Set(S.used||[]).size;hand.style.setProperty('--n',Math.max(4,Math.min(WIDE.matches?9:5,nH)));
+ // en largeur sur grand écran : autant de colonnes que la largeur du panneau le permet (cartes de 100 à 118 px)
+ if(LANDTALL.matches&&innerHeight>=640){const cols=Math.max(3,Math.min(Math.max(nH,4),Math.floor((hand.clientWidth+6)/106)));hand.style.gridTemplateColumns=`repeat(${cols},minmax(0,118px))`}else hand.style.gridTemplateColumns='';
  hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card${S.sel===k?' sel':''}" data-k="${k}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}>${cardFace(t,{mini:1,v:Z.U[t].react&&!S.busy?'Nuit':''})}</button>`).join('')
   +[...new Set(S.used||[])].map(t=>{const k=S.used.indexOf(t),n=S.used.filter(x=>x===t).length,on=S.sel!==null&&S.sel<0&&S.used[-1-S.sel]===t;
    const tr=Z.isTrace(t),ch=tr?Z.charges(G,t,true):0;
@@ -916,10 +918,11 @@ let HD=null;
 const LANDTALL=matchMedia('(orientation:landscape) and (min-aspect-ratio:5/4) and (min-width:560px)');
 function updatePreview(){const land=LANDTALL.matches;if(!WIDE.matches&&!land)return;let pv=$('#preview');if(!pv){pv=document.createElement('div');pv.id='preview';document.body.appendChild(pv)}
  const t=S.hover||selCard()||(land&&S.bsel!=null&&G.bench[S.bsel]?G.bench[S.bsel].t:null)||(land&&(S.inspect??S.moveFrom)!=null&&G.grid[S.inspect??S.moveFrom]?G.grid[S.inspect??S.moveFrom].t:null);pv.hidden=!t||!ov.hidden;pv.classList.toggle('land',land);
- if(land){const a=$('#fams').getBoundingClientRect(),b=$('#info').getBoundingClientRect(),sd=$('.side2').getBoundingClientRect(),hh=b.top-a.bottom-(innerHeight<520?10:24),w=Math.max(0,Math.min(sd.width*.55,hh*1086/1448));
-  pv.style.width=w+'px';pv.style.left=(sd.left+sd.width/2-w/2)+'px';pv.style.top=(a.bottom+12+(hh-w*1448/1086)/2)+'px';
-  // pas assez de place à droite (téléphone tourné) : la carte s'affiche dans le coin de la forêt, en haut à gauche du plateau
-  if(w<90){const m=cv.getBoundingClientRect(),w2=Math.min(130,m.width*.34);pv.style.width=w2+'px';pv.style.left=(m.left+6)+'px';pv.style.top=(m.top+6)+'px'}}else{pv.style.width=pv.style.left=pv.style.top=''}
+ if(land){const place=above=>{const a=$(above).getBoundingClientRect(),b=$('#info').getBoundingClientRect(),sd=$('.side2').getBoundingClientRect(),hh=b.top-a.bottom-(innerHeight<520?10:24),w=Math.max(0,Math.min(sd.width*.55,hh*1086/1448));
+   pv.style.width=w+'px';pv.style.left=(sd.left+sd.width/2-w/2)+'px';pv.style.top=(a.bottom+(innerHeight<520?5:12)+(hh-w*1448/1086)/2)+'px';return w};
+  // pas assez de place (téléphone tourné) : la carte choisie prend la place des lignes nuit / horde / factions
+  document.body.classList.remove('pvon');if(t&&ov.hidden&&place('#fams')<110){document.body.classList.add('pvon');if(place('.top')<60)pv.hidden=true}}
+ else{document.body.classList.remove('pvon');pv.style.width=pv.style.left=pv.style.top=''}
  const key=t+(S.busy?1:0)+(G.upg[t]?'u':'');if(t&&pv.dataset.t!==key){pv.dataset.t=key;pv.innerHTML=cardFace(t)}}
 $('#hand').addEventListener('pointerover',e=>{const b=e.target.closest('.card');if(!b||e.pointerType!=='mouse')return;S.hover=b.dataset.b!==undefined?(G.bench[+b.dataset.b]||{}).t:b.dataset.u!==undefined?S.used[+b.dataset.u]:S.hand[+b.dataset.k];updatePreview()});
 $('#hand').addEventListener('pointerleave',()=>{if(S.hover){S.hover=null;updatePreview()}});
