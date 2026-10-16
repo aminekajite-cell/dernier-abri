@@ -21,7 +21,7 @@ for(const t of KEYS){const D=Z.U[t];
  if(!D.evo)check(`carte ${t} : coût entre 0 et 3`,()=>{const c=Z.cost(t);ok(fin(c)&&c>=0&&c<=3,'coût '+c)});
  if(D.block)check(`carte ${t} : PV positifs`,()=>ok(fin(D.hp)&&D.hp>0,'PV '+D.hp));
  if(D.dmg!=null)check(`carte ${t} : dégâts et portée valides`,()=>ok(fin(D.dmg)&&D.dmg>=0&&(D.rng==null||D.rng>=1),'dmg '+D.dmg+' rng '+D.rng));
- check(`carte ${t} : illustration présente`,()=>ok(fs.existsSync(path.join(ROOT,'assets/cards',t+'.webp')),'assets/cards/'+t+'.webp manquant'));
+ check(`carte ${t} : illustration présente`,()=>ok(fs.existsSync(path.join(ROOT,'assets/cards',t+'.webp'))||fs.existsSync(path.join(ROOT,'assets/cards_cartoon',t+'.webp')),'assets/cards/'+t+'.webp manquant'));
 }
 for(const k of Object.keys(Z.ZT)){const T=Z.ZT[k];check(`zombie ${k} : stats valides`,()=>ok(T.n&&fin(T.hp)&&T.hp>0&&fin(T.dmg)&&fin(T.spd)&&T.spd>=1))}
 for(const f of Object.keys(Z.FAM))check(`faction ${f} : cartes existantes, 3 paliers`,()=>{Z.FAM[f].cards.forEach(t=>ok(Z.U[t],t+' inconnue'));eq(Z.FAM[f].lv.length,3);eq(Z.FAM[f].d.length,3)});
@@ -31,7 +31,7 @@ check('les 4 routes sont au bord, hors forêt',()=>Z.ROADS.forEach(i=>ok(Z.isEdg
 
 /* ---------- 2. pose de chaque carte ---------- */
 for(const t of PLAY){const D=Z.U[t];if(D.react)continue;
- check(`pose de ${t}`,()=>{const st=fresh();st.grid[2*9+4]={t:'gun',hp:1};
+ check(`pose de ${t}`,()=>{const st=fresh();st.grid[2*9+4]={t:'gun',hp:1,gold:D.gold?1:0};
   const i=D.onUnit?2*9+4:D.instant?Z.C:freeCells(st).find(j=>Z.canPlace(st,t,j));ok(i!=null,'aucune case valide');
   ok(Z.canPlace(st,t,i),'canPlace refuse');const e0=st.energy;Z.place(st,t,i,rng(3));
   ok(t==='coffee'||st.energy<=e0,'énergie augmentée');if(!D.instant){const u=st.grid[i];ok(u,'rien sur la case');if(D.block)ok(fin(u.hp)&&u.hp>0,'PV '+u.hp)}})}
@@ -70,6 +70,18 @@ check('frénésie : +12 % de PV par nuit dès la nuit 4, +1 dégât toutes les 1
 
 check('zombie dans la forêt : intouchable',()=>{const st=fresh();st.grid[1*9+4]={t:'gun',hp:3};Z.startNight(st,rng(5));st.pending=[];
  st.z=[{id:1,k:'walk',pos:4,hp:5,max:5,cd:99}];for(let k=0;k<3;k++)Z.step(st);eq(st.z[0].hp,5)});
+
+check('équipement : posé une seule fois par unité, garde l’effet',()=>{const st=fresh();Z.place(st,'gun',2*9+4,rng(1));const u=st.grid[2*9+4],h=Z.maxHp(st,u);
+ ok(Z.canPlace(st,'gear',2*9+4));Z.place(st,'gear',2*9+4,rng(1));eq(Z.maxHp(st,u),h+4);ok(!Z.canPlace(st,'gear',2*9+4),'2 fois le même équipement')});
+check('Jumelles : seulement sur une unité à distance',()=>{const st=fresh();Z.place(st,'axe',2*9+4,rng(1));ok(!Z.canPlace(st,'binoc',2*9+4))});
+check('Clés : l’unité ne compte plus dans la limite',()=>{const st=fresh();Z.place(st,'gun',2*9+4,rng(1));eq(Z.unitCount(st),1);Z.place(st,'keys',2*9+4,rng(1));eq(Z.unitCount(st),0)});
+check('postes de soutien : hors limite et non cumulables',()=>{const st=fresh();['gun','axe','med','snp','dog'].forEach((t,k)=>Z.place(st,t,2*9+2+k,rng(1)));ok(Z.canPlace(st,'tent',6*9+4));ok(!Z.isUnit('ammobox'))});
+check('Opérateur radio : +1 à la limite, une seule fois',()=>{const st=fresh();const c=Z.unitCap(st);Z.place(st,'radioop',Z.C,rng(1));eq(Z.unitCap(st),c+1);ok(!Z.canPlace(st,'radioop',Z.C))});
+check('Pilules : survit une fois par nuit',()=>{const st=fresh();Z.place(st,'monk',2*9+4,rng(1));Z.place(st,'pills',2*9+4,rng(1));Z.startNight(st,rng(2));st.pending=[];const u=st.grid[2*9+4];
+ st.z=[{id:1,k:'fat',pos:1*9+4,hp:999,max:999,cd:1,style:0}];u.hp=1;for(let k=0;k<12&&u.pillN==null;k++)Z.step(st);ok(u.pillN===st.night,'pilules non utilisées')});
+check('Fosse piégée : avale le premier zombie',()=>{const st=fresh();Z.place(st,'pit',3*9+4,rng(1),true);Z.startNight(st,rng(2));st.pending=[];st.z=[{id:1,k:'fat',pos:2*9+4,hp:80,max:80,cd:1,style:0}];Z.step(st);eq(st.z.length,0)});
+check('Talkie-walkie : échange avec la réserve',()=>{const st=fresh();Z.place(st,'gun',2*9+4,rng(1));Z.place(st,'axe',2*9+5,rng(1));Z.recall(st,2*9+5);st.grid[2*9+4].hp=1;Z.startNight(st,rng(2));st.energy=5;
+ ok(Z.react(st,'talkie',2*9+4));eq(st.grid[2*9+4].t,'axe');eq(st.bench[0].t,'gun')});
 
 /* ---------- 4. nuits aléatoires ---------- */
 const PLACE=PLAY.filter(t=>!Z.U[t].react&&!Z.U[t].instant&&!Z.U[t].onUnit);

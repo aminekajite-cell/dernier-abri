@@ -117,10 +117,11 @@ const SPRDC={},SPRC={},DOWN=Math.PI/2;
  ['fix',0,50,'canteen hospital market workshop'],['fix',0,42,'lamp siren solar scare'],
  ['wallh',0,54,'sand bar barrier modwall fen'],['fix',0,46,'bunker'],['fix',0,40,'tire'],
  ['fix',0,40,'fire spike net bear wire'],['fix',0,32,'trap mine clay gas smoke bait dyn firetrap'],
+ ['fix',0,48,'tent tower'],['fix',0,40,'ammobox trench workbench rocks'],['fix',0,36,'pump flood'],['fix',0,42,'pit'],['wallh',0,50,'gate gabion'],
  ['rot',DOWN,34,'z_walk z_run z_sap z_armor z_howl z_crawl z_spit z_boss'],['rot',DOWN,40,'z_fat'],['rot',DOWN,30,'z_zdog']
 ].forEach(([m,b,z,ids])=>ids.split(' ').forEach(k=>{SPRDC[k]=[m,b,z];const im=new Image();im.onload=()=>SPRC[k]=im;im.src='assets/sprites_cartoon/'+k+'.webp'}));
 // le sprite à utiliser selon le style choisi (cartoon si disponible, sinon réaliste)
-function sprK(k){if(ART_STYLE==='cartoon'&&SPRC[k])return[SPRC[k],SPRDC[k]];return[SPR[k],SPRD[k]]}
+function sprK(k){if((ART_STYLE==='cartoon'||!SPRD[k])&&SPRC[k])return[SPRC[k],SPRDC[k]];return[SPR[k],SPRD[k]]}
 function drawSpr(k,x,y,a,out,mul){const[im,d]=sprK(k);if(!im||!d)return false;const[m,b,z]=d,sz=z*(mul||1),r=im.width/im.height,w=r>=1?sz:sz*r,h=r>=1?sz/r:sz;
  ctx.save();ctx.translate(x,y);if(m==='rot')ctx.rotate(a-b);else if(m==='wall')ctx.rotate(out);else if(m==='wallh')ctx.rotate(out+Math.PI/2);else if((m==='up'||m==='flip')&&Math.cos(a)<-.1)ctx.scale(-1,1);
  ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore();return true}
@@ -131,16 +132,17 @@ let ART_STYLE=(()=>{try{return localStorage.getItem('abri-style')||'real'}catch(
 const CART_FILES=('chief_police chief_mil chief_pyro chief_trap chief_farm chief_care chief_tech chief_comm k9squad nightsnp '+
  'gun snp sht xbow flame mg molo kid swat mortar sentry hunter turret tesla vigile doc nailer ranger rocket axe dog cop butch monk riot k9 dogs pitch amb orderly '+
  'med lamp radio cook mech siren lead solar pharma hospital priest stretch scare workshop teacher market carp canteen '+
- 'fortin autogun tracker brasero dyn bear food kit rep roadmap gas molotov grenade shot flare bait patch napalm rush horn air trap wire mine spike tear firetrap fen fire clay sand bar modwall barrier bunker door car').split(' ');
+ 'fortin autogun tracker brasero dyn bear food kit rep roadmap gas molotov grenade shot flare bait patch napalm rush horn air trap wire mine spike tear firetrap fen fire clay sand bar modwall barrier bunker door car '+
+ 'gear binoc bandage medkit torch pills pack tape keys tent ammobox tower trench pump flood workbench palis gate gabion log pit glass cans rocks supply airdrop jerry rest radioop talkie storm bomber noise').split(' ');
 const CART_ZOMB='walk fat sap armor zdog crawl run howl spit boss'.split(' ');
 const CART_POP=CART_FILES.slice(0,10);
-const cartoon=t=>ART_STYLE==='cartoon'&&CART_FILES.includes(t);
+const cartoon=t=>CART_FILES.includes(t)&&(ART_STYLE==='cartoon'||!ART_FILES.includes(t));
 const popUrl=t=>!popOK(t)?'':cartoon(t)?(CART_POP.includes(t)?'assets/cards_cartoon/'+t+'_pop.webp':''):ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
 const artUrl=t=>cartoon(t)?'assets/cards_cartoon/'+t+'.webp':ART_TEST?ART_DIR+ART_TEST:ART_FILES.includes(t)?ART_DIR+t+'.webp':'';
 /* face de carte complète (style Hearthstone) : illustration dans une fenêtre arrondie, gemme de coût, bandeau du nom,
    texte d'effet, gemmes d'attaque et de PV, faction, rôle et rareté. Tout est écrit par le jeu.
    o.mini : version de la main (sans le texte d'effet) ; o.base : stats de base (collection), sinon celles de la partie (améliorations). */
-const CATL={wall:'Défense',shoot:'Tireur',melee:'Corps à corps',help:'Soutien',trap:'Piège',item:'Objet',react:'Réaction'};
+const CATL={post:'Poste de soutien',wall:'Défense',shoot:'Tireur',melee:'Corps à corps',help:'Soutien',trap:'Piège',item:'Objet',react:'Réaction'};
 const TRAPK=['trap','mine','spike','gas','clay','firetrap','dyn','burn','wire'];
 function cardStats(D){const o={};if(D.dmg)o.atk=D.dmg+(D.hits>1?'×'+D.hits:'');else{const k=TRAPK.find(k=>D[k]);if(k)o.atk=D[k];else if(D.heal||D.mech)o.heal=D.heal||D.mech}
  if(D.block&&D.hp)o.hp=D.hp;return o}
@@ -165,7 +167,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v75 · 16 oct.';
+const VERSION='v76 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -428,10 +430,11 @@ function dogShape(skin,coat,dark,now,wag){
  oEll(-2,0,11,6,coat);ell(-3,-2,7,2.5,'rgba(255,255,255,.08)');ell(-4,2.5,7,2,'rgba(0,0,0,.2)');
  oCirc(9,0,5,coat);oEll(13.5,0,3,2.4,dark,1);circ(15.6,0,1,INK);
  oEll(8,-4.5,2,3,dark,1);oEll(8,4.5,2,3,dark,1)}
-const CATC={wall:'#c9a27a',shoot:'#f2b33d',melee:'#ff7a59',help:'#7cc7ff',trap:'#e5484d',item:'#d6c2ff'};
+const CATC={post:'#9ee08a',wall:'#c9a27a',shoot:'#f2b33d',melee:'#ff7a59',help:'#7cc7ff',trap:'#e5484d',item:'#d6c2ff'};
 let BARS=[],EYES=[],LABELS=[];
 function hpBar(x,y,f,c){if(f>=1)return;BARS.push([x,y,f,c])}
 function drawBars(){for(const[x,y,f,c]of BARS){ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(x-18,y-1,36,7);ctx.fillStyle=c;ctx.fillRect(x-17,y,34*clamp(f,0,1),5)}}
+const EQIC={gear:'🦺',binoc:'🔭',bandage:'🩹',medkit:'⛑',torch:'🔦',pills:'💊',pack:'🎒',tape:'➰',keys:'🔑'};
 function drawUnit(i,u,now){
  const p0=tc(i),D0=Z.stat(G,u.t),cc=CATC[D0.cat];
  // socle : un disque discret de la couleur du rôle
@@ -443,6 +446,7 @@ function drawUnit(i,u,now){
  if(D0.up)safeTxt(p0.x+19,p0.y-17,'+','#f2b33d');
  if(u.gold)safeTxt(p0.x-19,p0.y-17,u.gold>1?u.gold+'★':'★','#f2c23d');else if(D0.evo)safeTxt(p0.x-19,p0.y-17,'✦','#c58cff');
  const lv=(u.lvA||0)+(u.lvD||0);if(lv){ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(p0.x+11,p0.y+14,18,12);ctx.fillStyle='#9fd86b';ctx.font='bold 9px system-ui,sans-serif';ctx.textAlign='center';ctx.fillText('N'+lv,p0.x+20,p0.y+23)}
+ const eq=Z.eqOf(u);if(eq.length){ctx.font='10px system-ui,sans-serif';ctx.textAlign='center';eq.slice(0,4).forEach((t,k)=>{const ex=p0.x-22+k*12,ey=p0.y+22;ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(ex-6,ey-7,12,12);ctx.fillStyle='#fff';ctx.fillText(EQIC[t]||'•',ex,ey+3)})}
  const mx=Z.maxHp(G,u);if(D0.block)hpBar(p0.x,p0.y-31,u.hp/mx,u.hp/mx>.4?'#9fd86b':'#e5484d');
  if(u.name&&nightAmt<.5)LABELS.push([p0.x,p0.y+33,u.name.replace(/^(Le |La |L’)/,'')+(u.gold?' '+stars(u):'')]);
 }
@@ -497,6 +501,11 @@ function drawUnitInner(i,u,now){
   case 'wire':{ctx.save();ctx.translate(x,y);ctx.rotate(out+Math.PI/2);[-24,24].forEach(p=>oLine(p,-8,p,8,'#5a4632',2.4));[-5,0,5].forEach(o=>{ctx.beginPath();for(let k=-24;k<=24;k+=4)ctx.lineTo(k,o+((k/4)%2?1.5:-1.5));ctx.strokeStyle=INK;ctx.lineWidth=2.6;ctx.stroke();ctx.strokeStyle='#9da1a6';ctx.lineWidth=1;ctx.stroke()});ctx.restore();break}
   case 'spike':{ell(x,y,21,15,INK);ell(x,y,19.5,13.5,'#1c140b');for(let k=0;k<u.hp+3;k++){const t=k/(u.hp+3)*7,px=x+Math.cos(t)*10,py=y+Math.sin(t)*6;oLine(px,py+3,px,py-6,'#a07a4a',1.6);circ(px,py-6,.8,'#d8c19a')}break}
   case 'gas':{ctx.save();ctx.translate(x,y);ell(2,5,10,8,'rgba(0,0,0,.35)');oCirc(0,0,8.5,'#b8332f');ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(0,0,5.5,0,7);ctx.stroke();ell(-3,-3,3,2,'rgba(255,255,255,.28)');oCirc(0,0,2.2,'#888',.8);ctx.fillStyle='#f2d24a';ctx.fillRect(-6,4,4,2);ctx.restore();break}
+  case 'log':{ctx.save();ctx.translate(x,y);ctx.rotate(out+Math.PI/2+Math.sin(now/500)*.15);ell(2,5,22,8,'rgba(0,0,0,.3)');oLine(-22,-12,-22,12,'#4a3420',2.4);oLine(22,-12,22,12,'#4a3420',2.4);oLine(-22,-11,22,-11,'#4a3420',1.6);
+   oRound(-17,-6,34,12,6,u.lu>=3?'#5a4632':'#8a6238');ctx.fillStyle='rgba(0,0,0,.2)';for(let k=-12;k<16;k+=7)ctx.fillRect(k,-6,1.2,12);[-10,0,10].forEach(k=>oLine(k,6,k,11,'#cfcfcf',1));ctx.restore();break}
+  case 'glass':{ctx.save();ctx.translate(x,y);const r=rng(i*13);for(let k=0;k<9;k++){const px=(r()-.5)*30,py=(r()-.5)*22,s2=3+r()*4,t=r()*7;ctx.save();ctx.translate(px,py);ctx.rotate(t);ctx.fillStyle=INK;ctx.beginPath();ctx.moveTo(-s2-1,0);ctx.lineTo(0,-s2*.7-1);ctx.lineTo(s2+1,s2*.4);ctx.fill();
+   ctx.fillStyle=k%3?'rgba(120,200,150,.85)':'rgba(190,230,240,.85)';ctx.beginPath();ctx.moveTo(-s2,0);ctx.lineTo(0,-s2*.7);ctx.lineTo(s2,s2*.4);ctx.fill();ctx.restore()}ctx.restore();break}
+  case 'cans':{ctx.save();ctx.translate(x,y);ctx.rotate(out+Math.PI/2);oLine(-22,0,22,0,'#d8d0b8',1);[-22,22].forEach(p=>oLine(p,-6,p,6,'#5a4632',2.2));[-11,0,11].forEach((p,k)=>{oRect(p-3.5,1,7,9,['#b8433a','#9aa0a6','#c9a13a'][k],1);ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(p-2.5,2,1.5,7)});ctx.restore();break}
   case 'smoke':{circ(x+1,y+3,7,'rgba(0,0,0,.3)');oCirc(x,y,6,'#4f6b3f');ctx.fillStyle='#ddd';ctx.fillRect(x-4,y-1,8,2);circ(x+3,y-5,1.5,'#9a9a9a');break}
   case 'bait':{ell(x+1,y+3,12,8,'rgba(0,0,0,.3)');oEll(x,y,11,7,'#a8323a');ell(x-2,y-1,6,3.5,'#d36a6f');oCirc(x+8,y+3,3,'#f0ece4',1);circ(x-6,y+3,1,'#6a1418');break}
   case 'dyn':{ctx.save();ctx.translate(x,y);ell(1,4,12,8,'rgba(0,0,0,.3)');[-6,0,6].forEach(p=>oRect(p-2.5,-8,5,16,'#c0392b',1));ctx.fillStyle='#222';ctx.fillRect(-9,-2,18,3);oLine(0,-8,4,-14,'#ccc',.8);if(Math.floor(now/200)%2){circ(4,-14,2.4,'#ffcf4a');circ(4,-14,1,'#fff')}ctx.restore();break}
@@ -506,8 +515,8 @@ function drawUnitInner(i,u,now){
    Des murs voisins se raccordent automatiquement : une section continue relie leurs centres (moitié du matériau de chacun),
    avec un poteau aux extrémités et aux angles, et une seule barre de PV par ouvrage.
    Un mur seul est un tronçon posé en travers de la route, prêt à se raccorder. */
-const PLAIN=new Set(['bar','car','fen','sand','tire','barrier','modwall','door']),METAL=new Set(['car','modwall','door','barrier']);
-const WMAT={bar:'wood',sand:'sand',tire:'tire',barrier:'stripe',modwall:'metal',door:'steel',car:'rust',fen:'electric',bunker:'stone',brasero:'metal',fortin:'stone'};
+const PLAIN=new Set(['bar','car','fen','sand','tire','barrier','modwall','door','palis']),METAL=new Set(['car','modwall','door','barrier']);
+const WMAT={palis:'stake',gate:'metal',gabion:'stone',sand:'sand',tire:'tire',barrier:'stripe',modwall:'metal',door:'steel',car:'rust',fen:'electric',bunker:'stone',brasero:'metal',fortin:'stone'};
 // section de mur dans le repère local : de x0 à x1, épaisseur 2h centrée sur y=0
 function wallSect(m,x0,x1,h,r){const w=x1-x0;if(w<=0)return;
  if(m!=='electric'){ctx.fillStyle=INK;ctx.fillRect(x0-1,-h-2,w+2,2*h+4)}
@@ -515,6 +524,9 @@ function wallSect(m,x0,x1,h,r){const w=x1-x0;if(w<=0)return;
    ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(x,-h,1.4,2*h);ctx.fillStyle=INK;ctx.beginPath();ctx.moveTo(x-.6,-h);ctx.lineTo(x+ww/2,-h-5.5);ctx.lineTo(x+ww+.6,-h);ctx.fill();
    ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x,-h);ctx.lineTo(x+ww/2,-h-4.3);ctx.lineTo(x+ww,-h);ctx.fill()}
   [-h*.45,h*.5].forEach(y=>{ctx.fillStyle=INK;ctx.fillRect(x0,y-2.6,w,5.2);ctx.fillStyle='#5f4226';ctx.fillRect(x0,y-1.8,w,3.6);for(let x=x0+4;x<x1;x+=11)circ(x,y,.9,'#d8d8d8')})}
+ else if(m==='stake'){for(let x=x0;x<x1;x+=6){const ww=Math.min(5.4,x1-x),c=['#6e4a28','#7d5732','#5f3f22'][Math.floor(r()*3)];ctx.fillStyle=c;ctx.fillRect(x,-h+3,ww,2*h-6);
+   [[-h+3,-1],[h-3,1]].forEach(([y0,d])=>{ctx.fillStyle=INK;ctx.beginPath();ctx.moveTo(x-.6,y0);ctx.lineTo(x+ww/2,y0+d*7.5);ctx.lineTo(x+ww+.6,y0);ctx.fill();ctx.fillStyle='#c9a46a';ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x+ww/2,y0+d*6);ctx.lineTo(x+ww,y0);ctx.fill()})}
+  ctx.fillStyle=INK;ctx.fillRect(x0,-2.5,w,5);ctx.fillStyle='#8a7a5a';ctx.fillRect(x0,-1.5,w,3)}
  else if(m==='sand'){ctx.fillStyle='#6d5a38';ctx.fillRect(x0,-h,w,2*h);[[-h/2,0],[h/2,5]].forEach(([y,o])=>{for(let x=x0-5+o;x<x1+5;x+=10){if(x+5<x0||x-5>x1)continue;
    ctx.save();ctx.beginPath();ctx.rect(x0,-h-2,w,2*h+4);ctx.clip();oEll(x,y,5.6,h/2-.4,'#c9ab73',1.2);ell(x-1.5,y-1.6,2.6,1.3,'rgba(255,255,255,.22)');line(x-3,y+1.5,x+3,y+1.5,'rgba(0,0,0,.18)',1);ctx.restore()}})}
  else if(m==='tire'){ctx.fillStyle='#2a2a2a';ctx.fillRect(x0,-h,w,2*h);ctx.save();ctx.beginPath();ctx.rect(x0,-h-2,w,2*h+4);ctx.clip();
@@ -892,7 +904,7 @@ function unitLine(u){const tr=Z.TRAITS[u.trait],D=Z.U[u.t],lv=(u.lvA||0)+(u.lvD|
  return (u.name?`<b>${u.name}</b>, ${cardName(u.t)}`:`<b>${cardName(u.t)}</b>`)+rl+(u.gold?` <b class="gold">${stars(u)} doré</b>`:'')+(D.evo?' <b class="evo">✦ évolution</b>':'')
   +(tr?` · <b>${tr.n}</b> (${tr.d})`:'')+(D.dmg?` · ${plural(k,'zombie tué','zombies tués')}, niveau suivant à ${Z.lvKills(Z.lvOf(k)+1)}`:'')
   +(lv?` · niveau ${lv} (+${u.lvA||0} dégât, +${(u.lvD||0)*3} PV)`:'')+(so=>so?` · ${Z.FAM[Z.famOf(u.t)].ic} solidarité +${so}`:'')(Z.sol(G,G.grid.indexOf(u),u))+(u.leg?` · porte le souvenir de <b>${u.leg}</b> (+1 dégât, +2 PV)`:'')
-  +(g=>g.length>1?` · <b>rempart de ${g.length} murs</b> : ${g.reduce((a,k)=>a+G.grid[k].hp,0)}/${g.reduce((a,k)=>a+Z.maxHp(G,G.grid[k]),0)} PV en commun`:'')(Z.wallGroup(G,G.grid.indexOf(u)))+` · ${u.hp}/${Z.maxHp(G,u)} PV.`}
+  +(g=>g.length>1?` · <b>rempart de ${g.length} murs</b> : ${g.reduce((a,k)=>a+G.grid[k].hp,0)}/${g.reduce((a,k)=>a+Z.maxHp(G,G.grid[k]),0)} PV en commun`:'')(Z.wallGroup(G,G.grid.indexOf(u)))+(Z.eqOf(u).length?` · équipé : ${Z.eqOf(u).map(t=>EQIC[t]+' '+Z.U[t].n).join(', ')}`:'')+` · ${u.hp}/${Z.maxHp(G,u)} PV.`}
 // fusion ou évolution juste après une pose ou un déplacement : effets, son, et découverte enregistrée dans la collection
 function mergeFx(m){if(!m||typeof m!=='object')return;const p=tc(m.i),now=performance.now();
  const pull=(j,c)=>{const q=tc(j);facing[j]=null;addFX({type:'tracer',x1:q.x,y1:q.y,x2:p.x,y2:p.y,c,w:3,dur:450});burst(q.x,q.y,c,12,.09,2)};
@@ -929,6 +941,7 @@ function tapCell(i){
  if(t==='coffee')floatTxt(CEN.x,CEN.y,'+2 énergie','#f2b33d');
  if(t==='flare')floatTxt(CEN.x,CEN.y,'Fusée !','#ff8a5a');
  mergeFx(mg);save();render();
+ if(G.drawNow){const n=G.drawNow;G.drawNow=0;drawCards(Math.min(n,Math.max(0,Z.HAND_MAX-S.hand.length)));floatTxt(CEN.x,CEN.y-30,'Largage : +'+n+' cartes','#9ee08a');save();render()}
  if(D.peek)peekScreen();
 }
 function peekScreen(){
@@ -1036,7 +1049,7 @@ function end(){
  const dailyTxt=G.daily?dailyEnd(nights):'';
  show(`<h2 class="ko">L’abri est tombé</h2><p>La horde est entrée pendant la nuit <b>${G.night}</b>.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div><p><b>${G.kills}</b> zombies éliminés. Record : <b>${plural(best,'nuit','nuits')}</b>${newRec?' (nouveau record !)':''}.</p>${dailyTxt}${legs.length?`<p>🎖️ <b>Héritage :</b> ${legs.map(f=>`${f.name} (${Z.U[f.t].n}, ${f.kills} zombies)`).join(', ')} ${legs.length>1?'laissent':'laisse'} un souvenir pour ta prochaine partie : le premier ${legs.length>1?'survivant du même métier':Z.U[legs[0].t].n} posé aura +1 dégât et +2 PV.</p>`:''}${pts?`<p>+<b>${pts}</b> points de survie (total : ${META.points}). Débloque de nouvelles cartes dans la <b>Collection</b>.</p>`:''}${fresh.length?`<h3>Débloqué !</h3><ul>${fresh.map(f=>`<li><b>${f}</b></li>`).join('')}</ul>`:''}<h3>Mémorial</h3>${memorialHtml()}<button type="button" class="go" data-a="new">Rejouer</button><button type="button" class="skip" data-a="coll">Collection</button>`);
 }
-const CATN={wall:'Défenses',shoot:'Tireurs',melee:'Corps à corps',help:'Soutien',trap:'Pièges',item:'Objets'};
+const CATN={wall:'Défenses',post:'Postes de soutien',shoot:'Tireurs',melee:'Corps à corps',help:'Soutien',trap:'Pièges',item:'Objets',react:'Réactions'};
 const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${art(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em> · ${Z.U[t].d}${famLine(t)}</span></div>`).join('')}</div>`).join('');
 // carte d'un zombie : même cadre, illustration de assets/zombies/, attaque et PV de base
 function zombieFace(k){const z=Z.ZT[k],hp=Math.round(z.hp*(z.boss?1:Z.ZHP));
