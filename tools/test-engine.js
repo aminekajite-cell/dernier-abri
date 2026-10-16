@@ -89,6 +89,10 @@ check('escouade : +1 seulement avec un Tank, un Soin et un DPS voisins',()=>{con
 check('les postes de soutien n’ont pas de rôle',()=>{['lamp','hospital','workshop','tower'].forEach(t=>eq(Z.roleOf(t),null))});
 check('un piège posé revient à la défausse (il ne reste plus en main)',()=>{const st=fresh();Z.place(st,'trap',3*9+4,rng(1));ok(!st.grid[3*9+4].gen)});
 
+check('munition : seulement contre le Colosse sur la carte',()=>{const st=fresh();Z.startNight(st,rng(1));st.pending=[];st.energy=5;ok(!Z.canReact(st,'shell',Z.C));
+ st.z=[{id:9,k:'boss',pos:2*9+4,hp:100,max:100,cd:5,style:0}];ok(Z.canReact(st,'shell',Z.C));Z.react(st,'shell',Z.C);ok(st.z[0].hp<100)});
+check('troc : la munition n’a plus de stock maximum',()=>{const st=fresh();st.scrap=100;ok(Z.pay(st,'ammo'));ok(Z.pay(st,'ammo'));ok(Z.pay(st,'ammo'));ok(Z.pay(st,'ammo'))});
+
 /* ---------- 4. nuits aléatoires ---------- */
 const PLACE=PLAY.filter(t=>!Z.U[t].react&&!Z.U[t].instant&&!Z.U[t].onUnit);
 const NIGHTS=+process.env.NIGHTS||300;let maxZ=0,slow=0,worst=0;

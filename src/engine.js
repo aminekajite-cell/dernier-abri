@@ -147,6 +147,7 @@ const Z=(()=>{
   talkie:{n:'Talkie-walkie',cat:'react',react:'unit',v:'Relève',d:'Pendant la nuit : une unité blessée part en réserve, la plus solide de la réserve prend sa place'},
   storm:{n:'Orage',cat:'react',react:'any',v:'Ralentit',d:'Pendant la nuit : tous les zombies perdent 2 tours, mais le feu s’éteint'},
   bomber:{n:'Bombardier',cat:'react',react:'cell',v:'8 en ligne',d:'Pendant la nuit : 8 dégâts à tous les zombies de la ligne visée'},
+  shell:{n:'Munition anti-Colosse',cat:'react',react:'any',antiboss:1,v:'Colosse',d:'Pendant la nuit, quand le Colosse est sur la carte : un tir qui lui inflige 15 dégâts plus le quart de ses PV max, sans armure'},
   noise:{n:'Boîte à bruit',cat:'react',react:'cell',v:'Attire',d:'Pendant la nuit : les zombies marchent vers la case visée pendant 4 tours'},
   // évolutions secrètes : jamais dans le deck, elles naissent de deux cartes précises posées côte à côte (voir EVO)
   k9squad:{n:'Brigade canine',cat:'melee',hp:8,block:1,rng:1,dmg:3,every:1,hits:2,stun:1,push:1,evo:1,v:'3 ×2 · Étourdit',d:'Un policier et son chien : 2 morsures de 3 dégâts par tour, qui étourdissent et repoussent'},
@@ -201,7 +202,8 @@ const Z=(()=>{
  const unitDmg=u=>{const T=TRAITS[u.trait]||{};return (hasEq(u,'tape')?(u.gold||0):0)+(T.dmgB||0)+(u.trait==='aguerri'&&(u.kills||0)>=10?1:0)+(u.lvA||0)+(u.gold||0)+(u.leg?1:0)};
  // héritage : un survivant tombé après 100 victimes laisse un souvenir ; dans la partie suivante, la première unité de son métier gagne +1 dégât et +2 PV
  const LEGACY_KILLS=100;
- const legacies=st=>(st.fallen||[]).filter(f=>f.kills>=LEGACY_KILLS&&U[f.t]&&!U[f.t].evo&&!U[f.t].chief);
+ // héritage retiré (v82) : presque jamais vu
+ const legacies=()=>[];
  // niveaux : tous les 20 zombies tués, l'unité gagne un niveau, offensif (+1 dégât) ou défensif (+3 PV max et soin complet)
  const LVL=20;
  // kills nécessaires : niveau 1 à 20, puis 25 de plus, 30 de plus, 35… (sans plafond)
@@ -220,7 +222,7 @@ const Z=(()=>{
  // équilibrage v63 : constructions à tracer plus chères, épave moins chère, chiens plus chers, arbalète plus chère
  Object.assign(COST,{bar:2,sand:2,fen:2,car:2,dog:2,dogs:3,xbow:3});
  Object.assign(COST,{gear:1,binoc:1,bandage:1,medkit:2,torch:1,pills:1,pack:1,tape:1,keys:3,tower:2,trench:2,pump:2,flood:2,palis:2,gate:2,gabion:3,
-  log:2,pit:2,glass:1,cans:1,rocks:2,supply:1,airdrop:2,jerry:1,rest:0,radioop:3,talkie:1,storm:2,bomber:3,noise:1});
+  shell:1,log:2,pit:2,glass:1,cans:1,rocks:2,supply:1,airdrop:2,jerry:1,rest:0,radioop:3,talkie:1,storm:2,bomber:3,noise:1});
  const cost=t=>COST[t]??2;
  const ZT={
   walk:{n:'Rôdeur',hp:17,spd:2,dmg:1,info:'lent'},
@@ -355,7 +357,8 @@ const Z=(()=>{
    {n:'Soigner la personne',d:'L’abri perd 1 PV (provisions), toutes tes unités récupèrent 3 PV.',go:st=>{st.shelter=Math.max(1,st.shelter-1);st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+3)});return{txt:'C’était une infirmière. Avant de repartir, elle soigne tout le monde.'}}},
    {n:'Passer ton chemin',d:'Pas de risque.',go:()=>({txt:'Ses appels s’éteignent dans ton dos.'})}]}
  };
- const dawnEvent=(st,rnd=Math.random)=>st.night>=2&&rnd()<.45?pickR(Object.keys(DAWN),rnd):null;
+ // événements de l'aube plus rares (v82) : environ 1 aube sur 4
+ const dawnEvent=(st,rnd=Math.random)=>st.night>=2&&rnd()<.25?pickR(Object.keys(DAWN),rnd):null;
  function resolveDawn(st,id,k,rnd=Math.random,deck){const c=DAWN[id].ch[k];if(c.ok&&!c.ok(st))return{txt:'Impossible.'};const r=c.go(st,rnd,deck)||{};touch(st);return r}
  // mutations : toutes les 4 nuits, la horde gagne un bonus permanent pour toute la partie
  const MUTS={
@@ -388,7 +391,7 @@ const Z=(()=>{
  };
  const SHOP={
   heal:{n:'Réparer l’abri',d:'+3 PV à l’abri',cost:15},
-  ammo:{n:'Munition anti-Colosse',d:'Se tire pendant la nuit du Colosse : 30 dégâts. 3 en stock au maximum',cost:20},
+  ammo:{n:'Munition anti-Colosse',d:'Une carte Munition arrive dans ta main : pendant la nuit du Colosse, elle lui inflige de gros dégâts',cost:20},
   upgrade:{n:'Améliorer une carte',d:'Toutes tes cartes de ce type sont améliorées. Plus cher à chaque fois',cost:25,more:15},
   remove:{n:'Jeter une carte',d:'Retire une carte de ton deck',cost:10}
  };
@@ -405,7 +408,7 @@ const Z=(()=>{
  'swat hospital tesla air rocket'.split(' ').forEach(t=>RAR[t]='epic');
  'gear bandage torch pack trench glass cans supply jerry rest talkie noise palis'.split(' ').forEach(t=>RAR[t]='com');
  'binoc medkit pills tape tower pump flood gate gabion log pit rocks airdrop storm'.split(' ').forEach(t=>RAR[t]='rare');
- 'keys radioop bomber'.split(' ').forEach(t=>RAR[t]='epic');
+ 'keys radioop bomber'.split(' ').forEach(t=>RAR[t]='epic');RAR.shell='rare';
  KEYS.filter(t=>U[t].chief).forEach(t=>RAR[t]='leg');'molotov horn'.split(' ').forEach(t=>RAR[t]='rare');
  const SIDES=['le nord','le sud','l’ouest','l’est'];
  const rc=i=>[Math.floor(i/N),i%N],idx=(r,c)=>r*N+c;
@@ -533,7 +536,7 @@ const Z=(()=>{
   while(out.length<n){let r=rnd()*100,rr='com';for(const k in RARITY){if(r<RARITY[k].w){rr=k;break}r-=RARITY[k].w}
    const cand=pool.filter(t=>RAR[t]===rr&&!out.includes(t));if(cand.length)out.push(cand[Math.floor(rnd()*cand.length)]);else if(!pool.some(t=>!out.includes(t)))break}
   return out}
- function pay(st,k){const c=shopCost(st,k);if(st.scrap<c||(k==='ammo'&&(st.ammo||0)>=AMMO_MAX))return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(maxS(st),st.shelter+3);if(k==='ammo')st.ammo=(st.ammo||0)+1;return true}
+ function pay(st,k){const c=shopCost(st,k);if(st.scrap<c)return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(maxS(st),st.shelter+3);return true}
  // munitions anti-Colosse : achetées au troc, tirées pendant la nuit sur le Colosse (ignorent l'armure)
  const AMMO_MAX=3,AMMO_DMG=30;
  const bossAlive=st=>st.z.some(z=>z.hp>0&&ZT[z.k].boss&&!isEdge(z.pos));
@@ -801,6 +804,7 @@ const Z=(()=>{
   return{heal:st.shelter-before,scrap:s,card:T.card||null,relic:!!T.relic,tier:st.tier||'base'}}
  // réactions pendant la nuit
  function canReact(st,t,i){const D=U[t];if(!D||!D.react||!canPay(st,t))return false;
+  if(D.antiboss)return bossAlive(st);
   if(t==='talkie')return !!(st.grid[i]&&isUnit(st.grid[i].t)&&st.grid[i].hp<maxHp(st,st.grid[i])&&(st.bench||[]).length);
   if(D.react==='unit')return !!(st.grid[i]&&U[st.grid[i].t].block&&st.grid[i].hp<maxHp(st,st.grid[i]));return D.react==='any'||(i>=0&&i<N*N)}
  function react(st,t,i){if(!canReact(st,t,i))return null;const ev=[];st.energy-=costOf(st,t);st.disc=1;const al=()=>st.z.filter(z=>z.hp>0&&!isEdge(z.pos));
@@ -812,6 +816,7 @@ const Z=(()=>{
   if(t==='rush'){st.rushT=3;ev.push({i:C,k:'rush'})}
   if(t==='tear'){al().filter(z=>cheb(z.pos,i)<=1).forEach(z=>z.cd+=3);ev.push({i,k:'smoke'})}
   if(t==='talkie'){const b=st.bench;let k=0;b.forEach((v,j)=>{if(v.hp>b[k].hp)k=j});const v=b.splice(k,1)[0];b.push(st.grid[i]);st.grid[i]=v;ev.push({i,k:'heal'})}
+  if(U[t].antiboss){const z=al().filter(z=>ZT[z.k].boss).sort((a,b)=>a.hp-b.hp)[0];if(z){hit(st,z,ammoDmg(z),ev,-1,1);ev.push({i:C,k:'shot',zid:z.id})}}
   if(t==='storm'){al().forEach(z=>{z.cd+=2;z.burnT=0});st.grid.forEach((u,j)=>{if(u&&u.t==='fire')st.grid[j]=null});ev.push({i:C,k:'horn'})}
   if(t==='bomber'){const r=rc(i)[0];al().filter(z=>rc(z.pos)[0]===r).forEach(z=>hit(st,z,8,ev,-1,1));for(let c=1;c<N-1;c++)ev.push({i:idx(r,c),k:'boom'})}
   if(t==='noise'){st.noise={i,until:st.tick+4};ev.push({i,k:'howl'})}
