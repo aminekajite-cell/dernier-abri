@@ -344,3 +344,13 @@ body.pvon .side .event,body.pvon .side .horde,body.pvon .side .fams{display:none
 .hint[hidden]{display:none}
 .hint small{display:block;margin-top:4px;color:var(--muted);font-size:11px}
 @keyframes hintin{from{opacity:0;transform:translate(-50%,-8px)}}
+/* v92 : options */
+.opts{display:flex;flex-direction:column;gap:14px}
+.opts label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--ink)}
+.opts label b{color:var(--lantern);font-weight:700;margin-left:6px}
+.opts label.chk{flex-direction:row;align-items:center;gap:10px}
+.opts select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit}
+.opts input[type=range]{width:100%;accent-color:var(--lantern)}
+.opts input[type=checkbox]{width:20px;height:20px;accent-color:var(--lantern)}
+html.bigtext .info{font-size:15px}html.bigtext .event{font-size:15px}html.bigtext .event b{font-size:16px}html.bigtext .horde{font-size:15px}
+html.bigtext .fam{font-size:14px}html.bigtext .panel{font-size:17px}html.bigtext .hint{font-size:16px}html.bigtext .dk span{font-size:15px}

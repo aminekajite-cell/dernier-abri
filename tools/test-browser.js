@@ -30,6 +30,8 @@ async function run(vp,label){
   const n=await p.$$eval('.citem-w',es=>es.filter(e=>!e.hidden).length);if(!n)problems.push(`${label} : la recherche « tir » ne trouve rien`);
   await p.selectOption('[data-f=sort]','cost');await p.waitForTimeout(200);await shot('03-collection');await overflow('collection');await click('[data-a=title]')});
 
+ await step('options',async()=>{await click('[data-a=options]');await p.waitForTimeout(200);if(!/Options/.test(await ov()))problems.push(`${label} : l’écran d’options ne s’ouvre pas`);await shot('03b-options');await overflow('options');
+  await p.evaluate(()=>{const r=document.querySelector('[data-o=sfx]');r.value=40;r.dispatchEvent(new Event('input',{bubbles:true}))});if(await p.evaluate(()=>OPT.sfx)!==.4)problems.push(`${label} : le volume ne s’enregistre pas`);await click('[data-a=optclose]')});
  // une partie
  await step('nouvelle partie',async()=>{await click('[data-a=new]');await click('[data-a=edit]');await shot('04-deck');await overflow('éditeur de deck');await click('[data-a=new]');await click('[data-a=start]');await p.waitForTimeout(400)});
  const box=await p.$eval('#map',e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width}});const cs=box.w/9;

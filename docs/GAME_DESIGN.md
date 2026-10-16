@@ -659,3 +659,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 **v90** : sons d’interface enregistrés (Kenney Interface Sounds, CC0) : toucher une carte, poser une carte, fusion, niveau, évolution, rappel en réserve. Les tirs, explosions et coups restent générés en attendant un pack d’armes.
 
 **v91** : tirs, sniper, fusil à pompe, explosions, coups au corps à corps, impacts sur les zombies, morsures, coups sur l’abri et défenses détruites utilisent des sons enregistrés (Kenney Impact Sounds et 25 CC0 bang SFX), avec une hauteur au hasard. Lecture par Web Audio sur le site (léger même avec beaucoup de tirs), lecteur audio classique en fichier local, son généré en secours.
+
+**v92** : écran d’options (accueil et écran de la partie) : langue (français ; anglais en préparation), volume des effets sonores, volume de la musique et de l’ambiance, vitesse de la nuit au départ (×1, ×2, ×4 ; le bouton de vitesse passe de ×1 à ×2 puis ×4), secousses de l’écran, texte plus grand. Réglages enregistrés sur l’appareil. Textes de l’accueil mis à jour (convalescence, équipe complète au lieu des alliances).

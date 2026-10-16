@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v91 · 16 oct.';
+const VERSION='v92 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -177,6 +177,10 @@ const VERSION='v91 · 16 oct.';
   if(!/^v\d+$/.test(v)||v===cur)return;const k='abri-upd-'+v;try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){}
   location.replace(location.pathname+'?v='+v.slice(1)+location.hash)}).catch(()=>{})}catch(e){}})();
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
+// options du joueur (enregistrées sur l'appareil)
+const OPT=(()=>{const d={sfx:1,mus:1,speed:1,shake:1,text:0,lang:'fr'};try{return Object.assign(d,JSON.parse(localStorage.getItem('abri-opts'))||{})}catch(e){return d}})();
+function saveOpt(){try{localStorage.setItem('abri-opts',JSON.stringify(OPT))}catch(e){}}
+function applyOpt(){try{SFX.setVol(OPT.sfx,OPT.mus)}catch(e){}document.documentElement.classList.toggle('bigtext',!!OPT.text);document.documentElement.lang=OPT.lang}
 const TICK=650;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -330,7 +334,7 @@ function splat(x,y,big){const n=big?9:3;for(let k=0;k<n;k++){const a=Math.random
 const V=new Map(),FX=[],PT=[],facing=Array(Z.N*Z.N).fill(null);
 let nightAmt=0,nightTarget=0,shakeT=0,shakeK=5,hurtT=0,last=performance.now();
 // tremblement de l'écran : k = force ; une secousse plus forte remplace une plus faible
-function shake(now,k){if(now-shakeT>200||k>=shakeK){shakeT=now;shakeK=k}}
+function shake(now,k){if(!OPT.shake)return;if(now-shakeT>200||k>=shakeK){shakeT=now;shakeK=k}}
 // compteur de victimes de la nuit (affiché en haut à gauche)
 const KC={n:0,t:0,on:0};
 const ease=p=>p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
@@ -1047,7 +1051,7 @@ function wavePause(n){return new Promise(res=>{S.pause=n;S.moveFrom=null;S.inspe
  floatTxt(CEN.x,CEN.y-40,`Vague ${n} repoussée !`,'#9fd86b',18);render()})}
 function resumeWave(){if(!S.pause)return;S.pause=0;S.moveFrom=null;S.inspect=null;Z.nextWave(G);const f=S.resume;S.resume=null;floatTxt(CEN.x,CEN.y-40,`Vague ${G.wave} sur ${G.waves} : le Colosse arrive !`,'#ff6b6b',18);SFX.play('groan');render();f&&f()}
 async function night(){
- if(S.busy)return;S.busy=true;S.sel=null;S.drag=null;S.discard.push(...S.used);S.used=[];
+ if(S.busy)return;S.busy=true;SPEED=OPT.speed||1;S.sel=null;S.drag=null;S.discard.push(...S.used);S.used=[];
  S.moveFrom=null;S.inspect=null;save();
  const scrap0=G.scrap,kills0=G.kills;
  tuto(2);nightTarget=1;KC.n=0;KC.on=1;Z.startNight(G,R);render();await wait(900);
@@ -1149,13 +1153,25 @@ function zombieFace(k){const z=Z.ZT[k],hp=Math.round(z.hp*(z.boss?1:Z.ZHP));
   <span class="cf-foot"><span class="cf-atk" title="Dégâts">${ink('atk')}<b>${z.dmg}</b></span><span class="cf-marks"><em>Zombie</em></span><span class="cf-hp" title="PV"><b>${hp}</b></span></span></span>`}
 const zedHtml=()=>`<div class="cgrid">${Z.ZK.map(k=>`<div class="citem">${zombieFace(k)}</div>`).join('')}</div>`;
 const memorialHtml=()=>(G.fallen||[]).length?`<div class="deck">${G.fallen.map(f=>`<div class="dk" style="--cc:var(--muted)">${svg(f.t)}<span><b>✝ ${f.name}</b>${Z.U[f.t].n} · ${Z.TRAITS[f.trait]?Z.TRAITS[f.trait].n+' · ':''}${plural(f.kills,'zombie','zombies')} · tombé la nuit ${f.night}</span></div>`).join('')}</div>`:`<p>${G.shelter>0?'Personne n’est tombé. Pour l’instant.':'Aucun survivant n’est tombé au combat.'}</p>`;
-function runInfo(){
+// écran d'options : volumes, vitesse de nuit, secousses, taille du texte, langue
+let optBack=null,onTitle=false;
+function optionsScreen(back){if(back)optBack=back;const pc=v=>Math.round(v*100);
+ show(`<h2 class="pw">Options</h2><div class="opts">
+  <label>Langue<select data-o="lang"><option value="fr" ${OPT.lang==='fr'?'selected':''}>Français</option><option value="en" disabled>English (bientôt)</option></select></label>
+  <label><span>Effets sonores <b>${pc(OPT.sfx)} %</b></span><input type="range" min="0" max="100" step="5" value="${pc(OPT.sfx)}" data-o="sfx"></label>
+  <label><span>Musique et ambiance <b>${pc(OPT.mus)} %</b></span><input type="range" min="0" max="100" step="5" value="${pc(OPT.mus)}" data-o="mus"></label>
+  <label>Vitesse de la nuit au départ<select data-o="speed">${[1,2,4].map(v=>`<option value="${v}" ${OPT.speed==v?'selected':''}>× ${v}</option>`).join('')}</select></label>
+  <label class="chk"><input type="checkbox" data-o="shake" ${OPT.shake?'checked':''}> Secousses de l’écran</label>
+  <label class="chk"><input type="checkbox" data-o="text" ${OPT.text?'checked':''}> Texte plus grand</label>
+ </div><button type="button" class="go" data-a="optclose">Retour</button>`)}
+function runInfo(){onTitle=false;
  const counts={};deckList().forEach(t=>counts[t]=(counts[t]||0)+1);
  show(`<h2 class="pw">${Z.CHARS[G.char].n}</h2><p><b>${G.kills}</b> zombies éliminés · <b>${G.scrap}</b> ferraille</p>
   <h3>Reliques</h3>${G.relics.length?`<div class="deck">${G.relics.map(r=>`<div class="dk" style="--cc:var(--lantern)">${svg('relic')}<span><b>${Z.RELICS[r].n}</b>${Z.RELICS[r].d}</span></div>`).join('')}</div>`:'<p>Aucune pour l’instant. Tu en trouves une toutes les 5 nuits.</p>'}
   <h3>Mutations de la horde</h3>${G.muts.length?`<div class="deck">${G.muts.map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${Z.MUTS[m].n}</b>${Z.MUTS[m].d}</span></div>`).join('')}</div>`:'<p>Aucune pour l’instant. La horde mute toutes les 5 nuits.</p>'}
   <h3>Factions</h3><div class="deck">${Object.keys(Z.FAM).map(f=>{const F=Z.FAM[f],c=Z.famCounts(G)[f]||0,l=Z.famLevels(G)[f];return `<div class="dk" style="--cc:${l?'var(--lantern)':'var(--muted)'}"><span style="font-size:20px">${F.ic}</span><span><b>${F.n} : ${c}</b>${l?'Actif : '+F.d.slice(0,l).join(' ; '):`Encore ${F.lv[0]-c} pour : ${F.d[0]}`}</span></div>`}).join('')}</div> 
   <h3>Tes survivants</h3>${G.grid.some(u=>u&&u.name)?`<div class="deck">${G.grid.filter(u=>u&&u.name).map(u=>`<div class="dk" style="--cc:${cc(u.t)}">${svg(u.t)}<span><b>${u.name}</b>${cardName(u.t)} · ${Z.TRAITS[u.trait].n} (${Z.TRAITS[u.trait].d}) · ${plural(u.kills||0,'zombie','zombies')} · ${u.hp}/${Z.maxHp(G,u)} PV</span></div>`).join('')}</div>`:'<p>Aucun survivant posé.</p>'}
+  <button type="button" class="skip" data-a="options">⚙️ Options</button>
   <h3>Mémorial</h3>${memorialHtml()}
   <h3>Ton deck (${deckList().length} cartes)</h3><div class="deck">${Object.entries(counts).map(([t,n])=>`<div class="dk" style="--cc:${cc(t)}">${art(t)}<span><b>${n>1?n+' × ':''}${cardName(t)}</b>${Z.U[t].d}${G.upg[t]?` (amélioré : ${Z.upgDesc(t)})`:''}</span></div>`).join('')}</div>
   <button type="button" class="go" data-a="close">Fermer</button>`);
@@ -1234,6 +1250,8 @@ function collectionScreen(keep){const own=META.cards;
 function evoHtml(){const ev=META.evo||[];return `<h3>Évolutions secrètes (${ev.length}/${Z.EVO_KEYS.length})</h3><p>Deux cartes précises posées côte à côte se transforment en une unité unique. Elle n’entre jamais dans un deck ; quand elle tombe, ses deux cartes reviennent dans ta défausse.</p>
  <div class="deck">${Z.EVO_KEYS.map(k=>ev.includes(k)?`<div class="dk in" style="--cc:#c58cff">${svg(k)}<span><b>✦ ${Z.U[k].n}</b><em class="ce">${Z.EVO[k].map(t=>Z.U[t].n).join(' + ')}</em><br>${Z.U[k].d}</span></div>`:`<div class="dk locked" style="--cc:var(--muted)">${svg('relic')}<span><b>???</b>Pas encore découverte.</span></div>`).join('')}</div>`}
 const ACT={
+ options:()=>optionsScreen(onTitle?'title':'game'),
+ optclose:()=>{if(optBack==='game'){hide();render()}else title()},
  closeov:()=>{hide();render()},
  bpick:v=>{S.bsel=+v;S.sel=null;S.moveFrom=null;S.inspect=null;hide();render()},
  artstyle:()=>{ART_STYLE=ART_STYLE==='cartoon'?'real':'cartoon';try{localStorage.setItem('abri-style',ART_STYLE)}catch(e){}title()},
@@ -1280,7 +1298,11 @@ const ACT={
 panel.addEventListener('input',e=>{const f=e.target.dataset&&e.target.dataset.f;if(f==='q'){CF.q=e.target.value;cfApply()}});
 panel.addEventListener('change',e=>{const f=e.target.dataset&&e.target.dataset.f;if(!f||f==='q')return;CF[f]=e.target.value;(panel.querySelector('[data-a=dkreset]')?deckEditor:collectionScreen)(true)});
 panel.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=ACT[b.dataset.a];if(f)f(b.dataset.v)});
-$('#go').addEventListener('click',()=>{if(S.pause)resumeWave();else if(S.busy){SPEED=SPEED===1?2:1;render()}else night()});
+panel.addEventListener('input',e=>{const el=e.target.closest('[data-o]');if(!el)return;const k=el.dataset.o;
+ if(k==='sfx'||k==='mus'){OPT[k]=+el.value/100;const b=el.parentElement.querySelector('b');if(b)b.textContent=el.value+' %'}
+ else if(k==='speed')OPT.speed=+el.value;else if(k==='shake'||k==='text')OPT[k]=el.checked?1:0;else if(k==='lang')OPT.lang=el.value;
+ saveOpt();applyOpt();if(k==='sfx')SFX.play('ui')});
+$('#go').addEventListener('click',()=>{if(S.pause)resumeWave();else if(S.busy){SPEED=SPEED===1?2:SPEED===2?4:1;render()}else night()});
 
 function nextUnlockTxt(){const u=Z.unlocks(META),nx=[];
  for(const k in Z.UNLOCK.chars)if(!u.chars.includes(k))nx.push([Z.UNLOCK.chars[k]-META.total,`${Z.CHARS[k].n} dans ${Z.UNLOCK.chars[k]-META.total} nuits au total`]);
@@ -1298,11 +1320,11 @@ function dailyScreen(){const day=today(),c=dailySetup(day),b=dailyBest(day);
   <ul><li>Personnage : <b>${Z.CHARS[c.ch].n}</b></li><li>Lieu : <b>${Z.PLACES[c.pl].n}</b></li><li>Toutes les cartes sont disponibles.</li></ul>
   ${b!==null?`<p>Ton meilleur score aujourd’hui : <b>${plural(b,'nuit','nuits')}</b>.</p>`:''}<p>Les défis ne comptent pas pour les déblocages.</p>
   <button type="button" class="go" data-a="daily-go">Jouer le défi</button><button type="button" class="skip" data-a="title">Retour</button>`)}
-function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de fin. Survis <b>une nuit de plus</b>, encore et encore : chaque nuit, la horde est plus nombreuse et plus coriace.</p>
+function title(){onTitle=true;show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de fin. Survis <b>une nuit de plus</b>, encore et encore : chaque nuit, la horde est plus nombreuse et plus coriace.</p>
 <ul><li>Le jour, dépense tes <b>5 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
-<li>Chaque survivant a un <b>prénom</b> et un trait. S’il tombe, il est perdu pour de bon.</li>
+<li>Chaque survivant a un <b>prénom</b> et un trait. La première fois qu’il tombe, il part blessé en réserve pour 3 nuits ; la seconde fois, il est perdu pour de bon.</li>
 <li>Chaque unité a un <b>rôle</b> : 🛡️ <b>Tank</b> (attire les zombies à 3 cases, bloque 1 coup sur 3), ❤️ <b>Soin</b> (à distance ou sur les 8 cases autour, jamais les murs), ⚔️ <b>DPS</b>. Un Tank, un Soin et un DPS voisins forment une <b>escouade</b> : +1 dégât (ou +1 soin) pour chacun.</li>
-<li>Les unités de <b>corps à corps</b> rendent chaque coup reçu au contact. Des <b>murs</b> côte à côte forment un rempart : chaque mur relié gagne des PV. Deux factions à 3 unités chacune forment une <b>alliance</b>.</li>
+<li>Les unités de <b>corps à corps</b> rendent chaque coup reçu au contact. Des <b>murs</b> côte à côte forment un rempart : chaque mur relié gagne des PV. 2 survivants d’une même faction débloquent son bonus, 5 forment une <b>équipe complète</b>.</li>
 <li>Prépare-toi au <b>Colosse</b> : achète des <b>munitions anti-Colosse</b> au troc : chacune arrive en main sous forme de carte, à jouer pendant sa nuit. Elle arrive en <b>2 vagues</b> : entre les deux, tu déplaces librement tes unités et tu peux jouer tes réactions.</li>
 <li>Le jour, tu peux <b>déplacer</b> librement tout ce que tu as posé : touche-le, puis touche une case libre. Tu peux aussi <b>rappeler</b> une unité dans ta réserve : elle garde ses niveaux, ses étoiles, son prénom et son trait, et se repose gratuitement.</li><li>Tu as au plus <b>5 unités</b> sur le terrain (+1 toutes les 10 nuits) ; murs et pièges sont illimités. Fusionne pour libérer de la place.</li>
 <li>Garde de l’énergie pour la nuit : les cartes <b>Réaction</b> (grenade, tir de l’abri…) se jouent pendant l’attaque.</li>
@@ -1315,8 +1337,8 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 5 nuits, la horde <b>mute</b> pour de bon et la nuit est une <b>nuit de pression</b> (+25 % de zombies). Si un zombie blesse l’abri, c’est la <b>brèche</b> : toute la horde avance d’un coup. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button>${iosHint()?'<p class="ver">Sur iPhone : Partager → « Sur l’écran d’accueil » pour jouer en plein écran.</p>':''}<p class="ver">Sons : Kenney (kenney.nl), artisticdude et saturn91 (OpenGameArt), sous licence CC0.</p><p class="ver">${VERSION}</p>`)}
-newGame();render();requestAnimationFrame(frame);title();
+<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><button type="button" class="skip" data-a="options">⚙️ Options</button>${iosHint()?'<p class="ver">Sur iPhone : Partager → « Sur l’écran d’accueil » pour jouer en plein écran.</p>':''}<p class="ver">Sons : Kenney (kenney.nl), artisticdude et saturn91 (OpenGameArt), sous licence CC0.</p><p class="ver">${VERSION}</p>`)}
+applyOpt();newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son
 const muteBtn=$('#mute');
