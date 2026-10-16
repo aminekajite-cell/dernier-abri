@@ -13,20 +13,33 @@ const SFX=(()=>{
   }catch(e){ac=null}
   return ac}
  // le navigateur n'autorise le son qu'après un geste du joueur
- const unlock=()=>{zLoad();if(init()&&ac.state==='suspended')ac.resume().catch(()=>{})};
+ const unlock=()=>{if(init()){loadAll();if(ac.state==='suspended')ac.resume().catch(()=>{})}};
  ['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,unlock,{passive:true}));
- // grognements enregistrés : chargés au premier geste du joueur, joués avec une hauteur au hasard.
- // Si un fichier n'est pas encore chargé (ou manque), on retombe sur le son généré.
- const ZN=30,ZS=[];let zReady=false;
- // sons d'interface enregistrés (Kenney, CC0) : [fichiers, volume, variation de hauteur]
- const SAMP={ui:[['select_001','select_002','click_001'],.5,.06],place:[['drop_001','drop_002','drop_003','drop_004'],.7,.08],
-  fuse:[['confirmation_002'],.7,0],lvl:[['confirmation_001'],.7,0],evo:[['maximize_006'],.7,0],back:[['back_001'],.6,.05]},SA={};
- function zLoad(){if(zReady)return;zReady=true;try{for(let k=1;k<=ZN;k++){const a=new Audio();a.preload='auto';a.src='assets/sounds/zombie-'+String(k).padStart(2,'0')+'.mp3';ZS.push(a)}
-  for(const n in SAMP)SA[n]=SAMP[n][0].map(f=>{const a=new Audio();a.preload='auto';a.src='assets/sounds/ui-'+f+'.mp3';return a})}catch(e){}}
- function sample(name){const d=SAMP[name],L=SA[name];if(!d||!L)return false;const a0=L[Math.floor(Math.random()*L.length)];if(!a0||a0.readyState<2)return false;
-  try{const a=a0.cloneNode();a.volume=d[1];a.playbackRate=1+(Math.random()*2-1)*d[2];a.preservesPitch=a.mozPreservesPitch=a.webkitPreservesPitch=false;const p=a.play();if(p&&p.catch)p.catch(()=>{});return true}catch(e){return false}}
- function zombie(vol,rate){if(muted||!ZS.length)return false;const a0=ZS[Math.floor(Math.random()*ZS.length)];if(!a0||a0.readyState<2)return false;
-  try{const a=a0.cloneNode();a.volume=Math.max(0,Math.min(1,vol));a.playbackRate=rate||(.8+Math.random()*.45);a.preservesPitch=a.mozPreservesPitch=a.webkitPreservesPitch=false;const p=a.play();if(p&&p.catch)p.catch(()=>{});return true}catch(e){return false}}
+ // sons enregistrés (assets/sounds, CC0 : voir CREDITS.md), chargés au premier geste du joueur.
+ // Lecture par Web Audio (léger, même avec beaucoup de tirs) ; si le chargement échoue (fichier ouvert en local), lecteur audio classique ;
+ // si le son n'est pas prêt, on retombe sur le son généré.
+ // [fichiers, volume, variation de hauteur, hauteur de base]
+ const R3=(p,n,s=1)=>Array.from({length:n},(_,k)=>p+String(k+s).padStart(p.endsWith('0')?1:2,'0'));
+ const SAMP={
+  zgroan:[R3('zombie-',30),.5,.2],
+  ui:[['ui-select_001','ui-select_002','ui-click_001'],.5,.06],place:[['ui-drop_001','ui-drop_002','ui-drop_003','ui-drop_004'],.7,.08],
+  fuse:[['ui-confirmation_002'],.7,0],lvl:[['ui-confirmation_001'],.7,0],evo:[['ui-maximize_006'],.7,0],back:[['ui-back_001'],.6,.05],
+  shot:[['fx-shot1','fx-shot2','fx-shot3'],.32,.1],mg:[['fx-shot3','fx-shot2'],.24,.08,1.18],snp:[['fx-snp1','fx-snp2'],.5,.05],sht:[['fx-sht1','fx-sht2'],.42,.06],
+  boom:[['fx-boom1','fx-boom2','fx-boom3'],.7,.08],melee:[['fx-melee000','fx-melee001','fx-melee002'],.5,.1],hit:[['fx-hit000','fx-hit001','fx-hit002'],.28,.12],
+  bite:[['fx-bite000','fx-bite001','fx-bite002'],.42,.1],shelter:[['fx-shelter000','fx-shelter001','fx-shelter002'],.6,.06],lost:[['fx-lost000','fx-lost001','fx-lost002'],.55,.06]};
+ const BUF={},EL={};let loaded=false;
+ function loadAll(){if(loaded||!ac)return;loaded=true;
+  for(const n in SAMP)SAMP[n][0].forEach(f=>{if(BUF[f]||EL[f])return;const url='assets/sounds/'+f+'.mp3';EL[f]=null;
+   const html=()=>{try{const a=new Audio();a.preload='auto';a.src=url;EL[f]=a}catch(e){}};if(location.protocol==='file:'){html();return}
+   fetch(url).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((res,rej)=>ac.decodeAudioData(b,res,rej))).then(buf=>{BUF[f]=buf})
+    .catch(html)})}
+ function playFile(f,vol,rate){
+  if(BUF[f]){const s=ac.createBufferSource();s.buffer=BUF[f];s.playbackRate.value=rate;const g=ac.createGain();g.gain.value=vol;s.connect(g);g.connect(master);s.start(ac.currentTime);return true}
+  const a0=EL[f];if(!a0||a0.readyState<2)return false;
+  try{const a=a0.cloneNode();a.volume=Math.max(0,Math.min(1,vol));a.playbackRate=rate;a.preservesPitch=a.mozPreservesPitch=a.webkitPreservesPitch=false;const p=a.play();if(p&&p.catch)p.catch(()=>{});return true}catch(e){return false}}
+ function sample(name,vol,rate){const d=SAMP[name];if(!d||muted||!ac)return false;const f=d[0][Math.floor(Math.random()*d[0].length)];
+  return playFile(f,vol??d[1],rate??((d[3]||1)*(1+(Math.random()*2-1)*d[2])))}
+ const zombie=(vol,rate)=>sample('zgroan',vol,rate);
  function noise(t,dur,{f=1200,q=1,type='bandpass',vol=.5,attack=.002,f2}={}){
   const s=ac.createBufferSource();s.buffer=noiseBuf;s.loop=true;
   const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);fl.Q.value=q;

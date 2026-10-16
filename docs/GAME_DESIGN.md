@@ -657,3 +657,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Électricien** (Bricoleurs) : plus de coupure de courant et clôtures à 2 dégâts tant qu’il est sur la carte ; répare 1 PV par tour.
 
 **v90** : sons d’interface enregistrés (Kenney Interface Sounds, CC0) : toucher une carte, poser une carte, fusion, niveau, évolution, rappel en réserve. Les tirs, explosions et coups restent générés en attendant un pack d’armes.
+
+**v91** : tirs, sniper, fusil à pompe, explosions, coups au corps à corps, impacts sur les zombies, morsures, coups sur l’abri et défenses détruites utilisent des sons enregistrés (Kenney Impact Sounds et 25 CC0 bang SFX), avec une hauteur au hasard. Lecture par Web Audio sur le site (léger même avec beaucoup de tirs), lecteur audio classique en fichier local, son généré en secours.

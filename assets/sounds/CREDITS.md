@@ -11,3 +11,5 @@ Traitement : silences coupés, volume normalisé, mono 22 kHz, MP3 48 kbit/s.
 À revérifier sur les pages d’origine avant la sortie Steam (licence au moment du téléchargement).
 
 | `ui-*.mp3` (clics, pose de carte, fusion, niveau, évolution) | [Interface Sounds 1.0](https://kenney.nl/assets/interface-sounds), copie GitHub [Calinou/kenney-interface-sounds](https://github.com/Calinou/kenney-interface-sounds) | Kenney (www.kenney.nl) | CC0 (licence incluse dans le pack), crédit apprécié |
+| `fx-melee*`, `fx-hit*`, `fx-bite*`, `fx-shelter*`, `fx-lost*` (coups, morsures, abri, destruction) | [Impact Sounds](https://kenney.nl/assets/impact-sounds) | Kenney (www.kenney.nl) | CC0 (licence incluse dans le pack) |
+| `fx-shot*`, `fx-sht*`, `fx-snp*`, `fx-boom*` (tirs, fusil à pompe, sniper, explosions) | [25 CC0 bang / firework SFX](https://opengameart.org/content/25-cc0-bang-firework-sfx) (OpenGameArt) | voir la page | CC0 (licence indiquée dans le titre, pas de fichier de licence dans le zip : à revérifier) |
