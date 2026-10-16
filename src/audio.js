@@ -18,7 +18,13 @@ const SFX=(()=>{
  // grognements enregistrés : chargés au premier geste du joueur, joués avec une hauteur au hasard.
  // Si un fichier n'est pas encore chargé (ou manque), on retombe sur le son généré.
  const ZN=30,ZS=[];let zReady=false;
- function zLoad(){if(zReady)return;zReady=true;try{for(let k=1;k<=ZN;k++){const a=new Audio();a.preload='auto';a.src='assets/sounds/zombie-'+String(k).padStart(2,'0')+'.mp3';ZS.push(a)}}catch(e){}}
+ // sons d'interface enregistrés (Kenney, CC0) : [fichiers, volume, variation de hauteur]
+ const SAMP={ui:[['select_001','select_002','click_001'],.5,.06],place:[['drop_001','drop_002','drop_003','drop_004'],.7,.08],
+  fuse:[['confirmation_002'],.7,0],lvl:[['confirmation_001'],.7,0],evo:[['maximize_006'],.7,0],back:[['back_001'],.6,.05]},SA={};
+ function zLoad(){if(zReady)return;zReady=true;try{for(let k=1;k<=ZN;k++){const a=new Audio();a.preload='auto';a.src='assets/sounds/zombie-'+String(k).padStart(2,'0')+'.mp3';ZS.push(a)}
+  for(const n in SAMP)SA[n]=SAMP[n][0].map(f=>{const a=new Audio();a.preload='auto';a.src='assets/sounds/ui-'+f+'.mp3';return a})}catch(e){}}
+ function sample(name){const d=SAMP[name],L=SA[name];if(!d||!L)return false;const a0=L[Math.floor(Math.random()*L.length)];if(!a0||a0.readyState<2)return false;
+  try{const a=a0.cloneNode();a.volume=d[1];a.playbackRate=1+(Math.random()*2-1)*d[2];a.preservesPitch=a.mozPreservesPitch=a.webkitPreservesPitch=false;const p=a.play();if(p&&p.catch)p.catch(()=>{});return true}catch(e){return false}}
  function zombie(vol,rate){if(muted||!ZS.length)return false;const a0=ZS[Math.floor(Math.random()*ZS.length)];if(!a0||a0.readyState<2)return false;
   try{const a=a0.cloneNode();a.volume=Math.max(0,Math.min(1,vol));a.playbackRate=rate||(.8+Math.random()*.45);a.preservesPitch=a.mozPreservesPitch=a.webkitPreservesPitch=false;const p=a.play();if(p&&p.catch)p.catch(()=>{});return true}catch(e){return false}}
  function noise(t,dur,{f=1200,q=1,type='bandpass',vol=.5,attack=.002,f2}={}){
@@ -55,8 +61,8 @@ const SFX=(()=>{
   death:t=>{[330,262,196].forEach((f,k)=>tone(t+k*.25,.5,{f,vol:.12,type:'triangle'}))}
  };
  function play(name,gap=.06){
-  if(muted||!init()||!S[name])return;
-  try{const t=ac.currentTime;if(last[name]&&t-last[name]<gap)return;last[name]=t;S[name](t+.01)}catch(e){}}
+  if(muted||!init()||!(S[name]||SAMP[name]))return;
+  try{const t=ac.currentTime;if(last[name]&&t-last[name]<gap)return;last[name]=t;if(sample(name))return;S[name](t+.01)}catch(e){}}
  // ambiance de nuit : vent filtré + grondement sourd + nappe musicale sombre, dont le volume suit l'obscurité ;
  // par-dessus, des bruits lointains au hasard : hiboux, loups, grognements de zombies, et quelques notes de musique.
  let music=null,nextEvt=0,nextNote=0;

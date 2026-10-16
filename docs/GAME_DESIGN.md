@@ -655,3 +655,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Assassin** (Militaires, DPS, 3 dégâts au contact) : toutes les 4 attaques, tue d’un coup un zombie ordinaire (jamais le Colosse).
 - **Infirmière de campagne** (Soignants, soin à distance portée 2) : à l’aube, les unités en réserve non blessées récupèrent 2 PV.
 - **Électricien** (Bricoleurs) : plus de coupure de courant et clôtures à 2 dégâts tant qu’il est sur la carte ; répare 1 PV par tour.
+
+**v90** : sons d’interface enregistrés (Kenney Interface Sounds, CC0) : toucher une carte, poser une carte, fusion, niveau, évolution, rappel en réserve. Les tirs, explosions et coups restent générés en attendant un pack d’armes.
