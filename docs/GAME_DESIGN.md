@@ -632,3 +632,9 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 **v84** : les réparateurs (Mécanicien, Atelier, Charpentier, L’Ingénieur) réparent aussi les postes de soutien, pas seulement les murs. Textes des Chefs mis à jour (« compte pour 2 » au lieu de « gagne un palier »).
 
 **v85** : le Colosse ne détruit plus une défense d’un coup. Il fait 10 dégâts par coup aux défenses, postes et unités à la nuit 10, +2 toutes les 10 nuits (12 à la nuit 20, 14 à la nuit 30). Le Tank peut bloquer ses coups (1 sur 3). Il reste très lent, fonce tout droit, ignore la provocation et le recul, et frappe l’abri sans mourir.
+
+**v86 : rythme de la horde et convalescence.**
+- **Nombre de zombies** : il monte jusqu’à la nuit 10. Après chaque Colosse, une **nuit de répit** (nuits 11, 21, 31…) a 30 % de zombies en moins, puis le nombre remonte. Au-delà de la nuit 10, la croissance est logarithmique (de plus en plus lente), jamais exponentielle.
+- **Frénésie meurtrière** : un niveau de plus après chaque Colosse, cumulable (niveau 1 dès la nuit 11, 2 dès la nuit 21…). Chaque niveau : +60 % des PV de base et +1 dégât pour tous les zombies, Colosse compris. C’est elle qui porte la difficulté, plus le nombre.
+- **Mutations** : toutes les 5 nuits, une nouvelle mutation remplace la précédente, comme un affixe. Une seule active à la fois.
+- **Convalescence** : une unité qui tombe pour la 1ʳᵉ fois part blessée en réserve. Elle garde étoiles, niveaux, prénom, trait et équipements, ne peut pas être reposée le lendemain, et revient avec tous ses PV le surlendemain. Elle garde une cicatrice : à la chute suivante, elle meurt pour de bon (mémorial). La carte Repos guérit les blessés tout de suite ; le Talkie-walkie ne peut pas faire entrer un blessé.

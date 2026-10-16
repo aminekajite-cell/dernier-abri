@@ -91,7 +91,7 @@ Paliers : 4, 6 et 8 unités de la faction sur le plateau. Le Chef (carte légend
 - Dégâts des zombies : +1 toutes les 20 nuits.
 - Nuits de pression : toutes les 5 nuits, +25 % de zombies. Brèche : quand un zombie blesse l'abri, tous les autres avancent aussitôt d'une case.
 - Pas de frénésie ni de multiplicateur exponentiel. Munition anti-Colosse : 15 dégâts + 25 % des PV max du Colosse.
-- Mutations : toutes les 5 nuits, la horde gagne une mutation permanente au hasard : Peau épaisse (Les zombies ont +15 % de PV (cumulable)) ; Horde nombreuse (+15 % de zombies chaque nuit (cumulable)) ; Enragés (Les rôdeurs et les coureurs font +1 dégât par coup (cumulable)) ; Carapace (Les rôdeurs encaissent 1 dégât de moins par coup, sauf le feu et les explosions (cumulable jusqu’à 3)) ; Régénération (Les zombies récupèrent 1 PV tous les 3 tours (cumulable : +2, +3…)) ; Putréfaction (En mourant, un zombie éclabousse les unités autour de lui : 1 dégât (cumulable)) ; Pas pressés (Les zombies lents et très lents avancent d’un cran plus vite (jusqu’à 1 case par tour)).
+- Mutations : toutes les 5 nuits, la horde gagne une mutation permanente au hasard : Peau épaisse (Les zombies ont +15 % de PV) ; Horde nombreuse (+15 % de zombies chaque nuit) ; Enragés (Les rôdeurs et les coureurs font +1 dégât par coup) ; Carapace (Les rôdeurs encaissent 1 dégât de moins par coup, sauf le feu et les explosions) ; Régénération (Les zombies récupèrent 1 PV tous les 3 tours) ; Putréfaction (En mourant, un zombie éclabousse les unités autour de lui : 1 dégât) ; Pas pressés (Les zombies lents et très lents avancent d’un cran plus vite).
 - Événements de nuit possibles : Nuit calme ; Brouillard (Portée des tireurs −1) ; Pleine lune (+50 % de zombies) ; Pluie (L'essence ne brûle pas) ; Coupure de courant (Projecteurs et clôtures inactifs) ; Horde affamée (Les rôdeurs deviennent des coureurs).
 - Un tour de nuit : chaque unité attaque selon sa cadence, puis chaque zombie avance d'une case selon sa vitesse ou frappe ce qui le bloque.
 
@@ -248,7 +248,7 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Ravitaillement | 1 | commune | — | — | — | — | — | — | Utilise-le sur l’abri : +6 ferraille |
 | Largage | 2 | rare | — | — | — | — | — | — | Utilise-le sur l’abri : pioche 3 cartes |
 | Jerrican | 1 | commune | — | — | — | — | — | — | Utilise-le sur l’abri : +2 énergie demain |
-| Repos | 0 | commune | — | — | — | — | — | — | Utilise-le sur l’abri : les unités en réserve récupèrent tous leurs PV |
+| Repos | 0 | commune | — | — | — | — | — | — | Utilise-le sur l’abri : les unités en réserve récupèrent tous leurs PV, et les blessés sont guéris tout de suite |
 | Opérateur radio | 3 | épique | — | — | — | — | — | — | Utilise-le sur l’abri : +1 unité à la limite, pour toute la partie (une seule fois par partie) |
 
 ### Réactions (nuit)

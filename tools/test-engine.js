@@ -45,7 +45,7 @@ check('carte à tracer : 4 cases puis plus rien',()=>{const st=fresh();Z.placeLi
 check('pneus : 3 cases par carte',()=>eq(Z.chargesOf('tire'),3));
 check('niveaux : 20, 45, 75, 110',()=>eq([1,2,3,4].map(Z.lvKills),[20,45,75,110]));
 check('mutations plafonnées (Carapace 3, Pas pressés 2)',()=>{const st=fresh();const r=rng(11);for(let k=0;k<200;k++)Z.mutate(st,r);ok(Z.mc(st,'carapace')<=3&&Z.mc(st,'frenesie')<=2)});
-check('PV zombies : linéaires, pas d’explosion',()=>{const a=Z.hpMult(20)-Z.hpMult(10),b=Z.hpMult(100)-Z.hpMult(90);ok(Math.abs(a-b)<1e-9,'croissance non linéaire')});
+check('PV zombies : par paliers réguliers, pas d’explosion',()=>{const a=Z.hpMult(20)-Z.hpMult(10),b=Z.hpMult(100)-Z.hpMult(90);ok(Math.abs(a-b)<1e-9,'croissance non linéaire')});
 check('nuit de pression : plus de zombies que la nuit d’avant',()=>{const st=fresh();st.night=15;const a=Z.waveList(st).walk;st.night=14;ok(a>Z.waveList(st).walk)});
 check('Communauté palier 2 : 1re carte moins chère une seule fois',()=>{const st=fresh();st.energy=10;['vigile','teacher','market','carp','lead','monk'].forEach((t,k)=>st.grid[2*9+1+k]={t,hp:3});
  const c1=Z.costOf(st,'gun');Z.place(st,'gun',6*9+4,rng(2));ok(Z.costOf(st,'gun')===c1+1,'remise appliquée deux fois')});
@@ -68,7 +68,15 @@ check('factions : paliers à 2 et 5 survivants ; constructions et machines ne co
  st.grid[14]={t:'sht',hp:3};st.grid[15]={t:'snp',hp:3};eq(Z.famLevels(st).mil,1);st.grid[16]={t:'mg',hp:3};eq(Z.famLevels(st).mil,2)});
 check('Chef : compte pour 2 survivants',()=>{const st=fresh();st.grid[10]={t:'chief_mil',hp:5};eq(Z.famLevels(st).mil,1)});
 check('équipe complète : +2 PV',()=>{const st=fresh();['snp','mg','sht','snp'].forEach((t,k)=>st.grid[10+k]={t,hp:3});const u={t:'snp',hp:3};const a=Z.maxHp(st,u);st.grid[20]=u;eq(Z.maxHp(st,u),a+2)});
-check('frénésie : +10 % de PV à la nuit 10 et à chaque nuit suivante, +1 dégât toutes les 10 nuits',()=>{eq(Z.hpMult(9),1);ok(Math.abs(Z.hpMult(10)-1.1)<1e-9);ok(Math.abs(Z.hpMult(15)-1.6)<1e-9);eq(Z.dmgBonus(10),1);eq(Z.dmgBonus(9),0)});
+check('frénésie : un niveau après chaque Colosse (+60 % PV, +1 dégât)',()=>{eq(Z.hpMult(10),1);ok(Math.abs(Z.hpMult(11)-1.6)<1e-9);ok(Math.abs(Z.hpMult(25)-2.2)<1e-9);eq(Z.dmgBonus(10),0);eq(Z.dmgBonus(11),1);eq(Z.dmgBonus(21),2)});
+check('nuit de répit : 30 % de zombies en moins après un Colosse',()=>{const st=fresh();st.night=11;const a=Z.waveList(st).walk;st.night=12;ok(a<Z.waveList(st).walk,'pas de répit')});
+check('horde : croissance logarithmique (ralentit)',()=>{const g=(a,b)=>Z.waveCount('walk',b)-Z.waveCount('walk',a);ok(g(20,30)>=g(50,60),'croissance qui accélère');ok(Z.waveCount('walk',60)<20,'trop de zombies')});
+check('mutation = affixe : une seule à la fois, qui change',()=>{const st=fresh();const r=rng(4);const a=Z.mutate(st,r),b=Z.mutate(st,r);eq(st.muts.length,1);ok(a!==b)});
+check('convalescence : 1ʳᵉ chute = réserve blessée un jour, 2ᵉ chute = mort',()=>{const st=fresh();st.night=10;Z.place(st,'gun',2*9+4,rng(1));const u=st.grid[2*9+4];u.lvA=2;u.gold=1;
+ Z.startNight(st,rng(1));st.pending=[];st.z=[];st.putrid=0;u.hp=-1;st.muts=['putride'];
+ st.z=[{id:1,k:'walk',pos:3*9+4,hp:0,max:5,cd:9,style:0}];Z.step(st);
+ ok(!st.grid[2*9+4],'toujours sur la carte');eq(st.bench.length,1);ok(st.bench[0]===u&&u.gold===1&&u.lvA===2,'unité modifiée');ok(!Z.canPlaceBench(st,0,6*9+4),'reposable trop tôt');
+ Z.endNight(st);Z.newDay(st,rng(1));ok(!Z.canPlaceBench(st,0,6*9+4),'reposable le lendemain');Z.endNight(st);Z.newDay(st,rng(1));ok(Z.canPlaceBench(st,0,6*9+4),'pas revenue');eq(u.hp,Z.maxHp(st,u))});
 
 check('zombie dans la forêt : intouchable',()=>{const st=fresh();st.grid[1*9+4]={t:'gun',hp:3};Z.startNight(st,rng(5));st.pending=[];
  st.z=[{id:1,k:'walk',pos:4,hp:5,max:5,cd:99}];for(let k=0;k<3;k++)Z.step(st);eq(st.z[0].hp,5)});
