@@ -48,7 +48,9 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 
 ## Prochaines étapes (par ordre de priorité)
 
-1. Graphismes : tout est dessiné en code dans un style unique (contours sombres, ombres, détails). Aucun pack du marché ne couvre tout le jeu de façon cohérente ; avant la sortie Steam, faire redessiner l'ensemble par un artiste en suivant ce style. Ne pas mélanger plusieurs packs.
-2. Remplacer les sons générés par des sons d'un pack libre de droits si besoin (même contrainte de téléchargement).
-3. Classement en ligne du défi quotidien (serveur ou classements Steam).
-4. Préparer la page Steam, une démo pour le Steam Next Fest, puis la version Steam (Electron ou Tauri) et la version mobile.
+1. Équilibrage : adapter le joueur automatique de `tools/balance.js` (limite d’unités, réserve, convalescence, postes) puis mesurer la courbe de difficulté et le classement des cartes.
+2. Performance sur téléphone d’entrée de gamme pendant les grosses nuits (particules, nombre de sons).
+3. Derniers sons enregistrés (arbalète, lance-flammes, mort d’un survivant, aube, musique de nuit) : fichiers CC0 fournis par Amine, intégrés comme dans `assets/sounds/` (voir `CREDITS.md`).
+4. Graphismes : le jeu est en style cartoon (illustrations et sprites générés). Avant Steam, faire retoucher ou redessiner l’ensemble par un artiste dans ce style, et déclarer l’usage d’IA sur Steam.
+5. Préparer Steam : test à l’aveugle, page Steam, démo pour le Next Fest, version Electron ou Tauri, succès, sauvegarde cloud, classement du défi quotidien.
+6. **Traduction (en dernier, une fois le jeu stabilisé, décision d’Amine)** : sortir tous les textes (cartes, zombies, règles, interface) dans des fichiers de langue et traduire en anglais. Le choix de langue existe déjà dans les options (anglais marqué « bientôt »). D’ici là, écrire les nouveaux textes en français uniquement.
