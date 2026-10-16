@@ -99,6 +99,9 @@ check('les soigneurs ne soignent pas les murs',()=>{const st=fresh();st.grid[2*9
 
 check('les réparateurs réparent les postes de soutien',()=>{const st=fresh();st.grid[2*9+2]={t:'mech',hp:3};st.grid[2*9+3]={t:'lamp',hp:1};Z.startNight(st,rng(1));st.pending=[];st.z=[];Z.step(st);ok(st.grid[2*9+3].hp>1)});
 
+check('Colosse : 10 dégâts par coup, ne tue plus une défense d’un coup',()=>{const st=fresh();st.night=10;eq(Z.bossHit(st),10);st.night=20;eq(Z.bossHit(st),12);
+ st.night=10;st.grid[3*9+4]={t:'car',hp:14};Z.startNight(st,rng(1));st.pending=[];st.z=[{id:1,k:'boss',pos:2*9+4,hp:999,max:999,cd:1,style:0}];Z.step(st);eq(st.grid[3*9+4].hp,4)});
+
 /* ---------- 4. nuits aléatoires ---------- */
 const PLACE=PLAY.filter(t=>!Z.U[t].react&&!Z.U[t].instant&&!Z.U[t].onUnit);
 const NIGHTS=+process.env.NIGHTS||300;let maxZ=0,slow=0,worst=0;

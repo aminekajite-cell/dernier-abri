@@ -107,7 +107,7 @@ Paliers : 4, 6 et 8 unités de la faction sur le plateau. Le Chef (carte légend
 | Blindé | 29 | 1 | 1 case / 2 tours | encaisse 1 dégât de moins par coup, sauf le feu |
 | Hurleur | 23 | 1 | 1 case / 2 tours | appelle 2 rôdeurs en mourant |
 | Sapeur | 18 | 3 | 1 case / 2 tours | fonce sur les murs et explose : 15 dégâts au rempart, 3 autour, même s’il est tué avant |
-| Le Colosse | 58 | 2 | 1 case / 3 tours | boss de la nuit 10 : détruit une défense d’un coup et frappe l’abri sans mourir |
+| Le Colosse | 58 | 2 | 1 case / 3 tours | boss toutes les 10 nuits : 10 dégâts par coup sur tes défenses et tes unités (+2 toutes les 10 nuits), fonce tout droit et frappe l’abri sans mourir |
 
 ## Les cartes
 Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, en cases), cadence, rôle, faction, capacité. ✦ = évolution secrète (ne se joue pas, se forme sur le plateau).
