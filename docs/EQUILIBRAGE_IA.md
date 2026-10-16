@@ -140,34 +140,34 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 
 | Carte | Coût | Rareté | PV | Dégâts | Portée | Cadence | Rôle | Faction | Capacité |
 |---|---|---|---|---|---|---|---|---|---|
-| Tireur | 2 | commune | 3 | 2 | 3 | chaque tour | DPS | Police | 2 dégâts par tour, portée 3 |
-| Sniper | 3 | rare | 2 | 5 | 5 | 1 tour sur 2 | DPS | Militaires | 5 dégâts tous les 2 tours, portée 5 |
-| Fusil à pompe | 3 | épique | 4 | 2 | 2 | chaque tour | DPS | Militaires | 2 dégâts aux 4 zombies les plus proches à 2 cases |
-| Arbalète | 3 | rare | 3 | 2 ×2 | 3 | chaque tour | DPS | Trappeurs | À chaque tour, 2 dégâts à 2 zombies différents, portée 3 |
-| Lance-flammes | 2 | rare | 5 | 1 | 3 | chaque tour | DPS | Pyromanes | 1 dégât à 3 cases et enflamme le zombie : 1 dégât par tour pendant 3 tours, 5 PV |
-| Mitrailleuse | 3 | épique | 3 | 2 ×3 | 3 | chaque tour | DPS | Militaires | 3 tirs de 2 dégâts par tour, portée 3, s’enraye 1 tour sur 3 |
-| Cocktails | 3 | épique | 2 | 2 | 3 | 1 tour sur 3 | DPS | Pyromanes | Tous les 3 tours, un cocktail sur le groupe le plus serré : 2 dégâts et feu, portée 3 |
-| Gamin | 1 | commune | 1 | 1 ×2 | 3 | chaque tour | DPS | Communauté | Lance-pierre : 2 tirs de 1 dégât par tour, portée 3, mais 1 seul PV |
-| Tireur d’élite du GIGN | 3 | épique | 4 | 2 | 3 | chaque tour | DPS | Police | 2 dégâts par tour, portée 3 |
-| Mortier | 3 | rare | 3 | 3 | 5 | 1 tour sur 3 | DPS | Militaires | Tous les 3 tours, un obus sur le groupe le plus serré : 3 dégâts sur la case et autour |
-| Sentinelle automatique | 2 | rare | 6 | 1 ×2 | 3 | chaque tour | DPS | Militaires | Tourelle : 2 tirs de 1 dégât par tour, portée 3, 6 PV |
-| Chasseur | 2 | commune | 3 | 2 | 3 | chaque tour | DPS | Trappeurs | 2 dégâts par tour, portée 3 |
-| Tourelle bricolée | 2 | commune | 4 | 2 | 3 | chaque tour | DPS | Bricoleurs | 2 dégâts par tour, portée 3, 4 PV |
-| Bobine Tesla | 3 | épique | 4 | 2 ×3 | 3 | 1 tour sur 2 | DPS | Bricoleurs | Tous les 2 tours, un arc frappe 3 zombies (2 dégâts). Inactive pendant une coupure |
-| Vigile | 1 | commune | 4 | 1 | 3 | chaque tour | DPS | Communauté | 1 dégât par tour, portée 3, 4 PV |
-| Médecin de garde | 2 | commune | 4 | 1 | 2 | chaque tour | Soin | Soignants | Pistolet : 1 dégât par tour, portée 2, et récupère 1 PV tous les 2 tours |
-| Cloueur | 2 | commune | 4 | 1 ×2 | 3 | chaque tour | DPS | Bricoleurs | Cloueuse pneumatique : 2 tirs de 1 dégât par tour, portée 3 |
-| Garde champêtre | 2 | commune | 4 | 2 | 3 | chaque tour | DPS | Communauté | Fusil de chasse : 2 dégâts par tour, portée 3 |
-| Le Commissaire | 3 | légendaire | 5 | 2 | 3 | chaque tour | DPS | Police | Chef de la Police : 2 dégâts par tour, portée 3. La Police gagne un palier |
-| La Sergente | 3 | légendaire | 5 | 1 ×3 | 3 | chaque tour | DPS | Militaires | Cheffe des Militaires : 3 tirs par tour, portée 3. Les Militaires gagnent un palier |
-| Le Pyromane | 3 | légendaire | 5 | 1 | 3 | chaque tour | DPS | Pyromanes | Chef des Pyromanes : enflamme tous les zombies à 3 cases. Les Pyromanes gagnent un palier |
-| Le Braconnier | 3 | légendaire | 4 | 3 | 4 | 1 tour sur 2 | DPS | Trappeurs | Chef des Trappeurs : 3 dégâts tous les 2 tours, portée 4. Les Trappeurs gagnent un palier |
-| Lance-roquettes | 3 | épique | 4 | 2 | 3 | 1 tour sur 2 | DPS | — | Tous les 2 tours, une roquette : 2 dégâts, et 5 fois plus (10) contre le Colosse et les Gonflés. Portée 3 |
-| ✦ Tireur de nuit | — | — | 4 | 3 | 5 | chaque tour | DPS | — | Un sniper et son projecteur : 3 dégâts à chaque tour, portée 5 |
-| ✦ Lance-flammes lourd | — | — | 7 | 2 | 3 | chaque tour | DPS | — | 2 dégâts à 6 zombies au plus à 3 cases, qui brûlent ensuite 3 tours |
-| ✦ Tourelle automatique | — | — | 7 | 1 ×3 | 3 | chaque tour | DPS | — | Montée par le mécanicien : 3 tirs de 1 dégât par tour, portée 3 |
-| ✦ Bande de gamins | — | — | 5 | 1 ×4 | 3 | chaque tour | DPS | — | Toute la classe au lance-pierre : 4 tirs de 1 dégât par tour, portée 3 |
-| ✦ Traqueur | — | — | 5 | 2 ×2 | 4 | chaque tour | DPS | — | À chaque tour, 2 dégâts à 2 zombies différents, portée 4 |
+| Tireur | 2 | commune | 3 | 2 | 2 | chaque tour | DPS | Police | 2 dégâts par tour, portée 2 |
+| Sniper | 3 | rare | 2 | 5 | 4 | 1 tour sur 2 | DPS | Militaires | 5 dégâts tous les 2 tours, portée 4 |
+| Fusil à pompe | 3 | épique | 4 | 2 | 1 | chaque tour | DPS | Militaires | 2 dégâts aux 4 zombies les plus proches à 1 case |
+| Arbalète | 3 | rare | 3 | 2 ×2 | 2 | chaque tour | DPS | Trappeurs | À chaque tour, 2 dégâts à 2 zombies différents, portée 2 |
+| Lance-flammes | 2 | rare | 5 | 1 | 2 | chaque tour | DPS | Pyromanes | 1 dégât à 2 cases et enflamme le zombie : 1 dégât par tour pendant 3 tours, 5 PV |
+| Mitrailleuse | 3 | épique | 3 | 2 ×3 | 2 | chaque tour | DPS | Militaires | 3 tirs de 2 dégâts par tour, portée 2, s’enraye 1 tour sur 3 |
+| Cocktails | 3 | épique | 2 | 2 | 2 | 1 tour sur 3 | DPS | Pyromanes | Tous les 3 tours, un cocktail sur le groupe le plus serré : 2 dégâts et feu, portée 2 |
+| Gamin | 1 | commune | 1 | 1 ×2 | 2 | chaque tour | DPS | Communauté | Lance-pierre : 2 tirs de 1 dégât par tour, portée 2, mais 1 seul PV |
+| Tireur d’élite du GIGN | 3 | épique | 4 | 2 | 2 | chaque tour | DPS | Police | 2 dégâts par tour, portée 2 |
+| Mortier | 3 | rare | 3 | 3 | 4 | 1 tour sur 3 | DPS | Militaires | Tous les 3 tours, un obus sur le groupe le plus serré : 3 dégâts sur la case et autour |
+| Sentinelle automatique | 2 | rare | 6 | 1 ×2 | 2 | chaque tour | DPS | Militaires | Tourelle : 2 tirs de 1 dégât par tour, portée 2, 6 PV |
+| Chasseur | 2 | commune | 3 | 2 | 2 | chaque tour | DPS | Trappeurs | 2 dégâts par tour, portée 2 |
+| Tourelle bricolée | 2 | commune | 4 | 2 | 2 | chaque tour | DPS | Bricoleurs | 2 dégâts par tour, portée 2, 4 PV |
+| Bobine Tesla | 3 | épique | 4 | 2 ×3 | 2 | 1 tour sur 2 | DPS | Bricoleurs | Tous les 2 tours, un arc frappe 3 zombies (2 dégâts). Inactive pendant une coupure |
+| Vigile | 1 | commune | 4 | 1 | 2 | chaque tour | DPS | Communauté | 1 dégât par tour, portée 2, 4 PV |
+| Médecin de garde | 2 | commune | 4 | 1 | 1 | chaque tour | Soin | Soignants | Pistolet : 1 dégât par tour, portée 1, et récupère 1 PV tous les 2 tours |
+| Cloueur | 2 | commune | 4 | 1 ×2 | 2 | chaque tour | DPS | Bricoleurs | Cloueuse pneumatique : 2 tirs de 1 dégât par tour, portée 2 |
+| Garde champêtre | 2 | commune | 4 | 2 | 2 | chaque tour | DPS | Communauté | Fusil de chasse : 2 dégâts par tour, portée 2 |
+| Le Commissaire | 3 | légendaire | 5 | 2 | 2 | chaque tour | DPS | Police | Chef de la Police : 2 dégâts par tour, portée 2. La Police gagne un palier |
+| La Sergente | 3 | légendaire | 5 | 1 ×3 | 2 | chaque tour | DPS | Militaires | Cheffe des Militaires : 3 tirs par tour, portée 2. Les Militaires gagnent un palier |
+| Le Pyromane | 3 | légendaire | 5 | 1 | 2 | chaque tour | DPS | Pyromanes | Chef des Pyromanes : enflamme tous les zombies à 2 cases. Les Pyromanes gagnent un palier |
+| Le Braconnier | 3 | légendaire | 4 | 3 | 3 | 1 tour sur 2 | DPS | Trappeurs | Chef des Trappeurs : 3 dégâts tous les 2 tours, portée 3. Les Trappeurs gagnent un palier |
+| Lance-roquettes | 3 | épique | 4 | 2 | 2 | 1 tour sur 2 | DPS | — | Tous les 2 tours, une roquette : 2 dégâts, et 5 fois plus (10) contre le Colosse et les Gonflés. Portée 2 |
+| ✦ Tireur de nuit | — | — | 4 | 3 | 4 | chaque tour | DPS | — | Un sniper et son projecteur : 3 dégâts à chaque tour, portée 4 |
+| ✦ Lance-flammes lourd | — | — | 7 | 2 | 2 | chaque tour | DPS | — | 2 dégâts à 6 zombies au plus à 2 cases, qui brûlent ensuite 3 tours |
+| ✦ Tourelle automatique | — | — | 7 | 1 ×3 | 2 | chaque tour | DPS | — | Montée par le mécanicien : 3 tirs de 1 dégât par tour, portée 2 |
+| ✦ Bande de gamins | — | — | 5 | 1 ×4 | 2 | chaque tour | DPS | — | Toute la classe au lance-pierre : 4 tirs de 1 dégât par tour, portée 2 |
+| ✦ Traqueur | — | — | 5 | 2 ×2 | 3 | chaque tour | DPS | — | À chaque tour, 2 dégâts à 2 zombies différents, portée 3 |
 
 ### Corps à corps
 
@@ -211,8 +211,8 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Marché | 2 | commune | 4 | — | — | — | — | Communauté | À chaque aube, +2 ferraille |
 | Charpentier | 2 | rare | 4 | — | — | — | — | Communauté | À chaque aube, les défenses voisines récupèrent 2 PV |
 | La Doctoresse | 3 | légendaire | 5 | 2 | 1 | chaque tour | Soin | Soignants | Cheffe des Soignants : soigne 2 PV à chaque tour et frappe au scalpel (2 dégâts au contact). Les Soignants gagnent un palier |
-| L’Ingénieur | 3 | légendaire | 6 | 1 ×2 | 2 | chaque tour | — | Bricoleurs | Chef des Bricoleurs : répare 2 PV aux défenses voisines à chaque tour et tire 2 clous par tour (portée 2). Les Bricoleurs gagnent un palier |
-| Le Maire | 3 | légendaire | 5 | 2 | 2 | chaque tour | — | Communauté | Chef de la Communauté : les unités autour attaquent plus souvent, et il tire (2 dégâts, portée 2). La Communauté gagne un palier |
+| L’Ingénieur | 3 | légendaire | 6 | 1 ×2 | 1 | chaque tour | — | Bricoleurs | Chef des Bricoleurs : répare 2 PV aux défenses voisines à chaque tour et tire 2 clous par tour (portée 1). Les Bricoleurs gagnent un palier |
+| Le Maire | 3 | légendaire | 5 | 2 | 1 | chaque tour | — | Communauté | Chef de la Communauté : les unités autour attaquent plus souvent, et il tire (2 dégâts, portée 1). La Communauté gagne un palier |
 | ✦ Cantine de campagne | — | — | 6 | soin +2 | — | — | Soin | — | Soigne 2 PV à une unité voisine à chaque tour, et l’abri récupère 2 PV à chaque aube |
 
 ### Pièges

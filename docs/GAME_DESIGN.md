@@ -581,3 +581,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 **v70** : mise à jour automatique. `version.txt` contient le numéro de la dernière version ; au lancement, si la page chargée est plus ancienne (cache de GitHub Pages ou du téléphone), le jeu se recharge avec une adresse neuve qui contourne les caches (une seule tentative par version).
 
 **v71** : un zombie repoussé (Policier, Klaxon…) n'est plus projeté dans la forêt : contre la lisière, il reste sur place (bug trouvé par les nouveaux tests automatiques, `node tools/test.js`).
+
+**v72** : portée de toutes les unités qui tirent réduite de 1 (Tireur 2, Sniper 4, Mortier 4, Fusil à pompe 1, Médecin de garde, L’Ingénieur et Le Maire au contact…), car le début était trop facile.
