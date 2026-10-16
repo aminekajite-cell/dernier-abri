@@ -579,3 +579,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Une barre de vie par mur ; l'usure et les brèches se dessinent mur par mur. Les zombies visent toujours le point le plus faible (calcul de chemin inchangé).
 
 **v70** : mise à jour automatique. `version.txt` contient le numéro de la dernière version ; au lancement, si la page chargée est plus ancienne (cache de GitHub Pages ou du téléphone), le jeu se recharge avec une adresse neuve qui contourne les caches (une seule tentative par version).
+
+**v71** : un zombie repoussé (Policier, Klaxon…) n'est plus projeté dans la forêt : contre la lisière, il reste sur place (bug trouvé par les nouveaux tests automatiques, `node tools/test.js`).

@@ -411,7 +411,8 @@ const Z=(()=>{
   for(const j of cand){if(isForest(j)||!diagOK(p,j,bc))continue;const v=1+bc[j]+D[j];if(v<bv-1e-9){bv=v;best=j}}
   return best<0?pref[0]:best}
  // un pas en s'éloignant de la maison (recul)
- function back(p){let[r,c]=rc(p);const dr=r-MID,dc=c-MID;if(Math.abs(dr)>=Math.abs(dc))r+=Math.sign(dr);else c+=Math.sign(dc);return idx(Math.max(0,Math.min(N-1,r)),Math.max(0,Math.min(N-1,c)))}
+ // (jamais dans la forêt : contre la lisière, le zombie reste sur place)
+ function back(p){let[r,c]=rc(p);const dr=r-MID,dc=c-MID;if(Math.abs(dr)>=Math.abs(dc))r+=Math.sign(dr);else c+=Math.sign(dc);const b=idx(Math.max(0,Math.min(N-1,r)),Math.max(0,Math.min(N-1,c)));return isForest(b)?p:b}
  function shuffle(a,rnd=Math.random){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
  /* ---------- état d'une partie ---------- */
