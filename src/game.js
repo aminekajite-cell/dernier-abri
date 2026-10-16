@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v77 · 16 oct.';
+const VERSION='v78 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -205,13 +205,13 @@ function newGame(ch,pl,daily,deck){
  RS=daily?seedFrom('abri-'+daily):1+Math.floor(Math.random()*2147483645);
  G=Z.newState(ch,pl,R,daily?Z.KEYS.slice():Z.unlocks(META).pool);if(daily)G.daily=daily;
  S={draw:shuffle([...(deck||META.decks[META.slot]||Z.STARTER_DECK)]),board:G.grid.filter(Boolean),discard:[],bsel:null,hand:[],used:[],sel:null,moveFrom:null,inspect:null,busy:false,next:null,phase:null,picks:null,dawn:null};
- V.clear();FX.length=0;PT.length=0;facing.fill(null);clearDecals();
+ V.clear();FX.length=0;PT.length=0;facing.fill(null);clearDecals();POS=new Map();G.grid.forEach((u,j)=>{if(u)POS.set(u,j)});DISC0=-1;
  fillHand();
 }
 // la carte choisie à l'aube arrive d'office dans la main, le reste est pioché
 // la main se garde d'un jour à l'autre : on la complète jusqu'au nombre de cartes du jour (au moins 1 nouvelle), sans dépasser HAND_MAX
 function fillHand(){if(S.next){S.hand.push(S.next);S.next=null}drawCards(Math.min(Z.HAND_MAX-S.hand.length,Math.max(1,Z.drawCount(G)-S.hand.length)))}
-function drawCards(n){for(let k=0;k<n;k++){if(!S.draw.length){S.draw=shuffle(S.discard);S.discard=[]}if(!S.draw.length)break;S.hand.push(S.draw.pop())}}
+function drawCards(n){for(let k=0;k<n;k++){if(!S.draw.length&&S.discard.length){S.draw=shuffle(S.discard);S.discard=[];S.reshuf=1}if(!S.draw.length)break;S.hand.push(S.draw.pop());S.newDraw=(S.newDraw||0)+1}}
 // le deck de la partie : pioche, défausse, main, et les unités posées (qui reviennent dans la défausse quand elles tombent)
 const pileList=()=>[...S.draw,...S.discard,...S.hand,...(S.used||[])];
 // carte choisie : S.sel ≥ 0 désigne une carte de la main, S.sel < 0 une carte de construction déjà utilisée aujourd'hui (S.used)
@@ -226,7 +226,33 @@ const deckList=()=>[...pileList(),...(S.board||[]).flatMap(cardsOf)];
 // Un mur tracé en ligne n'a qu'une carte : si la case qui la porte tombe, une autre case du même mur la reprend.
 function syncBoard(){const live=new Set(G.grid.filter(Boolean).concat(G.bench||[]));for(const u of S.board||[])if(!live.has(u)&&!u.absorbed){
   if(u.line&&!u.gen){const heir=[...live].find(v=>v.line===u.line);if(heir){delete heir.gen;continue}}
-  S.discard.push(...cardsOf(u))}S.board=[...live]}
+  const cs=cardsOf(u),j=POS.get(u);if(j!=null)cs.forEach(()=>FLYSRC.push(cellRect(j)));S.discard.push(...cs)}S.board=[...live];POS=new Map();G.grid.forEach((u,j)=>{if(u)POS.set(u,j)})}
+// table de jeu : animations des cartes entre la pioche, la main et la défausse
+let POS=new Map();const FLYSRC=[];let LASTRECT=null,DISC0=-1;
+function cellRect(i){const r=cv.getBoundingClientRect(),c=r.width/Z.N;return{left:r.left+(i%Z.N)*c,top:r.top+Math.floor(i/Z.N)*c,width:c,height:c}}
+function fly(t,a,b,delay,back,done){if(reduce||!a||!b){done&&done();return}const g=document.createElement('div');g.className='flyc'+(back?' back':'');if(!back&&t)g.innerHTML=cardFace(t,{mini:1});document.body.appendChild(g);
+ const W=56,H=75,x0=a.left+a.width/2-W/2,y0=a.top+a.height/2-H/2,x1=b.left+b.width/2-W/2,y1=b.top+b.height/2-H/2;
+ const an=g.animate([{transform:`translate(${x0}px,${y0}px) scale(.85)`,opacity:.95},{transform:`translate(${x1}px,${y1}px) scale(1)`,opacity:1}],{duration:340,delay,easing:'cubic-bezier(.3,.7,.3,1)',fill:'both'});
+ an.onfinish=()=>{g.remove();done&&done()};an.oncancel=an.onfinish}
+function animPiles(){const pd=$('#pDraw'),px=$('#pDisc');if(!pd||!px)return;const rd=pd.getBoundingClientRect(),rx=px.getBoundingClientRect();
+ if(S.reshuf){S.reshuf=0;for(let k=0;k<5;k++)fly(null,rx,rd,k*60,1);px.classList.add('pulse');setTimeout(()=>px.classList.remove('pulse'),600)}
+ if(S.newDraw){const n=S.newDraw;S.newDraw=0;const cs=[...document.querySelectorAll('#hand .card[data-k]')].slice(-n);
+  cs.forEach((c,k)=>{c.style.visibility='hidden';fly(S.hand[+c.dataset.k],rd,c.getBoundingClientRect(),120+k*110,0,()=>{c.style.visibility=''})});if(n)setTimeout(()=>SFX.play('ui'),120)}
+ const n=S.discard.length;if(DISC0<0||n<DISC0)DISC0=n;
+ if(n>DISC0){const h=$('#hand').getBoundingClientRect();S.discard.slice(DISC0).slice(-5).forEach((t,k)=>fly(t,FLYSRC.shift()||LASTRECT||h,rx,k*90));DISC0=n}
+ FLYSRC.length=0;LASTRECT=null}
+const backHtml=n=>`<span class="pb"><b>${n}</b></span>`;
+function pilesHtml(){const pd=$('#pDraw'),px=$('#pDisc'),pr=$('#pRes');if(!pd)return;
+ pd.innerHTML=`${backHtml(S.draw.length)}<em>Pioche</em>`;pd.disabled=S.busy;
+ const top=S.discard[S.discard.length-1];px.innerHTML=(top?`<span class="pt" style="background-image:url('${artUrl(top)}')"></span>`:'<span class="pt empty"></span>')+`<b class="pn">${S.discard.length}</b><em>Défausse</em>`;px.disabled=S.busy;
+ const b=G.bench||[];pr.hidden=!b.length;if(b.length){pr.innerHTML=`<span class="pt" style="background-image:url('${artUrl(b[0].t)}')"></span><b class="pn">${b.length}</b><em>Réserve</em>`;pr.disabled=S.busy;pr.classList.toggle('sel',S.bsel!=null)}}
+// voir le contenu d'un tas
+const pileView=(ts,ordered)=>{if(!ts.length)return '<p>Vide.</p>';if(ordered)return `<div class="plist">${ts.map(t=>`<div class="pl"><span class="pt" style="background-image:url('${artUrl(t)}')"></span>${cardName(t)}</div>`).join('')}</div>`;
+ const c={};ts.forEach(t=>c[t]=(c[t]||0)+1);return `<div class="plist">${Object.keys(c).sort((a,b)=>cardName(a).localeCompare(cardName(b))).map(t=>`<div class="pl"><span class="pt" style="background-image:url('${artUrl(t)}')"></span>${cardName(t)}${c[t]>1?` <b>×${c[t]}</b>`:''}</div>`).join('')}</div>`};
+$('#pDraw').addEventListener('click',()=>{if(S.busy)return;SFX.play('ui');show(`<h2 class="pw">Pioche : ${plural(S.draw.length,'carte','cartes')}</h2><p>Les cartes que tu vas piocher, dans le désordre (l’ordre reste secret). Quand la pioche est vide, la défausse est mélangée pour la remplir.</p>${pileView(S.draw)}<button type="button" class="go" data-a="closeov">Fermer</button>`)});
+$('#pDisc').addEventListener('click',()=>{if(S.busy)return;SFX.play('ui');show(`<h2 class="pw">Défausse : ${plural(S.discard.length,'carte','cartes')}</h2><p>Les cartes jouées, utilisées ou tombées, de la plus récente à la plus ancienne. Elles reviendront quand la pioche sera vide.</p>${pileView(S.discard.slice().reverse(),1)}<button type="button" class="go" data-a="closeov">Fermer</button>`)});
+$('#pRes').addEventListener('click',()=>{if(S.busy)return;SFX.play('ui');const b=G.bench||[];if(b.length===1){S.bsel=S.bsel===0?null:0;S.sel=null;S.moveFrom=null;S.inspect=null;render();return}
+ show(`<h2 class="pw">Réserve</h2><p>Tes unités rappelées. Choisis-en une, puis touche une case en vert pour la reposer gratuitement.</p><div class="picks">${b.map((u,k)=>`<button type="button" class="pick" data-a="bpick" data-v="${k}">${cardFace(u.t,{mini:1,cost:0,tag:(u.name||'')+(u.gold?' '+'★'.repeat(u.gold):'')})}</button>`).join('')}</div><button type="button" class="skip" data-a="closeov">Fermer</button>`)});
 
 /* ---------- sauvegarde (localStorage, marche aussi dans Electron/Tauri) ---------- */
 const SAVE_KEY='abri-save',SAVE_V=3; // v3 : carte 9×9 (les anciennes sauvegardes en 7×7 sont ignorées)
@@ -236,7 +262,7 @@ function clearSave(){try{localStorage.removeItem(SAVE_KEY)}catch(e){}}
 function resume(d){
  newGame(d.g.char,d.g.place);
  Object.assign(G,d.g,{event:Z.EVENTS.find(e=>e.id===d.g.event)||Z.EVENTS[0]});Z.touch(G);
- RS=d.g.rs||RS;Object.assign(S,d.s,{sel:null,busy:false});S.used=S.used||[];G.bench=G.bench||[];S.bsel=null;S.board=G.grid.filter(Boolean).concat(G.bench);
+ RS=d.g.rs||RS;Object.assign(S,d.s,{sel:null,busy:false});S.used=S.used||[];G.bench=G.bench||[];S.bsel=null;S.board=G.grid.filter(Boolean).concat(G.bench);POS=new Map();G.grid.forEach((u,j)=>{if(u)POS.set(u,j)});DISC0=-1;
  hide();render();
  if(S.phase)dawnStep(S.phase,S.picks);
 }
@@ -834,12 +860,12 @@ function render(){
  const mN=G.muts.length,soon=Z.mutNight(G.night);
  $('#horde').innerHTML=(S.busy?'':hordeHtml())+`<span class="tags">${mN||soon?`<span class="mutc${soon?' soon':''}" title="Mutations de la horde">${svg('mut')}${mN}${soon?' · mute à l’aube':''}</span>`:''}${G.ammo?`<span class="ammoc" title="Munitions anti-Colosse">${svg('ammo')}${G.ammo}/${Z.AMMO_MAX}</span>`:''}<span class="scrap" title="Ferraille">${svg('scrap')}${G.scrap}</span></span>`;
  const left=G.energy??Z.ENERGY;
- const hand=$('#hand'),nH=S.hand.length+new Set(S.used||[]).size+(G.bench||[]).length;hand.style.setProperty('--n',Math.max(5,Math.min(WIDE.matches?10:6,nH)));
+ const hand=$('#hand'),nH=S.hand.length+new Set(S.used||[]).size;hand.style.setProperty('--n',Math.max(4,Math.min(WIDE.matches?9:5,nH)));
  hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card${S.sel===k?' sel':''}" data-k="${k}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}>${cardFace(t,{mini:1,v:Z.U[t].react&&!S.busy?'Nuit':''})}</button>`).join('')
   +[...new Set(S.used||[])].map(t=>{const k=S.used.indexOf(t),n=S.used.filter(x=>x===t).length,on=S.sel!==null&&S.sel<0&&S.used[-1-S.sel]===t;
    const tr=Z.isTrace(t),ch=tr?Z.charges(G,t,true):0;
    return `<button type="button" class="card reuse${on?' sel':''}" data-u="${k}" ${S.busy||Z.buildCost(G,t,true)>(G.energy??0)||(tr&&!ch)?'disabled':''}>${cardFace(t,{mini:1,cost:Z.buildCost(G,t,true),tag:tr?`Encore ${ch} case${ch>1?'s':''}`:'Encore'+(n>1?' ×'+n:'')})}</button>`}).join('')
-  +(G.bench||[]).map((u,k)=>`<button type="button" class="card bench${S.bsel===k?' sel':''}" data-b="${k}" ${S.busy?'disabled':''}>${cardFace(u.t,{mini:1,cost:0,tag:(u.name||'Réserve')+(u.gold?' '+'★'.repeat(u.gold):'')})}</button>`).join('');
+  ;try{pilesHtml();animPiles()}catch(e){}
  const fc=Z.famCounts(G),fl=Z.famLevels(G);const nU=Z.unitCount(G),cap=Z.unitCap(G);$('#fams').innerHTML=`<span class="fam cap${nU>=cap?' full':''}" title="Unités sur le terrain (murs et pièges illimités)">👥 ${nU}/${cap}</span>`+Object.keys(Z.FAM).filter(f=>fc[f]).map(f=>`<span class="fam l${fl[f]}" title="${Z.FAM[f].n}">${Z.FAM[f].ic} ${fc[f]}${fl[f]?' '+'★'.repeat(fl[f]):'/'+Z.FAM[f].lv[0]}</span>`).join('')+Z.allies(G).map(k=>`<span class="fam ally" title="${Z.ALLY[k].d}">🤝 ${Z.ALLY[k].n}</span>`).join('');
  const info=$('#info');info.className='info';
  if(S.busy&&S.sel!==null&&S.sel>=0){const t=S.hand[S.sel];info.innerHTML=`<b>${cardName(t)}</b> : ${Z.U[t].d}. `+(Z.U[t].react==='unit'?'Touche une unité blessée.':'Touche une case de la carte.')}
@@ -857,7 +883,7 @@ function render(){
  const tip=$('#tip');if(TUTO<4&&ov.hidden&&(S.busy?TUTO===3:TUTO<3)){tip.hidden=false;tip.textContent=TIPS[TUTO]}else tip.hidden=true;
  const go=$('#go');go.disabled=false;go.textContent=S.pause?`Lancer la vague ${S.pause+1} sur ${G.waves}`:S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy&&!S.pause);
 }
-$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;SFX.play('ui');
+$('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;SFX.play('ui');LASTRECT=b.getBoundingClientRect();
  if(b.dataset.b!==undefined){const k=+b.dataset.b;S.bsel=S.bsel===k?null:k;S.sel=null;S.moveFrom=null;S.inspect=null;render();return}S.bsel=null;
  if(b.dataset.u!==undefined){const k=-1-(+b.dataset.u);S.sel=S.sel===k?null:k;S.moveFrom=null;S.inspect=null;render();return}const k=+b.dataset.k;
  if(S.busy&&Z.U[S.hand[k]].react==='any'){playReact(k,Z.C);return}S.sel=S.sel===k?null:k;S.moveFrom=null;S.inspect=null;if(S.sel!==null)tuto(0);render()});
@@ -877,7 +903,7 @@ function updatePreview(){if(!WIDE.matches)return;let pv=$('#preview');if(!pv){pv
  const key=t+(S.busy?1:0)+(G.upg[t]?'u':'');if(t&&pv.dataset.t!==key){pv.dataset.t=key;pv.innerHTML=cardFace(t)}}
 $('#hand').addEventListener('pointerover',e=>{const b=e.target.closest('.card');if(!b||e.pointerType!=='mouse')return;S.hover=b.dataset.b!==undefined?(G.bench[+b.dataset.b]||{}).t:b.dataset.u!==undefined?S.used[+b.dataset.u]:S.hand[+b.dataset.k];updatePreview()});
 $('#hand').addEventListener('pointerleave',()=>{if(S.hover){S.hover=null;updatePreview()}});
-$('#hand').addEventListener('pointerdown',e=>{const b=e.target.closest('.card');if(!b||b.disabled||S.busy||b.dataset.b!==undefined)return;HD={b,x:e.clientX,y:e.clientY,on:false,g:null}});
+$('#hand').addEventListener('pointerdown',e=>{const b=e.target.closest('.card');if(b)LASTRECT=b.getBoundingClientRect();if(!b||b.disabled||S.busy||b.dataset.b!==undefined)return;HD={b,x:e.clientX,y:e.clientY,on:false,g:null}});
 addEventListener('pointermove',e=>{if(!HD)return;if(!HD.on&&Math.hypot(e.clientX-HD.x,e.clientY-HD.y)>12){HD.on=true;HD.g=HD.b.cloneNode(true);HD.g.classList.add('ghost');document.body.appendChild(HD.g);
   const k=HD.b.dataset.u!==undefined?-1-(+HD.b.dataset.u):+HD.b.dataset.k;S.sel=k;S.moveFrom=null;S.inspect=null;render()}
  if(HD.on){HD.g.style.left=e.clientX+'px';HD.g.style.top=e.clientY+'px'}});
@@ -946,7 +972,7 @@ function tapCell(i){
  if(D.peek)peekScreen();
 }
 function peekScreen(){
- if(S.draw.length<3){S.draw=shuffle(S.discard).concat(S.draw);S.discard=[]}
+ if(S.draw.length<3&&S.discard.length){S.draw=shuffle(S.discard).concat(S.draw);S.discard=[];S.reshuf=1}
  const top=S.draw.slice(-3).reverse();if(!top.length)return;
  show(`<h2 class="pw">Carte routière</h2><p>Les prochaines cartes de ta pioche. Prends-en une dans ta main.</p>
   <div class="picks">${top.map(t=>pickBtn(t,'peek',t)).join('')}</div>`);
@@ -1145,6 +1171,8 @@ function collectionScreen(keep){const own=META.cards;
 function evoHtml(){const ev=META.evo||[];return `<h3>Évolutions secrètes (${ev.length}/${Z.EVO_KEYS.length})</h3><p>Deux cartes précises posées côte à côte se transforment en une unité unique. Elle n’entre jamais dans un deck ; quand elle tombe, ses deux cartes reviennent dans ta défausse.</p>
  <div class="deck">${Z.EVO_KEYS.map(k=>ev.includes(k)?`<div class="dk in" style="--cc:#c58cff">${svg(k)}<span><b>✦ ${Z.U[k].n}</b><em class="ce">${Z.EVO[k].map(t=>Z.U[t].n).join(' + ')}</em><br>${Z.U[k].d}</span></div>`:`<div class="dk locked" style="--cc:var(--muted)">${svg('relic')}<span><b>???</b>Pas encore découverte.</span></div>`).join('')}</div>`}
 const ACT={
+ closeov:()=>{hide();render()},
+ bpick:v=>{S.bsel=+v;S.sel=null;S.moveFrom=null;S.inspect=null;hide();render()},
  artstyle:()=>{ART_STYLE=ART_STYLE==='cartoon'?'real':'cartoon';try{localStorage.setItem('abri-style',ART_STYLE)}catch(e){}title()},
  new:()=>prepScreen(),
  prepdeck:v=>{META.slot=+v;saveMeta(META);prepScreen()},

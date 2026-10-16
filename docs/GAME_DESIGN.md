@@ -605,3 +605,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - En style réaliste, ces cartes affichent leur illustration cartoon (pas d’image réaliste).
 
 **v77** : le style cartoon devient le seul style (le bouton « Style graphique » disparaît). Les 4 cartes sans illustration cartoon (Mur de pneus, Fumigène, Café, Filet) gardent leur image réaliste en attendant.
+
+**v78** : table de jeu. La main est posée sur une table en bois, entre la **pioche** (à gauche, dos de carte et nombre restant) et la **défausse** (à droite, dernière carte visible). Les unités rappelées forment un tas **Réserve** sous la pioche. Toucher un tas montre son contenu (la pioche dans le désordre). Animations : les cartes piochées glissent de la pioche vers la main, les cartes jouées ou tombées volent vers la défausse, et la défausse revient dans la pioche quand celle-ci est vide.

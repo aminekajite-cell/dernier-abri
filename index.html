@@ -7,7 +7,7 @@
 <title>Dernier Abri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
-<link rel="stylesheet" href="src/style.css?v=77">
+<link rel="stylesheet" href="src/style.css?v=78">
 </head>
 <body>
 
@@ -24,13 +24,17 @@
   <canvas class="map" id="map" aria-label="Carte autour de l’abri"></canvas>
   <div class="tip" id="tip" hidden></div>
   <div class="info" id="info"></div>
-  <div class="hand" id="hand"></div>
+  <div class="table" id="table">
+    <div class="piles"><button type="button" class="pile draw" id="pDraw" aria-label="Pioche"></button><button type="button" class="pile res" id="pRes" aria-label="Réserve" hidden></button></div>
+    <div class="hand" id="hand"></div>
+    <div class="piles"><button type="button" class="pile disc" id="pDisc" aria-label="Défausse"></button></div>
+  </div>
   <button class="go" id="go" type="button">Affronter la nuit</button>
 </div>
 <div class="overlay" id="ov"><div class="panel" id="panel"></div></div>
 
-<script src="src/engine.js?v=77"></script>
-<script src="src/audio.js?v=77"></script>
-<script src="src/game.js?v=77"></script>
+<script src="src/engine.js?v=78"></script>
+<script src="src/audio.js?v=78"></script>
+<script src="src/game.js?v=78"></script>
 </body>
 </html>

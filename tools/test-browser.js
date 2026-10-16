@@ -43,10 +43,11 @@ async function run(vp,label){
       if(cells.length)return{i,cell:cells[Math.floor(Math.random()*cells.length)]}}return null});
     if(!pick)break;await click(`.card[data-k="${pick.i}"]`);await p.mouse.click(...at(pick.cell));await p.waitForTimeout(120);
     if(await p.evaluate(()=>S.sel!==null&&S.sel<0))await p.evaluate(()=>{S.sel=null;render()})}
-   if(n===1)await shot('05-jour');await overflow('jour');
+   if(n===1){await shot('05-jour');await click('#pDraw');await p.waitForTimeout(200);if(!/Pioche/.test(await ov()))problems.push(`${label} : la pioche ne s’ouvre pas`);await click('#ov [data-a=closeov]');
+    await click('#pDisc');await p.waitForTimeout(200);if(!/Défausse/.test(await ov()))problems.push(`${label} : la défausse ne s’ouvre pas`);await click('#ov [data-a=closeov]')}await overflow('jour');
    // rappel d'une unité dans la réserve, puis remise en jeu gratuite
    if(n===2){const u=await p.evaluate(()=>G.grid.findIndex((v,j)=>Z.canRecall(G,j)));if(u>=0){await p.mouse.click(...at(u));await click('#info [data-a=recall]');
-    if(await p.evaluate(()=>G.bench.length)!==1)problems.push(`${label} : le rappel d’une unité ne marche pas`);else{await shot('05b-reserve');await click('.card.bench');
+    if(await p.evaluate(()=>G.bench.length)!==1)problems.push(`${label} : le rappel d’une unité ne marche pas`);else{await shot('05b-reserve');await click('#pRes');
      const c=await p.evaluate(()=>[...Array(81).keys()].find(j=>Z.canPlaceBench(G,0,j)));if(c!=null){await p.mouse.click(...at(c));if(await p.evaluate(()=>G.bench.length))problems.push(`${label} : l’unité de la réserve ne se repose pas`)}}}}});
   // nuit en accéléré, avec une réaction si possible
   await step(`nuit ${n}`,async()=>{await p.evaluate(()=>{G.maxS=G.shelter=200});await click('#go');await p.evaluate(()=>{SPEED=16});
