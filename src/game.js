@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v87 · 16 oct.';
+const VERSION='v88 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -816,6 +816,7 @@ function playEvents(ev,types,now){
  // victimes : compteur, « Carnage » si au moins 3 morts d'un coup, ralenti à la mort du Colosse
  if(dead.length){KC.n+=dead.length;KC.t=now;
   if(dead.length>=3){const ps=dead.map(e=>tc(e.i)),cx=ps.reduce((a,p)=>a+p.x,0)/ps.length,cy=ps.reduce((a,p)=>a+p.y,0)/ps.length;floatTxt(cx,cy-10,dead.length>=5?`Carnage ×${dead.length} !`:`Triple !${dead.length>3?' ×'+dead.length:''}`,'#ff9a2e',17);shake(now,4)}
+  try{SFX.play('zdie',.22)}catch(x){}
   dead.forEach(e=>{const v=V.get(e.zid),p=v?zpos(v,now):tc(e.i);burst(p.x,p.y,'#d8d0b8',5,.07,1.6);burst(p.x,p.y,'rgba(140,20,24,.9)',9,.1,2.4);addFX({type:'ring',x:p.x,y:p.y,r:26,c:'rgba(229,72,77,.8)',dur:260});
    // gros zombies : éclair et secousse à leur mort
    if(v&&['fat','armor','howl','sap'].includes(v.k)&&!e.boss){shake(now,4);addFX({type:'flash',x:p.x,y:p.y,r:22,c:'rgba(255,120,80,.6)',dur:180})}
@@ -1314,7 +1315,7 @@ function title(){show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de
 <li>Toutes les 5 nuits, la horde <b>mute</b> pour de bon et la nuit est une <b>nuit de pression</b> (+25 % de zombies). Si un zombie blesse l’abri, c’est la <b>brèche</b> : toute la horde avance d’un coup. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button>${iosHint()?'<p class="ver">Sur iPhone : Partager → « Sur l’écran d’accueil » pour jouer en plein écran.</p>':''}<p class="ver">${VERSION}</p>`)}
+<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button>${iosHint()?'<p class="ver">Sur iPhone : Partager → « Sur l’écran d’accueil » pour jouer en plein écran.</p>':''}<p class="ver">Grognements de zombies : artisticdude et saturn91 (OpenGameArt, CC0).</p><p class="ver">${VERSION}</p>`)}
 newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son

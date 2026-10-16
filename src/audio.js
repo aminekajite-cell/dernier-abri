@@ -1,4 +1,4 @@
-// Sons du jeu, générés en code avec Web Audio (aucun fichier à télécharger).
+// Sons du jeu : générés en code avec Web Audio, plus des grognements de zombies enregistrés (assets/sounds, licence CC0, voir CREDITS.md).
 // Expose l'objet global SFX : SFX.play('shot'), SFX.night(0..1) (ambiance et musique de nuit), SFX.toggle().
 // Tout est protégé : si l'audio n'est pas disponible, le jeu continue sans son.
 const SFX=(()=>{
@@ -13,8 +13,14 @@ const SFX=(()=>{
   }catch(e){ac=null}
   return ac}
  // le navigateur n'autorise le son qu'après un geste du joueur
- const unlock=()=>{if(init()&&ac.state==='suspended')ac.resume().catch(()=>{})};
+ const unlock=()=>{zLoad();if(init()&&ac.state==='suspended')ac.resume().catch(()=>{})};
  ['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,unlock,{passive:true}));
+ // grognements enregistrés : chargés au premier geste du joueur, joués avec une hauteur au hasard.
+ // Si un fichier n'est pas encore chargé (ou manque), on retombe sur le son généré.
+ const ZN=30,ZS=[];let zReady=false;
+ function zLoad(){if(zReady)return;zReady=true;try{for(let k=1;k<=ZN;k++){const a=new Audio();a.preload='auto';a.src='assets/sounds/zombie-'+String(k).padStart(2,'0')+'.mp3';ZS.push(a)}}catch(e){}}
+ function zombie(vol,rate){if(muted||!ZS.length)return false;const a0=ZS[Math.floor(Math.random()*ZS.length)];if(!a0||a0.readyState<2)return false;
+  try{const a=a0.cloneNode();a.volume=Math.max(0,Math.min(1,vol));a.playbackRate=rate||(.8+Math.random()*.45);a.preservesPitch=a.mozPreservesPitch=a.webkitPreservesPitch=false;const p=a.play();if(p&&p.catch)p.catch(()=>{});return true}catch(e){return false}}
  function noise(t,dur,{f=1200,q=1,type='bandpass',vol=.5,attack=.002,f2}={}){
   const s=ac.createBufferSource();s.buffer=noiseBuf;s.loop=true;
   const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);fl.Q.value=q;
@@ -37,7 +43,8 @@ const SFX=(()=>{
   shelter:t=>{tone(t,.35,{f:60,f2:30,vol:.6,type:'triangle'});noise(t,.25,{f:200,type:'lowpass',vol:.5})},
   boom:t=>{noise(t,1.1,{f:900,f2:80,type:'lowpass',vol:.9,attack:.005});tone(t,.8,{f:80,f2:25,vol:.7})},
   lost:t=>{noise(t,.25,{f:350,q:3,vol:.45});noise(t+.05,.2,{f:900,q:4,vol:.25})},
-  groan:t=>{const f=70+Math.random()*40;tone(t,.9,{f,f2:f*.7,type:'sawtooth',vol:.08,attack:.15});tone(t,.9,{f:f*1.01,f2:f*.69,type:'sawtooth',vol:.06,attack:.2})},
+  zdie:t=>{zombie(.32,.95+Math.random()*.4)},
+  groan:t=>{if(zombie(.5,.7+Math.random()*.35))return;const f=70+Math.random()*40;tone(t,.9,{f,f2:f*.7,type:'sawtooth',vol:.08,attack:.15});tone(t,.9,{f:f*1.01,f2:f*.69,type:'sawtooth',vol:.06,attack:.2})},
   place:t=>{tone(t,.08,{f:220,f2:140,vol:.25,type:'triangle'});noise(t,.04,{f:1500,vol:.1})},
   ui:t=>tone(t,.05,{f:660,vol:.12,type:'triangle'}),
   dawn:t=>{[392,494,587,784].forEach((f,k)=>tone(t+k*.12,.6,{f,vol:.12,type:'triangle'}))},
@@ -68,7 +75,7 @@ const SFX=(()=>{
   wolf:t=>{const f=260+Math.random()*60;glide(t,[[0,f],[.6,f*1.9],[2.2,f*1.75],[3.2,f*1.3]],{type:'triangle',vol:.045,vib:9,vibF:5.5,lp:1300});
    if(Math.random()<.5){const g2=f*1.12;glide(t+1.1,[[0,g2],[.5,g2*1.8],[2,g2*1.6],[2.8,g2*1.2]],{type:'triangle',vol:.03,vib:8,vibF:6,lp:1100})}},
   // grognement de zombie lointain
-  groan:t=>{const f=60+Math.random()*35;glide(t,[[0,f],[.5,f*1.15],[1.4,f*.75]],{type:'sawtooth',vol:.035,vib:4,vibF:9,lp:420});glide(t+.08,[[0,f*1.5],[.6,f*1.6],[1.3,f*1.1]],{type:'sawtooth',vol:.02,lp:380})},
+  groan:t=>{if(zombie(.16,.6+Math.random()*.3))return;const f=60+Math.random()*35;glide(t,[[0,f],[.5,f*1.15],[1.4,f*.75]],{type:'sawtooth',vol:.035,vib:4,vibF:9,lp:420});glide(t+.08,[[0,f*1.5],[.6,f*1.6],[1.3,f*1.1]],{type:'sawtooth',vol:.02,lp:380})},
   // craquement de branche
   crack:t=>{noise(t,.06,{f:2200,q:3,vol:.08});noise(t+.07,.04,{f:1800,q:3,vol:.05})}
  };
