@@ -107,7 +107,7 @@ const SPRD={},SPR={};
  ['flip',0,52,'fortin'],['flip',0,38,'sentry autogun turret'],['flip',0,36,'mortar'],
  ['fix',0,48,'bunker hospital'],['fix',0,44,'workshop market fire'],['fix',0,40,'scare spike net'],['fix',0,38,'lamp'],['fix',0,36,'solar'],['fix',0,34,'radio tesla canteen bear'],
  ['fix',0,30,'trap brasero smoke'],['fix',0,28,'siren dyn clay firetrap'],['fix',0,26,'gas mine'],['fix',0,22,'bait']
-].forEach(([m,b,z,ids])=>ids.split(' ').forEach(k=>{SPRD[k]=[m,b,z];const im=new Image();im.onload=()=>SPR[k]=im;im.src='assets/sprites/'+k+'.webp'}));
+].forEach(([m,b,z,ids])=>ids.split(' ').forEach(k=>{SPRD[k]=[m,b,z]}));// v93 : les sprites réalistes ne sont plus chargés (archivés), seuls les cartoon servent
 /* sprites cartoon (assets/sprites_cartoon/<id>.webp) : utilisés quand le style cartoon est choisi.
    Vus strictement du dessus, personnages et zombies tournés vers le BAS (angle π/2) ; murs dessinés à l'horizontale. */
 const SPRDC={},SPRC={},DOWN=Math.PI/2;
@@ -134,12 +134,12 @@ const CART_FILES=('chief_police chief_mil chief_pyro chief_trap chief_farm chief
  'gun snp sht xbow flame mg molo kid swat mortar sentry hunter turret tesla vigile doc nailer ranger rocket axe dog cop butch monk riot k9 dogs pitch amb orderly '+
  'med lamp radio cook mech siren lead solar pharma hospital priest stretch scare workshop teacher market carp canteen '+
  'fortin autogun tracker brasero dyn bear food kit rep roadmap gas molotov grenade shot flare bait patch napalm rush horn air trap wire mine spike tear firetrap fen fire clay sand bar modwall barrier bunker door car '+
- 'handler welder scout assassin fieldnurse genmech shell gear binoc bandage medkit torch pills pack tape keys tower trench pump flood palis gate gabion log pit glass cans rocks supply airdrop jerry rest radioop talkie storm bomber noise').split(' ');
+ 'heavyflame slaughter gang saint handler welder scout assassin fieldnurse genmech shell gear binoc bandage medkit torch pills pack tape keys tower trench pump flood palis gate gabion log pit glass cans rocks supply airdrop jerry rest radioop talkie storm bomber noise').split(' ');
 const CART_ZOMB='walk fat sap armor zdog crawl run howl spit boss'.split(' ');
 const CART_POP=CART_FILES.slice(0,10);
 const cartoon=t=>CART_FILES.includes(t)&&(ART_STYLE==='cartoon'||!ART_FILES.includes(t));
-const popUrl=t=>!popOK(t)?'':cartoon(t)?(CART_POP.includes(t)?'assets/cards_cartoon/'+t+'_pop.webp':''):ART_TEST?ART_DIR+ART_TEST.replace('.webp','_pop.webp'):ART_POP.includes(t)?ART_DIR+t+'_pop.webp':'';
-const artUrl=t=>cartoon(t)?'assets/cards_cartoon/'+t+'.webp':ART_TEST?ART_DIR+ART_TEST:ART_FILES.includes(t)?ART_DIR+t+'.webp':'';
+const popUrl=t=>popOK(t)&&CART_POP.includes(t)?'assets/cards_cartoon/'+t+'_pop.webp':'';
+const artUrl=t=>CART_FILES.includes(t)?'assets/cards_cartoon/'+t+'.webp':'';
 /* face de carte complète (style Hearthstone) : illustration dans une fenêtre arrondie, gemme de coût, bandeau du nom,
    texte d'effet, gemmes d'attaque et de PV, faction, rôle et rareté. Tout est écrit par le jeu.
    o.mini : version de la main (sans le texte d'effet) ; o.base : stats de base (collection), sinon celles de la partie (améliorations). */
@@ -1146,9 +1146,9 @@ function end(){
 }
 const CATN={wall:'Défenses',post:'Postes de soutien',shoot:'Tireurs',melee:'Corps à corps',help:'Soutien',trap:'Pièges',item:'Objets',react:'Réactions'};
 const deckHtml=()=>Object.keys(CATN).map(c=>`<h3>${CATN[c]}</h3><div class="deck">${Z.KEYS.filter(t=>Z.U[t].cat===c).map(t=>`<div class="dk" style="--cc:${cc(t)}">${art(t)}<span><b>${Z.U[t].n}</b>${rarTag(t)}<em class="ce">${Z.cost(t)} énergie</em> · ${Z.U[t].d}${famLine(t)}</span></div>`).join('')}</div>`).join('');
-// carte d'un zombie : même cadre, illustration de assets/zombies/, attaque et PV de base
+// carte d'un zombie : même cadre, illustration de assets/cards_cartoon/z_<type>.webp, attaque et PV de base
 function zombieFace(k){const z=Z.ZT[k],hp=Math.round(z.hp*(z.boss?1:Z.ZHP));
- return `<span class="cf zomb"><span class="cf-art" style="background-image:url('${ART_STYLE==='cartoon'&&CART_ZOMB.includes(k)?'assets/cards_cartoon/z_'+k:'assets/zombies/'+k}.webp')"></span><span class="cf-vig"></span>
+ return `<span class="cf zomb"><span class="cf-art" style="background-image:url('assets/cards_cartoon/z_${k}.webp')"></span><span class="cf-vig"></span>
   <span class="cf-name">${z.n}</span><span class="cf-rule"></span><span class="cf-txt${z.info.length>80?' xlong':z.info.length>50?' long':''}"><span>${z.info.charAt(0).toUpperCase()+z.info.slice(1)}</span></span>
   <span class="cf-foot"><span class="cf-atk" title="Dégâts">${ink('atk')}<b>${z.dmg}</b></span><span class="cf-marks"><em>Zombie</em></span><span class="cf-hp" title="PV"><b>${hp}</b></span></span></span>`}
 const zedHtml=()=>`<div class="cgrid">${Z.ZK.map(k=>`<div class="citem">${zombieFace(k)}</div>`).join('')}</div>`;

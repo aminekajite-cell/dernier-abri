@@ -21,7 +21,7 @@ for(const t of KEYS){const D=Z.U[t];
  if(!D.evo)check(`carte ${t} : coût entre 0 et 3`,()=>{const c=Z.cost(t);ok(fin(c)&&c>=0&&c<=3,'coût '+c)});
  if(D.block)check(`carte ${t} : PV positifs`,()=>ok(fin(D.hp)&&D.hp>0,'PV '+D.hp));
  if(D.dmg!=null)check(`carte ${t} : dégâts et portée valides`,()=>ok(fin(D.dmg)&&D.dmg>=0&&(D.rng==null||D.rng>=1),'dmg '+D.dmg+' rng '+D.rng));
- check(`carte ${t} : illustration présente`,()=>ok(fs.existsSync(path.join(ROOT,'assets/cards',t+'.webp'))||fs.existsSync(path.join(ROOT,'assets/cards_cartoon',t+'.webp')),'assets/cards/'+t+'.webp manquant'));
+ check(`carte ${t} : illustration présente`,()=>ok(fs.existsSync(path.join(ROOT,'assets/cards_cartoon',t+'.webp')),'assets/cards_cartoon/'+t+'.webp manquant'));
 }
 for(const k of Object.keys(Z.ZT)){const T=Z.ZT[k];check(`zombie ${k} : stats valides`,()=>ok(T.n&&fin(T.hp)&&T.hp>0&&fin(T.dmg)&&fin(T.spd)&&T.spd>=1))}
 for(const f of Object.keys(Z.FAM))check(`faction ${f} : cartes existantes, 2 paliers`,()=>{Z.FAM[f].cards.forEach(t=>ok(Z.U[t],t+' inconnue'));eq(Z.FAM[f].lv.length,2);eq(Z.FAM[f].d.length,2)});
