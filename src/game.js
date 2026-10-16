@@ -446,7 +446,7 @@ function drawUnit(i,u,now){
  if(D0.up)safeTxt(p0.x+19,p0.y-17,'+','#f2b33d');
  if(u.gold)safeTxt(p0.x-19,p0.y-17,u.gold>1?u.gold+'★':'★','#f2c23d');else if(D0.evo)safeTxt(p0.x-19,p0.y-17,'✦','#c58cff');
  const lv=(u.lvA||0)+(u.lvD||0);if(lv){ctx.fillStyle='rgba(0,0,0,.75)';ctx.fillRect(p0.x+11,p0.y+14,18,12);ctx.fillStyle='#9fd86b';ctx.font='bold 9px system-ui,sans-serif';ctx.textAlign='center';ctx.fillText('N'+lv,p0.x+20,p0.y+23)}
- const eq=Z.eqOf(u);if(eq.length){ctx.font='10px system-ui,sans-serif';ctx.textAlign='center';eq.slice(0,4).forEach((t,k)=>{const ex=p0.x-22+k*12,ey=p0.y+22;ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(ex-6,ey-7,12,12);ctx.fillStyle='#fff';ctx.fillText(EQIC[t]||'•',ex,ey+3)})}
+ const eq=Z.eqOf(u);if(eq.length){ctx.font='10px system-ui,sans-serif';ctx.textAlign='center';eq.slice(0,4).forEach((t,k)=>{const ex=p0.x-25,ey=p0.y-8+k*13;circ(ex,ey,6.8,'rgba(10,10,10,.8)');ctx.fillStyle='#fff';ctx.fillText(EQIC[t]||'•',ex,ey+3.5)})}
  const mx=Z.maxHp(G,u);if(D0.block)hpBar(p0.x,p0.y-31,u.hp/mx,u.hp/mx>.4?'#9fd86b':'#e5484d');
  if(u.name&&nightAmt<.5)LABELS.push([p0.x,p0.y+33,u.name.replace(/^(Le |La |L’)/,'')+(u.gold?' '+stars(u):'')]);
 }

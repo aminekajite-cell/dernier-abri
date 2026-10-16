@@ -29,7 +29,7 @@ Ce que j'attends de toi :
 - L'abri perd des PV quand un zombie l'atteint ; à 0 PV la partie est perdue.
 
 ### Constructions
-- Cartes à tracer : Barricade, Clôture, Sacs de sable, Mur de pneus, Barrage de police, Mur modulaire, Barbelés. Une carte donne 4 cases pour la journée (3 pour Mur de pneus, Barrage de police, Mur modulaire), pour le prix de la carte. Les cases se posent une par une ou en ligne ; la carte part à la défausse une fois ses cases posées ou le soir.
+- Cartes à tracer : Barricade, Clôture, Sacs de sable, Mur de pneus, Barrage de police, Mur modulaire, Barbelés, Palissade. Une carte donne 4 cases pour la journée (3 pour Mur de pneus, Barrage de police, Mur modulaire), pour le prix de la carte. Les cases se posent une par une ou en ligne ; la carte part à la défausse une fois ses cases posées ou le soir.
 - Les autres pièges restent en main la journée et se reposent à leur prix normal.
 - Des murs voisins forment un rempart : chaque mur garde ses PV (le mur frappé encaisse) et gagne +1 PV max par mur voisin relié, jusqu’à +3.
 - Les zombies calculent leur chemin : entrer sur une case libre coûte 1, sur un mur ou une unité coûte ses PV (pour un rempart, les PV de tout le rempart). Ils contournent si le détour coûte moins cher que de casser.
@@ -134,6 +134,9 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Bunker | 3 | rare | 16 | 1 | 1 | chaque tour | — | Militaires | Bloque, 16 PV, et tire sur les zombies au contact |
 | Brasero | 2 | rare | 5 | — | — | — | — | Pyromanes | Bloque. Tous les 2 tours, 1 dégât et feu aux zombies collés à lui |
 | Mur modulaire | 2 | commune | 9 | — | — | — | — | Bricoleurs | Panneaux de tôle : bloque, 9 PV |
+| Palissade | 2 | commune | 6 | — | — | — | — | — | Pieux taillés : bloque, 6 PV, 1 dégât à chaque zombie qui la frappe |
+| Grille métallique | 2 | rare | 10 | — | — | — | — | — | Bloque, 10 PV, récupère 1 PV tous les 4 tours |
+| Gabions | 3 | rare | 12 | — | — | — | — | — | Bloque, 12 PV. Un Sapeur ne lui fait que 5 dégâts |
 | ✦ Fortin | — | — | 32 | 3 | 1 | chaque tour | — | — | Épave et bunker soudés : bloque, 32 PV, et frappe les zombies au contact (3 dégâts) |
 
 ### Tireurs (distance)
@@ -232,6 +235,11 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Fût piégé | 1 | commune | — | — | — | — | — | Pyromanes | Explose au passage : 4 dégâts autour et les zombies brûlent 3 tours |
 | Filet | 1 | commune | — | — | — | — | — | Trappeurs | Le zombie qui passe est pris 4 tours, sert 2 fois |
 | Piège à ours | 2 | rare | — | — | — | — | — | Trappeurs | Le premier zombie qui marche dessus subit 10 dégâts |
+| Tronc oscillant | 2 | rare | — | — | — | — | — | — | 5 dégâts et repousse de 2 cases, 3 fois par nuit |
+| Fosse piégée | 2 | rare | — | — | — | — | — | — | Le premier zombie ordinaire qui passe y meurt. Ensuite, le trou ralentit les suivants |
+| Verre brisé | 1 | commune | — | — | — | — | — | — | Les zombies qui passent saignent : 1 dégât par tour pendant 3 tours |
+| Boîtes de conserve | 1 | commune | — | — | — | — | — | — | Le premier zombie qui passe donne l’alerte : tes tireurs font +1 dégât pendant 3 tours |
+| Éboulement | 2 | rare | — | — | — | — | — | — | Des rochers tombent au passage : 6 dégâts sur la case et autour |
 
 ### Objets (jour)
 
@@ -243,6 +251,20 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Café | 0 | épique | — | — | — | — | — | — | Utilise-le sur l’abri : gratuit, +2 énergie aujourd’hui |
 | Carte routière | 1 | rare | — | — | — | — | — | — | Utilise-la sur l’abri : regarde les 3 prochaines cartes de ta pioche et prends-en une |
 | Fusée de détresse | 1 | rare | — | — | — | — | — | — | Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté |
+| Matériel lourd | 1 | commune | — | — | — | — | — | — | Équipement : l’unité gagne 4 PV max. Un Tank équipé bloque 1 coup sur 2 |
+| Jumelles | 1 | rare | — | — | — | — | — | — | Équipement d’un tireur : +1 portée, et +1 dégât sur les zombies à plus de 2 cases |
+| Bandages | 1 | commune | — | — | — | — | — | — | Équipement : l’unité récupère 1 PV à chaque zombie qu’elle tue |
+| Sacoche de soins | 2 | rare | — | — | — | — | — | — | Équipement : tous les 2 tours, l’unité soigne 1 PV à un voisin blessé |
+| Lampe torche | 1 | commune | — | — | — | — | — | — | Équipement : ignore le Brouillard, +1 dégât sur les zombies encore intacts |
+| Pilules | 1 | rare | — | — | — | — | — | — | Équipement : une fois par nuit, l’unité qui devrait tomber reste debout avec 4 PV |
+| Sac à dos | 1 | commune | — | — | — | — | — | — | Équipement : à l’aube, +1 ferraille par zombie tué par l’unité pendant la nuit |
+| Ruban adhésif | 1 | rare | — | — | — | — | — | — | Équipement d’une unité fusionnée : +1 dégât par étoile |
+| Clés du dépôt | 3 | épique | — | — | — | — | — | — | Équipement : l’unité ne compte plus dans la limite d’unités |
+| Ravitaillement | 1 | commune | — | — | — | — | — | — | Utilise-le sur l’abri : +6 ferraille |
+| Largage | 2 | rare | — | — | — | — | — | — | Utilise-le sur l’abri : pioche 3 cartes |
+| Jerrican | 1 | commune | — | — | — | — | — | — | Utilise-le sur l’abri : +2 énergie demain |
+| Repos | 0 | commune | — | — | — | — | — | — | Utilise-le sur l’abri : les unités en réserve récupèrent tous leurs PV |
+| Opérateur radio | 3 | épique | — | — | — | — | — | — | Utilise-le sur l’abri : +1 unité à la limite, pour toute la partie (une seule fois par partie) |
 
 ### Réactions (nuit)
 
@@ -257,6 +279,10 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Molotov | 2 | rare | — | — | — | — | — | — | Pendant la nuit : 2 dégâts sur la case visée et autour, et les zombies y brûlent 4 tours |
 | Klaxon | 2 | rare | — | — | — | — | — | — | Pendant la nuit : tous les zombies reculent d’une case |
 | Adrénaline | 2 | épique | — | — | — | — | — | — | Pendant la nuit : tes unités attaquent deux fois pendant 3 tours |
+| Talkie-walkie | 1 | commune | — | — | — | — | — | — | Pendant la nuit : une unité blessée part en réserve, la plus solide de la réserve prend sa place |
+| Orage | 2 | rare | — | — | — | — | — | — | Pendant la nuit : tous les zombies perdent 2 tours, mais le feu s’éteint |
+| Bombardier | 3 | épique | — | — | — | — | — | — | Pendant la nuit : 8 dégâts à tous les zombies de la ligne visée |
+| Boîte à bruit | 1 | commune | — | — | — | — | — | — | Pendant la nuit : les zombies marchent vers la case visée pendant 4 tours |
 
 ## Troc de l'aube (ferraille)
 - Réparer l’abri : +3 PV à l’abri (15 ferraille).
