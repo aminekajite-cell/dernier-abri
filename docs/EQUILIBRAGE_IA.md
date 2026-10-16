@@ -154,10 +154,10 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Médecin de garde | 2 | commune | 4 | 1 | 1 | chaque tour | Soin | Soignants | Pistolet : 1 dégât par tour, portée 1, et récupère 1 PV tous les 2 tours |
 | Cloueur | 2 | commune | 4 | 1 ×2 | 2 | chaque tour | DPS | Bricoleurs | Cloueuse pneumatique : 2 tirs de 1 dégât par tour, portée 2 |
 | Garde champêtre | 2 | commune | 4 | 2 | 2 | chaque tour | DPS | Communauté | Fusil de chasse : 2 dégâts par tour, portée 2 |
-| Le Commissaire | 3 | légendaire | 5 | 2 | 2 | chaque tour | DPS | Police | Chef de la Police : 2 dégâts par tour, portée 2. La Police gagne un palier |
-| La Sergente | 3 | légendaire | 5 | 1 ×3 | 2 | chaque tour | DPS | Militaires | Cheffe des Militaires : 3 tirs par tour, portée 2. Les Militaires gagnent un palier |
-| Le Pyromane | 3 | légendaire | 5 | 1 | 2 | chaque tour | DPS | Pyromanes | Chef des Pyromanes : enflamme tous les zombies à 2 cases. Les Pyromanes gagnent un palier |
-| Le Braconnier | 3 | légendaire | 4 | 3 | 3 | 1 tour sur 2 | DPS | Trappeurs | Chef des Trappeurs : 3 dégâts tous les 2 tours, portée 3. Les Trappeurs gagnent un palier |
+| Le Commissaire | 3 | légendaire | 5 | 2 | 2 | chaque tour | DPS | Police | Chef de la Police : 2 dégâts par tour, portée 2. Compte pour 2 dans la faction Police |
+| La Sergente | 3 | légendaire | 5 | 1 ×3 | 2 | chaque tour | DPS | Militaires | Cheffe des Militaires : 3 tirs par tour, portée 2. Compte pour 2 Militaires |
+| Le Pyromane | 3 | légendaire | 5 | 1 | 2 | chaque tour | DPS | Pyromanes | Chef des Pyromanes : enflamme tous les zombies à 2 cases. Compte pour 2 Pyromanes |
+| Le Braconnier | 3 | légendaire | 4 | 3 | 3 | 1 tour sur 2 | DPS | Trappeurs | Chef des Trappeurs : 3 dégâts tous les 2 tours, portée 3. Compte pour 2 Trappeurs |
 | Lance-roquettes | 3 | épique | 4 | 2 | 2 | 1 tour sur 2 | DPS | — | Tous les 2 tours, une roquette : 2 dégâts, et 5 fois plus (10) contre le Colosse et les Gonflés. Portée 2 |
 | ✦ Tireur de nuit | — | — | 4 | 3 | 4 | chaque tour | DPS | — | Un sniper et son projecteur : 3 dégâts à chaque tour, portée 4 |
 | ✦ Lance-flammes lourd | — | — | 7 | 2 | 2 | chaque tour | DPS | — | 2 dégâts à 6 zombies au plus à 2 cases, qui brûlent ensuite 3 tours |
@@ -180,7 +180,7 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Fermier à la fourche | 2 | commune | 10 | 3 | 1 | chaque tour | Tank | Fermiers | 3 dégâts au contact et repousse le zombie d’une case, 10 PV |
 | Ambulancier | 2 | commune | 11 | 1 | 1 | chaque tour | Tank | Soignants | Bloque avec son brancard : 11 PV, 1 dégât au contact et repousse le zombie |
 | Infirmier costaud | 2 | rare | 7 | 2 | 1 | chaque tour | Soin | Soignants | 2 dégâts au contact. À chaque zombie tué, ses voisins récupèrent 1 PV |
-| La Fermière | 3 | légendaire | 14 | 2 ×2 | 1 | chaque tour | Tank | Fermiers | Cheffe des Fermiers : 2 coups de 2 dégâts par tour, 14 PV. Les Fermiers gagnent un palier |
+| La Fermière | 3 | légendaire | 14 | 2 ×2 | 1 | chaque tour | Tank | Fermiers | Cheffe des Fermiers : 2 coups de 2 dégâts par tour, 14 PV. Compte pour 2 Fermiers |
 | ✦ Brigade canine | — | — | 8 | 3 ×2 | 1 | chaque tour | DPS | — | Un policier et son chien : 2 morsures de 3 dégâts par tour, qui étourdissent et repoussent |
 | ✦ Équarrisseur | — | — | 9 | 5 | 1 | chaque tour | DPS | — | 5 dégâts à tous les zombies autour, récupère 1 PV par zombie tué |
 | ✦ Le Saint | — | — | 13 | 2 | 1 | chaque tour | Tank | — | 2 dégâts à tous les zombies autour, et ses voisins survivent une fois à un coup fatal |
@@ -191,16 +191,16 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 |---|---|---|---|---|---|---|---|---|---|
 | Infirmière | 1 | commune | 2 | soin +1 | — | — | Soin | Soignants | Soin à distance : 1 PV tous les 2 tours à l’unité la plus blessée à 2 cases ou moins |
 | Cuisinier | 2 | rare | 2 | — | — | — | — | Soignants | À chaque aube, l’abri récupère 1 PV |
-| Mécanicien | 2 | rare | 3 | — | — | — | — | Bricoleurs | Répare 1 PV à une défense voisine à chaque tour |
+| Mécanicien | 2 | rare | 3 | — | — | — | — | Bricoleurs | Répare 1 PV à une défense ou un poste voisin à chaque tour |
 | Chef de groupe | 3 | épique | 3 | — | — | — | — | Communauté | Tous les 3 tours, les unités autour attaquent une fois de plus |
 | Pharmacienne | 2 | rare | 3 | soin +1 | — | — | Soin | Soignants | Soin au contact : 1 PV à chaque tour à l’unité voisine la plus blessée (8 cases autour) |
 | Prêtre | 2 | rare | 3 | — | — | — | Soin | Soignants | Une fois chacune, les unités voisines qui devraient tomber restent à 1 PV |
 | Brancardier | 1 | commune | 4 | soin +1 | — | — | Soin | Soignants | Soin à distance : il court chercher les blessés, 1 PV tous les 2 tours à l’unité la plus blessée à 3 cases ou moins, 4 PV |
 | Institutrice | 2 | rare | 3 | — | — | — | — | Communauté | Tant qu’elle tient, tu pioches 1 carte de plus chaque jour |
-| Charpentier | 2 | rare | 4 | — | — | — | — | Communauté | À chaque aube, les défenses voisines récupèrent 2 PV |
+| Charpentier | 2 | rare | 4 | — | — | — | — | Communauté | À chaque aube, les défenses et les postes voisins récupèrent 2 PV |
 | La Doctoresse | 3 | légendaire | 5 | 2 | 1 | chaque tour | Soin | Soignants | Cheffe des Soignants : soin à distance de 2 PV à chaque tour (2 cases) et coups de scalpel au contact (2 dégâts). Compte pour 2 Soignants |
-| L’Ingénieur | 3 | légendaire | 6 | 1 ×2 | 1 | chaque tour | — | Bricoleurs | Chef des Bricoleurs : répare 2 PV aux défenses voisines à chaque tour et tire 2 clous par tour (portée 1). Les Bricoleurs gagnent un palier |
-| Le Maire | 3 | légendaire | 5 | 2 | 1 | chaque tour | — | Communauté | Chef de la Communauté : les unités autour attaquent plus souvent, et il tire (2 dégâts, portée 1). La Communauté gagne un palier |
+| L’Ingénieur | 3 | légendaire | 6 | 1 ×2 | 1 | chaque tour | — | Bricoleurs | Chef des Bricoleurs : répare 2 PV aux défenses et postes voisins à chaque tour et tire 2 clous par tour (portée 1). Compte pour 2 Bricoleurs |
+| Le Maire | 3 | légendaire | 5 | 2 | 1 | chaque tour | — | Communauté | Chef de la Communauté : les unités autour attaquent plus souvent, et il tire (2 dégâts, portée 1). Compte pour 2 dans la faction Communauté |
 | ✦ Cantine de campagne | — | — | 6 | soin +2 | — | — | Soin | — | Soin au contact : 2 PV à chaque tour à l’unité voisine la plus blessée, et l’abri récupère 2 PV à chaque aube |
 
 ### Pièges

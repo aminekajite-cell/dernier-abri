@@ -628,3 +628,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Événements de l’aube** : environ 1 aube sur 4 (au lieu de presque 1 sur 2).
 
 **v83** : soins. Les soigneurs ne soignent plus que les unités (les murs sont pour les réparateurs : Mécanicien, Atelier, Charpentier, Outils). Deux familles : **soin à distance** (Infirmière portée 2, Brancardier portée 3, La Doctoresse portée 2 ; portée affichée en vert) et **soin au contact** (Pharmacienne, Hôpital de campagne, Cantine, Sacoche de soins : les 8 cases autour). La Trousse de secours et les soins de l’aube des Soignants ne visent plus que les unités.
+
+**v84** : les réparateurs (Mécanicien, Atelier, Charpentier, L’Ingénieur) réparent aussi les postes de soutien, pas seulement les murs. Textes des Chefs mis à jour (« compte pour 2 » au lieu de « gagne un palier »).
