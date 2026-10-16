@@ -1,0 +1,48 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Style encre</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1c1915;--paper:#e8dcc2;--paper2:#d9c9a6;--red:#a8231c;--lamp:#d9822b}
+body{margin:0;background:#141210;color:#e8dcc2;font-family:'Atkinson Hyperlegible',sans-serif;padding:16px}
+h1{font-family:'Special Elite';font-weight:400;font-size:22px;margin:0 0 4px}p{margin:0 0 14px;color:#b9ab8e;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;max-width:1100px}
+.card{background:var(--paper);border-radius:10px;border:3px solid var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.6);color:var(--ink);overflow:hidden;position:relative}
+.card .top{display:flex;align-items:center;gap:6px;padding:6px 8px 4px;font-family:'Special Elite';font-size:16px}
+.cost{width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-size:14px;flex:none}
+.art{margin:0 8px;border:2px solid var(--ink);aspect-ratio:1/1;background:var(--paper2)}
+.art svg{width:100%;height:100%;display:block}
+.txt{padding:6px 9px 9px;font-size:12.5px;line-height:1.3;min-height:48px}
+.stats{display:flex;justify-content:space-between;padding:0 9px 8px;font-family:'Special Elite';font-size:14px}
+.stats b{color:var(--red);font-weight:400}
+.z{background:#cbb994}
+</style>
+<h1>Option 3 : style encre (gravure, 2 couleurs)</h1>
+<p>Silhouettes à l’encre sur papier, hachures, une seule couleur d’accent (rouge sang ou lanterne). Facile à confier à un artiste, cohérent avec le plateau.</p>
+<div class="grid" id="g"></div>
+<svg width="0" height="0" style="position:absolute"><defs>
+ <pattern id="h" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><line x1="0" y1="0" x2="0" y2="6" stroke="#1c1915" stroke-width="1.3" opacity=".55"/></pattern>
+ <pattern id="hx" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><line x1="0" y1="0" x2="0" y2="6" stroke="#1c1915" stroke-width="1.3" opacity=".45"/></pattern>
+ <pattern id="d" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r=".9" fill="#1c1915" opacity=".35"/></pattern>
+</defs></svg>
+<script>
+const K='#1c1915',R='#a8231c',L='#d9822b';
+// décor commun : sol hachuré, lune d'accent, arbres en silhouette
+const bg=(acc=L,moon=1)=>`<rect width="200" height="200" fill="url(#d)"/>${moon?`<circle cx="138" cy="62" r="38" fill="${acc}"/><circle cx="138" cy="62" r="38" fill="url(#h)" opacity=".35"/>`:''}
+ <path d="M0 150 Q50 140 100 148 T200 146 V200 H0Z" fill="url(#h)"/><path d="M0 150 Q50 140 100 148 T200 146" stroke="${K}" stroke-width="2.5" fill="none"/>
+ <path d="M8 150 L18 96 L28 150Z M22 150 L34 80 L46 150Z M170 148 L180 102 L190 148Z" fill="${K}"/>`;
+const person=(x,y,s=1,extra='')=>`<g transform="translate(${x} ${y}) scale(${s})" fill="${K}">
+ <circle cx="0" cy="-58" r="9"/><path d="M-11 -48 L11 -48 L14 -10 L8 -10 L6 0 L10 34 L2 34 L0 4 L-2 34 L-10 34 L-6 0 L-8 -10 L-14 -10Z"/>${extra}</g>`;
+const cards=[
+ {n:'Tireur',c:2,d:'2 dégâts par tour, portée 2.',s:['2 ⚔','3 PV'],art:bg(L)+person(80,140,1.1,`<path d="M10 -40 L54 -48 L55 -44 L12 -34Z"/><path d="M-12 -44 L8 -40 L6 -34 L-14 -38Z"/>`)+`<path d="M142 92 l8 -3 M146 100 l9 0" stroke="${R}" stroke-width="3"/>`},
+ {n:'Bûcheron',c:2,d:'5 dégâts au corps à corps, 7 PV.',s:['5 ⚔','7 PV'],art:bg(R)+person(92,142,1.15,`<path d="M12 -44 L40 -86 L45 -83 L17 -40Z"/><path d="M34 -96 Q52 -96 50 -76 L38 -80Z" fill="${K}"/><path d="M36 -94 Q48 -92 47 -79" stroke="#e8dcc2" stroke-width="1.5" fill="none"/>`)},
+ {n:'Infirmière',c:1,d:'Soigne 1 PV à une unité voisine tous les 2 tours.',s:['Soin','2 PV'],art:bg(L,0)+person(100,146,1.15,`<rect x="-24" y="-30" width="16" height="14" rx="2"/>`)+`<rect x="82" y="104" width="10" height="10" fill="#e8dcc2"/><path d="M87 105 v8 M83 109 h8" stroke="${R}" stroke-width="3"/><circle cx="150" cy="60" r="22" fill="none" stroke="${R}" stroke-width="5"/><path d="M150 46 v28 M136 60 h28" stroke="${R}" stroke-width="7"/>`},
+ {n:'Barricade',c:2,d:'Planches clouées : bloque, 7 PV.',s:['Mur','7 PV'],art:bg(L)+`<g stroke="${K}" stroke-width="3"><path d="M30 150 L44 92 M170 150 L156 92" /></g>
+  ${[[22,100,-8],[18,118,6],[24,134,-3]].map(([x,y,r])=>`<g transform="rotate(${r} 100 ${y})"><rect x="${x}" y="${y}" width="156" height="15" fill="${K}"/><rect x="${x}" y="${y}" width="156" height="15" fill="url(#hx)"/><circle cx="${x+10}" cy="${y+7}" r="2" fill="#e8dcc2"/><circle cx="${x+146}" cy="${y+7}" r="2" fill="#e8dcc2"/></g>`).join('')}`},
+ {n:'Mine',c:2,d:'Explose au passage : 6 dégâts sur la case et autour.',s:['6 zone','—'],art:bg(R,0)+`<ellipse cx="100" cy="150" rx="52" ry="12" fill="${K}" opacity=".3"/><path d="M52 146 Q100 104 148 146Z" fill="${K}"/><path d="M60 140 Q100 112 140 140" stroke="url(#hx)" fill="none"/>
+  <rect x="92" y="108" width="16" height="10" fill="${K}"/><circle cx="100" cy="106" r="6" fill="${R}"/><g stroke="${R}" stroke-width="3"><path d="M100 90 v-12 M86 94 l-8 -8 M114 94 l8 -8"/></g>`},
+ {n:'Rôdeur',c:'',z:1,d:'Lent. 17 PV, 1 dégât par coup.',s:['1 ⚔','17 PV'],art:bg(R)+`<g transform="translate(96 146) scale(1.15) rotate(-6)" fill="${K}"><circle cx="-4" cy="-60" r="9"/><path d="M-12 -50 L10 -50 L12 -12 L6 -8 L12 34 L3 34 L-1 4 L-5 34 L-13 32 L-8 -8 L-14 -12Z"/>
+  <path d="M8 -46 L46 -40 L46 -35 L8 -38Z"/><path d="M4 -40 L42 -28 L41 -23 L2 -32Z"/><path d="M-12 -12 L-18 0 L-14 2Z"/></g><circle cx="94" cy="76" r="2.3" fill="${R}"/><path d="M60 170 q6 -6 12 0 q6 6 12 0" stroke="${R}" stroke-width="3" fill="none"/>`}
+];
+document.getElementById('g').innerHTML=cards.map(c=>`<div class="card${c.z?' z':''}"><div class="top">${c.c!==''?`<span class="cost">${c.c}</span>`:'<span class="cost" style="background:#a8231c">☠</span>'}${c.n}</div>
+ <div class="art"><svg viewBox="0 0 200 200">${c.art}</svg></div><div class="txt">${c.d}</div><div class="stats"><span>${c.s[0]}</span><b>${c.s[1]}</b></div></div>`).join('');
+</script></html>
