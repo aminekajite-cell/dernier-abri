@@ -583,3 +583,10 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 **v71** : un zombie repoussé (Policier, Klaxon…) n'est plus projeté dans la forêt : contre la lisière, il reste sur place (bug trouvé par les nouveaux tests automatiques, `node tools/test.js`).
 
 **v72** : portée de toutes les unités qui tirent réduite de 1 (Tireur 2, Sniper 4, Mortier 4, Fusil à pompe 1, Médecin de garde, L’Ingénieur et Le Maire au contact…), car le début était trop facile.
+
+**v73** : la stratégie passe avant la quantité.
+- **Limite d’unités** : au plus 5 unités sur le terrain (tireurs, corps à corps, soutien, chefs, évolutions), +1 toutes les 10 nuits. Murs et pièges sont illimités. Une pose qui déclenche une fusion ou une évolution reste permise à la limite.
+- **Rappel** : le jour, une unité peut être rappelée dans la réserve. Elle garde ses PV, niveaux, étoiles, prénom et trait, ne compte plus dans la limite et se repose gratuitement quand on veut.
+- **Déplacement libre** : le jour, tout ce qui est posé (unités, murs, pièges) se déplace sans limite. Les murs recalculent leur bonus de liaison.
+- **Factions** : paliers à 2, 3 et 5 unités (avant 4, 6, 8). Seules les unités comptent, pas les murs ni les pièges. Palier 3 (équipe complète) : +1 dégât et +2 PV pour toute la faction. Alliances dès 2 unités dans chaque faction.
+- **Frénésie meurtrière douce** : moins de zombies en plus chaque nuit (croissance divisée par 2), mais dès la nuit 4 leurs PV montent de 12 % des PV de base par nuit (avant 8 %) et leurs dégâts de +1 toutes les 10 nuits (avant 20). Croissance linéaire, jamais exponentielle. Affichée dans la barre « Cette nuit ».

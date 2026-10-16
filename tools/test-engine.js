@@ -50,6 +50,24 @@ check('nuit de pression : plus de zombies que la nuit d’avant',()=>{const st=f
 check('Communauté palier 2 : 1re carte moins chère une seule fois',()=>{const st=fresh();st.energy=10;['vigile','teacher','market','carp','lead','monk'].forEach((t,k)=>st.grid[2*9+1+k]={t,hp:3});
  const c1=Z.costOf(st,'gun');Z.place(st,'gun',6*9+4,rng(2));ok(Z.costOf(st,'gun')===c1+1,'remise appliquée deux fois')});
 
+check('limite de 5 unités, murs et pièges illimités',()=>{const st=fresh();['gun','axe','med','snp','dog'].forEach((t,k)=>Z.place(st,t,2*9+2+k,rng(1)));
+ eq(Z.unitCount(st),5);ok(!Z.canPlace(st,'cop',6*9+4),'6ᵉ unité acceptée');ok(Z.canPlace(st,'bar',6*9+4),'mur refusé');ok(Z.canPlace(st,'trap',6*9+4),'piège refusé')});
+check('limite : +1 toutes les 10 nuits',()=>{const st=fresh();st.night=9;eq(Z.unitCap(st),5);st.night=10;eq(Z.unitCap(st),6);st.night=25;eq(Z.unitCap(st),7)});
+check('limite : une pose qui fusionne reste permise',()=>{const st=fresh();['gun','gun','axe','med','snp'].forEach((t,k)=>Z.place(st,t,2*9+1+k*2,rng(1)));
+ ok(Z.canPlace(st,'gun',6*9+4),'fusion refusée');Z.place(st,'gun',6*9+4,rng(1));eq(Z.unitCount(st),4)});
+check('rappel : l’unité garde tout et se repose gratuitement',()=>{const st=fresh();Z.place(st,'gun',2*9+4,rng(1));const u=st.grid[2*9+4];u.kills=30;u.lvA=1;u.gold=1;
+ ok(Z.recall(st,2*9+4));eq(Z.unitCount(st),0);eq(st.bench.length,1);const e=st.energy;ok(Z.placeBench(st,0,6*9+4));const v=st.grid[6*9+4];
+ ok(v===u&&v.kills===30&&v.lvA===1&&v.gold===1,'unité modifiée');eq(st.energy,e);eq(st.bench.length,0)});
+check('rappel : les murs ne se rappellent pas',()=>{const st=fresh();Z.place(st,'bar',2*9+4,rng(1),true);ok(!Z.canRecall(st,2*9+4))});
+check('déplacement libre, plusieurs fois par jour, murs compris',()=>{const st=fresh();Z.place(st,'gun',2*9+4,rng(1));Z.place(st,'bar',3*9+3,rng(1),true);
+ ok(Z.move(st,2*9+4,2*9+5));ok(Z.move(st,2*9+5,2*9+6));ok(Z.move(st,3*9+3,6*9+3),'mur non déplacé')});
+check('déplacement à la limite d’unités permis',()=>{const st=fresh();['gun','axe','med','snp','dog'].forEach((t,k)=>Z.place(st,t,2*9+2+k,rng(1)));ok(Z.move(st,2*9+2,6*9+2))});
+check('mur déplacé : bonus de liaison recalculé',()=>{const st=fresh();[3,4].forEach(c=>Z.place(st,'bar',9+c,rng(1),true));eq(st.grid[13].hp,8);Z.move(st,13,6*9+6);eq(st.grid[6*9+6].hp,7);eq(st.grid[12].hp,7)});
+check('factions : paliers à 2, 3 et 5 unités ; murs et pièges ne comptent pas',()=>{const st=fresh();eq(Z.FAM.mil.lv,[2,3,5]);
+ st.grid[10]={t:'mine',hp:1};st.grid[11]={t:'sentry',hp:3};eq(Z.famLevels(st).mil,0);st.grid[12]={t:'snp',hp:3};eq(Z.famLevels(st).mil,1)});
+check('équipe complète : +2 PV',()=>{const st=fresh();['snp','mg','sht','mortar'].forEach((t,k)=>st.grid[10+k]={t,hp:3});const u={t:'snp',hp:3};const a=Z.maxHp(st,u);st.grid[20]=u;eq(Z.maxHp(st,u),a+2)});
+check('frénésie : +12 % de PV par nuit dès la nuit 4, +1 dégât toutes les 10 nuits',()=>{ok(Math.abs(Z.hpMult(4)-1.12)<1e-9);eq(Z.dmgBonus(10),1);eq(Z.dmgBonus(9),0)});
+
 /* ---------- 4. nuits aléatoires ---------- */
 const PLACE=PLAY.filter(t=>!Z.U[t].react&&!Z.U[t].instant&&!Z.U[t].onUnit);
 const NIGHTS=+process.env.NIGHTS||300;let maxZ=0,slow=0,worst=0;

@@ -268,3 +268,8 @@ button.ammo[hidden]{display:none}
 .cfbar select{flex:1 1 30%;min-width:0}
 @media (min-width:700px){.cfbar input{flex:2 1 200px}.cfbar select{flex:1 1 140px}}
 .citem-w[hidden],.cfsec[hidden]{display:none}
+/* v73 : limite d'unités, réserve, rappel */
+.fam.cap{font-weight:700}
+.fam.cap.full{color:#ff9a7a;border-color:#ff9a7a}
+.hand .card.bench{outline:2px dashed #9ee08a;outline-offset:-2px}
+.info .recall{margin-left:6px;padding:3px 9px;border-radius:6px;border:1px solid #9ee08a;background:rgba(158,224,138,.12);color:#cfeec4;font:inherit;font-size:13px;cursor:pointer}

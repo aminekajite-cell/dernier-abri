@@ -52,16 +52,16 @@ Le Chef de groupe et le Maire donnent des attaques en plus ; la carte Adrénalin
 
 ### Factions
 Paliers : 4, 6 et 8 unités de la faction sur le plateau. Le Chef (carte légendaire) donne +1 palier tant qu'il est en vie (jusqu'au palier 3).
-- Police (Agent anti-émeute, Chien policier, Barrage de police, Tireur d’élite du GIGN, Policier, Tireur, Projecteur, Sirène, Le Commissaire) : 4 unités → tes policiers perdent 1 PV de moins par coup ; 6 → tes policiers ont +1 portée ; 8 → +1 dégât pour toute la faction.
-- Militaires (Mortier, Sentinelle automatique, Mine claymore, Bunker, Sniper, Mitrailleuse, Fusil à pompe, Mine, Dynamite, La Sergente) : 4 unités → tes militaires font +1 dégât ; 6 → mines et dynamite : +3 dégâts ; 8 → +1 dégât pour toute la faction.
-- Soignants (Ambulancier, Médecin de garde, Infirmier costaud, Pharmacienne, Hôpital de campagne, Prêtre, Brancardier, Infirmière, Cuisinier, La Doctoresse) : 4 unités → soins +1 PV, tes soignants font +1 dégât ; 6 → à l’aube, toutes tes unités récupèrent 2 PV ; 8 → +1 dégât pour toute la faction.
-- Pyromanes (Brasero, Fût piégé, Essence, Lance-flammes, Cocktails, Bonbonne de gaz, Mur de pneus, Le Pyromane) : 4 unités → le feu fait +1 dégât par tour ; 6 → les zombies qui meurent en brûlant explosent (2 dégâts autour) ; 8 → +1 dégât pour toute la faction.
-- Trappeurs (Filet, Piège à ours, Chasseur, Piège à loup, Fosse à pieux, Barbelés, Fumigène, Appât, Arbalète, Le Braconnier) : 4 unités → pièges : +2 dégâts ; 6 → pièges : +4 dégâts au total ; 8 → +1 dégât pour toute la faction.
-- Fermiers (Meute de chiens, Fermier à la fourche, Épouvantail, Chien, Bûcheron, Boucher, La Fermière) : 4 unités → corps à corps : +1 dégât ; 6 → corps à corps : +1 PV à chaque zombie tué ; 8 → +1 dégât pour toute la faction.
-- Bricoleurs (Cloueur, Tourelle bricolée, Atelier, Mur modulaire, Bobine Tesla, Clôture, Panneau solaire, Mécanicien, Radio, L’Ingénieur) : 4 unités → tes bricoleurs font +1 dégât, clôtures +1 ; 6 → clôtures : étourdissent 1 tour, réparations +1 PV ; 8 → +1 dégât pour toute la faction.
-- Communauté (Garde champêtre, Institutrice, Marché, Vigile, Charpentier, Chef de groupe, Moine, Gamin, Le Maire) : 4 unités → tes membres de la Communauté ont +1 portée, l’abri +1 PV à l’aube ; 6 → ta 1ʳᵉ carte de chaque jour coûte 1 énergie de moins ; 8 → +1 dégât pour toute la faction.
+- Police (Agent anti-émeute, Chien policier, Barrage de police, Tireur d’élite du GIGN, Policier, Tireur, Projecteur, Sirène, Le Commissaire) : 2 unités → tes policiers perdent 1 PV de moins par coup ; 3 → tes policiers ont +1 portée ; 5 → équipe complète : +1 dégât et +2 PV pour toute la faction.
+- Militaires (Mortier, Sentinelle automatique, Mine claymore, Bunker, Sniper, Mitrailleuse, Fusil à pompe, Mine, Dynamite, La Sergente) : 2 unités → tes militaires font +1 dégât ; 3 → mines et dynamite : +3 dégâts ; 5 → équipe complète : +1 dégât et +2 PV pour toute la faction.
+- Soignants (Ambulancier, Médecin de garde, Infirmier costaud, Pharmacienne, Hôpital de campagne, Prêtre, Brancardier, Infirmière, Cuisinier, La Doctoresse) : 2 unités → soins +1 PV, tes soignants font +1 dégât ; 3 → à l’aube, toutes tes unités récupèrent 2 PV ; 5 → équipe complète : +1 dégât et +2 PV pour toute la faction.
+- Pyromanes (Brasero, Fût piégé, Essence, Lance-flammes, Cocktails, Bonbonne de gaz, Mur de pneus, Le Pyromane) : 2 unités → le feu fait +1 dégât par tour ; 3 → les zombies qui meurent en brûlant explosent (2 dégâts autour) ; 5 → équipe complète : +1 dégât et +2 PV pour toute la faction.
+- Trappeurs (Filet, Piège à ours, Chasseur, Piège à loup, Fosse à pieux, Barbelés, Fumigène, Appât, Arbalète, Le Braconnier) : 2 unités → pièges : +2 dégâts ; 3 → pièges : +4 dégâts au total ; 5 → équipe complète : +1 dégât et +2 PV pour toute la faction.
+- Fermiers (Meute de chiens, Fermier à la fourche, Épouvantail, Chien, Bûcheron, Boucher, La Fermière) : 2 unités → corps à corps : +1 dégât ; 3 → corps à corps : +1 PV à chaque zombie tué ; 5 → équipe complète : +1 dégât et +2 PV pour toute la faction.
+- Bricoleurs (Cloueur, Tourelle bricolée, Atelier, Mur modulaire, Bobine Tesla, Clôture, Panneau solaire, Mécanicien, Radio, L’Ingénieur) : 2 unités → tes bricoleurs font +1 dégât, clôtures +1 ; 3 → clôtures : étourdissent 1 tour, réparations +1 PV ; 5 → équipe complète : +1 dégât et +2 PV pour toute la faction.
+- Communauté (Garde champêtre, Institutrice, Marché, Vigile, Charpentier, Chef de groupe, Moine, Gamin, Le Maire) : 2 unités → tes membres de la Communauté ont +1 portée, l’abri +1 PV à l’aube ; 3 → ta 1ʳᵉ carte de chaque jour coûte 1 énergie de moins ; 5 → équipe complète : +1 dégât et +2 PV pour toute la faction.
 
-### Alliances (deux factions avec chacune au moins 3 unités)
+### Alliances (deux factions avec chacune au moins 2 unités)
 - Loi martiale (Police + Militaires) : tes tireurs ont +1 portée.
 - Pièges incendiaires (Pyromanes + Trappeurs) : tes pièges enflamment les zombies (3 tours).
 - Médecine de campagne (Soignants + Fermiers) : ton corps à corps récupère 1 PV à chaque zombie tué.
@@ -84,15 +84,15 @@ Paliers : 4, 6 et 8 unités de la faction sur le plateau. Le Chef (carte légend
 ## La horde
 
 - Nombre de zombies par nuit (nuits 1 à 10), puis + croissance par nuit au-delà :
-  - Rôdeur : 2, 2, 4, 4, 4, 4, 5, 5, 5, 5 ; ensuite +1,2 par nuit
-  - Coureur : 0, 0, 1, 1, 1, 1, 2, 2, 2, 2 ; ensuite +0,72 par nuit
-  - Gonflé : 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,48 par nuit
-  - Chien zombie : 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,48 par nuit
-  - Rampant : 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,48 par nuit
-  - Cracheur : 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 ; ensuite +0,36 par nuit
-  - Blindé : 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 ; ensuite +0,48 par nuit
-  - Hurleur : 0, 0, 0, 0, 0, 1, 1, 1, 1, 1 ; ensuite +0,3 par nuit
-  - Sapeur : 0, 0, 0, 1, 1, 1, 1, 2, 2, 2 ; ensuite +0,4 par nuit
+  - Rôdeur : 2, 2, 4, 4, 4, 4, 5, 5, 5, 5 ; ensuite +0,6 par nuit
+  - Coureur : 0, 0, 1, 1, 1, 1, 2, 2, 2, 2 ; ensuite +0,36 par nuit
+  - Gonflé : 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,24 par nuit
+  - Chien zombie : 0, 0, 0, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,24 par nuit
+  - Rampant : 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 ; ensuite +0,24 par nuit
+  - Cracheur : 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 ; ensuite +0,18 par nuit
+  - Blindé : 0, 0, 0, 0, 1, 1, 1, 1, 1, 1 ; ensuite +0,24 par nuit
+  - Hurleur : 0, 0, 0, 0, 0, 1, 1, 1, 1, 1 ; ensuite +0,15 par nuit
+  - Sapeur : 0, 0, 0, 1, 1, 1, 1, 2, 2, 2 ; ensuite +0,2 par nuit
 - Le Colosse : 58 PV, 1 la nuit 10, 2 la nuit 20, etc. Les nuits du Colosse se jouent en 2 vagues avec une pause pour déplacer ses troupes. Munitions anti-Colosse : 3 en stock maximum.
 - PV des zombies : PV de base jusqu'à la nuit 3, puis +8 % des PV de base par nuit (additif, arrondi au-dessus). Le Colosse : 58 PV à la nuit 10, puis +8 % par nuit.
 - Dégâts des zombies : +1 toutes les 20 nuits.
