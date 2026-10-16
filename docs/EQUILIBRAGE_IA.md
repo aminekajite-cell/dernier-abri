@@ -52,13 +52,13 @@ Le Chef de groupe et le Maire donnent des attaques en plus ; la carte Adrénalin
 
 ### Factions
 Paliers : 4, 6 et 8 unités de la faction sur le plateau. Le Chef (carte légendaire) donne +1 palier tant qu'il est en vie (jusqu'au palier 3).
-- Police (Agent anti-émeute, Chien policier, Barrage de police, Tireur d’élite du GIGN, Policier, Tireur, Projecteur, Sirène, Le Commissaire) : 2 unités → tes policiers perdent 1 PV de moins par coup ; 5 → tes policiers ont +1 portée ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
-- Militaires (Mortier, Sentinelle automatique, Mine claymore, Bunker, Sniper, Mitrailleuse, Fusil à pompe, Mine, Dynamite, La Sergente) : 2 unités → tes militaires font +1 dégât ; 5 → mines et dynamite : +3 dégâts ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
-- Soignants (Ambulancier, Médecin de garde, Infirmier costaud, Pharmacienne, Hôpital de campagne, Prêtre, Brancardier, Infirmière, Cuisinier, La Doctoresse) : 2 unités → soins +1 PV, tes soignants font +1 dégât ; 5 → à l’aube, toutes tes unités récupèrent 2 PV ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
+- Police (Agent anti-émeute, Chien policier, Barrage de police, Tireur d’élite du GIGN, Policier, Tireur, Projecteur, Sirène, Maître-chien, Le Commissaire) : 2 unités → tes policiers perdent 1 PV de moins par coup ; 5 → tes policiers ont +1 portée ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
+- Militaires (Mortier, Sentinelle automatique, Mine claymore, Bunker, Sniper, Mitrailleuse, Fusil à pompe, Mine, Dynamite, Assassin, La Sergente) : 2 unités → tes militaires font +1 dégât ; 5 → mines et dynamite : +3 dégâts ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
+- Soignants (Ambulancier, Médecin de garde, Infirmier costaud, Pharmacienne, Hôpital de campagne, Prêtre, Brancardier, Infirmière, Cuisinier, Infirmière de campagne, La Doctoresse) : 2 unités → soins +1 PV, tes soignants font +1 dégât ; 5 → à l’aube, toutes tes unités récupèrent 2 PV ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
 - Pyromanes (Brasero, Fût piégé, Essence, Lance-flammes, Cocktails, Bonbonne de gaz, Mur de pneus, Le Pyromane) : 2 unités → le feu fait +1 dégât par tour ; 5 → les zombies qui meurent en brûlant explosent (2 dégâts autour) ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
-- Trappeurs (Filet, Piège à ours, Chasseur, Piège à loup, Fosse à pieux, Barbelés, Fumigène, Appât, Arbalète, Le Braconnier) : 2 unités → pièges : +2 dégâts ; 5 → pièges : +4 dégâts au total ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
+- Trappeurs (Filet, Piège à ours, Chasseur, Piège à loup, Fosse à pieux, Barbelés, Fumigène, Appât, Arbalète, Éclaireur, Le Braconnier) : 2 unités → pièges : +2 dégâts ; 5 → pièges : +4 dégâts au total ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
 - Fermiers (Meute de chiens, Fermier à la fourche, Épouvantail, Chien, Bûcheron, Boucher, La Fermière) : 2 unités → corps à corps : +1 dégât ; 5 → corps à corps : +1 PV à chaque zombie tué ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
-- Bricoleurs (Cloueur, Tourelle bricolée, Atelier, Mur modulaire, Bobine Tesla, Clôture, Panneau solaire, Mécanicien, Radio, L’Ingénieur) : 2 unités → tes bricoleurs font +1 dégât, clôtures +1 ; 5 → clôtures : étourdissent 1 tour, réparations +1 PV ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
+- Bricoleurs (Cloueur, Tourelle bricolée, Atelier, Mur modulaire, Bobine Tesla, Clôture, Panneau solaire, Mécanicien, Radio, Soudeuse, Électricien, L’Ingénieur) : 2 unités → tes bricoleurs font +1 dégât, clôtures +1 ; 5 → clôtures : étourdissent 1 tour, réparations +1 PV ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
 - Communauté (Garde champêtre, Institutrice, Marché, Vigile, Charpentier, Chef de groupe, Moine, Gamin, Le Maire) : 2 unités → tes membres de la Communauté ont +1 portée, l’abri +1 PV à l’aube ; 5 → ta 1ʳᵉ carte de chaque jour coûte 1 énergie de moins ; équipe complète : +1 dégât et +2 PV pour toute la faction ; undefined → undefined.
 
 ### Alliances (deux factions avec chacune au moins 2 unités)
@@ -159,6 +159,7 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Le Pyromane | 3 | légendaire | 5 | 1 | 2 | chaque tour | DPS | Pyromanes | Chef des Pyromanes : enflamme tous les zombies à 2 cases. Compte pour 2 Pyromanes |
 | Le Braconnier | 3 | légendaire | 4 | 3 | 3 | 1 tour sur 2 | DPS | Trappeurs | Chef des Trappeurs : 3 dégâts tous les 2 tours, portée 3. Compte pour 2 Trappeurs |
 | Lance-roquettes | 3 | épique | 4 | 2 | 2 | 1 tour sur 2 | DPS | — | Tous les 2 tours, une roquette : 2 dégâts, et 5 fois plus (10) contre le Colosse et les Gonflés. Portée 2 |
+| Éclaireur | 3 | rare | 3 | 2 | 4 | chaque tour | DPS | Trappeurs | 2 dégâts par tour, portée 4. Le zombie touché est marqué 2 tours : il prend +1 dégât de chaque coup |
 | ✦ Tireur de nuit | — | — | 4 | 3 | 4 | chaque tour | DPS | — | Un sniper et son projecteur : 3 dégâts à chaque tour, portée 4 |
 | ✦ Lance-flammes lourd | — | — | 7 | 2 | 2 | chaque tour | DPS | — | 2 dégâts à 6 zombies au plus à 2 cases, qui brûlent ensuite 3 tours |
 | ✦ Tourelle automatique | — | — | 7 | 1 ×3 | 2 | chaque tour | DPS | — | Montée par le mécanicien : 3 tirs de 1 dégât par tour, portée 2 |
@@ -181,6 +182,8 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | Ambulancier | 2 | commune | 11 | 1 | 1 | chaque tour | Tank | Soignants | Bloque avec son brancard : 11 PV, 1 dégât au contact et repousse le zombie |
 | Infirmier costaud | 2 | rare | 7 | 2 | 1 | chaque tour | Soin | Soignants | 2 dégâts au contact. À chaque zombie tué, ses voisins récupèrent 1 PV |
 | La Fermière | 3 | légendaire | 14 | 2 ×2 | 1 | chaque tour | Tank | Fermiers | Cheffe des Fermiers : 2 coups de 2 dégâts par tour, 14 PV. Compte pour 2 Fermiers |
+| Maître-chien | 2 | rare | 12 | 2 | 1 | chaque tour | Tank | Police | Tank : 12 PV, 2 dégâts au contact. Les chiens voisins font +1 dégât |
+| Assassin | 3 | épique | 5 | 3 | 1 | chaque tour | DPS | Militaires | 3 dégâts au contact. Toutes les 4 attaques, il tue d’un coup un zombie ordinaire (pas le Colosse) |
 | ✦ Brigade canine | — | — | 8 | 3 ×2 | 1 | chaque tour | DPS | — | Un policier et son chien : 2 morsures de 3 dégâts par tour, qui étourdissent et repoussent |
 | ✦ Équarrisseur | — | — | 9 | 5 | 1 | chaque tour | DPS | — | 5 dégâts à tous les zombies autour, récupère 1 PV par zombie tué |
 | ✦ Le Saint | — | — | 13 | 2 | 1 | chaque tour | Tank | — | 2 dégâts à tous les zombies autour, et ses voisins survivent une fois à un coup fatal |
@@ -201,6 +204,9 @@ Colonnes : coût en énergie, rareté, PV, dégâts par coup, portée (losange, 
 | La Doctoresse | 3 | légendaire | 5 | 2 | 1 | chaque tour | Soin | Soignants | Cheffe des Soignants : soin à distance de 2 PV à chaque tour (2 cases) et coups de scalpel au contact (2 dégâts). Compte pour 2 Soignants |
 | L’Ingénieur | 3 | légendaire | 6 | 1 ×2 | 1 | chaque tour | — | Bricoleurs | Chef des Bricoleurs : répare 2 PV aux défenses et postes voisins à chaque tour et tire 2 clous par tour (portée 1). Compte pour 2 Bricoleurs |
 | Le Maire | 3 | légendaire | 5 | 2 | 1 | chaque tour | — | Communauté | Chef de la Communauté : les unités autour attaquent plus souvent, et il tire (2 dégâts, portée 1). Compte pour 2 dans la faction Communauté |
+| Soudeuse | 2 | commune | 4 | — | — | — | — | Bricoleurs | Répare 2 PV par tour à une défense ou un poste voisin |
+| Infirmière de campagne | 2 | commune | 3 | soin +1 | — | — | Soin | Soignants | Soin à distance : 1 PV tous les 2 tours à l’unité la plus blessée à 2 cases. À l’aube, les unités en réserve (non blessées) récupèrent 2 PV |
+| Électricien | 2 | rare | 4 | — | — | — | — | Bricoleurs | Tant qu’il est sur la carte : plus de coupure de courant et clôtures à 2 dégâts. Répare 1 PV par tour à une défense ou un poste voisin |
 | ✦ Cantine de campagne | — | — | 6 | soin +2 | — | — | Soin | — | Soin au contact : 2 PV à chaque tour à l’unité voisine la plus blessée, et l’abri récupère 2 PV à chaque aube |
 
 ### Pièges

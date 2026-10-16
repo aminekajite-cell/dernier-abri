@@ -110,6 +110,16 @@ check('les réparateurs réparent les postes de soutien',()=>{const st=fresh();s
 check('Colosse : 10 dégâts par coup, ne tue plus une défense d’un coup',()=>{const st=fresh();st.night=10;eq(Z.bossHit(st),10);st.night=20;eq(Z.bossHit(st),12);
  st.night=10;st.grid[3*9+4]={t:'car',hp:14};Z.startNight(st,rng(1));st.pending=[];st.z=[{id:1,k:'boss',pos:2*9+4,hp:999,max:999,cd:1,style:0}];Z.step(st);eq(st.grid[3*9+4].hp,4)});
 
+check('Maître-chien : les chiens voisins font +1 dégât',()=>{const st=fresh();st.grid[2*9+4]={t:'dog',hp:5};Z.startNight(st,rng(1));st.pending=[];
+ const z={id:1,k:'fat',pos:1*9+4,hp:99,max:99,cd:99,style:0};st.z=[z];Z.step(st);const a=99-z.hp;st.grid[2*9+3]={t:'handler',hp:12};z.hp=99;Z.step(st);ok(99-z.hp>a,'pas de bonus')});
+check('Éclaireur : le zombie touché est marqué (+1 dégât)',()=>{const st=fresh();st.grid[5*9+4]={t:'scout',hp:3};Z.startNight(st,rng(1));st.pending=[];const z={id:1,k:'fat',pos:2*9+4,hp:99,max:99,cd:99,style:0};st.z=[z];Z.step(st);ok(z.markT>0,'pas marqué')});
+check('Assassin : exécute un zombie ordinaire toutes les 4 attaques, jamais le Colosse',()=>{const st=fresh();st.grid[3*9+4]={t:'assassin',hp:5};Z.startNight(st,rng(1));st.pending=[];
+ const z={id:1,k:'fat',pos:2*9+4,hp:999,max:999,cd:99,style:0};st.z=[z];for(let k=0;k<4;k++)Z.step(st);ok(z.hp<=0,'pas exécuté');
+ const b={id:2,k:'boss',pos:2*9+4,hp:999,max:999,cd:99,style:0};st.z=[b];for(let k=0;k<4;k++)Z.step(st);ok(b.hp>900,'Colosse exécuté')});
+check('Électricien : plus de coupure de courant',()=>{const st=fresh();st.event=Z.EVENTS.find(e=>e.id==='coupure');st.grid[2*9+4]={t:'genmech',hp:4};st.grid[3*9+4]={t:'tesla',hp:4};
+ Z.startNight(st,rng(1));st.pending=[];const z={id:1,k:'fat',pos:4*9+3,hp:99,max:99,cd:99,style:0};st.z=[z];Z.step(st);Z.step(st);ok(z.hp<99,'la Tesla ne tire pas')});
+check('Infirmière de campagne : soigne la réserve à l’aube',()=>{const st=fresh();st.grid[2*9+4]={t:'fieldnurse',hp:3};st.bench=[{t:'gun',hp:1}];Z.endNight(st);eq(st.bench[0].hp,3)});
+
 /* ---------- 4. nuits aléatoires ---------- */
 const PLACE=PLAY.filter(t=>!Z.U[t].react&&!Z.U[t].instant&&!Z.U[t].onUnit);
 const NIGHTS=+process.env.NIGHTS||300;let maxZ=0,slow=0,worst=0;

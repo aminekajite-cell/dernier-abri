@@ -646,3 +646,12 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Sensations** : chiffres de dégâts plus gros et orange à partir de 10 (avec secousse), éclaboussure et anneau à chaque mort, éclair et secousse à la mort des gros zombies, secousse plus forte quand l’abri est touché.
 
 **v88** : premiers sons enregistrés. 30 grognements de zombies (OpenGameArt, CC0 : artisticdude et saturn91), dans `assets/sounds/` (236 Ko au total, sources dans `CREDITS.md`). Ils remplacent les grognements générés (début de vague, Hurleur, ambiance de nuit) et accompagnent la mort des zombies, avec une hauteur au hasard. Si un fichier manque, le son généré reprend le relais.
+
+**v89** : images manquantes et 6 nouveaux survivants (sprites de la planche cartoon, illustrations de la réserve).
+- Illustrations cartoon de Mur de pneus, Fumigène, Café et Filet (objets posés sur un fond de nuit flou tiré des autres cartes) ; sprite cartoon du Brasero.
+- **Maître-chien** (Police, Tank, 12 PV, 2 dégâts) : les chiens voisins font +1 dégât.
+- **Soudeuse** (Bricoleurs, réparatrice) : répare 2 PV par tour à une défense ou un poste voisin.
+- **Éclaireur** (Trappeurs, DPS, portée 4, 2 dégâts) : marque le zombie touché 2 tours (+1 dégât de chaque coup).
+- **Assassin** (Militaires, DPS, 3 dégâts au contact) : toutes les 4 attaques, tue d’un coup un zombie ordinaire (jamais le Colosse).
+- **Infirmière de campagne** (Soignants, soin à distance portée 2) : à l’aube, les unités en réserve non blessées récupèrent 2 PV.
+- **Électricien** (Bricoleurs) : plus de coupure de courant et clôtures à 2 dégâts tant qu’il est sur la carte ; répare 1 PV par tour.

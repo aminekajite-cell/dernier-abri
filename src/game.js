@@ -117,7 +117,7 @@ const SPRDC={},SPRC={},DOWN=Math.PI/2;
  ['fix',0,50,'canteen hospital market workshop'],['fix',0,42,'lamp siren solar scare'],
  ['wallh',0,54,'sand bar barrier modwall fen'],['fix',0,46,'bunker'],['fix',0,40,'tire'],
  ['fix',0,40,'fire spike net bear wire'],['fix',0,32,'trap mine clay gas smoke bait dyn firetrap'],
- ['fix',0,48,'tower'],['fix',0,40,'trench rocks'],['fix',0,36,'pump flood'],['fix',0,42,'pit'],['wallh',0,50,'gate gabion'],
+ ['fix',0,48,'tower'],['rot',DOWN,46,'handler welder scout assassin fieldnurse genmech'],['fix',0,40,'brasero'],['fix',0,40,'trench rocks'],['fix',0,36,'pump flood'],['fix',0,42,'pit'],['wallh',0,50,'gate gabion'],
  ['rot',DOWN,34,'z_walk z_run z_sap z_armor z_howl z_crawl z_spit z_boss'],['rot',DOWN,40,'z_fat'],['rot',DOWN,30,'z_zdog']
 ].forEach(([m,b,z,ids])=>ids.split(' ').forEach(k=>{SPRDC[k]=[m,b,z];const im=new Image();im.onload=()=>SPRC[k]=im;im.src='assets/sprites_cartoon/'+k+'.webp'}));
 // le sprite à utiliser selon le style choisi (cartoon si disponible, sinon réaliste)
@@ -134,7 +134,7 @@ const CART_FILES=('chief_police chief_mil chief_pyro chief_trap chief_farm chief
  'gun snp sht xbow flame mg molo kid swat mortar sentry hunter turret tesla vigile doc nailer ranger rocket axe dog cop butch monk riot k9 dogs pitch amb orderly '+
  'med lamp radio cook mech siren lead solar pharma hospital priest stretch scare workshop teacher market carp canteen '+
  'fortin autogun tracker brasero dyn bear food kit rep roadmap gas molotov grenade shot flare bait patch napalm rush horn air trap wire mine spike tear firetrap fen fire clay sand bar modwall barrier bunker door car '+
- 'shell gear binoc bandage medkit torch pills pack tape keys tower trench pump flood palis gate gabion log pit glass cans rocks supply airdrop jerry rest radioop talkie storm bomber noise').split(' ');
+ 'handler welder scout assassin fieldnurse genmech shell gear binoc bandage medkit torch pills pack tape keys tower trench pump flood palis gate gabion log pit glass cans rocks supply airdrop jerry rest radioop talkie storm bomber noise').split(' ');
 const CART_ZOMB='walk fat sap armor zdog crawl run howl spit boss'.split(' ');
 const CART_POP=CART_FILES.slice(0,10);
 const cartoon=t=>CART_FILES.includes(t)&&(ART_STYLE==='cartoon'||!ART_FILES.includes(t));
@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v88 · 16 oct.';
+const VERSION='v89 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */

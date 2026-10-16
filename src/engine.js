@@ -112,6 +112,13 @@ const Z=(()=>{
   rush:{n:'Adrénaline',cat:'react',react:'any',v:'×2',d:'Pendant la nuit : tes unités attaquent deux fois pendant 3 tours'},
   rocket:{n:'Lance-roquettes',cat:'shoot',hp:4,block:1,rng:2,dmg:2,every:2,heavy:5,v:'2 · ×5 gros',d:'Tous les 2 tours, une roquette : 2 dégâts, et 5 fois plus (10) contre le Colosse et les Gonflés. Portée 2'},
   flare:{n:'Fusée de détresse',cat:'item',instant:1,flare:1,v:'1 côté',d:'Utilise-la sur l’abri : la nuit prochaine, la horde n’arrive que d’un seul côté'},
+  // --- v89 : 6 nouveaux survivants ---
+  handler:{n:'Maître-chien',cat:'melee',hp:12,block:1,rng:1,dmg:2,every:1,dogBoost:1,v:'2 · Chiens +1',d:'Tank : 12 PV, 2 dégâts au contact. Les chiens voisins font +1 dégât'},
+  welder:{n:'Soudeuse',cat:'help',hp:4,block:1,mech:2,v:'Répare 2',d:'Répare 2 PV par tour à une défense ou un poste voisin'},
+  scout:{n:'Éclaireur',cat:'shoot',hp:3,block:1,rng:4,dmg:2,every:1,mark:2,v:'2 · P4 · Marque',d:'2 dégâts par tour, portée 4. Le zombie touché est marqué 2 tours : il prend +1 dégât de chaque coup'},
+  assassin:{n:'Assassin',cat:'melee',hp:5,block:1,rng:1,dmg:3,every:1,exec:4,v:'3 · Exécute',d:'3 dégâts au contact. Toutes les 4 attaques, il tue d’un coup un zombie ordinaire (pas le Colosse)'},
+  fieldnurse:{n:'Infirmière de campagne',cat:'help',hp:3,block:1,heal:1,hrng:2,benchHeal:2,v:'Soin · P2',d:'Soin à distance : 1 PV tous les 2 tours à l’unité la plus blessée à 2 cases. À l’aube, les unités en réserve (non blessées) récupèrent 2 PV'},
+  genmech:{n:'Électricien',cat:'help',hp:4,block:1,mech:1,genPow:1,v:'Courant · Répare',d:'Tant qu’il est sur la carte : plus de coupure de courant et clôtures à 2 dégâts. Répare 1 PV par tour à une défense ou un poste voisin'},
   // --- v76 : logistique (équipements, postes de soutien, nouvelles défenses, pièges, objets et réactions) ---
   // équipements : se posent sur une de tes unités et y restent (même rappelée). Une unité ne porte qu'un exemplaire de chaque équipement.
   gear:{n:'Matériel lourd',cat:'item',instant:1,onUnit:1,equip:1,v:'+4 PV',d:'Équipement : l’unité gagne 4 PV max. Un Tank équipé bloque 1 coup sur 2'},
@@ -167,7 +174,7 @@ const Z=(()=>{
     Soin : soigne le double sur un Tank. DPS : +1 dégât s'il a un Tank voisin (à couvert).
     Escouade : une unité qui a, avec ses voisins, un Tank, un Soin et un DPS gagne +1 dégât (ou +1 soin). */
  const ROLES={tank:{n:'Tank',ic:'🛡️'},heal:{n:'Soin',ic:'❤️'},dps:{n:'DPS',ic:'⚔️'}};
- const TANKS='riot amb monk cop pitch chief_farm saint'.split(' '),HEALS='med pharma stretch hospital priest orderly doc chief_care canteen'.split(' ');
+ const TANKS='riot amb monk cop pitch chief_farm saint handler'.split(' '),HEALS='med pharma stretch hospital priest orderly doc chief_care canteen fieldnurse'.split(' ');
  const TAUNT=3;
  function roleOf(t){const D=U[t];if(!D||!D.block||!isUnit(t))return null;if(TANKS.includes(t))return'tank';if(HEALS.includes(t))return'heal';
   if(D.dmg&&(D.cat==='shoot'||D.cat==='melee'))return'dps';return null}
@@ -176,7 +183,7 @@ const Z=(()=>{
  const EVO={k9squad:['cop','dog'],nightsnp:['snp','lamp'],heavyflame:['flame','gas'],fortin:['car','bunker'],autogun:['gun','mech'],slaughter:['axe','butch'],canteen:['med','cook'],gang:['kid','teacher'],saint:['monk','priest'],tracker:['xbow','hunter']};
  const EVO_KEYS=Object.keys(EVO);
  // survivants nommés : chaque humain ou chien posé reçoit un prénom et un trait, compte ses victimes, et meurt pour de bon
- const HUMANS='gun snp sht xbow flame mg molo kid axe cop butch monk med cook mech lead riot swat pharma priest stretch hunter pitch teacher vigile carp amb doc orderly nailer ranger'.split(' ');
+ const HUMANS='gun snp sht xbow flame mg molo kid axe cop butch monk med cook mech lead riot swat pharma priest stretch hunter pitch teacher vigile carp amb doc orderly nailer ranger handler welder scout assassin fieldnurse genmech'.split(' ');
  const NAMES='Marco Léa Karim Sofia Hugo Nadia Bruno Inès Yanis Chloé Malik Julie Théo Amira Victor Lina Samir Emma Rachid Zoé Paul Yasmine Louis Clara Mehdi Sarah Hector Nora Igor Maya Omar Jade Gaston Lou Bilal Rose Kenji Alice Driss Margot'.split(' ');
  const DOG_NAMES='Rex Kira Brutus Lola Tyson Médor Nala Rocky'.split(' ');
  const TRAITS={
@@ -197,6 +204,7 @@ const Z=(()=>{
  const nearPost=(st,i,t)=>around(i).some(j=>st.grid[j]&&st.grid[j].t===t);
  // unités (survivants, chiens, machines, chefs, évolutions) : limitées sur le terrain. Les murs et les pièges ne comptent pas.
  const isUnit=t=>!!(U[t]&&U[t].block&&(U[t].cat==='shoot'||U[t].cat==='melee'||U[t].cat==='help'));
+ const DOGS=['dog','dogs','k9','k9squad'];
  const isWallU=v=>!!(v&&U[v.t]&&U[v.t].cat==='wall'&&U[v.t].block);
  const linkB=(st,j)=>j<0?0:Math.min(3,around(j).filter(k=>isWallU(st.grid[k])).length);
  const maxHp=(st,u)=>Math.max(1,(st&&st.grid&&isWallU(u)?linkB(st,st.grid.indexOf(u)):0)+Math.ceil(stat(st,u.t).hp*(1+1.2*(u.gold||0)))+((TRAITS[u.trait]||{}).hpB||0)+(u.lvD||0)*3+(u.leg?2:0)+(st&&st.grid&&famW(u.t)&&famLevel(st,famOf(u.t))>=2?2:0)+(hasEq(u,'gear')?4:0));
@@ -222,7 +230,7 @@ const Z=(()=>{
  'car door snp sht mg molo siren lead solar dyn'.split(' ').forEach(t=>COST[t]=3);
  // équilibrage v63 : constructions à tracer plus chères, épave moins chère, chiens plus chers, arbalète plus chère
  Object.assign(COST,{bar:2,sand:2,fen:2,car:2,dog:2,dogs:3,xbow:3});
- Object.assign(COST,{gear:1,binoc:1,bandage:1,medkit:2,torch:1,pills:1,pack:1,tape:1,keys:3,tower:2,trench:2,pump:2,flood:2,palis:2,gate:2,gabion:3,
+ Object.assign(COST,{handler:2,welder:2,scout:3,assassin:3,fieldnurse:2,genmech:2,gear:1,binoc:1,bandage:1,medkit:2,torch:1,pills:1,pack:1,tape:1,keys:3,tower:2,trench:2,pump:2,flood:2,palis:2,gate:2,gabion:3,
   shell:1,log:2,pit:2,glass:1,cans:1,rocks:2,supply:1,airdrop:2,jerry:1,rest:0,radioop:3,talkie:1,storm:2,bomber:3,noise:1});
  const cost=t=>COST[t]??2;
  const ZT={
@@ -282,13 +290,13 @@ const Z=(()=>{
  // factions : plus il y a d'unités d'une faction sur la carte, plus elle est forte (2 paliers).
  // Le Chef d'une faction (carte légendaire) compte pour 2 survivants.
  const FAM={
-  police:{n:'Police',ic:'👮',cards:['riot','k9','barrier','swat','cop','gun','lamp','siren','chief_police'],lv:[2,5],d:['tes policiers perdent 1 PV de moins par coup','tes policiers ont +1 portée ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
-  mil:{n:'Militaires',ic:'🎖️',cards:['mortar','sentry','clay','bunker','snp','mg','sht','mine','dyn','chief_mil'],lv:[2,5],d:['tes militaires font +1 dégât','mines et dynamite : +3 dégâts ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
-  care:{n:'Soignants',ic:'⛑️',cards:['amb','doc','orderly','pharma','hospital','priest','stretch','med','cook','chief_care'],lv:[2,5],d:['soins +1 PV, tes soignants font +1 dégât','à l’aube, toutes tes unités récupèrent 2 PV ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
+  police:{n:'Police',ic:'👮',cards:['riot','k9','barrier','swat','cop','gun','lamp','siren','handler','chief_police'],lv:[2,5],d:['tes policiers perdent 1 PV de moins par coup','tes policiers ont +1 portée ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
+  mil:{n:'Militaires',ic:'🎖️',cards:['mortar','sentry','clay','bunker','snp','mg','sht','mine','dyn','assassin','chief_mil'],lv:[2,5],d:['tes militaires font +1 dégât','mines et dynamite : +3 dégâts ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
+  care:{n:'Soignants',ic:'⛑️',cards:['amb','doc','orderly','pharma','hospital','priest','stretch','med','cook','fieldnurse','chief_care'],lv:[2,5],d:['soins +1 PV, tes soignants font +1 dégât','à l’aube, toutes tes unités récupèrent 2 PV ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
   pyro:{n:'Pyromanes',ic:'🔥',cards:['brasero','firetrap','fire','flame','molo','gas','tire','chief_pyro'],lv:[2,5],d:['le feu fait +1 dégât par tour','les zombies qui meurent en brûlant explosent (2 dégâts autour) ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
-  trap:{n:'Trappeurs',ic:'🪤',cards:['net','bear','hunter','trap','spike','wire','smoke','bait','xbow','chief_trap'],lv:[2,5],d:['pièges : +2 dégâts','pièges : +4 dégâts au total ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
+  trap:{n:'Trappeurs',ic:'🪤',cards:['net','bear','hunter','trap','spike','wire','smoke','bait','xbow','scout','chief_trap'],lv:[2,5],d:['pièges : +2 dégâts','pièges : +4 dégâts au total ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
   farm:{n:'Fermiers',ic:'🐕',cards:['dogs','pitch','scare','dog','axe','butch','chief_farm'],lv:[2,5],d:['corps à corps : +1 dégât','corps à corps : +1 PV à chaque zombie tué ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
-  tech:{n:'Bricoleurs',ic:'⚡',cards:['nailer','turret','workshop','modwall','tesla','fen','solar','mech','radio','chief_tech'],lv:[2,5],d:['tes bricoleurs font +1 dégât, clôtures +1','clôtures : étourdissent 1 tour, réparations +1 PV ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
+  tech:{n:'Bricoleurs',ic:'⚡',cards:['nailer','turret','workshop','modwall','tesla','fen','solar','mech','radio','welder','genmech','chief_tech'],lv:[2,5],d:['tes bricoleurs font +1 dégât, clôtures +1','clôtures : étourdissent 1 tour, réparations +1 PV ; équipe complète : +1 dégât et +2 PV pour toute la faction']},
   comm:{n:'Communauté',ic:'🏠',cards:['ranger','teacher','market','vigile','carp','lead','monk','kid','chief_comm'],lv:[2,5],d:['tes membres de la Communauté ont +1 portée, l’abri +1 PV à l’aube','ta 1ʳᵉ carte de chaque jour coûte 1 énergie de moins ; équipe complète : +1 dégât et +2 PV pour toute la faction']}
  };
  const CHIEF={police:'chief_police',mil:'chief_mil',care:'chief_care',pyro:'chief_pyro',trap:'chief_trap',farm:'chief_farm',tech:'chief_tech',comm:'chief_comm'};
@@ -415,7 +423,8 @@ const Z=(()=>{
  'swat hospital tesla air rocket'.split(' ').forEach(t=>RAR[t]='epic');
  'gear bandage torch pack trench glass cans supply jerry rest talkie noise palis'.split(' ').forEach(t=>RAR[t]='com');
  'binoc medkit pills tape tower pump flood gate gabion log pit rocks airdrop storm'.split(' ').forEach(t=>RAR[t]='rare');
- 'keys radioop bomber'.split(' ').forEach(t=>RAR[t]='epic');RAR.shell='rare';
+ 'keys radioop bomber'.split(' ').forEach(t=>RAR[t]='epic');
+ 'welder fieldnurse'.split(' ').forEach(t=>RAR[t]='com');'handler scout genmech'.split(' ').forEach(t=>RAR[t]='rare');RAR.assassin='epic';RAR.shell='rare';
  KEYS.filter(t=>U[t].chief).forEach(t=>RAR[t]='leg');'molotov horn'.split(' ').forEach(t=>RAR[t]='rare');
  const SIDES=['le nord','le sud','l’ouest','l’est'];
  const rc=i=>[Math.floor(i/N),i%N],idx=(r,c)=>r*N+c;
@@ -686,10 +695,10 @@ const Z=(()=>{
   for(let j=0;j<w.boss;j++)st.pending.push({k:'boss',wave:big?WAVES_N:1,at:10+j*12,pos:edges[Math.floor(rnd()*edges.length)]});
   st.cap=Math.max(90,st.pending.reduce((m,p)=>Math.max(m,p.at),0)+60);
   st.z=[];st.tick=0}
- const power=st=>st.event.id!=='coupure'||st.relics.includes('groupe')||has(st,'solar');
+ const power=st=>st.event.id!=='coupure'||st.relics.includes('groupe')||has(st,'solar')||has(st,'genmech');
  const lampB=(st,i,pow)=>pow?around(i).reduce((s,j)=>s+(st.grid[j]&&st.grid[j].t==='lamp'?stat(st,'lamp').buff:0),0):0;
  // un zombie encore dans la forêt (anneau extérieur) ne peut pas être touché : il faut qu'il entre sur la carte
- function hit(st,z,d,ev,src,fire){if(isEdge(z.pos))return false;if(d>0&&st._flood&&st._flood.some(j=>cheb(j,z.pos)<=2))d++;if(!fire){const a=(ZT[z.k].armor||0)+(z.k==='walk'?Math.min(3,mc(st,'carapace')):0);if(a)d=Math.max(0,d-a)}const was=z.hp;z.hp-=d;ev.push({i:z.pos,txt:d?'−'+d:'0',k:'hit',zid:z.id,src});return was>0&&z.hp<=0}
+ function hit(st,z,d,ev,src,fire){if(isEdge(z.pos))return false;if(d>0&&z.markT>0)d++;if(d>0&&st._flood&&st._flood.some(j=>cheb(j,z.pos)<=2))d++;if(!fire){const a=(ZT[z.k].armor||0)+(z.k==='walk'?Math.min(3,mc(st,'carapace')):0);if(a)d=Math.max(0,d-a)}const was=z.hp;z.hp-=d;ev.push({i:z.pos,txt:d?'−'+d:'0',k:'hit',zid:z.id,src});return was>0&&z.hp<=0}
  function explode(st,i,d,ev){st.z.filter(o=>o.hp>0&&cheb(o.pos,i)<=1).forEach(o=>hit(st,o,d,ev,i,1));ev.push({i,k:'boom'})}
  // la cible d'un zombie : le leurre (Sirène, Épouvantail) ou le Tank le plus proche à portée de provocation, sinon l'abri
  function lureTarget(st,p){if(st.noise&&st.noise.until>=st.tick)return st.noise.i;let best=C,bd=99;for(let j=0;j<st.grid.length;j++){const u=st.grid[j];if(!u)continue;const r=U[u.t].lure||(roleOf(u.t)==='tank'?TAUNT:0);if(!r)continue;const d=cheb(p,j);if(d<=r&&d<bd){bd=d;best=j}}return best}
@@ -712,7 +721,9 @@ const Z=(()=>{
   for(let h=0;h<H;h++){let ts=inR();if(D.distinct)ts=ts.filter(z=>!done.has(z.id));if(!ts.length)break;
    ts.sort((a,b)=>cheb(a.pos,C)-cheb(b.pos,C)||a.hp-b.hp);const z=ts[0];done.add(z.id);
    const xb=(hasEq(u,'binoc')&&manh(z.pos,i)>2?1:0)+(hasEq(u,'torch')&&z.hp>=z.max?1:0);
-   const killed=hit(st,z,(D.heavy&&(ZT[z.k].boss||z.k==='fat')?dh(h)*D.heavy:dh(h))+xb,ev,i,pierce);ev.push({i,k:'fire'});got(killed);
+   const ex=D.exec&&!ZT[z.k].boss&&(u.exN=(u.exN||0)+1)%D.exec===0;
+   const killed=ex?hit(st,z,z.hp+9,ev,i,1):hit(st,z,(D.heavy&&(ZT[z.k].boss||z.k==='fat')?dh(h)*D.heavy:dh(h))+xb,ev,i,pierce);ev.push({i,k:'fire'});got(killed);
+   if(D.mark&&z.hp>0)z.markT=Math.max(z.markT||0,D.mark+1);
    if((D.ignite||(u.t==='tesla'&&ally(st,'short')))&&z.hp>0)z.burnT=Math.max(z.burnT||0,D.ignite||3);
    if(D.stun&&z.hp>0&&(u.t!=='k9'||u.stunT!==st.tick)){z.cd+=D.stun;u.stunT=st.tick}
    if((D.push||(D.cat==='melee'&&ally(st,'patrol')))&&z.hp>0&&!ZT[z.k].boss){const b=back(z.pos),bu=st.grid[b];if(!(bu&&U[bu.t].block))z.pos=b}
@@ -731,7 +742,7 @@ const Z=(()=>{
    sapBlast(st,z.pos,ev);return}let d=T.boss?bossHit(st):zhit(st,z);if(roleOf(u.t)==='tank'){u.blk=(u.blk||0)+1;if(u.blk%(hasEq(u,'gear')?2:3)===0){ev.push({i:n,txt:'bloqué',k:'block',zid:z.id});return}}if(!T.boss&&(st._fl||{}).police&&famOf(u.t)==='police')d=Math.max(1,d-1);if(D.cap&&!T.boss)d=Math.min(d,D.cap);if(!T.boss&&isUnit(u.t)&&nearPost(st,n,'trench'))d=Math.max(1,d-1);
   const tn=n,tu=u;
   tu.hp-=d;ev.push({i:tn,txt:'−'+d,k:ranged?'spit':'bite',zid:z.id,from:z.pos});
-  if(!ranged&&u.t==='fen'&&pow){const el=(st._fl||{}).tech||0;hit(st,z,((st.relics.includes('groupe')||has(st,'solar'))?2:1)+(el?1:0),ev,n);if(el>=2)z.cd+=1;if(ally(st,'short'))z.burnT=Math.max(z.burnT||0,3)}
+  if(!ranged&&u.t==='fen'&&pow){const el=(st._fl||{}).tech||0;hit(st,z,((st.relics.includes('groupe')||has(st,'solar')||has(st,'genmech'))?2:1)+(el?1:0),ev,n);if(el>=2)z.cd+=1;if(ally(st,'short'))z.burnT=Math.max(z.burnT||0,3)}
   if(!ranged&&D.thorns&&u.t!=='fen')hit(st,z,D.thorns,ev,n);
   // riposte : une unité de corps à corps frappée au contact rend le coup aussitôt
   if(!ranged&&D.cat==='melee'&&D.dmg&&u.hp>0&&z.hp>0){const fl=st._fl||{};if(hit(st,z,D.dmg+unitDmg(u)+sol(st,n,u)+(fl.farm?1:0)+(fl.care&&famOf(u.t)==='care'?1:0)+(ally(st,'hunt')?1:0),ev,n)){u.kills=(u.kills||0)+1;u.nk=(u.nk||0)+1}}
@@ -761,12 +772,13 @@ const Z=(()=>{
   st._flood=pow?st.grid.map((u,j)=>u&&u.t==='flood'?j:-1).filter(j=>j>=0):[];
   for(const z of alive())if(z.burnT>0){z.burnT--;hit(st,z,1+(fl.pyro?1:0),ev,-1,1)}
   for(const z of alive())if(z.bleedT>0){z.bleedT--;hit(st,z,1,ev,-1,1)}
+  for(const z of alive())if(z.markT>0)z.markT--;
   if(mc(st,'regen')&&st.tick%3===0)for(const z of alive())if(z.hp<z.max)z.hp=Math.min(z.max,z.hp+mc(st,'regen'));
   for(let i=0;i<st.grid.length;i++){const u=st.grid[i];if(!u)continue;const D=stat(st,u.t);
    if(D.rng&&st.tick%D.every===0&&!(D.jam&&st.tick%D.jam===0)&&!(D.needPow&&!pow)){
     const reps=1+(st.tick%3===0&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].lead)?1:0)+(st.rushT>0?1:0);
     const F=famOf(u.t),rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+(D.cat==='shoot'&&ally(st,'martial')?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&F==='police'?1:0)+(fl.comm&&F==='comm'&&D.rng>1?1:0)+(D.rng>1&&hasEq(u,'binoc')?1:0)+(D.cat==='shoot'&&D.rng>1&&nearPost(st,i,'tower')?1:0)+(e==='brume'&&D.cat==='shoot'&&hasEq(u,'torch')?1:0)),
-     dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+sol(st,i,u)+(fl.mil&&F==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0)+(fl.tech&&F==='tech'?1:0)+(fl.care&&F==='care'?1:0)+(D.cat==='melee'&&ally(st,'hunt')?1:0)+(squad(st,i)?1:0)+(F&&fl[F]>=2?1:0)+(D.cat==='shoot'&&st.alarmT>=st.tick?1:0);
+     dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+sol(st,i,u)+(fl.mil&&F==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0)+(fl.tech&&F==='tech'?1:0)+(fl.care&&F==='care'?1:0)+(D.cat==='melee'&&ally(st,'hunt')?1:0)+(squad(st,i)?1:0)+(F&&fl[F]>=2?1:0)+(DOGS.includes(u.t)&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].dogBoost)?1:0)+(D.cat==='shoot'&&st.alarmT>=st.tick?1:0);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}
    if(D.heal&&(D.hfast||st.tick%2===0)){const ns=(D.hrng>1?st.grid.map((v,j)=>j).filter(j=>j!==i&&inRange(j,i,D.hrng)):around(i)).map(j=>st.grid[j]).filter(v=>v&&isUnit(v.t)&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0)+(u.gold||0)+(squad(st,i)?1:0));ev.push({i,k:'heal'})}}
    if(D.mech&&!D.mechAll){const ns=around(i).filter(j=>st.grid[j]&&repairable(st.grid[j].t)&&st.grid[j].hp<maxHp(st,st.grid[j])&&repOK(st,j));if(ns.length){repDone(st,ns[0]);const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0)+(u.gold||0)+(sol(st,i,u)?1:0));ev.push({i:ns[0],k:'heal'})}}
@@ -812,6 +824,7 @@ const Z=(()=>{
   st.shelter=Math.min(maxS(st),st.shelter+h);
   st.grid.forEach((u,i)=>{if(u&&U[u.t].carp)around(i).forEach(j=>{const v=st.grid[j];if(v&&repairable(v.t))v.hp=Math.min(maxHp(st,v),v.hp+U[u.t].carp)})});
   st.grid.forEach((u,i)=>{if(u&&isUnit(u.t)&&nearPost(st,i,'pump'))u.hp=maxHp(st,u)});
+  const bh=st.grid.reduce((a,u)=>a+(u&&U[u.t].benchHeal||0),0);if(bh)(st.bench||[]).forEach(u=>{if(!u.koUntil)u.hp=Math.min(maxHp(st,u),u.hp+bh)});
   const s=(st.relics.includes('aimant')?3:0)+(T.scrap||0)+st.grid.reduce((a,u)=>a+(u&&U[u.t].market||0)+(u&&hasEq(u,'pack')?(u.nk||0):0),0);st.scrap+=s;
   return{heal:st.shelter-before,scrap:s,card:T.card||null,relic:!!T.relic,tier:st.tier||'base'}}
  // réactions pendant la nuit
