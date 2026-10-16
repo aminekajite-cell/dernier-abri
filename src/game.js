@@ -168,7 +168,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v93 · 16 oct.';
+const VERSION='v94 · 16 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -883,7 +883,7 @@ function playEvents(ev,types,now){
 
 /* ---------- UI ---------- */
 function hordeHtml(){const w=Z.waveList(G);const parts=Z.ZK.filter(k=>w[k]).map(k=>`<span class="hz"><span class="dot" style="--zc:var(--z-${k})"></span>${plural(w[k],...ZN[k])}</span>`);
- const fz=Z.frenzy(G);return `<span>Cette nuit :</span>${fz?`<span class="hz big" title="Frénésie meurtrière : PV des zombies">Frénésie : +${fz} % PV${Z.dmgBonus(G.night)?`, +${Z.dmgBonus(G.night)} dégât`:''}</span>`:''}${Z.pressure(G.night)?'<span class="hz big red">Nuit rouge : +25 % de zombies, mutation et relique à l’aube</span>':''}${Z.respite(G.night)?'<span class="hz big calm">Nuit de répit : 30 % de zombies en moins</span>':''}${parts.join('')}${Z.bigNight(G,w)?'<span class="hz big">⚠ Nuit du Colosse : 2 vagues</span>':`<span class="hz boss">Colosse dans ${plural(10-G.night%10,'nuit','nuits')}</span>`}`}
+ const fz=Z.frenzy(G);return `<span>Cette nuit :</span>${fz?`<span class="hz warn" title="Frénésie meurtrière : PV des zombies">Frénésie : +${fz} % PV${Z.dmgBonus(G.night)?`, +${Z.dmgBonus(G.night)} dégât`:''}</span>`:''}${Z.pressure(G.night)?'<span class="hz warn red">Nuit rouge : +25 % de zombies, mutation et relique à l’aube</span>':''}${Z.respite(G.night)?'<span class="hz warn calm">Nuit de répit : 30 % de zombies en moins</span>':''}${parts.join('')}${Z.bigNight(G,w)?'<span class="hz warn">⚠ Nuit du Colosse : 2 vagues</span>':`<span class="hz boss">Colosse dans ${plural(10-G.night%10,'nuit','nuits')}</span>`}`}
 const cardName=t=>Z.stat(G,t).n;
 const roleTag=t=>{const r=Z.roleOf(t);return r?`<span class="role" title="${Z.ROLES[r].n}">${Z.ROLES[r].ic}</span>`:''};
 const roleLine=t=>{const r=Z.roleOf(t);return r?` <em class="ce">${Z.ROLES[r].ic} ${Z.ROLES[r].n}</em>`:''};
