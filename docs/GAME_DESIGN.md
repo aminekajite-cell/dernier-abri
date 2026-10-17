@@ -767,3 +767,8 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
   - M9 Blindé des secours (tank, 3) : 30 PV, 2 dégâts, repousse.
 
 **v122** : plus d’émojis dans le jeu. Toutes les icônes (aide, détail de la nuit, aube, victoire, mémorial, cadenas, options, rôles, factions, équipements sur les pions, compteur de victimes, Colosse sur la piste) sont des pictogrammes à l’encre dessinés en code (`GLY` dans `game.js`), dans le style des pictogrammes des cartes. Restent seulement les signes typographiques ★ (étoiles de fusion), ✦ (évolution) et ✓.
+
+**v123** : finition de l’interface.
+- **Règles du jeu** en fiches illustrées (le but, le jour, la nuit, l’aube, rôles et escouade, factions, fusion et évolutions, remparts, survivants, la horde, Mutations de la horde), avec un sommaire pour sauter à une fiche. Les règles qui étaient dans « Voir les cartes et les zombies » y ont été déplacées ; cette page devient **Cartes et bestiaire** (catalogue des cartes, des zombies et des mutations instables).
+- **Animations de fin** : défaite avec secousse, voile rouge et tampon « Tombé » ; victoire avec l’hélicoptère qui arrive, lueur dorée et tampon « Victoire » ; l’hélicoptère repart quand on part avec les secours. Coupées en mode économie et si le système demande moins d’animations.
+- **Statistiques** (bouton sur l’accueil) : record, victoires, meilleure Mutation, parties, nuits et zombies au total, les 10 dernières parties (`META.hist`), les cartes les plus jouées (`META.played`). Le défi du jour n’y compte pas.

@@ -565,3 +565,38 @@ html.eco .panel img.heli{animation:none;filter:none}
 .info .ink{width:14px;height:14px;vertical-align:-2px}
 .role .ink{width:14px;height:14px}
 .tab:disabled{flex-direction:row;justify-content:center;align-items:center;gap:4px}
+
+/* v123 : règles en fiches illustrées */
+.rindex{display:flex;flex-wrap:wrap;gap:6px}
+.rchip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;border:1.5px solid #8a6a42;background:#e6d6b1;color:#3a2a18;font:600 12.5px var(--f-body);box-shadow:0 2px 0 #8a7350;cursor:pointer}
+.rchip .ink,.rchip .ic{width:15px;height:15px}
+.rfiche{scroll-margin-top:8px;padding:12px 12px 10px;border-radius:8px;background:#f6eedb;border:1.5px solid #c9b48a;box-shadow:inset 0 0 0 3px #f6eedb,inset 0 0 0 4px rgba(138,106,66,.35),0 2px 0 #b5a077;display:flex;flex-direction:column;gap:7px}
+.rfiche h3{display:flex;align-items:center;gap:8px;margin:0;font-size:19px;color:#3a2a18}
+.rfiche h3 .ink,.rfiche h3 .ic{width:24px;height:24px;flex:none;color:#8e1d12;stroke-width:2.2}
+.rfiche p{font-size:14px}
+.rfiche .dk{padding:4px 0}
+.fic.mnum{font:400 16px var(--f-disp);color:#8e1d12}
+/* statistiques */
+.stiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stile{display:flex;flex-direction:column;align-items:center;padding:9px 4px;border-radius:8px;background:#f6eedb;border:1.5px solid #c9b48a;text-align:center}
+.stile b{font:400 24px/1 var(--f-disp);color:#3a2a18}.stile span{font-size:11.5px;color:#5a4630;margin-top:3px}
+.hist{display:flex;flex-direction:column;gap:5px}
+.hrow{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 9px;border-radius:6px;background:#efe3c6;font-size:12.5px;color:#5a4630}
+.hrow.win{background:#e2ecd0}.hrow .hn{font-weight:700;color:#3a2a18;display:flex;gap:4px;align-items:center}.hrow .hn .ink{width:15px;height:15px}
+.hrow .hk{font-variant-numeric:tabular-nums}
+.cgrid.fav{grid-template-columns:repeat(3,1fr)}
+/* animations de fin de partie */
+.bigstamp{display:block;align-self:center;font:400 34px/1 var(--f-disp);text-transform:uppercase;letter-spacing:.06em;padding:6px 18px;border:4px solid currentColor;border-radius:6px;transform:rotate(-7deg);font-style:normal;margin:4px 0 2px}
+.bigstamp.ko{color:#a8231c}.bigstamp.ok{color:#2e6b3a}
+.panel.lose .bigstamp,.panel.win .bigstamp{animation:stampin .55s cubic-bezier(.2,1.6,.4,1) both .15s}
+@keyframes stampin{0%{transform:rotate(-7deg) scale(2.6);opacity:0}100%{transform:rotate(-7deg) scale(1);opacity:1}}
+.panel.lose{animation:shake .5s ease-in-out}
+@keyframes shake{20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.overlay.lose{background:radial-gradient(circle at 50% 50%,rgba(20,13,8,.72) 40%,rgba(120,10,6,.75))}
+.overlay.win{background:radial-gradient(circle at 50% 40%,rgba(255,210,90,.25),rgba(20,13,8,.75) 70%)}
+.panel img.heli:not(.away){animation:heliin 1.4s cubic-bezier(.2,.8,.3,1) both,heli 3s ease-in-out 1.4s infinite}
+@keyframes heliin{0%{transform:translateX(120%) translateY(-30px) rotate(-6deg);opacity:0}100%{transform:none;opacity:1}}
+.panel img.heli.away{animation:heliout 2.2s ease-in .3s both}
+@keyframes heliout{0%{transform:none}100%{transform:translate(-140%,-70px) rotate(8deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.panel.lose,.panel.win .bigstamp,.panel.lose .bigstamp,.panel img.heli{animation:none!important}}
+html.eco .panel.lose,html.eco .panel img.heli{animation:none!important}
