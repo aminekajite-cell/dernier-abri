@@ -543,3 +543,13 @@ html.eco .hand .card.guide,html.eco .go.guide{animation:none;outline:3px solid #
 /* v119 : dos de carte doré (récompense de la première victoire) */
 html.goldback .pile .pb,html.goldback .flyc.back{filter:sepia(.55) saturate(2.2) hue-rotate(-8deg) brightness(1.06)}
 html.goldback .pile .pb{box-shadow:0 0 0 2px #f2c23d,1px 2px 0 #c9b68c,2px 3px 0 #6b4e2e,3px 4px 0 #c9b68c,4px 5px 0 #6b4e2e,5px 7px 10px rgba(0,0,0,.55)}
+
+/* v120 : icônes des reliques, hélicoptère et carte de victoire */
+.relic-ic{width:40px;height:40px;object-fit:contain;flex:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+.relic .relic-ic{width:46px;height:46px}
+.panel img.heli{display:block;width:min(78%,300px);margin:-4px auto -6px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.4));animation:heli 3s ease-in-out infinite}
+@keyframes heli{50%{transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){.panel img.heli{animation:none}}
+html.eco .panel img.heli{animation:none;filter:none}
+.vcard{width:150px;margin:0 auto}
+.citem .vlock{font-size:12px;color:#7a4a00;text-align:center}

@@ -749,3 +749,19 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **22 reliques** (8 avant, 14 nouvelles). Disponibles tout de suite : Sifflet de dresseur (chiens +2 PV, +1 dégât), Trousse de chirurgien (soins +1), Gilet pare-balles (tanks bloquent 1 coup sur 2), Coffre de pillard (boutique à 6 cartes), Carnet de troc (amélioration −10 ferraille), Ceinture de cartouches (3 munitions), Pacte du sang (+1 énergie par jour, abri −1 PV à chaque aube), Appât vivant (+50 % de ferraille par zombie, +15 % de zombies). Débloquées par les victoires (`lock` = niveau de Mutation vaincu) : Sérum expérimental (M0 : convalescence 2 nuits), Cloche d’église (M2 : unités +2 PV à l’aube), Carnet de recettes (M4 : fusion à 2 unités), Plan de l’abri (M6 : abri +3 PV max), Insigne du sauveteur (M8 : +1 unité), Fanion des secours (M10 : +1 énergie par jour). En partie, seules les reliques débloquées peuvent sortir (`st.relicPool`).
 - **Relique de départ** : chaque victoire ajoute une relique au hasard (parmi celles débloquées) à la réserve du joueur ; avant une partie, il peut en choisir une (« Préparer la partie »), en plus de celle de son personnage.
 - **Dos de carte doré** débloqué à la première victoire (activé tout de suite, réglable dans les Options).
+
+**v120** : illustrations d’Amine intégrées et **cartes de victoire**.
+- Les 22 reliques ont chacune leur icône (`assets/relics/<id>.webp`).
+- Écran de victoire : l’hélicoptère des secours (`assets/ui/heli.webp`).
+- **Maison fortifiée** (`assets/ui/shelter_fort.webp`) : récompense de la première victoire avec le dos doré, réglable dans les Options (« Abri »).
+- **10 cartes de victoire** (légendaires, champ `vic` = niveau de Mutation à vaincre). Elles ne s’achètent pas et ne sortent pas en boutique : une victoire les ajoute à la collection, puis le joueur les met dans son deck (1 exemplaire).
+  - M0 Hélicoptère de ravitaillement (objet, 1) : +2 énergie et pioche 2 cartes.
+  - M1 Mitrailleuse lourde (tireur, 3) : 3 tirs de 2, portée 2, ne s’enraye pas, 6 PV.
+  - M2 Radio militaire (poste, 2) : les tireurs à 2 cases ou moins font +1 dégât.
+  - M3 Médecin militaire (soin, 2) : 2 PV tous les 2 tours, portée 3.
+  - M4 Mur de conteneurs (défense, 3) : 20 PV, anti-sapeur.
+  - M5 Tireur des secours (tireur, 3) : 6 dégâts tous les 2 tours, portée 4.
+  - M6 Champ de mines (piège, 2) : 8 dégâts en zone, 3 fois.
+  - M7 Chien de sauvetage (corps à corps, 2) : 2 morsures de 2, soigne 1 PV à un voisin tous les 2 tours.
+  - M8 Frappe au napalm (réaction, 2) : 4 dégâts en zone puis feu.
+  - M9 Blindé des secours (tank, 3) : 30 PV, 2 dégâts, repousse.

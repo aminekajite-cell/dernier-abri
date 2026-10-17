@@ -57,7 +57,7 @@ for(const t of PLAY){const D=Z.U[t];if(D.react)continue;
  check(`pose de ${t}`,()=>{const st=fresh();st.grid[2*9+4]={t:'gun',hp:1,gold:D.gold?1:0};
   const i=D.onUnit?2*9+4:D.instant?Z.C:freeCells(st).find(j=>Z.canPlace(st,t,j));ok(i!=null,'aucune case valide');
   ok(Z.canPlace(st,t,i),'canPlace refuse');const e0=st.energy;Z.place(st,t,i,rng(3));
-  ok(t==='coffee'||st.energy<=e0,'énergie augmentée');if(!D.instant){const u=st.grid[i];ok(u,'rien sur la case');if(D.block)ok(fin(u.hp)&&u.hp>0,'PV '+u.hp)}})}
+  ok(t==='coffee'||t==='v_heli'||st.energy<=e0,'énergie augmentée');if(!D.instant){const u=st.grid[i];ok(u,'rien sur la case');if(D.block)ok(fin(u.hp)&&u.hp>0,'PV '+u.hp)}})}
 for(const t of PLAY.filter(t=>Z.U[t].react))
  check(`réaction ${t}`,()=>{const st=fresh();st.grid[3*9+4]={t:'gun',hp:1};Z.startNight(st,rng(5));for(let k=0;k<6;k++)Z.step(st);
   const i=Z.U[t].react==='unit'?3*9+4:2*9+4;if(!Z.canReact(st,t,i))return;Z.react(st,t,i);st.z.forEach(z=>ok(fin(z.hp),'PV zombie '+z.hp))});
