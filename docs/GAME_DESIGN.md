@@ -337,7 +337,7 @@ Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque ty
 
 ## Les mutations de la horde
 
-**Frénésie meurtrière** (v113) : +25 % des PV de base de tous les zombies toutes les 5 nuits, cumulable (+25 % dès la nuit 6, +50 % dès la nuit 11, +75 % dès la nuit 16…), et +1 dégât après chaque Colosse (nuits 11, 21…). Elle remplace le saut de +60 % d’un coup après le Colosse, trop brutal.
+**Frénésie meurtrière** (v114) : dès la nuit 5, +10 % de PV **et de dégâts** pour tous les zombies, puis +10 % de plus chaque nuit (nuit 10 : +60 %, nuit 15 : +110 %, nuit 30 : +260 %). Les fractions de dégât s’accumulent coup après coup (1,5 = un coup sur deux à 2). **Curée** : une unité encerclée prend +1 dégât par autre zombie à son contact (+2 au plus, pas le Colosse) : un tank qui attire la horde doit être soigné.
 
 Toutes les 4 nuits (nuits 4, 8, 12…), la horde gagne une mutation tirée au hasard, permanente pour toute la partie. Elle est annoncée à l'aube, et le bandeau du haut prévient la veille (« mute à l'aube »). Le but : casser les défenses qui semblaient sûres (par exemple une armée de tireurs) sans ajouter de mécanique à gérer pour le joueur.
 
@@ -714,3 +714,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Essence** : 1 dégât par tour au lieu de 2 (de loin la carte la plus rentable).
 - **Assassin** : 2 dégâts au lieu de 3. **Meute de chiens** : 4 morsures de 1 au lieu de 2.
 - **Chef de groupe** : les unités autour attaquent une fois de plus tous les 2 tours au lieu de 3 (Le Maire garde 3). **Ambulancier** : 2 dégâts au lieu de 1.
+
+**v114** (demande d’Amine) : la frénésie meurtrière commence à la nuit 5 (+10 %) et grandit de +10 % chaque nuit ; elle s’applique désormais aux **dégâts** des zombies autant qu’à leurs PV (avant, seuls les PV montaient : les combats duraient plus longtemps sans jamais menacer les tanks). Le +1 dégât après chaque Colosse est supprimé (remplacé par cette montée continue). Nouvelle règle de **curée** : +1 dégât par autre zombie au contact de l’unité frappée, +2 au plus.
