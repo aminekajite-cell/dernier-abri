@@ -74,7 +74,7 @@ check('factions : paliers à 2 et 5 survivants ; constructions et machines ne co
  st.grid[14]={t:'sht',hp:3};st.grid[15]={t:'snp',hp:3};eq(Z.famLevels(st).mil,1);st.grid[16]={t:'mg',hp:3};eq(Z.famLevels(st).mil,2)});
 check('Chef : compte pour 2 survivants',()=>{const st=fresh();st.grid[10]={t:'chief_mil',hp:5};eq(Z.famLevels(st).mil,1)});
 check('équipe complète : +2 PV',()=>{const st=fresh();['snp','mg','sht','snp'].forEach((t,k)=>st.grid[10+k]={t,hp:3});const u={t:'snp',hp:3};const a=Z.maxHp(st,u);st.grid[20]=u;eq(Z.maxHp(st,u),a+2)});
-check('frénésie : un niveau après chaque Colosse (+60 % PV, +1 dégât)',()=>{eq(Z.hpMult(10),1);ok(Math.abs(Z.hpMult(11)-1.6)<1e-9);ok(Math.abs(Z.hpMult(25)-2.2)<1e-9);eq(Z.dmgBonus(10),0);eq(Z.dmgBonus(11),1);eq(Z.dmgBonus(21),2)});
+check('frénésie : +25 % de PV toutes les 5 nuits, +1 dégât après chaque Colosse',()=>{eq(Z.hpMult(5),1);ok(Math.abs(Z.hpMult(6)-1.25)<1e-9);ok(Math.abs(Z.hpMult(11)-1.5)<1e-9);ok(Math.abs(Z.hpMult(26)-2.25)<1e-9);eq(Z.dmgBonus(10),0);eq(Z.dmgBonus(11),1);eq(Z.dmgBonus(21),2)});
 check('nuit de répit : 30 % de zombies en moins après un Colosse',()=>{const st=fresh();st.night=11;const a=Z.waveList(st).walk;st.night=12;ok(a<Z.waveList(st).walk,'pas de répit')});
 check('horde : croissance logarithmique (ralentit)',()=>{const g=(a,b)=>Z.waveCount('walk',b)-Z.waveCount('walk',a);ok(g(20,30)>=g(50,60),'croissance qui accélère');ok(Z.waveCount('walk',60)<20,'trop de zombies')});
 check('mutation = affixe : une seule à la fois, qui change',()=>{const st=fresh();const r=rng(4);const a=Z.mutate(st,r),b=Z.mutate(st,r);eq(st.muts.length,1);ok(a!==b)});

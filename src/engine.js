@@ -2,12 +2,12 @@
 const Z=(()=>{
  // carte de 9×9 cases : l'anneau extérieur est la forêt d'où vient la horde, l'abri est au centre
  const N=9,C=(N*N-1)/2,MID=(N-1)/2,MAXS=10;let HPS=0,HPS2=.12;
- // frénésie meurtrière : un niveau de plus après chaque Colosse (niveau 1 dès la nuit 11, niveau 2 dès la nuit 21…), cumulable.
- // Chaque niveau : +60 % des PV de base et +1 dégât pour les zombies.
- const HP_FROM=11,HP_STEP=.6;
- const frenzyLv=n=>Math.max(0,Math.floor((n-1)/10));
+ // frénésie meurtrière (v113, demande d'Amine) : +25 % des PV de base toutes les 5 nuits, cumulable (nuit 6 : +25 %, nuit 11 : +50 %,
+ // nuit 16 : +75 %…), pour éviter un saut brutal après le Colosse. Les dégâts gardent leur rythme : +1 après chaque Colosse (nuits 11, 21…).
+ const HP_FROM=6,HP_STEP=.25;
+ const frenzyLv=n=>Math.max(0,Math.floor((n-1)/5));
  const hpMult=n=>1+HP_STEP*frenzyLv(n);
- const dmgBonus=n=>frenzyLv(n);
+ const dmgBonus=n=>Math.max(0,Math.floor((n-1)/10));
  const U={
   // défenses
   bar:{n:'Barricade',cat:'wall',hp:7,block:1,v:'7 PV',d:'Planches clouées : bloque les zombies, 7 PV'},
@@ -38,11 +38,11 @@ const Z=(()=>{
   cook:{n:'Cuisinier',cat:'help',hp:2,block:1,cook:1,v:'+1 abri',d:'À chaque aube, l’abri récupère 1 PV'},
   mech:{n:'Mécanicien',cat:'help',hp:3,block:1,mech:1,v:'Répare',d:'Répare 1 PV à une défense ou un poste voisin à chaque tour'},
   siren:{n:'Sirène',cat:'post',hp:4,block:1,lure:2,v:'Attire',d:'Les zombies à 2 cases ou moins marchent vers elle au lieu de l’abri'},
-  lead:{n:'Chef de groupe',cat:'help',hp:3,block:1,lead:1,v:'Rythme',d:'Tous les 3 tours, les unités autour attaquent une fois de plus'},
+  lead:{n:'Chef de groupe',cat:'help',hp:3,block:1,lead:1,v:'Rythme',d:'Tous les 2 tours, les unités autour attaquent une fois de plus'},
   solar:{n:'Panneau solaire',cat:'post',hp:2,block:1,solar:1,v:'Courant',d:'Projecteurs et clôtures marchent pendant une coupure, clôtures à 2 dégâts'},
   // pièges
   trap:{n:'Piège à loup',cat:'trap',hp:1,block:0,trap:5,v:'5',d:'Le premier zombie qui marche dessus subit 5 dégâts'},
-  fire:{n:'Essence',cat:'trap',hp:1,block:0,burn:2,v:'2/tour',d:'Flaque enflammée : 2 dégâts par tour aux zombies dessus, s\'éteint à l\'aube'},
+  fire:{n:'Essence',cat:'trap',hp:1,block:0,burn:1,v:'1/tour',d:'Flaque enflammée : 1 dégât par tour aux zombies dessus, s\'éteint à l\'aube'},
   mine:{n:'Mine',cat:'trap',hp:1,block:0,mine:6,v:'6 zone',d:'Explose au passage : 6 dégâts sur la case et autour'},
   wire:{n:'Barbelés',cat:'trap',hp:1,block:0,wire:1,v:'Ralentit',d:'Ne bloque pas : 1 dégât et ralentit chaque zombie qui passe, reste en place'},
   spike:{n:'Fosse à pieux',cat:'trap',hp:4,block:0,spike:3,v:'3 ×4',d:'3 dégâts à chaque zombie qui tombe dedans, casse après 4 zombies'},
@@ -74,7 +74,7 @@ const Z=(()=>{
   net:{n:'Filet',cat:'trap',hp:2,block:0,net:4,v:'Immobilise',d:'Le zombie qui passe est pris 4 tours, sert 2 fois'},
   bear:{n:'Piège à ours',cat:'trap',hp:1,block:0,trap:10,v:'10',d:'Le premier zombie qui marche dessus subit 10 dégâts'},
   hunter:{n:'Chasseur',cat:'shoot',hp:3,block:1,rng:2,dmg:2,every:1,v:'2 · P2',d:'2 dégâts par tour, portée 2'},
-  dogs:{n:'Meute de chiens',cat:'melee',hp:7,block:1,rng:1,dmg:2,every:1,hits:4,v:'2 ×4',d:'4 morsures de 2 dégâts par tour au corps à corps'},
+  dogs:{n:'Meute de chiens',cat:'melee',hp:7,block:1,rng:1,dmg:1,every:1,hits:4,v:'1 ×4',d:'4 morsures de 1 dégât par tour au corps à corps'},
   pitch:{n:'Fermier à la fourche',cat:'melee',hp:10,block:1,rng:1,dmg:3,every:1,push:1,v:'3 · Recul',d:'3 dégâts au contact et repousse le zombie d’une case, 10 PV'},
   scare:{n:'Épouvantail',cat:'post',hp:6,block:1,lure:2,v:'Attire',d:'Les zombies à 2 cases ou moins marchent vers lui au lieu de l’abri, 6 PV'},
   turret:{n:'Tourelle bricolée',cat:'shoot',hp:4,block:1,rng:2,dmg:2,every:1,v:'2 · P2',d:'2 dégâts par tour, portée 2, 4 PV'},
@@ -89,7 +89,7 @@ const Z=(()=>{
   napalm:{n:'Napalm',cat:'react',react:'cell',v:'Feu zone',d:'Pendant la nuit : la case visée et autour s’embrasent (flaques de feu jusqu’à l’aube)'},
   air:{n:'Frappe aérienne',cat:'react',react:'cell',v:'10 zone',d:'Pendant la nuit : 10 dégâts à tous les zombies à 2 cases ou moins de la case visée'},
   // combattants des factions de soutien
-  amb:{n:'Ambulancier',cat:'melee',hp:11,block:1,rng:1,dmg:1,every:1,push:1,v:'1 · Recul',d:'Bloque avec son brancard : 11 PV, 1 dégât au contact et repousse le zombie'},
+  amb:{n:'Ambulancier',cat:'melee',hp:11,block:1,rng:1,dmg:2,every:1,push:1,v:'2 · Recul',d:'Bloque avec son brancard : 11 PV, 2 dégâts au contact et repousse le zombie'},
   doc:{n:'Médecin de garde',cat:'shoot',hp:4,block:1,rng:1,dmg:1,every:1,selfHeal:1,v:'1 · P1 · Soin',d:'Pistolet : 1 dégât par tour, portée 1, et récupère 1 PV tous les 2 tours'},
   orderly:{n:'Infirmier costaud',cat:'melee',hp:7,block:1,rng:1,dmg:2,every:1,healKill:1,v:'2 · Soigne',d:'2 dégâts au contact. À chaque zombie tué, ses voisins récupèrent 1 PV'},
   nailer:{n:'Cloueur',cat:'shoot',hp:4,block:1,rng:2,dmg:1,every:1,hits:2,v:'1 ×2 · P2',d:'Cloueuse pneumatique : 2 tirs de 1 dégât par tour, portée 2'},
@@ -116,7 +116,7 @@ const Z=(()=>{
   handler:{n:'Maître-chien',cat:'melee',hp:12,block:1,rng:1,dmg:2,every:1,dogBoost:1,v:'2 · Chiens +1',d:'Tank : 12 PV, 2 dégâts au contact. Les chiens voisins font +1 dégât'},
   welder:{n:'Soudeuse',cat:'help',hp:4,block:1,mech:2,v:'Répare 2',d:'Répare 2 PV par tour à une défense ou un poste voisin'},
   scout:{n:'Éclaireur',cat:'shoot',hp:3,block:1,rng:4,dmg:2,every:1,mark:2,v:'2 · P4 · Marque',d:'2 dégâts par tour, portée 4. Le zombie touché est marqué 2 tours : il prend +1 dégât de chaque coup'},
-  assassin:{n:'Assassin',cat:'melee',hp:5,block:1,rng:1,dmg:3,every:1,exec:4,v:'3 · Exécute',d:'3 dégâts au contact. Toutes les 4 attaques, il tue d’un coup un zombie ordinaire (pas le Colosse)'},
+  assassin:{n:'Assassin',cat:'melee',hp:5,block:1,rng:1,dmg:2,every:1,exec:4,v:'2 · Exécute',d:'2 dégâts au contact. Toutes les 4 attaques, il tue d’un coup un zombie ordinaire (pas le Colosse)'},
   fieldnurse:{n:'Infirmière de campagne',cat:'help',hp:3,block:1,heal:1,hrng:2,benchHeal:2,v:'Soin · P2',d:'Soin à distance : 1 PV tous les 2 tours à l’unité la plus blessée à 2 cases. À l’aube, les unités en réserve (non blessées) récupèrent 2 PV'},
   genmech:{n:'Électricien',cat:'help',hp:4,block:1,mech:1,genPow:1,v:'Courant · Répare',d:'Tant qu’il est sur la carte : plus de coupure de courant et clôtures à 2 dégâts. Répare 1 PV par tour à une défense ou un poste voisin'},
   // --- v76 : logistique (équipements, postes de soutien, nouvelles défenses, pièges, objets et réactions) ---
@@ -843,7 +843,7 @@ const Z=(()=>{
   if(mc(st,'regen')&&st.tick%3===0)for(const z of alive())if(z.hp<z.max)z.hp=Math.min(z.max,z.hp+mc(st,'regen'));
   for(let i=0;i<st.grid.length;i++){const u=st.grid[i];if(!u)continue;const D=stat(st,u.t);
    if(D.rng&&st.tick%D.every===0&&!(D.jam&&st.tick%D.jam===0)&&!(D.needPow&&!pow)){
-    const reps=1+(st.tick%3===0&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].lead)?1:0)+(st.rushT>0?1:0);
+    const reps=1+(around(i).some(j=>{const L=st.grid[j]&&U[st.grid[j].t];return L&&L.lead&&st.tick%(L.chief?3:2)===0})?1:0)+(st.rushT>0?1:0);
     const F=famOf(u.t),rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+(D.cat==='shoot'&&ally(st,'martial')?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&F==='police'?1:0)+(fl.comm&&F==='comm'&&D.rng>1?1:0)+(D.rng>1&&hasEq(u,'binoc')?1:0)+(D.cat==='shoot'&&D.rng>1&&nearPost(st,i,'tower')?1:0)+(e==='brume'&&D.cat==='shoot'&&hasEq(u,'torch')?1:0)),
      dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+sol(st,i,u)+(fl.mil&&F==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0)+(fl.tech&&F==='tech'?1:0)+(fl.care&&F==='care'?1:0)+(D.cat==='melee'&&ally(st,'hunt')?1:0)+(squad(st,i)?1:0)+(F&&fl[F]>=2?1:0)+(DOGS.includes(u.t)&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].dogBoost)?1:0)+(D.cat==='shoot'&&st.alarmT>=st.tick?1:0);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}

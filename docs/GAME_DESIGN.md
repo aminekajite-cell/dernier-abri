@@ -337,7 +337,7 @@ Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque ty
 
 ## Les mutations de la horde
 
-**Frénésie meurtrière** : à partir de la nuit 8, chaque mutation (à l’aube des nuits 8, 12, 16…) ajoute aussi +10 % de PV et +10 % de dégâts à tous les zombies, cumulable (+10 % dès la nuit 9, +30 % dès la nuit 17). Les dégâts en fraction s'accumulent sur chaque zombie : avec +10 %, un zombie à 1 dégât frappe une fois à 2 tous les 10 coups. But : une difficulté qui monte toujours, en face des fusions à plusieurs étoiles.
+**Frénésie meurtrière** (v113) : +25 % des PV de base de tous les zombies toutes les 5 nuits, cumulable (+25 % dès la nuit 6, +50 % dès la nuit 11, +75 % dès la nuit 16…), et +1 dégât après chaque Colosse (nuits 11, 21…). Elle remplace le saut de +60 % d’un coup après le Colosse, trop brutal.
 
 Toutes les 4 nuits (nuits 4, 8, 12…), la horde gagne une mutation tirée au hasard, permanente pour toute la partie. Elle est annoncée à l'aube, et le bandeau du haut prévient la veille (« mute à l'aube »). Le but : casser les défenses qui semblaient sûres (par exemple une armée de tireurs) sans ajouter de mécanique à gérer pour le joueur.
 
@@ -708,3 +708,9 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Haut de l’écran** : la piste des nuits prend toute la largeur ; mutation et ferraille sont au bout de la rangée des jetons (toujours visibles, la rangée défile si elle déborde) ; zone des zombies resserrée.
 
 **v112** : **première nuit guidée**. À la toute première partie, le jeu met le Tireur et la Barricade dans la main et guide pas à pas : choisir le Tireur (la carte pulse en doré), le poser sur la case qui brille au-dessus de la maison, choisir la Barricade, la poser sur la case qui brille de la route du sud, puis « Affronter la nuit » (le bouton pulse). La bulle du guide remplace la ligne d’info pendant ces étapes. Le joueur reste libre de faire autrement ; le guide s’arrête au lancement de la nuit, puis les bulles habituelles (nuit, aube) prennent le relais. Les Règles du jeu proposent « Rejouer la première nuit guidée ».
+
+**v113** (équilibrage validé par Amine, d’après le rapport v112) :
+- **Frénésie meurtrière** : +25 % des PV de base toutes les 5 nuits (au lieu de +60 % d’un coup après chaque Colosse), pour éviter le saut brutal entre la nuit 10 et la nuit 15 ; +1 dégât après chaque Colosse, comme avant.
+- **Essence** : 1 dégât par tour au lieu de 2 (de loin la carte la plus rentable).
+- **Assassin** : 2 dégâts au lieu de 3. **Meute de chiens** : 4 morsures de 1 au lieu de 2.
+- **Chef de groupe** : les unités autour attaquent une fois de plus tous les 2 tours au lieu de 3 (Le Maire garde 3). **Ambulancier** : 2 dégâts au lieu de 1.
