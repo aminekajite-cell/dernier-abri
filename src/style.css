@@ -439,3 +439,8 @@ body{background:
  .ztk,.ztk-i{width:26px;height:26px}.ztk-i{line-height:22px;font-size:13px}.ztk b{min-width:15px;height:15px;font-size:10px;line-height:15px;right:-5px;bottom:-4px}
  .stamp{font-size:12px;bottom:9px}.event:has(.stamp) .ztoks{padding-right:104px}
 }
+
+/* v100 : dos des cartes d'Amine (assets/ui/dos.webp) pour la pioche et les cartes qui volent */
+.pile .pb,.flyc.back{border:0;border-radius:9%/7%;background:url(../assets/ui/dos.webp) center/100% 100% no-repeat}
+.pile .pb{box-shadow:1px 2px 0 #c9b68c,2px 3px 0 #1e2a36,3px 4px 0 #c9b68c,4px 5px 0 #1e2a36,5px 7px 8px rgba(0,0,0,.55)}
+.pile .pb b{background:rgba(20,30,42,.88);color:#f2e1b0;border:1.5px solid #c9a35a;box-shadow:0 1px 3px rgba(0,0,0,.6)}
