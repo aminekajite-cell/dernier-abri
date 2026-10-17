@@ -485,3 +485,6 @@ ul.rules .ink{width:1.1em;height:1.1em}
 /* v104 : nom de la nuit écrit directement sur le feutre, sans étiquette */
 .fiche-top b{background:none;box-shadow:none;padding:0 2px;color:#f2e1b0;text-shadow:0 2px 3px rgba(0,0,0,.6)}
 .ztoks::before{background:none;border:0;padding:0 2px;color:#a9bfa3;top:-9px}
+/* v105 : plus d'intitulé « La horde », les jetons parlent d'eux-mêmes */
+.ztoks::before{content:none;display:none}
+.ztoks{margin-top:8px}

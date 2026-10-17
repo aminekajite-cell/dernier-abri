@@ -685,3 +685,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 **v103** : correction de la v102 selon Amine : pas de tapis autour de la zone du haut ; c’est la fiche de nuit elle-même qui est en feutre vert (comme sous la main), avec le nom de l’événement sur une étiquette de papier et les jetons de la horde dans une zone plus sombre du feutre. La piste et les jetons restent posés sur la table.
 
 **v104** : le nom de la nuit et « La horde » sont écrits directement sur le feutre (sans étiquette), pour un plateau plus épuré.
+
+**v105** : l’intitulé « La horde » est retiré de la fiche de nuit : les jetons de zombies suffisent.
