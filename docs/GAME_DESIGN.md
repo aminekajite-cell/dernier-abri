@@ -683,3 +683,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 **v102** : en haut de l’écran, la fiche de nuit, la piste des nuits et les jetons (unités, factions, mutation, ferraille) sont posés sur un tapis de feutre vert, le même que sous la main : le plateau est encadré par deux tapis de jeu. « Aucun effet » n’est plus écrit sur la fiche d’une nuit calme.
 
 **v103** : correction de la v102 selon Amine : pas de tapis autour de la zone du haut ; c’est la fiche de nuit elle-même qui est en feutre vert (comme sous la main), avec le nom de l’événement sur une étiquette de papier et les jetons de la horde dans une zone plus sombre du feutre. La piste et les jetons restent posés sur la table.
+
+**v104** : le nom de la nuit et « La horde » sont écrits directement sur le feutre (sans étiquette), pour un plateau plus épuré.
