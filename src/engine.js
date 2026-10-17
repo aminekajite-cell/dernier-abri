@@ -580,7 +580,7 @@ const Z=(()=>{
   {n:'Réveil difficile',d:'Le premier jour, tu n’as que 3 énergies'},
   {n:'Sans répit',d:'Plus de nuit de répit après le Colosse'},
   {n:'Pénurie',d:'La boutique coûte 10 ferraille, et un zombie ordinaire sur deux seulement rapporte de la ferraille'},
-  {n:'Mutation précoce',d:'Une mutation est active dès la nuit 1'},
+  {n:'Instabilité précoce',d:'Une mutation instable est active dès la nuit 1'},
   {n:'Curée',d:'La curée monte jusqu’à +3 dégâts au lieu de +2'},
   {n:'Blessures profondes',d:'Les blessés restent 4 nuits en convalescence au lieu de 3'},
   {n:'Nuits de sang',d:'Les nuits rouges amènent +50 % de zombies au lieu de +25 %'},

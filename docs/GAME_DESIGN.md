@@ -740,3 +740,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
   10. Dernier Abri : abri −3 PV max, frénésie dès la nuit 3.
 - L’accueil affiche la meilleure Menace vaincue et le nombre de victoires ; la Menace en cours s’affiche à côté du jour (« M3 »). Le défi du jour reste en Menace 0.
 - Note : la Menace 8 devait faire revenir les nuits rouges toutes les 4 nuits ; elle les rend plutôt plus fortes, pour ne pas décaler mutations et reliques.
+
+**v117** : vocabulaire (décision d’Amine, plus dans le thème) : les niveaux de difficulté de la v116 s’appellent **Mutations** (« Mutation de la horde » 0 à 10, « Mutation 3 vaincue ») au lieu de Menaces, et les affixes qui changent toutes les 5 nuits s’appellent **mutations instables**. Le niveau 5 devient « Instabilité précoce : une mutation instable dès la nuit 1 ». Dans le code, les niveaux restent `menace` / `MENACES` et les affixes `muts` / `MUTS`.
