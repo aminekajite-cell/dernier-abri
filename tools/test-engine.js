@@ -29,6 +29,14 @@ for(const k of Z.EVO_KEYS)check(`évolution ${k} : recette valide`,()=>Z.EVO[k].
 check('évolution : nouvelle carte, les 2 cartes de la recette repartent en défausse',()=>{const st=fresh();Z.place(st,'cop',2*9+3,rng(1));Z.place(st,'dog',2*9+4,rng(1));const u=st.grid.find(v=>v&&v.t==='k9squad');ok(u,'pas d’évolution');eq([...u.fbk].sort(),['cop','dog']);eq(u.src,[])});
 check('deck de départ valide',()=>eq(Z.deckError(Z.STARTER_DECK,Z.STARTER_CARDS),''));
 check('les 4 routes sont au bord, hors forêt',()=>Z.ROADS.forEach(i=>ok(Z.isEdge(i)&&!Z.isForest(i))));
+check('reliques : 22, dont 6 de victoire, tirées seulement si débloquées',()=>{eq(Object.keys(Z.RELICS).length,22);eq(Z.VICTORY_RELICS.length,6);const st=fresh();for(let k=0;k<40;k++)Z.relicChoices(st,rng(k),5).forEach(r=>ok(Z.RELICS[r].lock==null,r+' verrouillée'));st.relicPool=['serum'];ok([...Array(60).keys()].some(k=>Z.relicChoices(st,rng(k),3).includes('serum')))});
+check('reliques : effets (insigne, plan, recettes, pacte, sifflet, coffre, cartouches)',()=>{const st=fresh();const c0=Z.unitCap(st);Z.addRelic(st,'insigne');eq(Z.unitCap(st),c0+1);
+ const m0=Z.maxS(st);Z.addRelic(st,'plan');eq(Z.maxS(st),m0+3);
+ const s2=fresh();Z.addRelic(s2,'recettes');[2*9+2,2*9+4].forEach(i=>Z.place(s2,'gun',i,rng(1)));eq(s2.grid.filter(Boolean).length,1);eq(s2.grid.find(Boolean).gold,1);
+ const s3=fresh();Z.addRelic(s3,'pacte');Z.newDay(s3,rng(1));eq(s3.energy,Z.ENERGY+1);
+ const s4=fresh();Z.addRelic(s4,'sifflet');eq(Z.stat(s4,'dog').dmg,Z.U.dog.dmg+1);
+ const s5=fresh();Z.addRelic(s5,'coffre');eq(Z.storeOffer(s5,[],rng(2)).length,Z.STORE_N+1);
+ const s6=fresh();eq(Z.ammoMax(s6),2);Z.addRelic(s6,'cartouches');eq(Z.ammoMax(s6),3)});
 check('chaque type de nuit a un nom, un effet et une phrase courte',()=>Z.EVENTS.forEach(e=>ok(e.n&&e.d&&e.p&&e.p.length<=45)));
 check('Menace : 10 niveaux décrits, règles de départ',()=>{eq(Z.MENACES.length,11);for(let k=1;k<=10;k++)ok(Z.MENACES[k].n&&Z.MENACES[k].d);
  const a=Z.applyMenace(Z.newState('surv','bois',rng(1)),0,rng(1));eq(a.energy,Z.ENERGY);eq(a.muts.length,0);

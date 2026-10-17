@@ -284,8 +284,29 @@ const Z=(()=>{
   clous:{n:'Caisse de clous',d:'Tes défenses ont +3 PV'},
   rage:{n:'Adrénaline',d:'Tes unités au corps à corps font +1 dégât'},
   groupe:{n:'Groupe électrogène',d:'Plus de coupure de courant, clôtures à 2 dégâts'},
-  aimant:{n:'Aimant',d:'+3 ferraille à chaque aube'}
+  aimant:{n:'Aimant',d:'+3 ferraille à chaque aube'},
+  // v119 : 8 nouvelles reliques disponibles tout de suite
+  sifflet:{n:'Sifflet de dresseur',d:'Tes chiens ont +2 PV et +1 dégât'},
+  chirurgien:{n:'Trousse de chirurgien',d:'Tes soins rendent 1 PV de plus'},
+  gilet:{n:'Gilet pare-balles',d:'Tes tanks bloquent 1 coup sur 2 au lieu de 1 sur 3'},
+  coffre:{n:'Coffre de pillard',d:'La boutique propose 6 cartes au lieu de 5'},
+  troc:{n:'Carnet de troc',d:'Améliorer une carte coûte 10 ferraille de moins'},
+  cartouches:{n:'Ceinture de cartouches',d:'Tu peux avoir 3 munitions anti-Colosse au lieu de 2'},
+  pacte:{n:'Pacte du sang',d:'+1 énergie chaque jour, mais l’abri perd 1 PV à chaque aube',risk:1},
+  appat:{n:'Appât vivant',d:'+50 % de ferraille par zombie, mais +15 % de zombies',risk:1},
+  // v119 : 6 reliques débloquées par les victoires (lock : niveau de Mutation à vaincre)
+  serum:{n:'Sérum expérimental',d:'La convalescence ne dure que 2 nuits',lock:0},
+  cloche:{n:'Cloche d’église',d:'À chaque aube, toutes tes unités récupèrent 2 PV',lock:2},
+  recettes:{n:'Carnet de recettes',d:'Tes fusions ne demandent que 2 unités identiques',lock:4},
+  plan:{n:'Plan de l’abri',d:'L’abri a +3 PV max',lock:6},
+  insigne:{n:'Insigne du sauveteur',d:'+1 unité sur le terrain',lock:8},
+  fanion:{n:'Fanion des secours',d:'+1 énergie chaque jour',lock:10}
  };
+ const hasR=(st,r)=>!!(st&&st.relics&&st.relics.includes(r));
+ // reliques débloquées par les victoires : st.relicPool (rempli par le jeu à partir de la sauvegarde du joueur)
+ const relicOpen=(st,r)=>RELICS[r].lock==null||(st.relicPool||[]).includes(r);
+ const VICTORY_RELICS=Object.keys(RELICS).filter(r=>RELICS[r].lock!=null);
+ const ammoMax=st=>AMMO_MAX+(hasR(st,'cartouches')?1:0);
  // une relique toutes les 5 nuits
  const relicNight=n=>n%5===0;
  // familles : plus il y a d'unités d'une famille sur la carte, plus la famille est forte (2 paliers)
@@ -469,7 +490,7 @@ const Z=(()=>{
   upgrade:{n:'Améliorer une carte',d:'Toutes tes cartes de ce type sont améliorées. Plus cher à chaque fois',cost:25,more:15},
   remove:{n:'Jeter une carte',d:'Retire une carte de ton deck',cost:10}
  };
- const shopCost=(st,k)=>(k==='store'&&men(st,4)?5:0)+SHOP[k].cost+(SHOP[k].more||0)*Object.keys(st.upg||{}).length;
+ const shopCost=(st,k)=>(k==='store'&&men(st,4)?5:0)-(k==='upgrade'&&hasR(st,'troc')?10:0)+SHOP[k].cost+(SHOP[k].more||0)*Object.keys(st.upg||{}).length;
  // rareté : les cartes puissantes sortent rarement à l'aube et au troc
  const RARITY={com:{n:'Commune',w:67},rare:{n:'Rare',w:27},epic:{n:'Épique',w:6},leg:{n:'Légendaire',w:0}};
  const RAR={};
@@ -571,7 +592,8 @@ const Z=(()=>{
  const copyMax=t=>COPY_MAX[RAR[t]||'com'];
  const runPoints=(nights,kills)=>nights*10+Math.floor(kills/4);
  // ferraille d'un zombie tué : 15 pour le Colosse, 1 sinon ; en Menace 4, un zombie ordinaire sur deux seulement en rapporte
- function killScrap(st,boss){if(boss)return 15;if(!men(st,4))return 1;st.kacc=(st.kacc||0)+1;return st.kacc%2}
+ function killScrap(st,boss){let v=boss?15:1;if(!boss&&men(st,4)){st.kacc=(st.kacc||0)+1;v=st.kacc%2}
+  if(hasR(st,'appat')){st.bacc=(st.bacc||0)+v*.5;const x=Math.floor(st.bacc);st.bacc-=x;v+=x}return v}
  // victoire (v116) : survivre à la nuit 30 (le Colosse final) ; on peut ensuite partir (victoire) ou rester (infini)
  const WIN_NIGHT=30,winPoints=m=>100+50*m;
  // les 10 niveaux de Menace : chacun ajoute une règle, et ils se cumulent ; on débloque le niveau suivant en gagnant
@@ -597,7 +619,7 @@ const Z=(()=>{
   if(deck.length>DECK_MAX)return`${DECK_MAX} cartes au maximum.`;
   const c={};for(const t of deck){c[t]=(c[t]||0)+1;if(owned&&!owned.includes(t))return`${U[t].n} n’est pas dans ta collection.`;if(c[t]>copyMax(t))return`${U[t].n} : ${copyMax(t)} exemplaire(s) au maximum.`}
   return''}
- function newDay(st,rnd,offer){st.night++;(st.bench||[]).forEach(u=>{if(u.koUntil&&st.night>u.koUntil){delete u.koUntil;u.hp=maxHp(st,u)}});st.charges={};st.energy=ENERGY+(st.nextE||0);st.disc=0;st.nextE=0;st.moved=0;st.rushT=0;
+ function newDay(st,rnd,offer){st.night++;(st.bench||[]).forEach(u=>{if(u.koUntil&&st.night>u.koUntil){delete u.koUntil;u.hp=maxHp(st,u)}});st.charges={};st.energy=ENERGY+(st.nextE||0)+(hasR(st,'pacte')?1:0)+(hasR(st,'fanion')?1:0);st.disc=0;st.nextE=0;st.moved=0;st.rushT=0;
   if(offer){st.event=EVENTS.find(e=>e.id===offer.event)||EVENTS[0];st.tier=offer.tier}else{st.event=rnd()<.2?EVENTS[0]:EVENTS[1+Math.floor(rnd()*(EVENTS.length-1))];st.tier='base'}}
  const has=(st,t)=>st.grid.some(u=>u&&u.t===t);
  // Communauté au palier 2 : la 1ʳᵉ carte jouée chaque jour coûte 1 énergie de moins (minimum 0)
@@ -626,10 +648,11 @@ const Z=(()=>{
   if(R.includes('pieges'))TRAPF.forEach(k=>{if(b[k])d[k]+=2});
   if(R.includes('clous')&&b.cat==='wall')d.hp+=3;
   if(R.includes('rage')&&b.cat==='melee')d.dmg++;
+  if(R.includes('sifflet')&&DOGS.includes(t)){d.hp=(d.hp||0)+2;if(d.dmg)d.dmg++}
   return m[t]=d}
  function upgrade(st,t){st.upg[t]=1;touch(st)}
- function addRelic(st,r){if(!st.relics.includes(r))st.relics.push(r);touch(st)}
- function relicChoices(st,rnd=Math.random,n=3){return shuffle(Object.keys(RELICS).filter(r=>!st.relics.includes(r)),rnd).slice(0,n)}
+ function addRelic(st,r){if(!st.relics.includes(r)){st.relics.push(r);if(r==='plan'){st.maxS=maxS(st)+3;st.shelter+=3}}touch(st)}
+ function relicChoices(st,rnd=Math.random,n=3){return shuffle(Object.keys(RELICS).filter(r=>!st.relics.includes(r)&&relicOpen(st,r)),rnd).slice(0,n)}
  function draftChoices(rnd=Math.random,n=3,pool=KEYS){const out=[];
   while(out.length<n){let r=rnd()*100,rr='com';for(const k in RARITY){if(r<RARITY[k].w){rr=k;break}r-=RARITY[k].w}
    const cand=pool.filter(t=>RAR[t]===rr&&!out.includes(t));if(cand.length)out.push(cand[Math.floor(rnd()*cand.length)]);else if(!pool.some(t=>!out.includes(t)))break}
@@ -639,7 +662,7 @@ const Z=(()=>{
  const STORE_N=5,AMMO_COST=20,STORE_PRICE={com:8,rare:14,epic:22,leg:30};
  const storePrice=t=>STORE_PRICE[RAR[t]||'com'];
  function storeOffer(st,deckTypes,rnd=Math.random){const pool=KEYS.filter(t=>U[t]&&(U[t].cat==='item'||U[t].cat==='react')&&!U[t].antiboss&&!U[t].chief&&!(deckTypes||[]).includes(t));
-  return shuffle(pool.slice(),rnd).slice(0,STORE_N)}
+  return shuffle(pool.slice(),rnd).slice(0,STORE_N+(hasR(st,'coffre')?1:0))}
  function buyStore(st,t){const c=t==='shell'?AMMO_COST:storePrice(t);if(st.scrap<c)return false;st.scrap-=c;return true}
  function pay(st,k){const c=shopCost(st,k);if(st.scrap<c)return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(maxS(st),st.shelter+3);return true}
  // munitions anti-Colosse : achetées au troc, tirées pendant la nuit sur le Colosse (ignorent l'armure)
@@ -653,7 +676,7 @@ const Z=(()=>{
 
  /* ---------- pose des cartes ---------- */
  // limite d'unités sur le terrain : 5, puis +1 toutes les 10 nuits. Murs et pièges illimités.
- const unitCap=st=>5+Math.floor(((st&&st.night)||1)/10)+((st&&st.capB)||0);
+ const unitCap=st=>5+Math.floor(((st&&st.night)||1)/10)+((st&&st.capB)||0)+(hasR(st,'insigne')?1:0);
  const unitCount=st=>st.grid.reduce((n,u)=>n+(u&&isUnit(u.t)&&!hasEq(u,'keys')?1:0),0);
  // une pose qui déclenche une fusion ou une évolution ne prend pas de place en plus : elle reste permise à la limite
  function frees(st,t,i){if(!U[t].evo&&evoAt(st,t,i))return true;if(!canFuse(t))return false;
@@ -738,7 +761,7 @@ const Z=(()=>{
    return{k:'evo',i,j,t:k,from}}
   if(!canFuse(u.t))return null;const from=[];
   for(;;){const g=u.gold||0,same=st.grid.map((v,j)=>j!==i&&v&&v.t===u.t&&(v.gold||0)===g?j:-1).filter(j=>j>=0).sort((a,b)=>cheb(a,i)-cheb(b,i));
-   if(same.length<2)break;const js=same.slice(0,2);
+   const need=hasR(st,'recettes')?1:2;if(same.length<need)break;const js=same.slice(0,need);
    // v111 : la fusion crée une nouvelle carte ★ ; les cartes qui la composent repartent toutes en défausse
    // (u.fbk : cartes à rendre, que le rendu verse dans la défausse ; u.src=[] : la nouvelle carte ne revient pas quand l'unité tombe)
    if(!u.src||u.src.length){u.fbk=(u.fbk||[]).concat(u.src||(u.gen?[]:[u.t]));u.src=[]}
@@ -750,7 +773,7 @@ const Z=(()=>{
   if(U[u.t].block&&!u.blessed&&around(j).some(k=>st.grid[k]&&U[st.grid[k].t].bless)){u.hp=1;u.blessed=1;ev.push({i:j,k:'saved',name:u.name||U[u.t].n});return false}
   // convalescence : une unité qui tombe pour la 1ʳᵉ fois part blessée en réserve (elle garde tout) et se repose 3 nuits.
   // Elle garde une cicatrice : la fois suivante, elle tombe pour de bon.
-  if(isUnit(u.t)&&!u.scar){st.grid[j]=null;u.scar=1;u.hp=0;u.koUntil=st.night+(men(st,7)?4:3);(st.bench=st.bench||[]).push(u);ev.push({i:j,k:'ko',t:u.t,name:u.name});return true}
+  if(isUnit(u.t)&&!u.scar){st.grid[j]=null;u.scar=1;u.hp=0;u.koUntil=st.night+(men(st,7)?4:3)-(hasR(st,'serum')?1:0);(st.bench=st.bench||[]).push(u);ev.push({i:j,k:'ko',t:u.t,name:u.name});return true}
   st.grid[j]=null;ev.push({i:j,k:'lost',t:u.t,name:u.name});
   if(isWallU(u))around(j).forEach(k=>{const v=st.grid[k];if(isWallU(v))v.hp=Math.min(v.hp,maxHp(st,v))});
   if(u.name)(st.fallen=st.fallen||[]).push({name:u.name,t:u.t,trait:u.trait,kills:u.kills||0,night:st.night});return true}
@@ -771,7 +794,7 @@ const Z=(()=>{
  // nuits de pression : toutes les 5 nuits, +25 % de zombies pour la nuit
  const pressure=n=>n%5===0;
  function waveList(st){const e=st.event.id,w={};
-  for(const k of ZK){let v=waveCount(k,st.night);if(k!=='boss'){if(e==='lune')v*=1.5;v=Math.round(v*(1+.15*mc(st,'nombre'))*(pressure(st.night)?(men(st,8)?1.5:1.25):1)*(respite(st.night,st)?.7:1)*((PLACES[st.place]||{}).count||1)*((TIERS[st.tier]||TIERS.base).count))}w[k]=v}
+  for(const k of ZK){let v=waveCount(k,st.night);if(k!=='boss'){if(e==='lune')v*=1.5;v=Math.round(v*(1+.15*mc(st,'nombre'))*(pressure(st.night)?(men(st,8)?1.5:1.25):1)*(respite(st.night,st)?.7:1)*((PLACES[st.place]||{}).count||1)*((TIERS[st.tier]||TIERS.base).count)*(hasR(st,'appat')?1.15:1))}w[k]=v}
   if(e==='sprint'){w.run+=w.walk;w.walk=0}
   if(w.boss&&men(st,9))w.boss++;
   return w}
@@ -836,7 +859,7 @@ const Z=(()=>{
    // 15 dégâts au mur frappé (le surplus passe aux murs reliés les plus proches), 6 à une unité, puis 3 autour
    const cells=D.cat==='wall'?[n,...wallGroup(st,n).filter(j=>j!==n).sort((a,b)=>cheb(a,n)-cheb(b,n))]:[n];
    for(const j of cells){const v=st.grid[j];if(!v||left<=0)continue;const d=Math.min(left,v.hp);v.hp-=d;left-=d;ev.push({i:j,txt:'−'+d,k:'bite',zid:z.id});if(v.hp<=0)lose(st,j,v,ev)}
-   sapBlast(st,z.pos,ev);return}let d=T.boss?bossHit(st):zhit(st,z);if(roleOf(u.t)==='tank'){u.blk=(u.blk||0)+1;if(u.blk%(hasEq(u,'gear')?2:3)===0){ev.push({i:n,txt:'bloqué',k:'block',zid:z.id});return}}if(!T.boss&&(st._fl||{}).police&&famOf(u.t)==='police')d=Math.max(1,d-1);if(D.cap&&!T.boss)d=Math.min(d,D.cap);if(!T.boss&&isUnit(u.t)&&nearPost(st,n,'trench'))d=Math.max(1,d-1);
+   sapBlast(st,z.pos,ev);return}let d=T.boss?bossHit(st):zhit(st,z);if(roleOf(u.t)==='tank'){u.blk=(u.blk||0)+1;if(u.blk%((hasEq(u,'gear')||hasR(st,'gilet'))?2:3)===0){ev.push({i:n,txt:'bloqué',k:'block',zid:z.id});return}}if(!T.boss&&(st._fl||{}).police&&famOf(u.t)==='police')d=Math.max(1,d-1);if(D.cap&&!T.boss)d=Math.min(d,D.cap);if(!T.boss&&isUnit(u.t)&&nearPost(st,n,'trench'))d=Math.max(1,d-1);
   // curée (v114) : une unité encerclée prend +1 dégât par autre zombie à son contact (+2 au plus) : un tank qui attire la horde doit être soigné
   if(!T.boss&&isUnit(u.t))d+=Math.min(CUREE_MAX+(men(st,6)?1:0),st.z.filter(o=>o!==z&&o.hp>0&&!ZT[o.k].boss&&cheb(o.pos,n)<=1).length);
   const tn=n,tu=u;
@@ -879,12 +902,12 @@ const Z=(()=>{
     const F=famOf(u.t),rng=Math.max(1,D.rng-(e==='brume'&&D.cat==='shoot'?1:0)+(D.cat==='shoot'&&ally(st,'martial')?1:0)+((TRAITS[u.trait]||{}).rngB||0)+(fl.police>=2&&F==='police'?1:0)+(fl.comm&&F==='comm'&&D.rng>1?1:0)+(D.rng>1&&hasEq(u,'binoc')?1:0)+(D.cat==='shoot'&&D.rng>1&&nearPost(st,i,'tower')?1:0)+(e==='brume'&&D.cat==='shoot'&&hasEq(u,'torch')?1:0)),
      dmg=D.dmg+lampB(st,i,pow)+unitDmg(u)+sol(st,i,u)+(fl.mil&&F==='mil'?1:0)+(D.cat==='melee'&&fl.farm?1:0)+(fl.tech&&F==='tech'?1:0)+(fl.care&&F==='care'?1:0)+(D.cat==='melee'&&ally(st,'hunt')?1:0)+(squad(st,i)?1:0)+(F&&fl[F]>=2?1:0)+(DOGS.includes(u.t)&&around(i).some(j=>st.grid[j]&&U[st.grid[j].t].dogBoost)?1:0)+(D.cat==='shoot'&&st.alarmT>=st.tick?1:0);
     for(let r=0;r<reps;r++)attack(st,i,u,D,rng,dmg,ev)}
-   if(D.heal&&(D.hfast||st.tick%2===0)){const ns=(D.hrng>1?st.grid.map((v,j)=>j).filter(j=>j!==i&&inRange(j,i,D.hrng)):around(i)).map(j=>st.grid[j]).filter(v=>v&&isUnit(v.t)&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0)+(u.gold||0)+(squad(st,i)?1:0));ev.push({i,k:'heal'})}}
+   if(D.heal&&(D.hfast||st.tick%2===0)){const ns=(D.hrng>1?st.grid.map((v,j)=>j).filter(j=>j!==i&&inRange(j,i,D.hrng)):around(i)).map(j=>st.grid[j]).filter(v=>v&&isUnit(v.t)&&v.hp<maxHp(st,v));if(ns.length){ns.sort((a,b)=>(a.hp-maxHp(st,a))-(b.hp-maxHp(st,b)));ns[0].hp=Math.min(maxHp(st,ns[0]),ns[0].hp+D.heal+(fl.care?1:0)+(hasR(st,'chirurgien')?1:0)+(u.gold||0)+(squad(st,i)?1:0));ev.push({i,k:'heal'})}}
    if(D.mech&&!D.mechAll){const ns=around(i).filter(j=>st.grid[j]&&repairable(st.grid[j].t)&&st.grid[j].hp<maxHp(st,st.grid[j])&&repOK(st,j));if(ns.length){repDone(st,ns[0]);const w=st.grid[ns[0]];w.hp=Math.min(maxHp(st,w),w.hp+(D.mech>1?D.mech:1)+(fl.tech>=2?1:0)+(u.gold||0)+(sol(st,i,u)?1:0));ev.push({i:ns[0],k:'heal'})}}
    if(D.selfHeal&&st.tick%2===0&&u.hp<maxHp(st,u)){u.hp++;ev.push({i,k:'heal'})}
    if(hasEq(u,'medkit')&&st.tick%2===0){const ns=around(i).filter(j=>{const v=st.grid[j];return v&&isUnit(v.t)&&v.hp<maxHp(st,v)});if(ns.length){const v=st.grid[ns[0]];v.hp++;ev.push({i:ns[0],k:'heal'})}}
    if(D.regen&&st.tick%D.regen===0&&u.hp<maxHp(st,u)){u.hp++;ev.push({i,k:'heal'})}
-   if(D.healAll&&st.tick%2===0)around(i).forEach(j=>{const v=st.grid[j];if(v&&isUnit(v.t)&&v.hp<maxHp(st,v)){v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.care?1:0));ev.push({i:j,k:'heal'})}});
+   if(D.healAll&&st.tick%2===0)around(i).forEach(j=>{const v=st.grid[j];if(v&&isUnit(v.t)&&v.hp<maxHp(st,v)){v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.care?1:0)+(hasR(st,'chirurgien')?1:0));ev.push({i:j,k:'heal'})}});
    if(D.mechAll)around(i).forEach(j=>{const v=st.grid[j];if(v&&repairable(v.t)&&v.hp<maxHp(st,v)&&repOK(st,j)){repDone(st,j);v.hp=Math.min(maxHp(st,v),v.hp+1+(fl.tech>=2?1:0));ev.push({i:j,k:'heal'})}});
    if(D.aura&&st.tick%2===0)alive().filter(z=>cheb(z.pos,i)<=1).forEach(z=>{hit(st,z,1+(fl.pyro?1:0),ev,i,1);z.burnT=Math.max(z.burnT||0,2)});
    if(D.burn&&e!=='pluie')alive().filter(z=>z.pos===i).forEach(z=>{z.inFire=1;hit(st,z,D.burn+(fl.pyro?1:0),ev,i,1)});
@@ -921,6 +944,8 @@ const Z=(()=>{
   const h=st.grid.reduce((a,u)=>a+(u&&U[u.t].cook||0),0)+(st.relics.includes('soupe')?1:0)+(fl.comm?1:0)+(mutual?1:0),before=st.shelter;
   if(fl.care>=2)st.grid.forEach(u=>{if(u&&isUnit(u.t))u.hp=Math.min(maxHp(st,u),u.hp+2)});
   st.shelter=Math.min(maxS(st),st.shelter+h);
+  if(hasR(st,'pacte'))st.shelter=Math.max(1,st.shelter-1);
+  if(hasR(st,'cloche'))st.grid.forEach(u=>{if(u&&isUnit(u.t))u.hp=Math.min(maxHp(st,u),u.hp+2)});
   st.grid.forEach((u,i)=>{if(u&&U[u.t].carp)around(i).forEach(j=>{const v=st.grid[j];if(v&&repairable(v.t))v.hp=Math.min(maxHp(st,v),v.hp+U[u.t].carp)})});
   st.grid.forEach((u,i)=>{if(u&&isUnit(u.t)&&nearPost(st,i,'pump'))u.hp=maxHp(st,u)});
   const bh=st.grid.reduce((a,u)=>a+(u&&U[u.t].benchHeal||0),0);if(bh)(st.bench||[]).forEach(u=>{if(!u.koUntil)u.hp=Math.min(maxHp(st,u),u.hp+bh)});
@@ -950,6 +975,6 @@ const Z=(()=>{
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
  return{inRange,manh,SAP_WALL,ROLES,roleOf,TAUNT,squad,nbRoles,lureTarget,pathStep,field,N,C,MID,LINE,LINE_MAX,TRACE,CHARGES,chargesOf,isTrace,charges,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,CUREE_MAX,MENACES,MENACE_MAX,applyMenace,WIN_NIGHT,winPoints,killScrap,EV_CHANCE,EV_GAP,STORE_N,AMMO_COST,STORE_PRICE,storePrice,storeOffer,buyStore,rc,isEdge,isForest,ROADS,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,frenzyMult,FRENZY,FRENZY_FROM,dmgBonus,pressure,lvKills,lvOf,ammoDmg,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move,bossHit,frenzyLv,respite,eqOf,hasEq,isUnit,unitCap,unitCount,capFull,canRecall,recall,canPlaceBench,placeBench,famLevel};
+  DAWN,dawnEvent,resolveDawn,CUREE_MAX,VICTORY_RELICS,relicOpen,ammoMax,hasR,MENACES,MENACE_MAX,applyMenace,WIN_NIGHT,winPoints,killScrap,EV_CHANCE,EV_GAP,STORE_N,AMMO_COST,STORE_PRICE,storePrice,storeOffer,buyStore,rc,isEdge,isForest,ROADS,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,frenzyMult,FRENZY,FRENZY_FROM,dmgBonus,pressure,lvKills,lvOf,ammoDmg,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move,bossHit,frenzyLv,respite,eqOf,hasEq,isUnit,unitCap,unitCount,capFull,canRecall,recall,canPlaceBench,placeBench,famLevel};
 })();
 if(typeof module!=='undefined')module.exports=Z;

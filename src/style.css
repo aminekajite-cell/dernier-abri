@@ -539,3 +539,7 @@ html.eco .hand .card.guide,html.eco .go.guide{animation:none;outline:3px solid #
 .panel p.mwon{text-align:center;font-weight:700;color:#7a4a00}
 .panel ul.mlist{font-size:13px;gap:2px}
 .tabs.menace .tab{flex:0 0 auto;min-width:38px;padding:6px 4px}
+
+/* v119 : dos de carte doré (récompense de la première victoire) */
+html.goldback .pile .pb,html.goldback .flyc.back{filter:sepia(.55) saturate(2.2) hue-rotate(-8deg) brightness(1.06)}
+html.goldback .pile .pb{box-shadow:0 0 0 2px #f2c23d,1px 2px 0 #c9b68c,2px 3px 0 #6b4e2e,3px 4px 0 #c9b68c,4px 5px 0 #6b4e2e,5px 7px 10px rgba(0,0,0,.55)}

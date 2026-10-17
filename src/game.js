@@ -169,7 +169,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v118 · 17 oct.';
+const VERSION='v119 · 17 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -179,9 +179,9 @@ const VERSION='v118 · 17 oct.';
   location.replace(location.pathname+'?v='+v.slice(1)+location.hash)}).catch(()=>{})}catch(e){}})();
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 // options du joueur (enregistrées sur l'appareil)
-const OPT=(()=>{const d={sfx:1,mus:1,speed:1,shake:1,text:0,eco:0,lang:'fr'};try{return Object.assign(d,JSON.parse(localStorage.getItem('abri-opts'))||{})}catch(e){return d}})();
+const OPT=(()=>{const d={sfx:1,mus:1,speed:1,shake:1,text:0,eco:0,back:'',lang:'fr'};try{return Object.assign(d,JSON.parse(localStorage.getItem('abri-opts'))||{})}catch(e){return d}})();
 function saveOpt(){try{localStorage.setItem('abri-opts',JSON.stringify(OPT))}catch(e){}}
-function applyOpt(){try{SFX.setVol(OPT.sfx,OPT.mus);SFX.setMaxVoices(OPT.eco?5:10)}catch(e){}document.documentElement.classList.toggle('bigtext',!!OPT.text);document.documentElement.classList.toggle('eco',!!OPT.eco);if(typeof fit==='function'&&cv){fit.w0=0}document.documentElement.lang=OPT.lang}
+function applyOpt(){try{SFX.setVol(OPT.sfx,OPT.mus);SFX.setMaxVoices(OPT.eco?5:10)}catch(e){}document.documentElement.classList.toggle('bigtext',!!OPT.text);document.documentElement.classList.toggle('eco',!!OPT.eco);document.documentElement.classList.toggle('goldback',OPT.back==='gold');if(typeof fit==='function'&&cv){fit.w0=0}document.documentElement.lang=OPT.lang}
 const TICK=650;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1178,7 +1178,7 @@ function shopScreen(){
  S.phase='shop';S.picks=null;save();
  const row=(k,ex)=>{const o=Z.SHOP[k],c=Z.shopCost(G,k),ok=G.scrap>=c&&!ex;return `<button type="button" class="shopi" data-a="shop-${k}" ${ok?'':'disabled'}><span><b>${o.n}</b>${o.d}</span><span class="cost">${svg('scrap')}${c}</span></button>`};
  const upg=deckTypes().filter(t=>Z.UPGRADABLE.includes(t)&&!G.upg[t]);
- show(`<h2 class="pw">Le troc de l’aube</h2><p>Tu as <b>${G.scrap} ferraille</b>. Un zombie éliminé rapporte 1 ferraille, le Colosse 15. Économise pour ce qui compte. ${G.night%10===9?'<b>Le Colosse attaque demain !</b> ':''}Munitions anti-Colosse : <b>${ammoOwned()}/${Z.AMMO_MAX}</b>.</p>
+ show(`<h2 class="pw">Le troc de l’aube</h2><p>Tu as <b>${G.scrap} ferraille</b>. Un zombie éliminé rapporte 1 ferraille, le Colosse 15. Économise pour ce qui compte. ${G.night%10===9?'<b>Le Colosse attaque demain !</b> ':''}Munitions anti-Colosse : <b>${ammoOwned()}/${Z.ammoMax(G)}</b>.</p>
   <div class="shop">${S.store?`<button type="button" class="shopi" data-a="store-open"><span><b>Retourner à la boutique</b>Déjà ouverte pour cette aube</span><span class="cost">✓</span></button>`:row('store')}${row('heal',G.shelter>=Z.maxS(G))}${row('upgrade',!upg.length)}${row('remove',deckList().length<=5)}</div>
   <button type="button" class="go" data-a="nightpick">Continuer</button>`);
 }
@@ -1188,8 +1188,8 @@ const ammoOwned=()=>[...S.hand,...S.draw,...S.discard].filter(t=>t==='shell').le
 // la boutique : 5 objets absents du deck (un exemplaire chacun) et des munitions ; les achats arrivent en main
 function storeScreen(){const st=S.store;if(!st)return shopScreen();const own=ammoOwned();
  const item=(t,price,dis,label)=>`<div class="citem${dis?' locked':''}">${cardFace(t,{base:1})}<span class="qty"><button type="button" class="buy" data-a="store-buy" data-v="${t}" ${dis||G.scrap<price?'disabled':''}>${label||price+' ferraille'}</button></span></div>`;
- show(`<h2 class="pw">La boutique</h2><p>Tu as <b>${G.scrap} ferraille</b>. Les cartes achetées arrivent dans ta main et rejoignent ton deck pour la partie. Une seule de chaque, sauf les munitions (${own}/${Z.AMMO_MAX}).</p>
-  <div class="cgrid">${st.c.map(t=>st.b.includes(t)?item(t,0,1,'✓ Achetée'):item(t,Z.storePrice(t))).join('')}${item('shell',Z.AMMO_COST,own>=Z.AMMO_MAX,own>=Z.AMMO_MAX?`Maximum (${Z.AMMO_MAX})`:'')}</div>
+ show(`<h2 class="pw">La boutique</h2><p>Tu as <b>${G.scrap} ferraille</b>. Les cartes achetées arrivent dans ta main et rejoignent ton deck pour la partie. Une seule de chaque, sauf les munitions (${own}/${Z.ammoMax(G)}).</p>
+  <div class="cgrid">${st.c.map(t=>st.b.includes(t)?item(t,0,1,'✓ Achetée'):item(t,Z.storePrice(t))).join('')}${item('shell',Z.AMMO_COST,own>=Z.ammoMax(G),own>=Z.ammoMax(G)?`Maximum (${Z.ammoMax(G)})`:'')}</div>
   <button type="button" class="go" data-a="store-back">Retour au troc</button>`,true)}
 const pileTypes=()=>[...new Set(pileList())];
 function listScreen(title,txt,types,a){show(`<h2 class="pw">${title}</h2><p>${txt}</p><div class="deck pickable">${types.map(t=>`<button type="button" class="dk" data-a="${a}" data-v="${t}" style="--cc:${cc(t)}">${art(t)}<span><b>${cardName(t)}${a==='up-pick'?` → ${Z.upgDesc(t)}`:''}</b>${Z.U[t].d}</span></button>`).join('')}</div><button type="button" class="skip" data-a="shop">Retour</button>`)}
@@ -1205,10 +1205,15 @@ function nextDay(offer){
 }
 // victoire : la nuit 30 est tenue, les secours arrivent. Partir (victoire) ou rester (infini, pour le score)
 function victory(){G.won=1;const m=G.menace||0,pts=G.daily?0:Z.winPoints(m),unl=!G.daily&&m<Z.MENACE_MAX&&(META.menace||0)<=m;
+ let relUnl=null,relStart=null;
+ if(!G.daily){const vr=Z.VICTORY_RELICS.find(r=>Z.RELICS[r].lock===m&&!(META.relicsUnl||[]).includes(r));if(vr){relUnl=vr;META.relicsUnl=[...(META.relicsUnl||[]),vr]}
+  const avail=Object.keys(Z.RELICS).filter(r=>(Z.RELICS[r].lock==null||(META.relicsUnl||[]).includes(r))&&!(META.startPool||[]).includes(r));
+  if(avail.length){relStart=avail[Math.floor(Math.random()*avail.length)];META.startPool=[...(META.startPool||[]),relStart]}}
+ if(!G.daily&&!META.wins){OPT.back='gold';saveOpt();applyOpt()}
  if(!G.daily){META.wins=(META.wins||0)+1;META.menaceWon=Math.max(META.menaceWon??-1,m);META.menace=Math.max(META.menace||0,Math.min(Z.MENACE_MAX,m+1));META.points=(META.points||0)+pts;saveMeta(META)}
  save();SFX.play('dawn');const alive=G.grid.filter(u=>u&&u.name).map(u=>u.name);
  show(`<h2 class="ok">Les secours sont là !</h2><p>À l’aube de la nuit ${Z.WIN_NIGHT}, un hélicoptère se pose devant l’abri. Tu as tenu.</p><div class="big">Victoire${m?` · Mutation ${m}`:''}</div>
-  <p><b>${G.kills}</b> zombies éliminés.${alive.length?` Survivants : ${alive.join(', ')}.`:''}</p>${pts?`<p>+<b>${pts}</b> points de survie (total : ${META.points}).</p>`:''}${unl?`<p class="tipin">🔓 <b>Mutation ${m+1} débloquée</b> : ${Z.MENACES[m+1].n}. Choisis-la en préparant ta prochaine partie.</p>`:''}
+  <p><b>${G.kills}</b> zombies éliminés.${alive.length?` Survivants : ${alive.join(', ')}.`:''}</p>${pts?`<p>+<b>${pts}</b> points de survie (total : ${META.points}).</p>`:''}${META.wins===1&&!G.daily?`<p class="tipin">✨ <b>Dos de carte doré</b> débloqué pour ta première victoire (modifiable dans les Options).</p>`:''}${unl?`<p class="tipin">🔓 <b>Mutation ${m+1} débloquée</b> : ${Z.MENACES[m+1].n}. Choisis-la en préparant ta prochaine partie.</p>`:''}${relUnl?`<p class="tipin">🎁 <b>Nouvelle relique débloquée</b> : ${Z.RELICS[relUnl].n} (${Z.RELICS[relUnl].d}). Tu pourras la trouver en partie.</p>`:''}${relStart?`<p class="tipin">🎒 <b>Relique de départ</b> : ${Z.RELICS[relStart].n} rejoint ta réserve. Choisis-la avant ta prochaine partie.</p>`:''}
   <button type="button" class="go" data-a="win-leave">Partir avec les secours</button><button type="button" class="skip" data-a="win-stay">Rester : une nuit de plus (mode infini, pour le score)</button>
   <p class="ver">Si tu restes, ta victoire est déjà acquise : la horde grandit chaque nuit, jusqu’à ce qu’elle gagne.</p>`)}
 function leaveWin(){clearSave();const nights=G.night;let pts=0;if(!G.daily){pts=Z.runPoints(nights,G.kills);META.points=(META.points||0)+pts;META.best=Math.max(META.best,nights);META.total+=nights;META.runs++;saveMeta(META)}
@@ -1242,6 +1247,7 @@ function optionsScreen(back){if(back)optBack=back;const pc=v=>Math.round(v*100);
   <label><span>Musique et ambiance <b>${pc(OPT.mus)} %</b></span><input type="range" min="0" max="100" step="5" value="${pc(OPT.mus)}" data-o="mus"></label>
   <label>Vitesse de la nuit au départ<select data-o="speed">${[1,2,4].map(v=>`<option value="${v}" ${OPT.speed==v?'selected':''}>× ${v}</option>`).join('')}</select></label>
   <label class="chk"><input type="checkbox" data-o="shake" ${OPT.shake?'checked':''}> Secousses de l’écran</label>
+  ${(typeof META!=='undefined'&&META.wins>0)?`<label>Dos des cartes<select data-o="back"><option value="" ${OPT.back!=='gold'?'selected':''}>Classique</option><option value="gold" ${OPT.back==='gold'?'selected':''}>Doré (victoire)</option></select></label>`:''}
   <label class="chk"><input type="checkbox" data-o="eco" ${OPT.eco?'checked':''}> Mode économie (petits téléphones : moins d’effets, plateau moins détaillé)</label>
   <label class="chk"><input type="checkbox" data-o="text" ${OPT.text?'checked':''}> Texte plus grand</label>
  </div><button type="button" class="go" data-a="optclose">Retour</button>`)}
@@ -1283,12 +1289,12 @@ function hide(){ov.hidden=true;requestAnimationFrame(()=>{try{animPiles()}catch(
 function takeLegacy(){G.legacy=[];if(META.legacy&&META.legacy.length){META.legacy=[];saveMeta(META)}}
 const legacyTxt=()=>'';const legacyTxt0=()=>(META.legacy||[]).length?`<p>🎖️ Souvenirs pour cette partie : ${META.legacy.map(l=>`<b>${l.name}</b> (${Z.U[l.t].n}, ${l.kills} zombies) : ton premier ${Z.U[l.t].n} posé aura +1 dégât et +2 PV`).join(' ; ')}.</p>`:'';
 function ensureMeta(){if(!META.cards||!META.cards.length)META.cards=Z.STARTER_CARDS.slice();if(META.points==null)META.points=(META.total||0)*5;
- if(!META.decks)META.decks=[0,1,2].map(()=>Z.STARTER_DECK.slice());if(META.slot==null)META.slot=0;if(META.menace==null)META.menace=0;if(META.menaceWon==null)META.menaceWon=-1;if(META.wins==null)META.wins=0;saveMeta(META)}
+ if(!META.decks)META.decks=[0,1,2].map(()=>Z.STARTER_DECK.slice());if(META.slot==null)META.slot=0;if(META.menace==null)META.menace=0;if(META.menaceWon==null)META.menaceWon=-1;if(META.wins==null)META.wins=0;if(!META.relicsUnl)META.relicsUnl=[];if(!META.startPool)META.startPool=[];saveMeta(META)}
 ensureMeta();
-const PREP={ch:'surv',pl:'bois',menace:0};
+const PREP={ch:'surv',pl:'bois',menace:0,relic:''};
 // niveaux de Menace : on choisit le niveau avant la partie ; chaque victoire débloque le suivant (jusqu'à 10)
 const menaceTabs=()=>`<div class="tabs wrap menace">${Array.from({length:Z.MENACE_MAX+1},(_,k)=>k<=(META.menace||0)?`<button type="button" class="tab${k===PREP.menace?' on':''}" data-a="prepmen" data-v="${k}">${k}${k<=META.menaceWon?' ✓':''}</button>`:`<button type="button" class="tab" disabled>🔒 ${k}</button>`).join('')}</div>`;
-const menaceTxt=m=>m?`<b>Mutation ${m}</b> (tous les niveaux jusqu’au ${m} s’additionnent) :</p><ul class="mlist">${Z.MENACES.slice(1,m+1).map((x,k)=>`<li><b>${k+1}. ${x.n}</b> : ${x.d}.</li>`).join('')}</ul><p>Victoire : +${Z.winPoints(m)} points de survie${m<Z.MENACE_MAX?` et la Mutation ${m+1} débloquée`:''}.`:`<b>Mutation 0</b> : la horde d’origine. Gagne la nuit ${Z.WIN_NIGHT} pour débloquer la Mutation 1.`;
+const menaceTxt=m=>m?`<b>Mutation ${m}</b> (tous les niveaux jusqu’au ${m} s’additionnent) :</p><ul class="mlist">${Z.MENACES.slice(1,m+1).map((x,k)=>`<li><b>${k+1}. ${x.n}</b> : ${x.d}.</li>`).join('')}</ul><p>Victoire : +${Z.winPoints(m)} points de survie${m<Z.MENACE_MAX?` et la Mutation ${m+1} débloquée`:''}.`:`<b>Mutation 0</b> : la horde d’origine.${(META.menace||0)<1?` Gagne la nuit ${Z.WIN_NIGHT} pour débloquer la Mutation 1.`:''}`;
 const deckCount=d=>{const c={};d.forEach(t=>c[t]=(c[t]||0)+1);return c};
 function prepScreen(){const u=Z.unlocks(META);PREP.menace=Math.max(0,Math.min(META.menace||0,PREP.menace??META.menaceSel??0));if(!u.chars.includes(PREP.ch))PREP.ch='surv';if(!u.places.includes(PREP.pl))PREP.pl='bois';
  const d=META.decks[META.slot],err=Z.deckError(d,META.cards),fc={};d.forEach(t=>{const f=Z.famOf(t);if(f)fc[f]=(fc[f]||0)+1});
@@ -1301,6 +1307,7 @@ function prepScreen(){const u=Z.unlocks(META);PREP.menace=Math.max(0,Math.min(ME
   <h3>Ton lieu</h3><div class="tabs wrap">${Object.keys(Z.PLACES).map(k=>u.places.includes(k)?`<button type="button" class="tab${k===PREP.pl?' on':''}" data-a="preppl" data-v="${k}">${Z.PLACES[k].n}</button>`:`<button type="button" class="tab" disabled>🔒 ${Z.PLACES[k].n}</button>`).join('')}</div>
   <p>${Z.PLACES[PREP.pl].d}</p>
   <h3>Mutation de la horde</h3>${menaceTabs()}<p>${menaceTxt(PREP.menace)}</p>
+  <h3>Relique de départ</h3>${(META.startPool||[]).length?`<div class="tabs wrap"><button type="button" class="tab${!PREP.relic?' on':''}" data-a="preprel" data-v="">Aucune</button>${META.startPool.map(r=>`<button type="button" class="tab${PREP.relic===r?' on':''}" data-a="preprel" data-v="${r}">${Z.RELICS[r].n}</button>`).join('')}</div><p>${PREP.relic?`<b>${Z.RELICS[PREP.relic].n}</b> : ${Z.RELICS[PREP.relic].d}.`:'Tu commences sans relique en plus.'}</p>`:'<p>Chaque victoire ajoute une relique à ta réserve : tu pourras en choisir une ici avant la partie.</p>'}
   ${legacyTxt()}<button type="button" class="go" data-a="start" ${err?'disabled':''}>Commencer</button>
   <button type="button" class="skip" data-a="coll">Collection (${META.points} points)</button><button type="button" class="skip" data-a="title">Retour</button>`)}
 /* recherche et tri des cartes (collection et éditeur de deck) */
@@ -1349,8 +1356,9 @@ const ACT={
  preppl:v=>{PREP.pl=v;prepScreen()},
  'win-leave':()=>leaveWin(),
  'win-stay':()=>{G.endless=1;save();SFX.play('ui');dawn()},
+ preprel:v=>{PREP.relic=v||'';prepScreen()},
  prepmen:v=>{PREP.menace=+v;META.menaceSel=+v;saveMeta(META);prepScreen()},
- start:()=>{const d=META.decks[META.slot];if(Z.deckError(d,META.cards))return;newGame(PREP.ch,PREP.pl,null,d);Z.applyMenace(G,PREP.menace,R);takeLegacy();save();hide();render()},
+ start:()=>{const d=META.decks[META.slot];if(Z.deckError(d,META.cards))return;newGame(PREP.ch,PREP.pl,null,d);G.relicPool=(META.relicsUnl||[]).slice();Z.applyMenace(G,PREP.menace,R);if(PREP.relic&&(META.startPool||[]).includes(PREP.relic)&&!G.relics.includes(PREP.relic)){Z.addRelic(G,PREP.relic);if(PREP.relic==='pacte'||PREP.relic==='fanion')G.energy++}takeLegacy();save();hide();render()},
  edit:()=>deckEditor(),
  dkp:v=>{const d=META.decks[META.slot];if(d.length<Z.DECK_MAX&&(deckCount(d)[v]||0)<Z.copyMax(v)&&META.cards.includes(v)){d.push(v);saveMeta(META)}deckEditor(1)},
  dkm:v=>{const d=META.decks[META.slot],k=d.indexOf(v);if(k>=0){d.splice(k,1);saveMeta(META)}deckEditor(1)},
@@ -1379,7 +1387,7 @@ const ACT={
  'shop-store':()=>{if(Z.pay(G,'store')){S.store={c:Z.storeOffer(G,deckTypes(),R),b:[]};save();render();SFX.play('ui')}storeScreen()},
  'store-open':()=>storeScreen(),
  'store-back':()=>shopScreen(),
- 'store-buy':v=>{const st=S.store;if(!st||!v)return;if(v==='shell'?ammoOwned()>=Z.AMMO_MAX:(st.b.includes(v)||!st.c.includes(v)))return;
+ 'store-buy':v=>{const st=S.store;if(!st||!v)return;if(v==='shell'?ammoOwned()>=Z.ammoMax(G):(st.b.includes(v)||!st.c.includes(v)))return;
   if(!Z.buyStore(G,v))return;if(v!=='shell')st.b.push(v);if(S.hand.length<Z.HAND_MAX)S.hand.push(v);else S.discard.push(v);SFX.play('place');save();render();storeScreen()},
  'shop-upgrade':()=>listScreen('Améliorer une carte','Toutes les cartes de ce type seront améliorées, y compris celles déjà posées.',deckTypes().filter(t=>Z.UPGRADABLE.includes(t)&&!G.upg[t]),'up-pick'),
  'shop-remove':()=>listScreen('Jeter une carte','Une carte de ce type quitte ton deck pour cette partie (les unités posées ne comptent pas).',pileTypes(),'rm-pick'),
@@ -1398,7 +1406,7 @@ panel.addEventListener('change',e=>{const f=e.target.dataset&&e.target.dataset.f
 panel.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=ACT[b.dataset.a];if(f)f(b.dataset.v)});
 panel.addEventListener('input',e=>{const el=e.target.closest('[data-o]');if(!el)return;const k=el.dataset.o;
  if(k==='sfx'||k==='mus'){OPT[k]=+el.value/100;const b=el.parentElement.querySelector('b');if(b)b.textContent=el.value+' %'}
- else if(k==='speed')OPT.speed=+el.value;else if(k==='shake'||k==='text'||k==='eco')OPT[k]=el.checked?1:0;else if(k==='lang')OPT.lang=el.value;
+ else if(k==='speed')OPT.speed=+el.value;else if(k==='shake'||k==='text'||k==='eco')OPT[k]=el.checked?1:0;else if(k==='lang')OPT.lang=el.value;else if(k==='back')OPT.back=el.value;
  saveOpt();applyOpt();if(k==='sfx')SFX.play('ui')});
 $('#go').addEventListener('click',()=>{if(S.pause)resumeWave();else if(S.busy){SPEED=SPEED===1?2:SPEED===2?4:1;render()}else night()});
 
