@@ -48,9 +48,11 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 
 ## Prochaines étapes (par ordre de priorité)
 
-1. Équilibrage : adapter le joueur automatique de `tools/balance.js` (limite d’unités, réserve, convalescence, postes) puis mesurer la courbe de difficulté et le classement des cartes.
-2. Performance sur téléphone d’entrée de gamme pendant les grosses nuits (particules, nombre de sons).
-3. Derniers sons enregistrés (arbalète, lance-flammes, mort d’un survivant, aube, musique de nuit) : fichiers CC0 fournis par Amine, intégrés comme dans `assets/sounds/` (voir `CREDITS.md`).
-4. Graphismes : le jeu est en style cartoon (illustrations et sprites générés). Avant Steam, faire retoucher ou redessiner l’ensemble par un artiste dans ce style, et déclarer l’usage d’IA sur Steam.
-5. Préparer Steam : test à l’aveugle, page Steam, démo pour le Next Fest, version Electron ou Tauri, succès, sauvegarde cloud, classement du défi quotidien.
-6. **Traduction (en dernier, une fois le jeu stabilisé, décision d’Amine)** : sortir tous les textes (cartes, zombies, règles, interface) dans des fichiers de langue et traduire en anglais. Le choix de langue existe déjà dans les options (anglais marqué « bientôt »). D’ici là, écrire les nouveaux textes en français uniquement.
+Équilibrage : Amine est satisfait de l’état v114 (frénésie +10 %/nuit sur PV et dégâts, curée, 4 énergies). Le joueur automatique de `tools/balance.js` est à jour des règles mais joue bien moins bien qu’Amine : il sert à comparer les cartes, pas à mesurer la difficulté.
+
+
+1. Performance sur téléphone d’entrée de gamme pendant les grosses nuits (particules, nombre de sons).
+2. Derniers sons enregistrés (arbalète, lance-flammes, mort d’un survivant, aube, musique de nuit) : fichiers CC0 fournis par Amine, intégrés comme dans `assets/sounds/` (voir `CREDITS.md`).
+3. Graphismes : le jeu est en style cartoon (illustrations et sprites générés). Avant Steam, faire retoucher ou redessiner l’ensemble par un artiste dans ce style, et déclarer l’usage d’IA sur Steam.
+4. Préparer Steam : test à l’aveugle, page Steam, démo pour le Next Fest, version Electron ou Tauri, succès, sauvegarde cloud, classement du défi quotidien.
+5. **Traduction (en dernier, une fois le jeu stabilisé, décision d’Amine)** : sortir tous les textes (cartes, zombies, règles, interface) dans des fichiers de langue et traduire en anglais. Le choix de langue existe déjà dans les options (anglais marqué « bientôt »). D’ici là, écrire les nouveaux textes en français uniquement.
