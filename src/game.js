@@ -169,7 +169,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v114 · 17 oct.';
+const VERSION='v115 · 17 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -179,9 +179,9 @@ const VERSION='v114 · 17 oct.';
   location.replace(location.pathname+'?v='+v.slice(1)+location.hash)}).catch(()=>{})}catch(e){}})();
 // slowT : ralenti (mort du Colosse) jusqu'à cet instant
 // options du joueur (enregistrées sur l'appareil)
-const OPT=(()=>{const d={sfx:1,mus:1,speed:1,shake:1,text:0,lang:'fr'};try{return Object.assign(d,JSON.parse(localStorage.getItem('abri-opts'))||{})}catch(e){return d}})();
+const OPT=(()=>{const d={sfx:1,mus:1,speed:1,shake:1,text:0,eco:0,lang:'fr'};try{return Object.assign(d,JSON.parse(localStorage.getItem('abri-opts'))||{})}catch(e){return d}})();
 function saveOpt(){try{localStorage.setItem('abri-opts',JSON.stringify(OPT))}catch(e){}}
-function applyOpt(){try{SFX.setVol(OPT.sfx,OPT.mus)}catch(e){}document.documentElement.classList.toggle('bigtext',!!OPT.text);document.documentElement.lang=OPT.lang}
+function applyOpt(){try{SFX.setVol(OPT.sfx,OPT.mus);SFX.setMaxVoices(OPT.eco?5:10)}catch(e){}document.documentElement.classList.toggle('bigtext',!!OPT.text);document.documentElement.classList.toggle('eco',!!OPT.eco);if(typeof fit==='function'&&cv){fit.w0=0}document.documentElement.lang=OPT.lang}
 const TICK=650;let SPEED=1,slowT=0;const tickMs=()=>TICK/SPEED*(performance.now()<slowT?3:1);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -297,7 +297,7 @@ if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.protot
 const cv=$('#map'),ctx=cv.getContext('2d');
 const dark=document.createElement('canvas'),dctx=dark.getContext('2d');
 let SC=1,DPR=1;
-function fit(){const w=cv.clientWidth||320;if(!fit.w0||fit.w0!==w){fit.w0=w;setTimeout(drawWoods,0)}DPR=Math.min(2,devicePixelRatio||1);const px=Math.round(w*DPR);if(cv.width!==px){cv.width=cv.height=px;dark.width=dark.height=px}SC=px/L}
+function fit(){const w=cv.clientWidth||320;if(!fit.w0||fit.w0!==w){fit.w0=w;setTimeout(drawWoods,0)}DPR=Math.min(OPT.eco?1:2,devicePixelRatio||1);const px=Math.round(w*DPR);if(cv.width!==px){cv.width=cv.height=px;const dp=Math.ceil(px/2);dark.width=dark.height=dp}SC=px/L}
 const tc=i=>{const[r,c]=Z.rc(i);return{x:c*T+T/2,y:r*T+T/2}};
 function rng(seed){return()=>(seed=(seed*16807)%2147483647)/2147483647}
 
@@ -754,6 +754,8 @@ function drawZombie(v,now){
 function addFX(f){f.t0=performance.now();FX.push(f)}
 function burst(x,y,c,n,spd,r){const now=performance.now();for(let k=0;k<n;k++){const a=Math.random()*7,s=spd*(.4+Math.random());PT.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,t0:now,dur:300+Math.random()*250,c,r:r||2,light:0})}}
 function drawFX(now){
+ // v115 : au plus 220 particules (70 en mode économie) : les plus anciennes disparaissent d'abord
+ {const m=OPT.eco?70:220;if(PT.length>m)PT.splice(0,PT.length-m)}
  for(let k=FX.length-1;k>=0;k--){const f=FX[k],p=Math.max(0,(now-f.t0)/f.dur);if(p>=1){FX.splice(k,1);continue}
   ctx.globalAlpha=1-p;
   if(f.type==='tracer')line(f.x1,f.y1,f.x1+(f.x2-f.x1)*Math.min(1,p*3),f.y1+(f.y2-f.y1)*Math.min(1,p*3),f.c,f.w);
@@ -781,16 +783,21 @@ function lights(now){
   else ls.push({x:p.x,y:p.y,r:T*.95})});
  FX.forEach(f=>{if(f.light){const p=(now-f.t0)/f.dur;if(p<1)ls.push({x:f.x,y:f.y,r:f.light*(1-p)})}});
  PT.forEach(q=>{if(q.light)ls.push({x:q.x,y:q.y,r:q.light})});
- return ls;
+ // v115 : au plus 24 lumières (12 en mode économie) : l'abri et les unités d'abord, puis les effets
+ return ls.slice(0,OPT.eco?12:24);
 }
+// v115 : l'obscurité se dessine à mi-résolution (les lumières sont des dégradés doux, la différence ne se voit pas) et chaque lumière
+// réutilise un même disque dégradé préparé une fois, au lieu d'un dégradé recalculé par lumière et par image
+const LIGHT=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);
+ g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.55,'rgba(0,0,0,.7)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return c})();
 function drawDark(now){
- if(nightAmt<.01)return;
+ if(nightAmt<.01)return;const k=dark.width/L;
  dctx.setTransform(1,0,0,1,0,0);dctx.globalCompositeOperation='source-over';dctx.clearRect(0,0,dark.width,dark.height);
  dctx.fillStyle=`rgba(4,7,18,${.66*nightAmt})`;dctx.fillRect(0,0,dark.width,dark.height);
- dctx.setTransform(SC,0,0,SC,0,0);dctx.globalCompositeOperation='destination-out';
- for(const l of lights(now)){const g=dctx.createRadialGradient(l.x,l.y,0,l.x,l.y,l.r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.55,'rgba(0,0,0,.7)');g.addColorStop(1,'rgba(0,0,0,0)');dctx.fillStyle=g;dctx.beginPath();dctx.arc(l.x,l.y,l.r,0,7);dctx.fill()}
- ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(dark,0,0);ctx.restore();
- ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(CEN.x,CEN.y,0,CEN.x,CEN.y,T*1.6);g.addColorStop(0,`rgba(255,170,60,${.12*nightAmt})`);g.addColorStop(1,'rgba(255,170,60,0)');ctx.fillStyle=g;ctx.fillRect(0,0,L,L);ctx.restore();
+ dctx.setTransform(k,0,0,k,0,0);dctx.globalCompositeOperation='destination-out';
+ for(const l of lights(now))dctx.drawImage(LIGHT,l.x-l.r,l.y-l.r,2*l.r,2*l.r);
+ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(dark,0,0,cv.width,cv.height);ctx.restore();
+ ctx.save();ctx.globalCompositeOperation='lighter';const r=T*1.6,g=ctx.createRadialGradient(CEN.x,CEN.y,0,CEN.x,CEN.y,r);g.addColorStop(0,`rgba(255,170,60,${.12*nightAmt})`);g.addColorStop(1,'rgba(255,170,60,0)');ctx.fillStyle=g;ctx.fillRect(CEN.x-r,CEN.y-r,2*r,2*r);ctx.restore();
 }
 function frame(now){
  requestAnimationFrame(frame);
@@ -1224,6 +1231,7 @@ function optionsScreen(back){if(back)optBack=back;const pc=v=>Math.round(v*100);
   <label><span>Musique et ambiance <b>${pc(OPT.mus)} %</b></span><input type="range" min="0" max="100" step="5" value="${pc(OPT.mus)}" data-o="mus"></label>
   <label>Vitesse de la nuit au départ<select data-o="speed">${[1,2,4].map(v=>`<option value="${v}" ${OPT.speed==v?'selected':''}>× ${v}</option>`).join('')}</select></label>
   <label class="chk"><input type="checkbox" data-o="shake" ${OPT.shake?'checked':''}> Secousses de l’écran</label>
+  <label class="chk"><input type="checkbox" data-o="eco" ${OPT.eco?'checked':''}> Mode économie (petits téléphones : moins d’effets, plateau moins détaillé)</label>
   <label class="chk"><input type="checkbox" data-o="text" ${OPT.text?'checked':''}> Texte plus grand</label>
  </div><button type="button" class="go" data-a="optclose">Retour</button>`)}
 function runInfo(){onTitle=false;
@@ -1372,7 +1380,7 @@ panel.addEventListener('change',e=>{const f=e.target.dataset&&e.target.dataset.f
 panel.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=ACT[b.dataset.a];if(f)f(b.dataset.v)});
 panel.addEventListener('input',e=>{const el=e.target.closest('[data-o]');if(!el)return;const k=el.dataset.o;
  if(k==='sfx'||k==='mus'){OPT[k]=+el.value/100;const b=el.parentElement.querySelector('b');if(b)b.textContent=el.value+' %'}
- else if(k==='speed')OPT.speed=+el.value;else if(k==='shake'||k==='text')OPT[k]=el.checked?1:0;else if(k==='lang')OPT.lang=el.value;
+ else if(k==='speed')OPT.speed=+el.value;else if(k==='shake'||k==='text'||k==='eco')OPT[k]=el.checked?1:0;else if(k==='lang')OPT.lang=el.value;
  saveOpt();applyOpt();if(k==='sfx')SFX.play('ui')});
 $('#go').addEventListener('click',()=>{if(S.pause)resumeWave();else if(S.busy){SPEED=SPEED===1?2:SPEED===2?4:1;render()}else night()});
 

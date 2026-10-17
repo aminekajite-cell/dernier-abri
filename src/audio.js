@@ -36,9 +36,9 @@ const SFX=(()=>{
    fetch(url).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((res,rej)=>ac.decodeAudioData(b,res,rej))).then(buf=>{BUF[f]=buf})
     .catch(html)})}
  function playFile(f,vol,rate){
-  if(BUF[f]){const s=ac.createBufferSource();s.buffer=BUF[f];s.playbackRate.value=rate;const g=ac.createGain();g.gain.value=vol;s.connect(g);g.connect(BUS||sfxG);s.start(ac.currentTime);return true}
+  if(BUF[f]){const s=ac.createBufferSource();s.buffer=BUF[f];s.playbackRate.value=rate;const g=ac.createGain();g.gain.value=vol;s.connect(g);g.connect(BUS||sfxG);voice(BUF[f].duration/rate);s.start(ac.currentTime);return true}
   const a0=EL[f];if(!a0||a0.readyState<2)return false;
-  try{const a=a0.cloneNode();a.volume=Math.max(0,Math.min(1,vol*(BUS===musG?VOL.mus:VOL.sfx)));a.playbackRate=rate;a.preservesPitch=a.mozPreservesPitch=a.webkitPreservesPitch=false;const p=a.play();if(p&&p.catch)p.catch(()=>{});return true}catch(e){return false}}
+  try{const a=a0.cloneNode();voice((a0.duration||.5)/rate);a.volume=Math.max(0,Math.min(1,vol*(BUS===musG?VOL.mus:VOL.sfx)));a.playbackRate=rate;a.preservesPitch=a.mozPreservesPitch=a.webkitPreservesPitch=false;const p=a.play();if(p&&p.catch)p.catch(()=>{});return true}catch(e){return false}}
  function sample(name,vol,rate){const d=SAMP[name];if(!d||muted||!ac)return false;const f=d[0][Math.floor(Math.random()*d[0].length)];
   return playFile(f,vol??d[1],rate??((d[3]||1)*(1+(Math.random()*2-1)*d[2])))}
  const zombie=(vol,rate)=>sample('zgroan',vol,rate);
@@ -75,9 +75,12 @@ const SFX=(()=>{
   lvl:t=>{[523,659,784,1047].forEach((f,k)=>tone(t+k*.09,.4,{f,vol:.13,type:'square'}))},
   death:t=>{[330,262,196].forEach((f,k)=>tone(t+k*.25,.5,{f,vol:.12,type:'triangle'}))}
  };
+ // v115 : nombre de sons joués en même temps plafonné (10, ou 5 en mode économie) : au-delà, on n'entend plus rien de plus,
+ // mais chaque son coûte du calcul, surtout sur un petit téléphone pendant les grosses nuits
+ let voices=0,maxVoices=10;const voice=d=>{voices++;setTimeout(()=>{voices=Math.max(0,voices-1)},Math.min(3000,Math.max(80,d*1000)))};
  function play(name,gap=.06){
-  if(muted||!init()||!(S[name]||SAMP[name]))return;
-  try{const t=ac.currentTime;if(last[name]&&t-last[name]<gap)return;last[name]=t;if(sample(name))return;S[name](t+.01)}catch(e){}}
+  if(muted||!init()||!(S[name]||SAMP[name]))return;if(voices>=maxVoices)return;
+  try{const t=ac.currentTime;if(last[name]&&t-last[name]<gap)return;last[name]=t;if(sample(name))return;voice(.3);S[name](t+.01)}catch(e){}}
  // ambiance de nuit : vent filtré + grondement sourd + nappe musicale sombre, dont le volume suit l'obscurité ;
  // par-dessus, des bruits lointains au hasard : hiboux, loups, grognements de zombies, et quelques notes de musique.
  let music=null,nextEvt=0,nextNote=0;
@@ -123,5 +126,5 @@ const SFX=(()=>{
   if(init()){master.gain.setTargetAtTime(muted?0:.55,ac.currentTime,.05);if(!muted)unlock()}return muted}
  // volumes des options (0 à 1)
  function setVol(sfx,mus){VOL.sfx=sfx;VOL.mus=mus;if(sfxG){sfxG.gain.setTargetAtTime(sfx,ac.currentTime,.05);musG.gain.setTargetAtTime(mus,ac.currentTime,.05)}}
- return{play,night,toggle,setVol,get muted(){return muted}};
+ return{play,night,toggle,setVol,setMaxVoices:n=>{maxVoices=n},get muted(){return muted}};
 })();

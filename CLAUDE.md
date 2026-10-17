@@ -51,7 +51,7 @@ Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant t
 Équilibrage : Amine est satisfait de l’état v114 (frénésie +10 %/nuit sur PV et dégâts, curée, 4 énergies). Le joueur automatique de `tools/balance.js` est à jour des règles mais joue bien moins bien qu’Amine : il sert à comparer les cartes, pas à mesurer la difficulté.
 
 
-1. Performance sur téléphone d’entrée de gamme pendant les grosses nuits (particules, nombre de sons).
+1. Performance : v115 a allégé la nuit (obscurité mi-résolution, plafonds de sons, particules et lumières) et ajouté un Mode économie. À confirmer sur un téléphone d’entrée de gamme.
 2. Derniers sons enregistrés (arbalète, lance-flammes, mort d’un survivant, aube, musique de nuit) : fichiers CC0 fournis par Amine, intégrés comme dans `assets/sounds/` (voir `CREDITS.md`).
 3. Graphismes : le jeu est en style cartoon (illustrations et sprites générés). Avant Steam, faire retoucher ou redessiner l’ensemble par un artiste dans ce style, et déclarer l’usage d’IA sur Steam.
 4. Préparer Steam : test à l’aveugle, page Steam, démo pour le Next Fest, version Electron ou Tauri, succès, sauvegarde cloud, classement du défi quotidien.

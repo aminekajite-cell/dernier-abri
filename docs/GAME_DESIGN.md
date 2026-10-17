@@ -716,3 +716,9 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - **Chef de groupe** : les unités autour attaquent une fois de plus tous les 2 tours au lieu de 3 (Le Maire garde 3). **Ambulancier** : 2 dégâts au lieu de 1.
 
 **v114** (demande d’Amine) : la frénésie meurtrière commence à la nuit 5 (+10 %) et grandit de +10 % chaque nuit ; elle s’applique désormais aux **dégâts** des zombies autant qu’à leurs PV (avant, seuls les PV montaient : les combats duraient plus longtemps sans jamais menacer les tanks). Le +1 dégât après chaque Colosse est supprimé (remplacé par cette montée continue). Nouvelle règle de **curée** : +1 dégât par autre zombie au contact de l’unité frappée, +2 au plus.
+
+**v115** : performance pendant les grosses nuits.
+- Mesure (Chromium, nuit chargée) : le dessin du jeu prend 1,5 à 2,7 ms par image ; le plus coûteux est l’obscurité de la nuit (1 à 2 ms).
+- Obscurité dessinée à mi-résolution et lumières réutilisant un même disque dégradé préparé une fois : 0,35 à 0,8 ms (≈ 2,5× plus rapide), sans différence visible. Lueur de l’abri limitée à sa zone.
+- Plafonds : 10 sons en même temps, 220 particules, 24 lumières.
+- **Mode économie** (Options) pour les petits téléphones : plateau à résolution normale au lieu de doublée, 5 sons, 70 particules, 12 lumières, ni flous ni ombres portées sur les cartes et l’interface.
