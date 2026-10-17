@@ -465,3 +465,9 @@ ul.rules .ink{width:1.1em;height:1.1em}
 .panel p.rip{color:#8e1d12}
 .panel .big{color:#2b1a0c}
 .overlay{background:rgba(20,13,8,.72)}
+
+/* v102 : tapis de feutre vert sous la fiche de nuit, la piste et les jetons, comme sous la main */
+.mat{display:flex;flex-direction:column;gap:7px;padding:7px 7px 8px;border-radius:12px;
+ background:repeating-linear-gradient(45deg,rgba(255,255,255,.015) 0 2px,rgba(0,0,0,0) 2px 4px),radial-gradient(120% 140% at 50% 0%,#24402c 0%,#1a3021 60%,#13241a 100%);
+ border:1px solid #0c160f;box-shadow:inset 0 0 0 3px rgba(0,0,0,.25),inset 0 0 0 5px rgba(240,220,170,.12),0 6px 16px rgba(0,0,0,.6)}
+.mat .fams:empty{display:none}
