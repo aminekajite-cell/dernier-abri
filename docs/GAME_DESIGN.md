@@ -10,7 +10,7 @@ Plateformes visées : Steam (PC) puis mobile.
 ## La boucle de jeu
 
 1. **Début** : tu prépares la partie : un de tes 3 decks (20 à 30 cartes, construits avec ta collection), un personnage (qui donne parfois une relique) et un lieu.
-2. **Jour** : tu as **5 énergies**. Chaque carte coûte de 0 à 3 énergies selon sa puissance ; tu joues autant de cartes que ton énergie le permet (le Café, gratuit, donne +2 énergies). Les cartes non jouées **restent en main** pour les jours suivants. Chaque jour, la main est complétée jusqu'à 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos), avec au moins 1 nouvelle carte et 8 cartes au maximum. Une fois par jour, tu peux aussi **déplacer** une de tes unités vers une case libre.
+2. **Jour** : tu as **4 énergies**. Chaque carte coûte de 0 à 3 énergies selon sa puissance ; tu joues autant de cartes que ton énergie le permet (le Café, gratuit, donne +2 énergies). Les cartes non jouées **restent en main** pour les jours suivants. Chaque jour, la main est complétée jusqu'à 5 cartes (+1 avec une Radio en jeu, +1 avec le Grand sac à dos), avec au moins 1 nouvelle carte et 8 cartes au maximum. Une fois par jour, tu peux aussi **déplacer** une de tes unités vers une case libre.
 3. **Nuit** : les zombies apparaissent sur l'anneau extérieur (les bois) et marchent vers la maison. Tes unités attaquent automatiquement. Les zombies frappent tout ce qui bloque leur chemin. Le bouton du bas passe la nuit en vitesse ×2.
 4. **Aube** :
    - toutes les 4 nuits, la horde mute (bonus permanent pour les zombies) ;
@@ -245,7 +245,7 @@ C'est l'identité du jeu : on s'attache à ses survivants, et on les perd.
 
 Inspiré de *Super Auto Pets*, *Vampire Survivors* et *Rogue Tower* : les unités grandissent pendant la partie.
 
-- **Fusion** : dès que 3 unités du même type et du même nombre d'étoiles sont sur la carte (à la pose de la 3ᵉ), elles fusionnent en une unité avec une étoile de plus, sur la case de la dernière posée. Chaque étoile ajoute les PV de base de la carte (★ = PV ×2, ★★ = PV ×3…) et +1 dégât (ou +1 soin, +1 réparation). Les fusions s'enchaînent : 3 unités ★ donnent une ★★. Le but : garder une chance de survie dans les parties très longues. Les 2 unités absorbées rendent leur carte à la défausse : elles peuvent être tirées de nouveau. L'unité dorée garde le prénom, le trait et les niveaux du survivant le plus aguerri, et cumule les victimes. Pas de fusion pour les pièges, les chefs, les évolutions. Une pose gratuite (événement de l'aube, départ du lieu) ne déclenche pas de fusion.
+- **Fusion** : dès que 3 unités du même type et du même nombre d'étoiles sont sur la carte (à la pose de la 3ᵉ), elles fusionnent en une unité avec une étoile de plus, sur la case de la dernière posée. Chaque étoile ajoute les PV de base de la carte (★ = PV ×2, ★★ = PV ×3…) et +1 dégât (ou +1 soin, +1 réparation). Les fusions s'enchaînent : 3 unités ★ donnent une ★★. Le but : garder une chance de survie dans les parties très longues. La fusion crée une **nouvelle carte ★** : les 3 cartes qui la composent repartent toutes en défausse et peuvent être tirées de nouveau (v111). Si l’unité fusionnée tombe, sa carte ★ est perdue ; rappelée en réserve, elle garde ses étoiles, visibles sur sa carte. L'unité dorée garde le prénom, le trait et les niveaux du survivant le plus aguerri, et cumule les victimes. Pas de fusion pour les pièges, les chefs, les évolutions. Une pose gratuite (événement de l'aube, départ du lieu) ne déclenche pas de fusion.
 - **Évolutions secrètes** : deux cartes précises posées (ou déplacées) côte à côte se transforment en une unité unique ✦. Ces unités ne sont jamais dans un deck ni tirées. Elles apparaissent dans la Collection une fois découvertes (sauvegardé dans `abri-meta.evo`). Quand l'évolution tombe, ses 2 cartes d'origine reviennent dans la défausse. L'évolution passe avant la fusion.
 
 | Évolution | Cartes | Effet |
@@ -265,7 +265,7 @@ Inspiré de *Super Auto Pets*, *Vampire Survivors* et *Rogue Tower* : les unité
 
 ## La nuit du Colosse en 2 vagues
 
-**Préparer le Colosse** : un compte à rebours dans le bandeau (« Colosse dans N nuits »), et au troc des **munitions anti-Colosse** (20 ferraille, 3 en stock au maximum). Pendant sa nuit, un bouton « Tirer sur le Colosse » apparaît : chaque munition lui inflige 30 dégâts (sans tenir compte de l'armure). Trois munitions retirent environ 90 de ses ~123 PV à la nuit 10 : il faut toujours une défense pour finir le travail. Le but : donner un objectif d'économie aux nuits 1 à 9.
+**Préparer le Colosse** : un compte à rebours dans le bandeau (« Colosse dans N nuits »), et à la boutique du troc des **munitions anti-Colosse** (20 ferraille, 2 au plus en ta possession, usage unique depuis la v111). Pendant sa nuit, un bouton « Tirer sur le Colosse » apparaît : chaque munition lui inflige 30 dégâts (sans tenir compte de l'armure). Trois munitions retirent environ 90 de ses ~123 PV à la nuit 10 : il faut toujours une défense pour finir le travail. Le but : donner un objectif d'économie aux nuits 1 à 9.
 
 **Lance-roquettes** (carte épique, 3 énergie, sans faction) : 2 dégâts tous les 2 tours à portée 3, ×5 contre le Colosse et les Gonflés. L'option « deck anti-Colosse ».
 
@@ -322,7 +322,7 @@ Nuits 1 à 10 : table fixe. Ensuite, chaque nuit ajoute des zombies de chaque ty
 
 ## Les événements de l'aube
 
-À partir de la nuit 2, environ une aube sur deux propose une petite histoire avec deux choix : un choix risqué qui peut rapporter gros, et un choix prudent. Ils arrivent après la relique éventuelle et avant le choix de la carte.
+À partir de la nuit 2, 15 % des aubes proposent une petite histoire avec deux choix (au moins 3 nuits entre deux, jamais deux fois la même tant que les 25 n’ont pas été vues, v111) : un choix risqué qui peut rapporter gros, et un choix prudent. La liste complète est dans `DAWN` (`src/engine.js`). Ils arrivent après la relique éventuelle et avant le choix de la carte.
 
 | Événement | Choix risqué | Choix prudent |
 |---|---|---|
@@ -402,6 +402,7 @@ Une relique reste active toute la partie. On en choisit 1 parmi 3 toutes les 5 n
 
 | Action | Coût | Effet |
 |---|---|---|
+| La boutique | 5 pour l’ouvrir | 5 objets absents du deck (8 / 14 / 22 / 30 selon la rareté, un exemplaire chacun) et des munitions anti-Colosse (20, 2 au plus). Change à chaque aube |
 | Réparer l’abri | 15 | +3 PV à l’abri |
 | Améliorer une carte | 25 (+15 par amélioration déjà faite) | Toutes tes cartes de ce type sont améliorées. Plus cher à chaque fois |
 | Jeter une carte | 10 | Retire une carte de ton deck |
@@ -697,3 +698,11 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 **v109** : les 4 évolutions reçoivent les grandes illustrations cartoon générées par Amine (Lance-flammes lourd, Équarrisseur, Le Saint, Bande de gamins), à la place des vignettes agrandies de la v108. Correction : le Mur de pneus, le Fumigène, le Café et le Filet avaient leur illustration depuis la v89 mais elle n’était pas déclarée dans le jeu (pictogramme à la place) ; un test du moteur vérifie maintenant que chaque illustration de `assets/cards_cartoon/` est bien déclarée.
 
 **v110** : page **Évolutions secrètes**, ouverte par un bouton en haut de la Collection (avec le compteur « n/10 découvertes »). Les évolutions découvertes en partie s’affichent en grande carte avec leur recette (ex. « Policier + Chien ») ; les autres en silhouette (sprite vu du dessus en ombre sur fond violet), « ??? », avec un indice : la première carte de la recette (« Indice : Sniper + ? »). L’ancienne liste en bas de la Collection est supprimée.
+
+**v111** (demandes d’Amine) :
+- **Énergie** : retour à **4 énergies** par jour (`ENERGY=4`).
+- **Événements de l’aube** : 25 événements au lieu de 8 (17 nouveaux : convoi abandonné, pharmacie, enfant seul, armurerie, groupe électrogène, marchande ambulante, église en ruine, soldat déserteur, incendie, carnet de survie, loups, hélicoptère écrasé, bibliothèque, deux survivants armés, orage, fouilleurs, ferme abandonnée). Ils sont plus rares : 15 % des aubes, au moins 3 nuits entre deux, et jamais deux fois le même tant que tous n’ont pas été vus dans la partie (`st.seenEv`, `st.lastEv`).
+- **Boutique** (remplace l’achat direct de munitions au troc) : 5 ferraille pour l’ouvrir ; elle propose 5 objets (objets et réactions, jamais d’unité) absents du deck, même non débloqués, un exemplaire de chacun (8 / 14 / 22 / 30 ferraille selon la rareté), plus des munitions anti-Colosse (20 ferraille). Elle change à chaque aube. Les achats arrivent en main et rejoignent le deck pour la partie.
+- **Munitions anti-Colosse** : 2 au plus en ta possession (main, pioche, défausse), et **usage unique** (elles ne reviennent plus en défausse) : le Colosse ne peut plus être abattu d’une salve.
+- **Fusion** : elle crée une **nouvelle carte ★** ; les 3 cartes qui la composent repartent toutes en défausse. Si l’unité fusionnée tombe, sa carte ★ est perdue ; rappelée en réserve, elle garde ses étoiles, visibles sur sa carte (bandeau doré ★, cadre qui brille) et sur le tas de la réserve.
+- **Haut de l’écran** : la piste des nuits prend toute la largeur ; mutation et ferraille sont au bout de la rangée des jetons (toujours visibles, la rangée défile si elle déborde) ; zone des zombies resserrée.

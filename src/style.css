@@ -501,3 +501,24 @@ ul.rules .ink{width:1.1em;height:1.1em}
 .evo-sil{position:absolute;inset:10%;background:center/contain no-repeat;filter:brightness(0);opacity:.85}
 .evo-x .cf-name{opacity:.6}.evo-x .cf-txt{opacity:.7;font-style:italic}
 .evo-x .recipe{color:#6a4a9a}
+
+/* v111 : carte d'une unité fusionnée : bandeau d'étoiles dorées et cadre qui brille */
+.cf.gold{filter:drop-shadow(0 0 4px rgba(255,200,60,.85)) drop-shadow(0 3px 6px rgba(0,0,0,.55))}
+.cf-stars{position:absolute;z-index:5;right:6%;top:4.2%;padding:.6cqw 2.4cqw;border-radius:2cqw;background:linear-gradient(#ffe28a,#e0a628);color:#5a3a06;
+ font:700 9cqw/1 var(--f-body);letter-spacing:-.5cqw;box-shadow:0 .8cqw 1.6cqw rgba(0,0,0,.55),inset 0 -.6cqw 0 rgba(0,0,0,.2)}
+.cf.mini .cf-stars{font-size:13cqw;padding:1cqw 3cqw}
+.pile .pt.gold{box-shadow:0 0 0 2px #f2c23d,2px 2px 0 #1a120b,4px 4px 0 #3a2a1c}
+.pstars{position:absolute;left:50%;top:-7px;transform:translateX(-50%);font-style:normal;font-size:10px;line-height:12px;padding:0 3px;border-radius:5px;background:#f2c23d;color:#5a3a06;white-space:nowrap}
+
+/* v111 : piste des nuits sur toute la largeur ; mutation et ferraille au bout de la rangée des jetons ; zone des zombies resserrée */
+.horde .track{flex:1}
+.fams{align-items:center}
+.fams .tags{margin-left:auto;display:inline-flex;gap:6px;align-items:center}
+.ztoks{padding:6px 7px 5px;margin-top:7px}
+.event{padding-bottom:9px}
+.fams{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:5px;padding:2px 1px 5px}
+.fams::-webkit-scrollbar{display:none}
+.fam{flex:none;padding:2px 6px;font-size:12px;gap:3px}
+.fam .ink{width:14px;height:14px}
+.fams .tok{flex:none}
+.fams .tags{position:sticky;right:0;padding-left:10px;background:linear-gradient(90deg,rgba(42,29,19,0),rgba(42,29,19,.92) 10px);border-radius:0 14px 14px 0}

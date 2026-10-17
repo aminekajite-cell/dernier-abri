@@ -155,7 +155,7 @@ const Z=(()=>{
   talkie:{n:'Talkie-walkie',cat:'react',react:'unit',v:'Relève',d:'Pendant la nuit : une unité blessée part en réserve, la plus solide de la réserve prend sa place'},
   storm:{n:'Orage',cat:'react',react:'any',v:'Ralentit',d:'Pendant la nuit : tous les zombies perdent 2 tours, mais le feu s’éteint'},
   bomber:{n:'Bombardier',cat:'react',react:'cell',v:'8 en ligne',d:'Pendant la nuit : 8 dégâts à tous les zombies de la ligne visée'},
-  shell:{n:'Munition anti-Colosse',cat:'react',react:'any',antiboss:1,v:'Colosse',d:'Pendant la nuit, quand le Colosse est sur la carte : un tir qui lui inflige 15 dégâts plus le quart de ses PV max, sans armure'},
+  shell:{n:'Munition anti-Colosse',cat:'react',react:'any',antiboss:1,once:1,v:'Colosse',d:'Pendant la nuit, quand le Colosse est sur la carte : un tir qui lui inflige 15 dégâts plus le quart de ses PV max, sans armure. Usage unique'},
   noise:{n:'Boîte à bruit',cat:'react',react:'cell',v:'Attire',d:'Pendant la nuit : les zombies marchent vers la case visée pendant 4 tours'},
   // évolutions secrètes : jamais dans le deck, elles naissent de deux cartes précises posées côte à côte (voir EVO)
   k9squad:{n:'Brigade canine',cat:'melee',hp:8,block:1,rng:1,dmg:3,every:1,hits:2,stun:1,push:1,evo:1,v:'3 ×2 · Étourdit',d:'Un policier et son chien : 2 morsures de 3 dégâts par tour, qui étourdissent et repoussent'},
@@ -223,7 +223,7 @@ const Z=(()=>{
  function levelUp(st,i,kind){const u=st.grid[i];if(!u||lvPending(u)<=0)return false;
   if(kind==='atk')u.lvA=(u.lvA||0)+1;else{u.lvD=(u.lvD||0)+1;u.hp=maxHp(st,u)}return true}
  // énergie : chaque jour on a ENERGY points, chaque carte coûte de 0 à 3 selon sa puissance
- const ENERGY=5,HAND_MAX=8;
+ const ENERGY=4,HAND_MAX=8;
  const COST={rocket:3,amb:2,doc:2,orderly:2,nailer:2,ranger:2,riot:2,k9:1,barrier:2,swat:3,mortar:3,sentry:2,clay:2,bunker:3,pharma:2,hospital:3,priest:2,stretch:1,brasero:2,firetrap:1,net:1,bear:2,hunter:2,dogs:2,pitch:2,scare:1,turret:2,workshop:3,modwall:2,tesla:3,teacher:2,market:2,vigile:1,carp:2,tear:1,napalm:2,air:3,chief_police:3,chief_mil:3,chief_care:3,chief_pyro:3,chief_trap:3,chief_farm:3,chief_tech:3,chief_comm:3,coffee:0,grenade:1,shot:1,patch:1,molotov:2,horn:2,rush:2};
  'bar fen sand trap fire wire smoke bait food kid dog med roadmap kit flare'.split(' ').forEach(t=>COST[t]=1);
  'gun axe cop tire spike mine lamp radio cook mech butch monk flame xbow rep gas'.split(' ').forEach(t=>COST[t]=2);
@@ -367,10 +367,66 @@ const Z=(()=>{
    {n:'Refuser',d:'Pas de risque.',go:()=>({txt:'Il hausse les épaules et reprend la route.'})}]},
   wounded:{n:'Un blessé dans le fossé',d:'Une personne blessée appelle à l’aide.',ch:[
    {n:'Soigner la personne',d:'L’abri perd 1 PV (provisions), toutes tes unités récupèrent 3 PV.',go:st=>{st.shelter=Math.max(1,st.shelter-1);st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+3)});return{txt:'C’était une infirmière. Avant de repartir, elle soigne tout le monde.'}}},
-   {n:'Passer ton chemin',d:'Pas de risque.',go:()=>({txt:'Ses appels s’éteignent dans ton dos.'})}]}
+   {n:'Passer ton chemin',d:'Pas de risque.',go:()=>({txt:'Ses appels s’éteignent dans ton dos.'})}]},
+  // v111 : 17 nouveaux événements (25 au total)
+  convoy:{n:'Un convoi abandonné',d:'Trois camions militaires en travers de la route, portières ouvertes.',ch:[
+   {n:'Fouiller les camions',d:'+10 ferraille, mais −1 énergie demain (fatigue).',go:st=>{st.scrap+=10;st.nextE=(st.nextE||0)-1;return{txt:'Tu reviens chargé : +10 ferraille. Tes jambes te le feront payer demain.'}}},
+   {n:'Passer ton chemin',d:'Pas de risque.',go:()=>({txt:'Les camions disparaissent derrière toi dans la brume.'})}]},
+  pharmacy:{n:'La pharmacie',d:'La vitrine est intacte. Quelque chose bouge dans l’arrière-boutique.',ch:[
+   {n:'Forcer la porte',d:'Une Trousse de secours… ou un défenseur blessé.',go:(st,rnd)=>{if(rnd()<.6)return{txt:'Les étagères ne sont pas vides.',cards:['kit']};const j=randUnit(st,rnd);return{txt:'Un rôdeur t’attendait. '+(j>=0?hurt(st,j,3):'Tu t’en sors de justesse.')}}},
+   {n:'Repartir',d:'Pas de risque.',go:()=>({txt:'Tu laisses la pharmacie à ce qui l’habite.'})}]},
+  child:{n:'Un enfant seul',d:'Un gamin, une fronde à la main, te suit de loin depuis l’aube.',ch:[
+   {n:'L’accueillir',d:'Un Gamin rejoint l’abri, mais l’abri perd 1 PV (une bouche de plus).',go:(st,rnd)=>{st.shelter=Math.max(1,st.shelter-1);const u=recruit(st,'kid',rnd);return{txt:u?`${u.name} s’installe près de la porte, sa fronde chargée.`:'Pas de place autour de l’abri : il repart avec tes provisions.'}}},
+   {n:'Lui indiquer la route',d:'Pas de risque.',go:()=>({txt:'Il hoche la tête et disparaît vers le sud.'})}]},
+  gunshop:{n:'L’armurerie',d:'Le rideau de fer est à moitié levé.',ch:[
+   {n:'Se glisser dessous',d:'Deux Grenades… ou une embuscade.',go:(st,rnd)=>{if(rnd()<.55)return{txt:'Une caisse oubliée sous le comptoir.',cards:['grenade','grenade']};st.shelter=Math.max(1,st.shelter-2);return{txt:'Une embuscade ! Tu rentres en courant, la horde sur les talons : l’abri perd 2 PV.'}}},
+   {n:'Ne pas tenter le diable',d:'Pas de risque.',go:()=>({txt:'Le rideau grince dans le vent derrière toi.'})}]},
+  generator:{n:'Un groupe électrogène',d:'Il tourne encore, dans un garage. Il faut du carburant pour le ramener.',ch:[
+   {n:'Le ramener (4 ferraille)',d:'+1 énergie demain.',ok:st=>st.scrap>=4,go:st=>{st.scrap-=4;st.nextE=(st.nextE||0)+1;return{txt:'Le moteur ronronne derrière l’abri. Demain, tu iras plus vite.'}}},
+   {n:'Le laisser',d:'Pas de risque.',go:()=>({txt:'Son bruit finira par attirer quelqu’un d’autre.'})}]},
+  trader:{n:'Une marchande ambulante',d:'Une charrette, une vieille femme et un fusil sur les genoux.',ch:[
+   {n:'Échanger 10 ferraille',d:'Une carte rare au hasard rejoint ton deck.',ok:st=>st.scrap>=10,go:(st,rnd)=>{const ts=(st.pool||KEYS).filter(t=>RAR[t]==='rare'&&U[t]&&!U[t].chief);if(!ts.length)return{txt:'Elle n’a rien qui t’intéresse.'};st.scrap-=10;const t=pickR(ts,rnd);return{txt:`Elle te tend ${U[t].n} sans un mot.`,cards:[t]}}},
+   {n:'Refuser',d:'Pas de risque.',go:()=>({txt:'Elle repart en sifflotant.'})}]},
+  church:{n:'L’église en ruine',d:'Le clocher tient encore debout. Le toit est en plomb.',ch:[
+   {n:'Prier un moment',d:'Toutes tes unités récupèrent 2 PV.',go:st=>{st.grid.forEach(u=>{if(u&&U[u.t].block)u.hp=Math.min(maxHp(st,u),u.hp+2)});return{txt:'Le silence fait du bien à tout le monde.'}}},
+   {n:'Arracher le plomb du toit',d:'+8 ferraille.',go:st=>{st.scrap+=8;return{txt:'Les cloches ne sonneront plus : +8 ferraille.'}}}]},
+  deserter:{n:'Un soldat déserteur',d:'Il a encore son arme et son uniforme, mais plus de chef.',ch:[
+   {n:'L’engager (10 ferraille)',d:'Un Tireur d’élite rejoint l’abri.',ok:st=>st.scrap>=10,go:(st,rnd)=>{st.scrap-=10;const u=recruit(st,'swat',rnd);return{txt:u?`${u.name} prend position sans un mot.`:'Pas de place autour de l’abri : il garde ta ferraille et s’en va.'}}},
+   {n:'Le désarmer',d:'+5 ferraille, mais un de tes défenseurs est blessé.',go:(st,rnd)=>{st.scrap+=5;const j=randUnit(st,rnd);return{txt:'Il se défend avant de fuir (+5 ferraille). '+(j>=0?hurt(st,j,2):'')}}}]},
+  blaze:{n:'Un incendie au loin',d:'Une maison brûle de l’autre côté du champ.',ch:[
+   {n:'Sauver ce qui peut l’être',d:'+6 ferraille, mais −1 énergie demain.',go:st=>{st.scrap+=6;st.nextE=(st.nextE||0)-1;return{txt:'Tu rentres couvert de suie, les bras chargés : +6 ferraille.'}}},
+   {n:'Regarder brûler',d:'Pas de risque.',go:()=>({txt:'Au moins, les zombies iront voir là-bas.'})}]},
+  diary:{n:'Un carnet de survie',d:'Trouvé sur un banc, plein de notes et de schémas.',ch:[
+   {n:'Le lire',d:'Tu pioches 2 cartes tout de suite.',go:st=>{st.drawNow=(st.drawNow||0)+2;return{txt:'Des idées plein la tête pour aujourd’hui.'}}},
+   {n:'Brûler les pages',d:'+1 PV à l’abri (un peu de chaleur).',go:st=>{st.shelter=Math.min(maxS(st),st.shelter+1);return{txt:'Le feu crépite. Les mots partent en fumée.'}}}]},
+  wolves:{n:'Des loups affamés',d:'Une meute tourne autour de l’abri depuis la nuit.',ch:[
+   {n:'Leur jeter des provisions',d:'L’abri perd 1 PV.',go:st=>{st.shelter=Math.max(1,st.shelter-1);return{txt:'Ils emportent la viande et s’éloignent.'}}},
+   {n:'Les chasser',d:'+4 ferraille (fourrures), mais un défenseur est blessé.',go:(st,rnd)=>{st.scrap+=4;const j=randUnit(st,rnd);return{txt:'La meute recule (+4 ferraille). '+(j>=0?hurt(st,j,3):'')}}}]},
+  crash:{n:'Un hélicoptère écrasé',d:'La carcasse fume encore dans la clairière.',ch:[
+   {n:'Fouiller l’épave',d:'Une Munition anti-Colosse… ou une explosion.',go:(st,rnd)=>{if(rnd()<.5)return{txt:'Dans la soute : une munition de gros calibre.',cards:['shell']};const j=randUnit(st,rnd);return{txt:'Le réservoir explose ! '+(j>=0?hurt(st,j,4):'Personne n’était à côté.')}}},
+   {n:'Ne pas s’approcher',d:'Pas de risque.',go:()=>({txt:'La fumée monte toute la journée.'})}]},
+  library:{n:'La bibliothèque',d:'Des manuels techniques, intacts, sur une étagère.',ch:[
+   {n:'Étudier',d:'Une carte de ton deck est améliorée, mais −1 énergie demain.',go:(st,rnd,deck)=>{const ts=[...new Set(deck||[])].filter(t=>UPGRADABLE.includes(t)&&!st.upg[t]);st.nextE=(st.nextE||0)-1;if(!ts.length)return{txt:'Rien d’utile cette fois. La journée est perdue.'};const t=pickR(ts,rnd);upgrade(st,t);return{txt:`Tu as compris comment mieux utiliser ${U[t].n} : la carte est améliorée.`}}},
+   {n:'Emporter du papier',d:'+3 ferraille.',go:st=>{st.scrap+=3;return{txt:'Ça servira à allumer le feu, et à troquer : +3 ferraille.'}}}]},
+  couple:{n:'Deux survivants armés',d:'Un frère et une sœur, prêts à se battre, mais affamés.',ch:[
+   {n:'Les nourrir',d:'Un Tireur et un Bûcheron rejoignent l’abri, mais l’abri perd 3 PV.',go:(st,rnd)=>{st.shelter=Math.max(1,st.shelter-3);const a=recruit(st,'gun',rnd),b=recruit(st,'axe',rnd);const ns=[a,b].filter(Boolean).map(u=>u.name);return{txt:ns.length?`${ns.join(' et ')} rejoignent l’abri.`:'Pas de place autour de l’abri : ils mangent et repartent.'}}},
+   {n:'Refuser',d:'Pas de risque.',go:()=>({txt:'Ils te regardent longtemps avant de partir.'})}]},
+  storm:{n:'Un orage se prépare',d:'Le ciel noircit à l’ouest. Le toit ne tiendra pas.',ch:[
+   {n:'Renforcer le toit (5 ferraille)',d:'+1 PV max et +1 PV à l’abri.',ok:st=>st.scrap>=5,go:st=>{st.scrap-=5;st.maxS=maxS(st)+1;st.shelter=Math.min(maxS(st),st.shelter+1);return{txt:'Le toit tient bon sous la pluie.'}}},
+   {n:'Prier pour que ça passe',d:'L’abri perd 1 PV.',go:st=>{st.shelter=Math.max(1,st.shelter-1);return{txt:'Une gouttière cède dans la nuit : l’abri perd 1 PV.'}}}]},
+  scavengers:{n:'Des fouilleurs',d:'Deux silhouettes fouillent les poubelles derrière l’abri.',ch:[
+   {n:'Partager le butin',d:'+5 ferraille.',go:st=>{st.scrap+=5;return{txt:'Ils connaissent les bons coins : +5 ferraille.'}}},
+   {n:'Les chasser',d:'Pas de risque.',go:()=>({txt:'Ils filent sans demander leur reste.'})}]},
+  farm:{n:'Une ferme abandonnée',d:'Le potager a poussé tout seul.',ch:[
+   {n:'Remplir les sacs',d:'Des Conserves rejoignent ton deck.',go:()=>({txt:'Carottes, pommes de terre et un bocal de confiture.',cards:['food']})},
+   {n:'Ne pas s’attarder',d:'Pas de risque.',go:()=>({txt:'Un épouvantail te regarde partir.'})}]}
  };
- // événements de l'aube plus rares (v82) : environ 1 aube sur 4
- const dawnEvent=(st,rnd=Math.random)=>st.night>=2&&rnd()<.25?pickR(Object.keys(DAWN),rnd):null;
+ // événements de l'aube (v111) : rares (15 % des aubes), au moins 3 nuits entre deux événements,
+ // et jamais deux fois le même tant que tous n'ont pas été vus dans la partie
+ const EV_CHANCE=.15,EV_GAP=3;
+ function dawnEvent(st,rnd=Math.random){if(st.night<2||st.night-(st.lastEv||-99)<EV_GAP||rnd()>=EV_CHANCE)return null;
+  let ks=Object.keys(DAWN).filter(k=>!(st.seenEv||[]).includes(k));if(!ks.length){st.seenEv=[];ks=Object.keys(DAWN)}
+  const k=pickR(ks,rnd);st.seenEv=[...(st.seenEv||[]),k];st.lastEv=st.night;return k}
  function resolveDawn(st,id,k,rnd=Math.random,deck){const c=DAWN[id].ch[k];if(c.ok&&!c.ok(st))return{txt:'Impossible.'};const r=c.go(st,rnd,deck)||{};touch(st);return r}
  // mutations : toutes les 5 nuits, une nouvelle mutation remplace la précédente (affixe de la horde)
  const MUTS={
@@ -406,7 +462,7 @@ const Z=(()=>{
  };
  const SHOP={
   heal:{n:'Réparer l’abri',d:'+3 PV à l’abri',cost:15},
-  ammo:{n:'Munition anti-Colosse',d:'Une carte Munition arrive dans ta main : pendant la nuit du Colosse, elle lui inflige de gros dégâts',cost:20},
+  store:{n:'La boutique',d:'5 objets qui ne sont pas dans ton deck, et des munitions anti-Colosse. Elle change à chaque visite',cost:5},
   upgrade:{n:'Améliorer une carte',d:'Toutes tes cartes de ce type sont améliorées. Plus cher à chaque fois',cost:25,more:15},
   remove:{n:'Jeter une carte',d:'Retire une carte de ton deck',cost:10}
  };
@@ -552,9 +608,16 @@ const Z=(()=>{
   while(out.length<n){let r=rnd()*100,rr='com';for(const k in RARITY){if(r<RARITY[k].w){rr=k;break}r-=RARITY[k].w}
    const cand=pool.filter(t=>RAR[t]===rr&&!out.includes(t));if(cand.length)out.push(cand[Math.floor(rnd()*cand.length)]);else if(!pool.some(t=>!out.includes(t)))break}
   return out}
+ // boutique (v111) : on paie pour l'ouvrir ; elle propose 5 objets (objets et réactions, jamais d'unité), même pas encore débloqués
+ // absents du deck, chacun achetable une fois, plus des munitions anti-Colosse (AMMO_MAX au plus en ta possession)
+ const STORE_N=5,AMMO_COST=20,STORE_PRICE={com:8,rare:14,epic:22,leg:30};
+ const storePrice=t=>STORE_PRICE[RAR[t]||'com'];
+ function storeOffer(st,deckTypes,rnd=Math.random){const pool=KEYS.filter(t=>U[t]&&(U[t].cat==='item'||U[t].cat==='react')&&!U[t].antiboss&&!U[t].chief&&!(deckTypes||[]).includes(t));
+  return shuffle(pool.slice(),rnd).slice(0,STORE_N)}
+ function buyStore(st,t){const c=t==='shell'?AMMO_COST:storePrice(t);if(st.scrap<c)return false;st.scrap-=c;return true}
  function pay(st,k){const c=shopCost(st,k);if(st.scrap<c)return false;st.scrap-=c;if(k==='heal')st.shelter=Math.min(maxS(st),st.shelter+3);return true}
  // munitions anti-Colosse : achetées au troc, tirées pendant la nuit sur le Colosse (ignorent l'armure)
- const AMMO_MAX=3,AMMO_DMG=30;
+ const AMMO_MAX=2,AMMO_DMG=30;
  const bossAlive=st=>st.z.some(z=>z.hp>0&&ZT[z.k].boss&&!isEdge(z.pos));
  const ammoDmg=z=>15+Math.ceil(.25*z.max);
  function fireAmmo(st){if(!(st.ammo>0))return null;const z=st.z.filter(z=>z.hp>0&&ZT[z.k].boss&&!isEdge(z.pos)).sort((a,b)=>a.hp-b.hp)[0];if(!z)return null;st.ammo--;const ev=[];
@@ -646,7 +709,11 @@ const Z=(()=>{
    return{k:'evo',i,j,t:k,from}}
   if(!canFuse(u.t))return null;const from=[];
   for(;;){const g=u.gold||0,same=st.grid.map((v,j)=>j!==i&&v&&v.t===u.t&&(v.gold||0)===g?j:-1).filter(j=>j>=0).sort((a,b)=>cheb(a,i)-cheb(b,i));
-   if(same.length<2)break;const js=same.slice(0,2);absorb(u,js.map(j=>st.grid[j]));js.forEach(j=>{st.grid[j]=null});u.gold=g+1;u.hp=maxHp(st,u);from.push(...js)}
+   if(same.length<2)break;const js=same.slice(0,2);
+   // v111 : la fusion crée une nouvelle carte ★ ; les cartes qui la composent repartent toutes en défausse
+   // (u.fbk : cartes à rendre, que le rendu verse dans la défausse ; u.src=[] : la nouvelle carte ne revient pas quand l'unité tombe)
+   if(!u.src||u.src.length){u.fbk=(u.fbk||[]).concat(u.src||(u.gen?[]:[u.t]));u.src=[]}
+   absorb(u,js.map(j=>st.grid[j]));js.forEach(j=>{st.grid[j]=null});u.gold=g+1;u.hp=maxHp(st,u);from.push(...js)}
   return from.length?{k:'fuse',i,t:u.t,from,gold:u.gold}:null}
  // une unité tombe : un survivant nommé rejoint le mémorial (sauf s'il est Increvable et n'a pas encore utilisé sa chance)
  function lose(st,j,u,ev){if(u.trait==='increvable'&&!u.saved){u.hp=1;u.saved=1;ev.push({i:j,k:'saved',name:u.name});return false}
@@ -851,6 +918,6 @@ const Z=(()=>{
   st.z=st.z.filter(z=>z.hp>0);return ev}
  function runNight(st,rnd){startNight(st,rnd);let r;do{r=step(st);if(r.pause)nextWave(st)}while(!r.done)}
  return{inRange,manh,SAP_WALL,ROLES,roleOf,TAUNT,squad,nbRoles,lureTarget,pathStep,field,N,C,MID,LINE,LINE_MAX,TRACE,CHARGES,chargesOf,isTrace,charges,isBuild,buildCost,lineCost,lineCells,placeLine,MAXS,maxS,PLACES,UNLOCK,unlocks,costOf,DECK_MIN,DECK_MAX,COPY_MAX,CARD_PRICE,STARTER_CARDS,STARTER_DECK,copyMax,runPoints,deckError,U,KEYS,ZT,ZK,EVENTS,RELICS,relicNight,MUTS,mutNight,mutate,zspd,mc,CHARS,SHOP,shopCost,RARITY,RAR,waveCount,SIDES,UPGRADABLE,get HPS(){return HPS},set HPS(v){HPS=v},hpMult,get WAVES(){return WAVES},set WAVES(v){WAVES=v},get GROW(){return GROW},set GROW(v){GROW=v},
-  DAWN,dawnEvent,resolveDawn,rc,isEdge,isForest,ROADS,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,frenzyMult,FRENZY,FRENZY_FROM,dmgBonus,pressure,lvKills,lvOf,ammoDmg,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move,bossHit,frenzyLv,respite,eqOf,hasEq,isUnit,unitCap,unitCount,capFull,canRecall,recall,canPlaceBench,placeBench,famLevel};
+  DAWN,dawnEvent,resolveDawn,EV_CHANCE,EV_GAP,STORE_N,AMMO_COST,STORE_PRICE,storePrice,storeOffer,buyStore,rc,isEdge,isForest,ROADS,INNER,EDGES,around,cheb,newState,newDay,waveList,stat,upgDesc,upgrade,addRelic,relicChoices,draftChoices,shuffle,pay,touch,canPlace,place,startNight,step,endNight,runNight,drawCount,FAM,CHIEF,famOf,famCounts,famLevels,TIERS,nightOffers,nightChoice,canReact,react,TRAITS,named,maxHp,sol,ALLY,ALLY_MIN,allies,wallGroup,LEGACY_KILLS,legacies,bigNight,nextWave,WAVES_N,AMMO_MAX,AMMO_DMG,bossAlive,fireAmmo,ZHP,EVO,EVO_KEYS,merge,frenzy,frenzyMult,FRENZY,FRENZY_FROM,dmgBonus,pressure,lvKills,lvOf,ammoDmg,LVL,lvPending,lvReady,levelUp,ENERGY,HAND_MAX,cost,canPay,canMove,move,bossHit,frenzyLv,respite,eqOf,hasEq,isUnit,unitCap,unitCount,capFull,canRecall,recall,canPlaceBench,placeBench,famLevel};
 })();
 if(typeof module!=='undefined')module.exports=Z;

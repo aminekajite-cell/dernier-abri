@@ -29,6 +29,9 @@ for(const k of Z.EVO_KEYS)check(`évolution ${k} : recette valide`,()=>Z.EVO[k].
 check('deck de départ valide',()=>eq(Z.deckError(Z.STARTER_DECK,Z.STARTER_CARDS),''));
 check('les 4 routes sont au bord, hors forêt',()=>Z.ROADS.forEach(i=>ok(Z.isEdge(i)&&!Z.isForest(i))));
 check('chaque type de nuit a un nom, un effet et une phrase courte',()=>Z.EVENTS.forEach(e=>ok(e.n&&e.d&&e.p&&e.p.length<=45)));
+check('au moins 25 événements d’aube, chacun avec 2 choix qui marchent',()=>{const ks=Object.keys(Z.DAWN);ok(ks.length>=25,'seulement '+ks.length);ks.forEach(k=>Z.DAWN[k].ch.forEach((c,i)=>{for(let s=1;s<=6;s++){const st=fresh();st.scrap=30;Z.place(st,'gun',2*9+4,rng(1),true);Z.place(st,'bar',2*9+5,rng(1),true);const r=Z.resolveDawn(st,k,i,rng(s),['gun','bar','snp']);ok(r&&typeof r.txt==='string'&&r.txt.length,k+' '+i+' sans texte');ok(st.scrap>=0&&st.shelter>=1&&isFinite(st.shelter),k+' '+i+' valeurs');(r.cards||[]).forEach(t=>ok(Z.U[t],k+' carte inconnue '+t))}}))});
+check('événements d’aube : rares, espacés de 3 nuits, sans répétition',()=>{const st=fresh();const r=rng(7);let n=0,last=-99;const seen=[];for(let night=2;night<400;night++){st.night=night;const e=Z.dawnEvent(st,r);if(e){n++;ok(night-last>=3,'trop rapprochés');last=night;seen.push(e)}}
+ const ks=Object.keys(Z.DAWN).length;ok(n>20&&n<90,'fréquence '+n+' sur 398 aubes');eq(new Set(seen.slice(0,Math.min(ks,seen.length))).size,Math.min(ks,seen.length),'répétition avant d’avoir tout vu')});
 check('chaque illustration de assets/cards_cartoon est déclarée dans CART_FILES (game.js)',()=>{const m=fs.readFileSync(path.join(ROOT,'src/game.js'),'utf8').match(/const CART_FILES=\(([\s\S]*?)\)\.split/);ok(m,'CART_FILES introuvable');const list=m[1].replace(/['+\s]+/g,' ').trim().split(' ');const miss=fs.readdirSync(path.join(ROOT,'assets/cards_cartoon')).map(f=>f.replace(/\.webp$/,'')).filter(f=>!f.endsWith('_pop')&&!f.startsWith('z_')&&Z.U[f]&&!list.includes(f));eq(miss,[])});
 
 /* ---------- 2. pose de chaque carte ---------- */
@@ -57,6 +60,7 @@ check('limite de 5 unités, murs et pièges illimités',()=>{const st=fresh();['
 check('limite : +1 toutes les 10 nuits',()=>{const st=fresh();st.night=9;eq(Z.unitCap(st),5);st.night=10;eq(Z.unitCap(st),6);st.night=25;eq(Z.unitCap(st),7)});
 check('limite : une pose qui fusionne reste permise',()=>{const st=fresh();['gun','gun','axe','med','snp'].forEach((t,k)=>Z.place(st,t,2*9+1+k*2,rng(1)));
  ok(Z.canPlace(st,'gun',6*9+4),'fusion refusée');Z.place(st,'gun',6*9+4,rng(1));eq(Z.unitCount(st),4)});
+check('fusion : nouvelle carte ★, les 3 cartes qui la composent repartent en défausse',()=>{const st=fresh();[2*9+2,2*9+4,6*9+4].forEach(i=>Z.place(st,'gun',i,rng(1)));const us=st.grid.filter(Boolean);eq(us.length,1);const u=us[0];eq(u.gold,1);eq(u.fbk,['gun']);eq(u.src,[]);[2*9+2,2*9+4,6*9+5].forEach(i=>{Z.place(st,'gun',i,rng(1))});const v=st.grid.filter(u=>u&&u.gold===1).length;ok(v>=1)});
 check('rappel : l’unité garde tout et se repose gratuitement',()=>{const st=fresh();Z.place(st,'gun',2*9+4,rng(1));const u=st.grid[2*9+4];u.kills=30;u.lvA=1;u.gold=1;
  ok(Z.recall(st,2*9+4));eq(Z.unitCount(st),0);eq(st.bench.length,1);const e=st.energy;ok(Z.placeBench(st,0,6*9+4));const v=st.grid[6*9+4];
  ok(v===u&&v.kills===30&&v.lvA===1&&v.gold===1,'unité modifiée');eq(st.energy,e);eq(st.bench.length,0)});
@@ -101,7 +105,8 @@ check('un piège posé revient à la défausse (il ne reste plus en main)',()=>{
 
 check('munition : seulement contre le Colosse sur la carte',()=>{const st=fresh();Z.startNight(st,rng(1));st.pending=[];st.energy=5;ok(!Z.canReact(st,'shell',Z.C));
  st.z=[{id:9,k:'boss',pos:2*9+4,hp:100,max:100,cd:5,style:0}];ok(Z.canReact(st,'shell',Z.C));Z.react(st,'shell',Z.C);ok(st.z[0].hp<100)});
-check('troc : la munition n’a plus de stock maximum',()=>{const st=fresh();st.scrap=100;ok(Z.pay(st,'ammo'));ok(Z.pay(st,'ammo'));ok(Z.pay(st,'ammo'));ok(Z.pay(st,'ammo'))});
+check('boutique : 5 objets hors du deck, jamais d’unité ni de munition, achats payés',()=>{const st=fresh();st.scrap=100;ok(Z.pay(st,'store'));eq(st.scrap,95);const deck=['gun','bar','food','grenade'];const o=Z.storeOffer(st,deck,rng(3));eq(o.length,Z.STORE_N);o.forEach(t=>{ok(['item','react'].includes(Z.U[t].cat),t+' n’est pas un objet');ok(!deck.includes(t),t+' déjà dans le deck');ok(t!=='shell')});eq(new Set(o).size,o.length);const p=Z.storePrice(o[0]);ok(Z.buyStore(st,o[0]));eq(st.scrap,95-p);st.scrap=Z.AMMO_COST-1;ok(!Z.buyStore(st,'shell'))});
+check('munition anti-Colosse : usage unique, 2 au plus',()=>{ok(Z.U.shell.once);eq(Z.AMMO_MAX,2)});
 
 check('soin à distance : l’Infirmière soigne à 2 cases',()=>{const st=fresh();st.grid[2*9+2]={t:'med',hp:2};st.grid[2*9+4]={t:'gun',hp:1};Z.startNight(st,rng(1));st.pending=[];st.z=[];for(let k=0;k<2;k++)Z.step(st);ok(st.grid[2*9+4].hp>1,'pas soigné')});
 check('soin au contact : la Pharmacienne ne soigne pas à 2 cases',()=>{const st=fresh();st.grid[2*9+2]={t:'pharma',hp:3};st.grid[2*9+4]={t:'gun',hp:1};Z.startNight(st,rng(1));st.pending=[];st.z=[];for(let k=0;k<2;k++)Z.step(st);eq(st.grid[2*9+4].hp,1)});
