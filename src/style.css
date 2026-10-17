@@ -491,3 +491,5 @@ ul.rules .ink{width:1.1em;height:1.1em}
 /* v106 : une phrase courte et poétique par type de nuit ; l'effet est dans le détail (toucher la fiche) */
 .poem{font-style:italic}
 .panel p.poem{font-style:italic;color:#5a4630;font-size:15px}
+/* v107 : la phrase remplace le nom de la nuit sur la fiche */
+.fiche-top b{white-space:normal;font-size:16px;line-height:1.2}

@@ -689,3 +689,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 **v105** : l’intitulé « La horde » est retiré de la fiche de nuit : les jetons de zombies suffisent.
 
 **v106** : la fiche de nuit n’écrit plus l’effet de la nuit. Chaque type de nuit a une phrase courte et poétique (champ `p` de `EVENTS` : « Le vent retient son souffle. », « La brume avale les silhouettes. », « La lune pleine les appelle tous. », « L’eau noie les flammes et les pas. », « Plus une lueur. Rien que leurs râles. », « Ils ont faim. Ils courent. »). Toucher la fiche ouvre le détail : la phrase, l’effet de la nuit, la nuit rouge, le répit, le Colosse, la frénésie et chaque type de zombie. Quand une fusée annonce la direction de la horde, la fiche l’indique à la place de la phrase.
+
+**v107** : sur la fiche de nuit, la phrase poétique remplace le nom de la nuit (« La brume avale les silhouettes. » au lieu de « Brouillard ») ; le nom et l’effet restent dans le détail. La fusée s’affiche en petit à droite quand elle annonce la direction de la horde.
