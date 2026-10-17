@@ -444,3 +444,24 @@ body{background:
 .pile .pb,.flyc.back{border:0;border-radius:9%/7%;background:url(../assets/ui/dos.webp) center/100% 100% no-repeat}
 .pile .pb{box-shadow:1px 2px 0 #c9b68c,2px 3px 0 #1e2a36,3px 4px 0 #c9b68c,4px 5px 0 #1e2a36,5px 7px 8px rgba(0,0,0,.55)}
 .pile .pb b{background:rgba(20,30,42,.88);color:#f2e1b0;border:1.5px solid #c9a35a;box-shadow:0 1px 3px rgba(0,0,0,.6)}
+
+/* v101 : logo sur l'accueil, règles du jeu dans leur propre écran */
+.logo{margin:-6px auto 0;width:min(100%,340px);line-height:0}
+.logo svg{width:100%;height:auto;display:block;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+ul.rules .ink{width:1.1em;height:1.1em}
+
+/* v101 : les écrans (accueil, aube, troc, collection…) deviennent des fiches de papier posées sur la table */
+.panel{--panel:#efe3c6;--panel2:#e6d6b1;--line:#b39a6e;--ink:#2b1a0c;--muted:#5a4630;--lantern:#9a6200;--blood:#a8231c;--good:#2e6b3a;
+ --k-wall:#7a5530;--k-shoot:#8a5a00;--k-melee:#b0441f;--k-help:#1f6a9a;--k-trap:#a8231c;--k-item:#6a4a9a;--k-post:#2e6b3a;--k-react:#a8231c;
+ color-scheme:light;color:var(--ink);border:0;border-radius:8px;position:relative;
+ background:radial-gradient(130% 80% at 30% 10%,#f4ead2,#e9dcbc 60%,#ddcb9f);
+ box-shadow:inset 0 0 0 5px #efe3c6,inset 0 0 0 6.5px #8a6a42,inset 0 0 0 9px #efe3c6,inset 0 0 0 10px rgba(138,106,66,.5),
+  0 1px 0 #c9b68c,0 2px 0 #b5a077,0 3px 0 #a08a61,0 4px 0 #8a7350,0 5px 0 #6e5a3c,0 14px 30px rgba(0,0,0,.7)}
+.panel h2.pw{color:#3a2a18}.panel h2.ok{color:#2e6b3a}.panel h2.ko{color:#8e1d12}
+.panel .go{background:linear-gradient(#f2c04a,#e0a028);color:#2b1a0c;box-shadow:0 3px 0 #8a5a10,0 4px 8px rgba(0,0,0,.35)}
+.panel .skip{background:#e6d6b1;border:1.5px solid #8a6a42;color:#3a2a18;box-shadow:0 2px 0 #8a7350}
+.panel .cfbar{background:#e9dcbc}
+.panel .cfbar input,.panel .cfbar select{background:#f6eedb;color:#2b1a0c;border-color:#8a6a42}
+.panel p.rip{color:#8e1d12}
+.panel .big{color:#2b1a0c}
+.overlay{background:rgba(20,13,8,.72)}

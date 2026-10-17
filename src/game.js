@@ -169,7 +169,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v100 · 17 oct.';
+const VERSION='v101 · 17 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -240,7 +240,9 @@ function fly(t,a,b,delay,back,done){if(reduce||!a||!b){done&&done();return}const
  const W=56,H=75,x0=a.left+a.width/2-W/2,y0=a.top+a.height/2-H/2,x1=b.left+b.width/2-W/2,y1=b.top+b.height/2-H/2;
  const an=g.animate([{transform:`translate(${x0}px,${y0}px) scale(.85)`,opacity:.95},{transform:`translate(${x1}px,${y1}px) scale(1)`,opacity:1}],{duration:340,delay,easing:'cubic-bezier(.3,.7,.3,1)',fill:'both'});
  an.onfinish=()=>{g.remove();done&&done()};an.oncancel=an.onfinish}
-function animPiles(){const pd=$('#pDraw'),px=$('#pDisc');if(!pd||!px)return;const rd=pd.getBoundingClientRect(),rx=px.getBoundingClientRect();
+function animPiles(){const pd=$('#pDraw'),px=$('#pDisc');if(!pd||!px)return;
+ // un écran (accueil, aube…) couvre le plateau : on garde les animations pour quand il se ferme
+ {const o=document.getElementById('ov');if(o&&!o.hidden)return}const rd=pd.getBoundingClientRect(),rx=px.getBoundingClientRect();
  if(S.reshuf){S.reshuf=0;for(let k=0;k<5;k++)fly(null,rx,rd,k*60,1);px.classList.add('pulse');setTimeout(()=>px.classList.remove('pulse'),600)}
  if(S.newDraw){const n=S.newDraw;S.newDraw=0;const cs=[...document.querySelectorAll('#hand .card[data-k]')].slice(-n);
   cs.forEach((c,k)=>{c.style.visibility='hidden';fly(S.hand[+c.dataset.k],rd,c.getBoundingClientRect(),120+k*110,0,()=>{c.style.visibility=''})});if(n)setTimeout(()=>SFX.play('ui'),120)}
@@ -1223,7 +1225,7 @@ function show(h,keep){const pv=document.getElementById('preview');if(pv)pv.hidde
 // les chiffres marqués data-count défilent de 0 à leur valeur
 function countUp(){if(reduce)return;panel.querySelectorAll('[data-count]').forEach(el=>{const n=+el.dataset.count;if(!(n>0))return;const t0=performance.now();el.textContent='0';
  const f=now=>{const p=clamp((now-t0)/900,0,1);el.textContent=Math.round(n*ease(p));if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)})}
-function hide(){ov.hidden=true}
+function hide(){ov.hidden=true;requestAnimationFrame(()=>{try{animPiles()}catch(e){}})}
 /* ---------- collection, decks et préparation de la partie ---------- */
 // héritage : les souvenirs des survivants tombés passent à la partie qui commence (une seule fois)
 function takeLegacy(){G.legacy=[];if(META.legacy&&META.legacy.length){META.legacy=[];saveMeta(META)}}
@@ -1298,6 +1300,7 @@ const ACT={
  load:()=>{const d=loadSave();if(d)resume(d);else prepScreen()},
  title:()=>title(),
  close:()=>hide(),
+ rules:()=>show(`<h2 class="pw">Règles du jeu</h2>${rulesHtml()}<button type="button" class="go" data-a="title">Retour</button>`),
  deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu prépares ton deck (20 à 30 cartes) avec les cartes de ta collection. Pendant la partie, tu ne joues que les cartes de ton deck : à l’aube, tu choisis l’une des cartes de ta pioche pour l’avoir en main le lendemain.</p>${deckHtml()}<h2 class="pw">Fusion, évolutions et niveaux</h2><p><b>Fusion :</b> quand 3 unités du même type et du même nombre d’étoiles sont sur la carte, elles fusionnent en une unité avec une étoile de plus. Chaque étoile ajoute 120 % des PV de base de la carte et +1 dégât (ou +1 soin). Les 2 cartes absorbées reviennent dans ta défausse.</p><p><b>Évolutions :</b> certaines paires de cartes posées côte à côte se transforment en une unité unique ✦. À toi de les découvrir.</p><p><b>Bonus et tirs multiples :</b> les bonus de dégâts (faction, voisins, niveaux…) comptent une fois par attaque ; pour une unité qui tire ou mord plusieurs fois, ils sont répartis entre les coups.</p><p><b>Niveaux :</b> une unité gagne un niveau à 20 zombies tués, puis 25 de plus, 30 de plus, et ainsi de suite : +1 dégât ou +3 PV, au choix à l’aube. Pas de niveau maximum.</p><h2 class="pw">Les factions</h2><p><b>Riposte :</b> une unité de corps à corps frappée au contact rend le coup aussitôt.</p><p><b>Limite :</b> au plus ${Z.unitCap(G||{night:1})} unités sur le terrain (5, puis +1 toutes les 10 nuits). Murs et pièges ne comptent pas. Le jour, tu peux déplacer librement tes cartes posées et rappeler une unité dans ta réserve pour la reposer gratuitement plus tard.</p><p>Chaque faction a 2 bonus : à 2 survivants, puis à 5 survivants (équipe complète). Seuls les survivants comptent (humains et chiens) : ni les constructions, ni les machines. Le Chef d’une faction (carte légendaire) compte pour 2.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span class="fic">${ink(Object.keys(Z.FAM).find(k=>Z.FAM[k]===f))}</span><span><b>${f.n}</b>${f.lv[0]} survivants : ${f.d[0]}. ${f.lv[1]} survivants : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">Les rôles</h2><p>🛡️ <b>Tank</b> : beaucoup de PV ; les zombies à ${Z.TAUNT} cases ou moins le visent au lieu de l’abri ; il bloque 1 coup sur 3.<br>❤️ <b>Soin</b> : soigne tes unités (jamais les murs, ce sont les réparateurs qui s’en chargent). Soin à distance (Infirmière, Brancardier, Doctoresse : portée en vert quand tu touches l’unité) ou au contact (Pharmacienne, Hôpital, Cantine : les 8 cases autour).<br>⚔️ <b>DPS</b> : gros dégâts.<br><b>Escouade</b> : un Tank, un Soin et un DPS voisins gagnent chacun +1 dégât (ou +1 soin).</p><p><b>Unités et postes :</b> une unité est un survivant ou une machine qui combat ou soigne ; elle compte dans la limite. Un poste de soutien (projecteur, hôpital, atelier, radio…) aide sans combattre et ne compte pas.</p><h2 class="pw">Les remparts</h2><p>Des murs posés côte à côte se relient en un rempart : chaque mur gagne +1 PV par mur voisin relié (jusqu’à +3). Chaque mur garde ses PV : celui que le zombie frappe encaisse le coup, et une brèche s’ouvre là où ça cède. Les zombies calculent leur chemin : ils contournent tes défenses si le détour est plus court que de les casser, sinon ils attaquent le point le plus faible.</p><h2 class="pw">La horde</h2><p>Jusqu’à la nuit 10, ils sont chaque nuit plus nombreux. Après chaque Colosse vient une <b>nuit de répit</b> (30 % de zombies en moins), puis leur nombre remonte, de plus en plus lentement. Surtout, après chaque Colosse, la <b>frénésie meurtrière</b> gagne un niveau, cumulable : +60 % des PV de base et +1 dégât pour tous les zombies. Toutes les 5 nuits, c’est la <b>nuit rouge</b> : 25 % de zombies en plus, puis à l’aube une mutation de la horde et une relique pour toi. Le Colosse attaque toutes les 10 nuits : très lent, il fonce tout droit, fait 10 dégâts par coup à tes défenses et tes unités (+2 toutes les 10 nuits) et frappe l’abri sans mourir. Un Tank peut bloquer ses coups. Tant qu’ils sont dans la forêt, les zombies sont <b>intouchables</b> : on ne peut les frapper qu’une fois entrés sur la carte. Quand un zombie blesse l’abri, c’est la <b>brèche</b> : tous les autres avancent aussitôt d’une case.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 5 nuits, la horde change de mutation : une nouvelle remplace la précédente, comme un affixe. Une seule est active à la fois.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
  dawn:()=>dawn(),
  lvl:v=>{const i=S.picks&&S.picks[0];if(i!=null&&Z.levelUp(G,i,v==='atk'?'atk':'def')){const p=tc(i);floatTxt(p.x,p.y-20,v==='atk'?'+1 dégât':'+3 PV','#9fd86b',15);addFX({type:'ring',x:p.x,y:p.y,r:44,c:'#9fd86b',dur:500})}S.phase=null;save();render();dawn()},
@@ -1347,10 +1350,9 @@ function dailyScreen(){const day=today(),c=dailySetup(day),b=dailyBest(day);
   <ul><li>Personnage : <b>${Z.CHARS[c.ch].n}</b></li><li>Lieu : <b>${Z.PLACES[c.pl].n}</b></li><li>Toutes les cartes sont disponibles.</li></ul>
   ${b!==null?`<p>Ton meilleur score aujourd’hui : <b>${plural(b,'nuit','nuits')}</b>.</p>`:''}<p>Les défis ne comptent pas pour les déblocages.</p>
   <button type="button" class="go" data-a="daily-go">Jouer le défi</button><button type="button" class="skip" data-a="title">Retour</button>`)}
-function title(){onTitle=true;show(`<h2 class="pw">Dernier Abri</h2><p>Pas de secours. Pas de fin. Survis <b>une nuit de plus</b>, encore et encore : chaque nuit, la horde est plus nombreuse et plus coriace.</p>
-<ul><li>Le jour, dépense tes <b>5 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
+const rulesHtml=()=>`<ul class="rules"><li>Le jour, dépense tes <b>5 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
 <li>Chaque survivant a un <b>prénom</b> et un trait. La première fois qu’il tombe, il part blessé en réserve pour 3 nuits ; la seconde fois, il est perdu pour de bon.</li>
-<li>Chaque unité a un <b>rôle</b> : 🛡️ <b>Tank</b> (attire les zombies à 3 cases, bloque 1 coup sur 3), ❤️ <b>Soin</b> (à distance ou sur les 8 cases autour, jamais les murs), ⚔️ <b>DPS</b>. Un Tank, un Soin et un DPS voisins forment une <b>escouade</b> : +1 dégât (ou +1 soin) pour chacun.</li>
+<li>Chaque unité a un <b>rôle</b> : ${ink('tank')} <b>Tank</b> (attire les zombies à 3 cases, bloque 1 coup sur 3), ${ink('heal')} <b>Soin</b> (à distance ou sur les 8 cases autour, jamais les murs), ${ink('dps')} <b>DPS</b>. Un Tank, un Soin et un DPS voisins forment une <b>escouade</b> : +1 dégât (ou +1 soin) pour chacun.</li>
 <li>Les unités de <b>corps à corps</b> rendent chaque coup reçu au contact. Des <b>murs</b> côte à côte forment un rempart : chaque mur relié gagne des PV. 2 survivants d’une même faction débloquent son bonus, 5 forment une <b>équipe complète</b>.</li>
 <li>Prépare-toi au <b>Colosse</b> : achète des <b>munitions anti-Colosse</b> au troc : chacune arrive en main sous forme de carte, à jouer pendant sa nuit. Elle arrive en <b>2 vagues</b> : entre les deux, tu déplaces librement tes unités et tu peux jouer tes réactions.</li>
 <li>Le jour, tu peux <b>déplacer</b> librement tout ce que tu as posé : touche-le, puis touche une case libre. Tu peux aussi <b>rappeler</b> une unité dans ta réserve : elle garde ses niveaux, ses étoiles, son prénom et son trait, et se repose gratuitement.</li><li>Tu as au plus <b>5 unités</b> sur le terrain (+1 toutes les 10 nuits) ; murs et pièges sont illimités. Fusionne pour libérer de la place.</li>
@@ -1361,10 +1363,46 @@ function title(){onTitle=true;show(`<h2 class="pw">Dernier Abri</h2><p>Pas de se
 <li>Pose 3 fois la même unité : elles <b>fusionnent</b> en une version dorée ★ ; 3 unités ★ donnent une ★★, et ainsi de suite. Certaines paires de cartes posées côte à côte <b>évoluent</b> en unité secrète. Les unités gagnent des <b>niveaux</b> en tuant des zombies (20, puis 25 de plus, 30…).</li>
 <li>La nuit, les zombies sortent de la forêt <b>uniquement par les 4 routes</b> et marchent vers la maison : un mur en travers d’une route la ferme. Tes survivants se défendent tout seuls.</li>
 <li>Tu ne joues que les cartes de <b>ton deck</b>. À l’aube, choisis l’une d’elles pour l’avoir <b>en main le lendemain</b>, puis échange ta <b>ferraille</b> au troc.</li>
-<li>Toutes les 5 nuits, la horde <b>mute</b> pour de bon et la nuit est une <b>nuit de pression</b> (+25 % de zombies). Si un zombie blesse l’abri, c’est la <b>brèche</b> : toute la horde avance d’un coup. Toutes les 5 nuits, trouve une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive.</li></ul>
+<li>Toutes les 5 nuits, c’est la <b>nuit rouge</b> (+25 % de zombies) ; à l’aube, la horde change de <b>mutation</b> (une seule à la fois) et tu trouves une <b>relique</b>. Toutes les 10 nuits, le <b>Colosse</b> arrive ; ensuite la <b>frénésie meurtrière</b> renforce tous les zombies, et la nuit d’après est un <b>répit</b> (30 % de zombies en moins). Si un zombie blesse l’abri, c’est la <b>brèche</b> : toute la horde avance d’un coup.</li></ul>`;
+// logo du jeu (aussi dans assets/ui/logo.svg), dessiné en SVG avec les polices du jeu
+const LOGO=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 210" role="img" aria-label="Dernier Abri">
+ <defs>
+  <radialGradient id="lg-moon" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="#fff4cf"/><stop offset=".7" stop-color="#f2d58a"/><stop offset="1" stop-color="#d9a640"/></radialGradient>
+  <radialGradient id="lg-glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd25a" stop-opacity=".9"/><stop offset="1" stop-color="#ffb020" stop-opacity="0"/></radialGradient>
+  <linearGradient id="lg-wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a6a3a"/><stop offset=".5" stop-color="#7a4f28"/><stop offset="1" stop-color="#5a3818"/></linearGradient>
+ </defs>
+ <circle cx="180" cy="74" r="62" fill="#2a1d13"/>
+ <circle cx="180" cy="74" r="57" fill="url(#lg-moon)"/>
+ <circle cx="158" cy="56" r="7" fill="#e3bf6c" opacity=".55"/><circle cx="204" cy="92" r="9" fill="#e3bf6c" opacity=".45"/><circle cx="208" cy="50" r="4" fill="#e3bf6c" opacity=".5"/>
+ <g fill="#1e140c">
+  <path d="M118 128 L123 82 L119 70 L126 80 L128 60 L131 84 L137 74 L133 92 L136 128Z"/>
+  <path d="M232 128 L235 90 L229 78 L238 88 L240 66 L243 90 L249 80 L245 98 L248 128Z"/>
+  <path d="M138 130 L138 92 L180 60 L222 92 L222 130Z"/>
+  <rect x="200" y="66" width="10" height="20"/>
+  <path d="M130 96 L180 54 L230 96 L224 100 L180 63 L136 100Z"/>
+ </g>
+ <circle cx="180" cy="100" r="22" fill="url(#lg-glow)"/>
+ <rect x="171" y="92" width="18" height="17" rx="1.5" fill="#ffc947"/>
+ <path d="M180 92v17M171 100.5h18" stroke="#1e140c" stroke-width="2.4"/>
+ <path d="M150 112 h12 v18 h-12z" fill="#3a2614"/>
+ <g>
+  <path d="M22 126 Q180 112 338 126 L332 190 Q180 178 28 190Z" fill="#1e140c" transform="translate(0,4)"/>
+  <path d="M22 126 Q180 112 338 126 L332 190 Q180 178 28 190Z" fill="url(#lg-wood)" stroke="#2a1a0c" stroke-width="3"/>
+  <path d="M26 158 Q180 146 334 158" stroke="#4a2e14" stroke-width="2" fill="none" opacity=".7"/>
+  <path d="M60 136 q30 -3 60 -2 M230 168 q40 -2 70 1 M70 176 q25 -2 50 -1" stroke="#b5814a" stroke-width="1.5" fill="none" opacity=".6"/>
+  <circle cx="40" cy="138" r="4" fill="#c9a35a" stroke="#3a2410" stroke-width="1.5"/><circle cx="320" cy="138" r="4" fill="#c9a35a" stroke="#3a2410" stroke-width="1.5"/>
+  <circle cx="44" cy="177" r="4" fill="#c9a35a" stroke="#3a2410" stroke-width="1.5"/><circle cx="316" cy="177" r="4" fill="#c9a35a" stroke="#3a2410" stroke-width="1.5"/>
+  <text x="180" y="170" text-anchor="middle" font-family="'Special Elite',serif" font-size="35" letter-spacing="1.5" fill="#1e140c" transform="translate(2,3)">DERNIER ABRI</text>
+  <text x="180" y="170" text-anchor="middle" font-family="'Special Elite',serif" font-size="35" letter-spacing="1.5" fill="#f2e1b0" stroke="#2a1a0c" stroke-width="1.2" paint-order="stroke">DERNIER ABRI</text>
+ </g>
+ <path d="M64 128 q4 0 4 5 v9 q0 3 -2.5 3 q-2.5 0 -2.5 -3 v-5 q-3 0 -3 -4 q0 -5 4 -5z" fill="#8e1d12" opacity=".9"/>
+ <text x="180" y="206" text-anchor="middle" font-family="'Atkinson Hyperlegible',sans-serif" font-size="12.5" letter-spacing="4" fill="#5a4630">UNE NUIT DE PLUS</text>
+</svg>`;
+function title(){onTitle=true;show(`<h1 class="logo">${LOGO}</h1><p>Pas de secours. Pas de fin. Survis <b>une nuit de plus</b>, encore et encore : chaque nuit, la horde est plus nombreuse et plus coriace.</p>
+
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}
-<button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><button type="button" class="skip" data-a="options">⚙️ Options</button>${iosHint()?'<p class="ver">Sur iPhone : Partager → « Sur l’écran d’accueil » pour jouer en plein écran.</p>':''}<p class="ver">Sons : Kenney (kenney.nl), artisticdude et saturn91 (OpenGameArt), sous licence CC0.</p><p class="ver">${VERSION}</p>`)}
+<button type="button" class="skip" data-a="rules">Règles du jeu</button><button type="button" class="skip" data-a="coll">Collection et decks</button><button type="button" class="skip" data-a="daily">Défi du jour</button><button type="button" class="skip" data-a="deck">Voir les cartes et les zombies</button><button type="button" class="skip" data-a="options">⚙️ Options</button>${iosHint()?'<p class="ver">Sur iPhone : Partager → « Sur l’écran d’accueil » pour jouer en plein écran.</p>':''}<p class="ver">Sons : Kenney (kenney.nl), artisticdude et saturn91 (OpenGameArt), sous licence CC0.</p><p class="ver">${VERSION}</p>`)}
 applyOpt();newGame();render();requestAnimationFrame(frame);title();
 
 // bouton son
