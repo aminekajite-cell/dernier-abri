@@ -169,7 +169,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v111 · 17 oct.';
+const VERSION='v112 · 17 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -206,13 +206,25 @@ let META=loadMeta();
 // tutoriel de la première partie : une bulle d'aide par étape (0 à 4 ; 5 = terminé)
 let TUTO=5;try{TUTO=+(localStorage.getItem('abri-tuto')??(META.runs||META.best?5:0))}catch(e){}
 function tuto(n){if(TUTO===n){TUTO=n+1;try{localStorage.setItem('abri-tuto',TUTO)}catch(e){}}}
+/* première nuit guidée (v112) : à la toute première partie, le jeu montre quoi toucher, étape par étape :
+   le Tireur, sa case au-dessus de la maison, la Barricade, sa case sur la route du sud, puis « Affronter la nuit ».
+   GUIDE est vrai tant que la première journée guidée n'est pas finie ; ensuite les bulles habituelles prennent le relais. */
+let GUIDE=false;const GUIDE_CELLS={gun:31,bar:58};
+function guideStep(){if(!GUIDE||!G||G.night!==1||S.busy)return null;const has=t=>G.grid.some(u=>u&&u.t===t),sel=selCard();
+ if(!has('gun'))return sel==='gun'?{n:1,cell:GUIDE_CELLS.gun,txt:'Pose-le juste au-dessus de la maison : touche la case qui brille.'}:{n:0,card:'gun',txt:'Les zombies sortent de la forêt par les 4 routes et marchent vers ta maison. Pour te défendre, touche le Tireur en bas de l’écran (il coûte 2 énergies).'};
+ if(!has('bar'))return sel==='bar'?{n:3,cell:GUIDE_CELLS.bar,txt:'Pose-la sur la route du sud pour la fermer : touche la case qui brille.'}:{n:2,card:'bar',txt:'Bien ! Ton tireur tirera tout seul sur les zombies à sa portée. Maintenant, touche la Barricade.'};
+ return{n:4,go:1,txt:'Ton énergie est dépensée pour aujourd’hui. Touche « Affronter la nuit » : tes survivants se défendront tout seuls.'}}
+// au lancement de la toute première partie : le Tireur et la Barricade sont dans la main
+function guideStart(){GUIDE=false;if(TUTO!==0)return;const need=['gun','bar'];if(!need.every(t=>S.hand.includes(t)||S.draw.includes(t)))return;
+ need.forEach(t=>{if(S.hand.includes(t))return;S.draw.splice(S.draw.lastIndexOf(t),1);if(S.hand.length>=Z.drawCount(G)){const k=S.hand.findIndex(x=>!need.includes(x));if(k>=0)S.draw.unshift(...S.hand.splice(k,1))}S.hand.push(t)});
+ const rk=t=>need.includes(t)?need.indexOf(t):9;S.hand.sort((a,b)=>rk(a)-rk(b));GUIDE=true}
 const TIPS=['👆 Touche une carte en bas pour la choisir. Le chiffre jaune est son coût en énergie.','Touche une case en pointillés jaunes pour la poser.','Bien ! Les points jaunes sous la carte sont ton énergie. Pose d’autres cartes, puis touche « Affronter la nuit ».','Tes survivants se défendent tout seuls. Touche le bouton du bas pour accélérer.'];
 function newGame(ch,pl,daily,deck){
  RS=daily?seedFrom('abri-'+daily):1+Math.floor(Math.random()*2147483645);
  G=Z.newState(ch,pl,R,daily?Z.KEYS.slice():Z.unlocks(META).pool);if(daily)G.daily=daily;
  S={draw:shuffle([...(deck||META.decks[META.slot]||Z.STARTER_DECK)]),board:G.grid.filter(Boolean),discard:[],bsel:null,hand:[],used:[],sel:null,moveFrom:null,inspect:null,busy:false,next:null,phase:null,picks:null,dawn:null};
  V.clear();FX.length=0;PT.length=0;facing.fill(null);clearDecals();POS=new Map();G.grid.forEach((u,j)=>{if(u)POS.set(u,j)});DISC0=-1;
- fillHand();
+ fillHand();if(!daily)guideStart();else GUIDE=false;
 }
 // la carte choisie à l'aube arrive d'office dans la main, le reste est pioché
 // la main se garde d'un jour à l'autre : on la complète jusqu'au nombre de cartes du jour (au moins 1 nouvelle), sans dépasser HAND_MAX
@@ -665,6 +677,10 @@ function drawWires(){const W=i=>!!(G.grid[i]&&G.grid[i].t==='wire'),seen=new Set
   const nb=k=>links.filter(([a,b])=>a===k||b===k).map(([a,b])=>a===k?b:a);
   g.forEach(k=>{const ls=nb(k);let corner=ls.length!==2;if(!corner){const[r0,c0]=Z.rc(k),[r1,c1]=Z.rc(ls[0]),[r2,c2]=Z.rc(ls[1]);corner=(r1-r0)!==(r0-r2)||(c1-c0)!==(c0-c2)}if(corner){const p=tc(k);wirePost(p.x,p.y)}})})}
 // pendant la pause de la nuit du Colosse : sa route en rouge (il fonce tout droit de sa route vers l'abri)
+// première nuit guidée : la case à toucher pulse en doré
+function drawGuide(now){const g=guideStep();if(!g||g.cell==null||G.grid[g.cell])return;const p=tc(g.cell),k=.5+.5*Math.sin(now/220);
+ ctx.save();ctx.strokeStyle=`rgba(255,210,90,${.55+.45*k})`;ctx.lineWidth=4;ctx.shadowColor='#ffd25a';ctx.shadowBlur=12+10*k;ctx.strokeRect(p.x-T/2+4,p.y-T/2+4,T-8,T-8);
+ ctx.fillStyle=`rgba(255,210,90,${.12+.12*k})`;ctx.fillRect(p.x-T/2+4,p.y-T/2+4,T-8,T-8);ctx.restore()}
 function drawBossRoute(now){if(!S.pause||!G.pending)return;const ps=[...new Set(G.pending.filter(p=>p.k==='boss').map(p=>p.pos))];if(!ps.length)return;
  const k=.55+.35*Math.sin(now/220);ctx.save();ctx.lineCap='round';
  ps.forEach(pos=>{const a=tc(pos),b=CEN,ang=Math.atan2(b.y-a.y,b.x-a.x),ex=b.x-Math.cos(ang)*T*.75,ey=b.y-Math.sin(ang)*T*.75;
@@ -808,6 +824,7 @@ function frameInner(now){
  const safe=f=>{ctx.save();try{f()}catch(e){}ctx.restore()};
  safe(()=>drawShelter(now));
  safe(()=>drawBossRoute(now));
+ safe(()=>drawGuide(now));
  safe(()=>drawWires());
  G.grid.forEach((u,i)=>{if(u&&!Z.U[u.t].block&&u.t!=='wire')safe(()=>drawUnit(i,u,now))});
  const zs=[...V.values()].sort((a,b)=>zpos(a,now).y-zpos(b,now).y);
@@ -923,7 +940,7 @@ function render(){
  const hand=$('#hand'),nH=S.hand.length+new Set(S.used||[]).size;hand.style.setProperty('--n',Math.max(4,Math.min(WIDE.matches?9:5,nH)));
  // en largeur sur grand écran : autant de colonnes que la largeur du panneau le permet (cartes de 100 à 118 px)
  if(LANDTALL.matches&&innerHeight>=640){const cols=Math.max(3,Math.min(Math.max(nH,4),Math.floor((hand.clientWidth+6)/106)));hand.style.gridTemplateColumns=`repeat(${cols},minmax(0,118px))`}else hand.style.gridTemplateColumns='';
- hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card${S.sel===k?' sel':''}" data-k="${k}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}>${cardFace(t,{mini:1,v:Z.U[t].react&&!S.busy?'Nuit':''})}</button>`).join('')
+ const gcard=(guideStep()||{}).card;hand.innerHTML=S.hand.map((t,k)=>`<button type="button" class="card${S.sel===k?' sel':''}${gcard===t&&S.hand.indexOf(t)===k?' guide':''}" data-k="${k}" ${(S.busy?!Z.U[t].react:Z.U[t].react)||!Z.canPay(G,t)?'disabled':''}>${cardFace(t,{mini:1,v:Z.U[t].react&&!S.busy?'Nuit':''})}</button>`).join('')
   +[...new Set(S.used||[])].map(t=>{const k=S.used.indexOf(t),n=S.used.filter(x=>x===t).length,on=S.sel!==null&&S.sel<0&&S.used[-1-S.sel]===t;
    const tr=Z.isTrace(t),ch=tr?Z.charges(G,t,true):0;
    return `<button type="button" class="card reuse${on?' sel':''}" data-u="${k}" ${S.busy||Z.buildCost(G,t,true)>(G.energy??0)||(tr&&!ch)?'disabled':''}>${cardFace(t,{mini:1,cost:Z.buildCost(G,t,true),tag:tr?`Encore ${ch} case${ch>1?'s':''}`:'Encore'+(n>1?' ×'+n:'')})}</button>`}).join('')
@@ -941,7 +958,9 @@ function render(){
  else info.innerHTML=`<span class="nrg">${'<i class="on"></i>'.repeat(Math.max(0,left))}${'<i></i>'.repeat(Math.max(0,Z.ENERGY-left))}</span> <b>${left}</b> énergie. Touche une carte posée pour la déplacer ou la rappeler.`;
  // bouton de tir : un seul élément, mis à jour sans être recréé (sinon le toucher peut se perdre pendant la nuit)
  updatePreview();checkHints();
- const tip=$('#tip');if(TUTO<4&&ov.hidden&&(S.busy?TUTO===3:TUTO<3)){tip.hidden=false;tip.textContent=TIPS[TUTO]}else tip.hidden=true;
+ const tip=$('#tip'),gs=guideStep();if(gs&&ov.hidden){tip.hidden=false;tip.textContent=gs.txt}else if(TUTO<4&&ov.hidden&&(S.busy?TUTO===3:TUTO<3)&&!GUIDE){tip.hidden=false;tip.textContent=TIPS[TUTO]}else tip.hidden=true;
+ $('#go').classList.toggle('guide',!!(gs&&gs.go&&ov.hidden));
+ $('#info').hidden=!!(gs&&ov.hidden);
  const go=$('#go');go.disabled=false;go.textContent=S.pause?`Lancer la vague ${S.pause+1} sur ${G.waves}`:S.busy?`Vitesse ×${SPEED} (toucher pour changer)`:'Affronter la nuit';go.classList.toggle('speed',S.busy&&!S.pause);
 }
 $('#hand').addEventListener('click',e=>{const b=e.target.closest('.card');if(!b||b.disabled)return;SFX.play('ui');LASTRECT=b.getBoundingClientRect();
@@ -1089,7 +1108,7 @@ async function night(){
  if(S.busy)return;S.busy=true;SPEED=OPT.speed||1;S.sel=null;S.drag=null;S.discard.push(...S.used);S.used=[];
  S.moveFrom=null;S.inspect=null;save();
  const scrap0=G.scrap,kills0=G.kills;
- tuto(2);nightTarget=1;KC.n=0;KC.on=1;Z.startNight(G,R);render();await wait(900);
+ if(GUIDE){GUIDE=false;if(TUTO<3){TUTO=3;try{localStorage.setItem('abri-tuto',3)}catch(e){}}}tuto(2);nightTarget=1;KC.n=0;KC.on=1;Z.startNight(G,R);render();await wait(900);
  let r;
  do{const types=G.grid.map(u=>u&&u.t);
   r=Z.step(G);syncBoard();const now=performance.now();
@@ -1318,7 +1337,8 @@ const ACT={
  load:()=>{const d=loadSave();if(d)resume(d);else prepScreen()},
  title:()=>title(),
  close:()=>hide(),
- rules:()=>show(`<h2 class="pw">Règles du jeu</h2>${rulesHtml()}<button type="button" class="go" data-a="title">Retour</button>`),
+ rules:()=>show(`<h2 class="pw">Règles du jeu</h2>${rulesHtml()}<button type="button" class="skip" data-a="retuto">Rejouer la première nuit guidée</button><button type="button" class="go" data-a="title">Retour</button>`),
+ retuto:()=>{TUTO=0;try{localStorage.setItem('abri-tuto','0')}catch(e){}ACT.new()},
  deck:()=>show(`<h2 class="pw">Les cartes</h2><p>Tu prépares ton deck (20 à 30 cartes) avec les cartes de ta collection. Pendant la partie, tu ne joues que les cartes de ton deck : à l’aube, tu choisis l’une des cartes de ta pioche pour l’avoir en main le lendemain.</p>${deckHtml()}<h2 class="pw">Fusion, évolutions et niveaux</h2><p><b>Fusion :</b> quand 3 unités du même type et du même nombre d’étoiles sont sur la carte, elles fusionnent en une unité avec une étoile de plus. Chaque étoile ajoute 120 % des PV de base de la carte et +1 dégât (ou +1 soin). La fusion crée une <b>nouvelle carte ★</b> : les 3 cartes qui la composent repartent dans ta défausse. Si l’unité fusionnée tombe, sa carte ★ est perdue ; rappelée en réserve, elle garde ses étoiles.</p><p><b>Évolutions :</b> certaines paires de cartes posées côte à côte se transforment en une unité unique ✦. À toi de les découvrir.</p><p><b>Bonus et tirs multiples :</b> les bonus de dégâts (faction, voisins, niveaux…) comptent une fois par attaque ; pour une unité qui tire ou mord plusieurs fois, ils sont répartis entre les coups.</p><p><b>Niveaux :</b> une unité gagne un niveau à 20 zombies tués, puis 25 de plus, 30 de plus, et ainsi de suite : +1 dégât ou +3 PV, au choix à l’aube. Pas de niveau maximum.</p><h2 class="pw">Les factions</h2><p><b>Riposte :</b> une unité de corps à corps frappée au contact rend le coup aussitôt.</p><p><b>Limite :</b> au plus ${Z.unitCap(G||{night:1})} unités sur le terrain (5, puis +1 toutes les 10 nuits). Murs et pièges ne comptent pas. Le jour, tu peux déplacer librement tes cartes posées et rappeler une unité dans ta réserve pour la reposer gratuitement plus tard.</p><p>Chaque faction a 2 bonus : à 2 survivants, puis à 5 survivants (équipe complète). Seuls les survivants comptent (humains et chiens) : ni les constructions, ni les machines. Le Chef d’une faction (carte légendaire) compte pour 2.</p><div class="deck">${Object.values(Z.FAM).map(f=>`<div class="dk" style="--cc:var(--lantern)"><span class="fic">${ink(Object.keys(Z.FAM).find(k=>Z.FAM[k]===f))}</span><span><b>${f.n}</b>${f.lv[0]} survivants : ${f.d[0]}. ${f.lv[1]} survivants : ${f.d[1]}.</span></div>`).join('')}</div><h2 class="pw">Les rôles</h2><p>🛡️ <b>Tank</b> : beaucoup de PV ; les zombies à ${Z.TAUNT} cases ou moins le visent au lieu de l’abri ; il bloque 1 coup sur 3.<br>❤️ <b>Soin</b> : soigne tes unités (jamais les murs, ce sont les réparateurs qui s’en chargent). Soin à distance (Infirmière, Brancardier, Doctoresse : portée en vert quand tu touches l’unité) ou au contact (Pharmacienne, Hôpital, Cantine : les 8 cases autour).<br>⚔️ <b>DPS</b> : gros dégâts.<br><b>Escouade</b> : un Tank, un Soin et un DPS voisins gagnent chacun +1 dégât (ou +1 soin).</p><p><b>Unités et postes :</b> une unité est un survivant ou une machine qui combat ou soigne ; elle compte dans la limite. Un poste de soutien (projecteur, hôpital, atelier, radio…) aide sans combattre et ne compte pas.</p><h2 class="pw">Les remparts</h2><p>Des murs posés côte à côte se relient en un rempart : chaque mur gagne +1 PV par mur voisin relié (jusqu’à +3). Chaque mur garde ses PV : celui que le zombie frappe encaisse le coup, et une brèche s’ouvre là où ça cède. Les zombies calculent leur chemin : ils contournent tes défenses si le détour est plus court que de les casser, sinon ils attaquent le point le plus faible.</p><h2 class="pw">La horde</h2><p>Jusqu’à la nuit 10, ils sont chaque nuit plus nombreux. Après chaque Colosse vient une <b>nuit de répit</b> (30 % de zombies en moins), puis leur nombre remonte, de plus en plus lentement. Surtout, après chaque Colosse, la <b>frénésie meurtrière</b> gagne un niveau, cumulable : +60 % des PV de base et +1 dégât pour tous les zombies. Toutes les 5 nuits, c’est la <b>nuit rouge</b> : 25 % de zombies en plus, puis à l’aube une mutation de la horde et une relique pour toi. Le Colosse attaque toutes les 10 nuits : très lent, il fonce tout droit, fait 10 dégâts par coup à tes défenses et tes unités (+2 toutes les 10 nuits) et frappe l’abri sans mourir. Un Tank peut bloquer ses coups. Tant qu’ils sont dans la forêt, les zombies sont <b>intouchables</b> : on ne peut les frapper qu’une fois entrés sur la carte. Quand un zombie blesse l’abri, c’est la <b>brèche</b> : tous les autres avancent aussitôt d’une case.</p>${zedHtml()}<h2 class="pw">Les mutations</h2><p>Toutes les 5 nuits, la horde change de mutation : une nouvelle remplace la précédente, comme un affixe. Une seule est active à la fois.</p><div class="deck">${Object.values(Z.MUTS).map(m=>`<div class="dk" style="--cc:var(--blood)">${svg('mut')}<span><b>${m.n}</b>${m.d}</span></div>`).join('')}</div><button type="button" class="go" data-a="title">Retour</button>`),
  dawn:()=>dawn(),
  lvl:v=>{const i=S.picks&&S.picks[0];if(i!=null&&Z.levelUp(G,i,v==='atk'?'atk':'def')){const p=tc(i);floatTxt(p.x,p.y-20,v==='atk'?'+1 dégât':'+3 PV','#9fd86b',15);addFX({type:'ring',x:p.x,y:p.y,r:44,c:'#9fd86b',dur:500})}S.phase=null;save();render();dawn()},

@@ -522,3 +522,9 @@ ul.rules .ink{width:1.1em;height:1.1em}
 .fam .ink{width:14px;height:14px}
 .fams .tok{flex:none}
 .fams .tags{position:sticky;right:0;padding-left:10px;background:linear-gradient(90deg,rgba(42,29,19,0),rgba(42,29,19,.92) 10px);border-radius:0 14px 14px 0}
+
+/* v112 : première nuit guidée : la carte et le bouton à toucher pulsent en doré */
+@keyframes guidep{0%,100%{filter:drop-shadow(0 0 3px rgba(255,210,90,.6))}50%{filter:drop-shadow(0 0 12px rgba(255,210,90,1))}}
+.hand .card.guide{animation:guidep 1.1s ease-in-out infinite;transform:translateY(-6px)}
+.go.guide{animation:guidep 1.1s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.hand .card.guide,.go.guide{animation:none;outline:3px solid #ffd25a}}
