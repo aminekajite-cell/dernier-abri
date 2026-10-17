@@ -488,3 +488,6 @@ ul.rules .ink{width:1.1em;height:1.1em}
 /* v105 : plus d'intitulé « La horde », les jetons parlent d'eux-mêmes */
 .ztoks::before{content:none;display:none}
 .ztoks{margin-top:8px}
+/* v106 : une phrase courte et poétique par type de nuit ; l'effet est dans le détail (toucher la fiche) */
+.poem{font-style:italic}
+.panel p.poem{font-style:italic;color:#5a4630;font-size:15px}

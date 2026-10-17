@@ -247,12 +247,12 @@ const Z=(()=>{
  };
  const ZK=Object.keys(ZT);
  const EVENTS=[
-  {id:'calme',n:'Nuit calme',d:'Aucun effet'},
-  {id:'brume',n:'Brouillard',d:'Portée des tireurs −1'},
-  {id:'lune',n:'Pleine lune',d:'+50 % de zombies'},
-  {id:'pluie',n:'Pluie',d:'L\'essence ne brûle pas'},
-  {id:'coupure',n:'Coupure de courant',d:'Projecteurs et clôtures inactifs'},
-  {id:'sprint',n:'Horde affamée',d:'Les rôdeurs deviennent des coureurs'}
+  {id:'calme',n:'Nuit calme',d:'Aucun effet',p:'Le vent retient son souffle.'},
+  {id:'brume',n:'Brouillard',d:'Portée des tireurs −1',p:'La brume avale les silhouettes.'},
+  {id:'lune',n:'Pleine lune',d:'+50 % de zombies',p:'La lune pleine les appelle tous.'},
+  {id:'pluie',n:'Pluie',d:'L\'essence ne brûle pas',p:'L’eau noie les flammes et les pas.'},
+  {id:'coupure',n:'Coupure de courant',d:'Projecteurs et clôtures inactifs',p:'Plus une lueur. Rien que leurs râles.'},
+  {id:'sprint',n:'Horde affamée',d:'Les rôdeurs deviennent des coureurs',p:'Ils ont faim. Ils courent.'}
  ];
  // nuits 1 à 10, puis chaque nuit ajoute GROW zombies de chaque type (survie sans fin)
  let WAVES={

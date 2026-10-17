@@ -28,6 +28,7 @@ for(const f of Object.keys(Z.FAM))check(`faction ${f} : cartes existantes, 2 pal
 for(const k of Z.EVO_KEYS)check(`évolution ${k} : recette valide`,()=>Z.EVO[k].forEach(t=>ok(Z.U[t],t+' inconnue')));
 check('deck de départ valide',()=>eq(Z.deckError(Z.STARTER_DECK,Z.STARTER_CARDS),''));
 check('les 4 routes sont au bord, hors forêt',()=>Z.ROADS.forEach(i=>ok(Z.isEdge(i)&&!Z.isForest(i))));
+check('chaque type de nuit a un nom, un effet et une phrase courte',()=>Z.EVENTS.forEach(e=>ok(e.n&&e.d&&e.p&&e.p.length<=45)));
 
 /* ---------- 2. pose de chaque carte ---------- */
 for(const t of PLAY){const D=Z.U[t];if(D.react)continue;

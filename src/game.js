@@ -169,7 +169,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v105 · 17 oct.';
+const VERSION='v106 · 17 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -893,7 +893,7 @@ function ficheHtml(){const w=Z.waveList(G),fz=Z.frenzy(G),dm=Z.dmgBonus(G.night)
  const stamp=S.busy?'':boss?'<i class="stamp boss">Colosse</i>':Z.pressure(G.night)?'<i class="stamp red">Nuit rouge</i>':Z.respite(G.night)?'<i class="stamp calm">Répit</i>':'';
  const toks=S.busy?'':Z.ZK.filter(k=>w[k]).map(k=>`<span class="ztk" title="${plural(w[k],...ZN[k])}"><span class="ztk-i" style="background-image:url('assets/sprites_cartoon/z_${k}.webp')"></span><b>${w[k]}</b></span>`).join('');
  const fzt=fz&&!S.busy?`<span class="ztk fz" title="Frénésie meurtrière : +${fz} % de PV${dm?`, +${dm} dégât`:''}"><span class="ztk-i">🩸</span><b>+${fz}%</b></span>`:'';
- return `<div class="fiche-top"><b>${G.event.n}</b><span>${G.event.d==='Aucun effet'?'':G.event.d}${G.side>=0?` · Fusée : ils viendront de ${Z.SIDES[G.side]}`:''}</span></div>${toks||fzt?`<div class="ztoks">${toks}${fzt}</div>`:''}${stamp}`}
+ return `<div class="fiche-top"><b>${G.event.n}</b><span class="poem">${G.side>=0?`Une fusée dans le ciel : ils viendront ${['du nord','du sud','de l’ouest','de l’est'][G.side]}.`:G.event.p||''}</span></div>${toks||fzt?`<div class="ztoks">${toks}${fzt}</div>`:''}${stamp}`}
 function trackHtml(){const a=Math.floor((G.night-1)/10)*10+1,mut=G.muts&&G.muts[0],soon=Z.mutNight(G.night),cells=[];
  for(let n=a;n<a+10;n++){const cls=(n%10===0?' boss':n%5===0?' red':Z.respite(n)?' calm':'')+(n<G.night?' past':'')+(n===G.night?' now':'');
   cells.push(`<span class="tc${cls}" title="Nuit ${n}${n%10===0?' : le Colosse':n%5===0?' : nuit rouge':Z.respite(n)?' : nuit de répit':''}">${n%10===0?'☠':n}${n===G.night?'<i class="meeple"></i>':''}</span>`)}
@@ -976,7 +976,7 @@ addEventListener('pointerup',e=>{if(!HD)return;const d=HD;HD=null;if(!d.on)retur
 addEventListener('pointercancel',()=>{if(HD&&HD.g)HD.g.remove();HD=null});
 $('#round').addEventListener('click',()=>{if(!S.busy&&ov.hidden)runInfo()});
 $('#event').addEventListener('click',()=>{if(S.busy||!ov.hidden)return;const w=Z.waveList(G),fz=Z.frenzy(G),dm=Z.dmgBonus(G.night);SFX.play('ui');
- show(`<h2 class="pw">Nuit ${G.night}</h2><p><b>${G.event.n}</b> : ${G.event.d}.</p>${Z.pressure(G.night)?'<p>🩸 <b>Nuit rouge</b> : 25 % de zombies en plus, puis une mutation et une relique à l’aube.</p>':''}${Z.respite(G.night)?'<p>🌙 <b>Nuit de répit</b> : 30 % de zombies en moins.</p>':''}${Z.bigNight(G,w)?'<p>☠️ <b>Nuit du Colosse</b> : la horde arrive en 2 vagues, le Colosse dans la seconde.</p>':''}${fz?`<p>🩸 <b>Frénésie meurtrière</b> : +${fz} % de PV${dm?`, +${dm} dégât`:''} pour tous les zombies.</p>`:''}
+ show(`<h2 class="pw">Nuit ${G.night}</h2>${G.event.p?`<p class="poem">${G.event.p}</p>`:''}<p><b>${G.event.n}</b> : ${G.event.d}.</p>${Z.pressure(G.night)?'<p>🩸 <b>Nuit rouge</b> : 25 % de zombies en plus, puis une mutation et une relique à l’aube.</p>':''}${Z.respite(G.night)?'<p>🌙 <b>Nuit de répit</b> : 30 % de zombies en moins.</p>':''}${Z.bigNight(G,w)?'<p>☠️ <b>Nuit du Colosse</b> : la horde arrive en 2 vagues, le Colosse dans la seconde.</p>':''}${fz?`<p>🩸 <b>Frénésie meurtrière</b> : +${fz} % de PV${dm?`, +${dm} dégât`:''} pour tous les zombies.</p>`:''}
   <div class="deck">${Z.ZK.filter(k=>w[k]).map(k=>`<div class="dk" style="--cc:var(--z-${k})"><span class="ztk-i big" style="background-image:url('assets/sprites_cartoon/z_${k}.webp')"></span><span><b>${plural(w[k],...ZN[k])}</b>${Z.ZT[k].info}</span></div>`).join('')}</div><button type="button" class="go" data-a="closeov">Fermer</button>`)});
 $('#horde').addEventListener('click',e=>{const t=e.target.closest('[data-tok=mut]');if(!t||!ov.hidden)return;const m=Z.MUTS[G.muts[0]];SFX.play('ui');
  show(`<h2 class="pw">Mutation de la horde</h2><p><b>${m.n}</b> : ${m.d}.</p><p>Elle reste active jusqu’à la prochaine mutation (toutes les 5 nuits).</p><button type="button" class="go" data-a="closeov">Fermer</button>`)});
