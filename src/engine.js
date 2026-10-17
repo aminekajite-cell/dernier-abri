@@ -721,7 +721,7 @@ const Z=(()=>{
     Fusion : 3 unités du même type et du même nombre d'étoiles fusionnent en une unité avec une étoile de plus
     (chaque étoile : +120 % des PV de base, +1 dégât ou +1 soin). Les fusions s'enchaînent (3 ★ donnent ★★, etc.).
     Les 2 unités absorbées rendent leur carte à la défausse : elles pourront être tirées de nouveau.
-    Évolution : deux cartes précises posées côte à côte deviennent une unité unique (EVO). Ses 2 cartes reviennent quand elle tombe. */
+    Évolution : deux cartes précises posées côte à côte deviennent une unité unique (EVO), une nouvelle carte ; les 2 cartes repartent aussitôt en défausse. */
  const basic=u=>!!u&&!u.gold&&!U[u.t].evo;
  const evoOf=(a,b)=>EVO_KEYS.find(k=>{const[x,y]=EVO[k];return(a===x&&b===y)||(a===y&&b===x)});
  const canFuse=t=>{const D=U[t];return !!D.block&&!D.evo&&!D.chief&&D.cat!=='trap'&&D.cat!=='wall'&&D.cat!=='post'};
@@ -731,7 +731,10 @@ const Z=(()=>{
   u.kills=all.reduce((s,v)=>s+(v.kills||0),0);u.lvA=Math.max(...all.map(v=>v.lvA||0));u.lvD=Math.max(...all.map(v=>v.lvD||0));u.leg=all.map(v=>v.leg).find(Boolean)}
  function merge(st,i){const u=st.grid[i];if(!u||U[u.t].evo)return null;
   if(basic(u))for(const j of around(i)){const v=st.grid[j];if(!basic(v))continue;const k=evoOf(u.t,v.t);if(!k)continue;
-   const from=[u.t,v.t];u.src=[u,v].filter(w=>!w.gen).map(w=>w.t);delete u.gen;absorb(u,[v]);v.absorbed=1;st.grid[j]=null;u.t=k;u.hp=maxHp(st,u);
+   const from=[u.t,v.t];
+   // v118 : l'évolution crée une nouvelle carte ; les 2 cartes de la recette repartent aussitôt en défausse (u.fbk).
+   // La carte évoluée ne va jamais dans le deck : blessée elle va en réserve, détruite elle disparaît.
+   u.fbk=(u.fbk||[]).concat([u,v].flatMap(w=>w.src||(w.gen?[]:[w.t])));u.src=[];delete u.gen;absorb(u,[v]);v.absorbed=1;st.grid[j]=null;u.t=k;u.hp=maxHp(st,u);
    return{k:'evo',i,j,t:k,from}}
   if(!canFuse(u.t))return null;const from=[];
   for(;;){const g=u.gold||0,same=st.grid.map((v,j)=>j!==i&&v&&v.t===u.t&&(v.gold||0)===g?j:-1).filter(j=>j>=0).sort((a,b)=>cheb(a,i)-cheb(b,i));

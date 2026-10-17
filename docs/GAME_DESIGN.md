@@ -742,3 +742,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Note : la Menace 8 devait faire revenir les nuits rouges toutes les 4 nuits ; elle les rend plutôt plus fortes, pour ne pas décaler mutations et reliques.
 
 **v117** : vocabulaire (décision d’Amine, plus dans le thème) : les niveaux de difficulté de la v116 s’appellent **Mutations** (« Mutation de la horde » 0 à 10, « Mutation 3 vaincue ») au lieu de Menaces, et les affixes qui changent toutes les 5 nuits s’appellent **mutations instables**. Le niveau 5 devient « Instabilité précoce : une mutation instable dès la nuit 1 ». Dans le code, les niveaux restent `menace` / `MENACES` et les affixes `muts` / `MUTS`.
+
+**v118** (décision d’Amine) : les **évolutions** fonctionnent comme la fusion : elles créent une **nouvelle carte** (avec son illustration), et les 2 cartes de la recette repartent aussitôt dans la défausse. Règle commune aux cartes fusionnées ★ et évoluées ✦ : elles n’entrent jamais dans le deck ni la défausse et ne se piochent jamais ; blessées, elles partent en réserve (convalescence) ; détruites, elles disparaissent.

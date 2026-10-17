@@ -26,6 +26,7 @@ for(const t of KEYS){const D=Z.U[t];
 for(const k of Object.keys(Z.ZT)){const T=Z.ZT[k];check(`zombie ${k} : stats valides`,()=>ok(T.n&&fin(T.hp)&&T.hp>0&&fin(T.dmg)&&fin(T.spd)&&T.spd>=1))}
 for(const f of Object.keys(Z.FAM))check(`faction ${f} : cartes existantes, 2 paliers`,()=>{Z.FAM[f].cards.forEach(t=>ok(Z.U[t],t+' inconnue'));eq(Z.FAM[f].lv.length,2);eq(Z.FAM[f].d.length,2)});
 for(const k of Z.EVO_KEYS)check(`évolution ${k} : recette valide`,()=>Z.EVO[k].forEach(t=>ok(Z.U[t],t+' inconnue')));
+check('évolution : nouvelle carte, les 2 cartes de la recette repartent en défausse',()=>{const st=fresh();Z.place(st,'cop',2*9+3,rng(1));Z.place(st,'dog',2*9+4,rng(1));const u=st.grid.find(v=>v&&v.t==='k9squad');ok(u,'pas d’évolution');eq([...u.fbk].sort(),['cop','dog']);eq(u.src,[])});
 check('deck de départ valide',()=>eq(Z.deckError(Z.STARTER_DECK,Z.STARTER_CARDS),''));
 check('les 4 routes sont au bord, hors forêt',()=>Z.ROADS.forEach(i=>ok(Z.isEdge(i)&&!Z.isForest(i))));
 check('chaque type de nuit a un nom, un effet et une phrase courte',()=>Z.EVENTS.forEach(e=>ok(e.n&&e.d&&e.p&&e.p.length<=45)));
