@@ -722,3 +722,21 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
 - Obscurité dessinée à mi-résolution et lumières réutilisant un même disque dégradé préparé une fois : 0,35 à 0,8 ms (≈ 2,5× plus rapide), sans différence visible. Lueur de l’abri limitée à sa zone.
 - Plafonds : 10 sons en même temps, 220 particules, 24 lumières.
 - **Mode économie** (Options) pour les petits téléphones : plateau à résolution normale au lieu de doublée, 5 sons, 70 particules, 12 lumières, ni flous ni ombres portées sur les cartes et l’interface.
+
+**v116** : **victoire et niveaux de Menace** (décision d’Amine).
+- **Victoire** : tenir **30 nuits** (`WIN_NIGHT`). La nuit 30 est une nuit du Colosse (« Colosse final » sur la fiche, phrase « Dernière nuit : les secours arrivent à l’aube »). À l’aube, écran « Les secours sont là ! » : +100 + 50 × Menace points de survie, et la Menace suivante se débloque. Deux choix :
+  - **Partir avec les secours** : la partie se termine en victoire (points des 30 nuits en plus).
+  - **Rester** : mode infini, pour le score ; la victoire reste acquise. La frénésie (+10 % par nuit) fixe une limite naturelle, vers la nuit 35 à 50.
+- **Menace** (0 à 10, choisie dans « Préparer la partie », niveaux cumulatifs, chaque victoire débloque le suivant) :
+  1. Horde coriace : +10 % de PV dès la nuit 1.
+  2. Réveil difficile : 3 énergies le premier jour.
+  3. Sans répit : plus de nuit de répit.
+  4. Pénurie : boutique à 10 ferraille, un zombie ordinaire sur deux rapporte de la ferraille.
+  5. Mutation précoce : une mutation dès la nuit 1.
+  6. Curée : jusqu’à +3 dégâts.
+  7. Blessures profondes : convalescence de 4 nuits.
+  8. Nuits de sang : nuits rouges à +50 % de zombies (au lieu de +25 %).
+  9. Double Colosse : un Colosse de plus à chaque nuit du Colosse.
+  10. Dernier Abri : abri −3 PV max, frénésie dès la nuit 3.
+- L’accueil affiche la meilleure Menace vaincue et le nombre de victoires ; la Menace en cours s’affiche à côté du jour (« M3 »). Le défi du jour reste en Menace 0.
+- Note : la Menace 8 devait faire revenir les nuits rouges toutes les 4 nuits ; elle les rend plutôt plus fortes, pour ne pas décaler mutations et reliques.

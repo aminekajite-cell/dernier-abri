@@ -169,7 +169,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v115 · 17 oct.';
+const VERSION='v116 · 17 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -917,13 +917,13 @@ function playEvents(ev,types,now){
 /* ---------- UI ---------- */
 // jeu de société : la fiche de nuit (événement, jetons de zombies, frénésie, tampon) et la piste des nuits
 function ficheHtml(){const w=Z.waveList(G),fz=Z.frenzy(G),dm=Z.dmgBonus(G.night),boss=Z.bigNight(G,w);
- const stamp=S.busy?'':boss?'<i class="stamp boss">Colosse</i>':Z.pressure(G.night)?'<i class="stamp red">Nuit rouge</i>':Z.respite(G.night)?'<i class="stamp calm">Répit</i>':'';
+ const fin=G.night===Z.WIN_NIGHT&&!G.won;const stamp=S.busy?'':fin?'<i class="stamp boss">Colosse final</i>':boss?'<i class="stamp boss">Colosse</i>':Z.pressure(G.night)?'<i class="stamp red">Nuit rouge</i>':Z.respite(G.night,G)?'<i class="stamp calm">Répit</i>':'';
  const toks=S.busy?'':Z.ZK.filter(k=>w[k]).map(k=>`<span class="ztk" title="${plural(w[k],...ZN[k])}"><span class="ztk-i" style="background-image:url('assets/sprites_cartoon/z_${k}.webp')"></span><b>${w[k]}</b></span>`).join('');
  const fzt=fz&&!S.busy?`<span class="ztk fz" title="Frénésie meurtrière : +${fz} % de PV et de dégâts"><span class="ztk-i">🩸</span><b>+${fz}%</b></span>`:'';
- return `<div class="fiche-top"><b title="${G.event.n}">${G.event.p||G.event.n}</b>${G.side>=0?`<span class="poem">Fusée : ils viendront ${['du nord','du sud','de l’ouest','de l’est'][G.side]}</span>`:''}</div>${toks||fzt?`<div class="ztoks">${toks}${fzt}</div>`:''}${stamp}`}
+ return `<div class="fiche-top"><b title="${G.event.n}">${G.night===Z.WIN_NIGHT&&!G.won?'Dernière nuit : les secours arrivent à l’aube.':G.event.p||G.event.n}</b>${G.side>=0?`<span class="poem">Fusée : ils viendront ${['du nord','du sud','de l’ouest','de l’est'][G.side]}</span>`:''}</div>${toks||fzt?`<div class="ztoks">${toks}${fzt}</div>`:''}${stamp}`}
 function trackHtml(){const a=Math.floor((G.night-1)/10)*10+1,mut=G.muts&&G.muts[0],soon=Z.mutNight(G.night),cells=[];
- for(let n=a;n<a+10;n++){const cls=(n%10===0?' boss':n%5===0?' red':Z.respite(n)?' calm':'')+(n<G.night?' past':'')+(n===G.night?' now':'');
-  cells.push(`<span class="tc${cls}" title="Nuit ${n}${n%10===0?' : le Colosse':n%5===0?' : nuit rouge':Z.respite(n)?' : nuit de répit':''}">${n%10===0?'☠':n}${n===G.night?'<i class="meeple"></i>':''}</span>`)}
+ for(let n=a;n<a+10;n++){const cls=(n%10===0?' boss':n%5===0?' red':Z.respite(n,G)?' calm':'')+(n<G.night?' past':'')+(n===G.night?' now':'');
+  cells.push(`<span class="tc${cls}" title="Nuit ${n}${n%10===0?' : le Colosse':n%5===0?' : nuit rouge':Z.respite(n,G)?' : nuit de répit':''}">${n%10===0?'☠':n}${n===G.night?'<i class="meeple"></i>':''}</span>`)}
  return `<span class="track">${cells.join('')}</span>`}
 // jetons mutation et ferraille : au bout de la rangée des jetons d'unités et de factions
 function tagsHtml(){const mut=G.muts&&G.muts[0],soon=Z.mutNight(G.night);return `<span class="tags">${mut?`<span class="tok mut${soon?' soon':''}" data-tok="mut" title="Mutation : ${Z.MUTS[mut].n}">${svg('mut')}</span>`:''}<span class="tok coin" title="Ferraille">${G.scrap}</span></span>`}
@@ -937,7 +937,7 @@ const rarTag=t=>rar(t)==='com'?'':`<span class="rt ${rar(t)}">${Z.RARITY[rar(t)]
 const WIDE=matchMedia('(min-width:760px)');
 const left0=()=>Math.max(0,G.energy??0);
 function render(){
- $('#round').innerHTML=S.busy?`Nuit ${G.night}`:`Jour ${G.night}`;
+ $('#round').innerHTML=(S.busy?`Nuit ${G.night}`:`Jour ${G.night}`)+(G.menace?`<small class="mtag">M${G.menace}</small>`:'');
  $('#shelT').textContent=`${Math.max(0,G.shelter)}/${Z.maxS(G)}`;
  const sb=$('#shelB');sb.style.width=Math.max(0,G.shelter)/Z.maxS(G)*100+'%';sb.className=G.shelter<=3?'low':'';
  $('#event').innerHTML=ficheHtml();
@@ -1008,7 +1008,7 @@ addEventListener('pointerup',e=>{if(!HD)return;const d=HD;HD=null;if(!d.on)retur
 addEventListener('pointercancel',()=>{if(HD&&HD.g)HD.g.remove();HD=null});
 $('#round').addEventListener('click',()=>{if(!S.busy&&ov.hidden)runInfo()});
 $('#event').addEventListener('click',()=>{if(S.busy||!ov.hidden)return;const w=Z.waveList(G),fz=Z.frenzy(G),dm=Z.dmgBonus(G.night);SFX.play('ui');
- show(`<h2 class="pw">Nuit ${G.night}</h2>${G.event.p?`<p class="poem">${G.event.p}</p>`:''}<p><b>${G.event.n}</b> : ${G.event.d}.</p>${Z.pressure(G.night)?'<p>🩸 <b>Nuit rouge</b> : 25 % de zombies en plus, puis une mutation et une relique à l’aube.</p>':''}${Z.respite(G.night)?'<p>🌙 <b>Nuit de répit</b> : 30 % de zombies en moins.</p>':''}${Z.bigNight(G,w)?'<p>☠️ <b>Nuit du Colosse</b> : la horde arrive en 2 vagues, le Colosse dans la seconde.</p>':''}${fz?`<p>🩸 <b>Frénésie meurtrière</b> : +${fz} % de PV et de dégâts pour tous les zombies (+10 % de plus chaque nuit).</p>`:''}
+ show(`<h2 class="pw">Nuit ${G.night}</h2>${G.event.p?`<p class="poem">${G.event.p}</p>`:''}<p><b>${G.event.n}</b> : ${G.event.d}.</p>${Z.pressure(G.night)?'<p>🩸 <b>Nuit rouge</b> : 25 % de zombies en plus, puis une mutation et une relique à l’aube.</p>':''}${Z.respite(G.night,G)?'<p>🌙 <b>Nuit de répit</b> : 30 % de zombies en moins.</p>':''}${Z.bigNight(G,w)?'<p>☠️ <b>Nuit du Colosse</b> : la horde arrive en 2 vagues, le Colosse dans la seconde.</p>':''}${fz?`<p>🩸 <b>Frénésie meurtrière</b> : +${fz} % de PV et de dégâts pour tous les zombies (+10 % de plus chaque nuit).</p>`:''}
   <div class="deck">${Z.ZK.filter(k=>w[k]).map(k=>`<div class="dk" style="--cc:var(--z-${k})"><span class="ztk-i big" style="background-image:url('assets/sprites_cartoon/z_${k}.webp')"></span><span><b>${plural(w[k],...ZN[k])}</b>${Z.ZT[k].info}</span></div>`).join('')}</div><button type="button" class="go" data-a="closeov">Fermer</button>`)});
 $('#fams').addEventListener('click',e=>{const t=e.target.closest('[data-tok=mut]');if(!t||!ov.hidden)return;const m=Z.MUTS[G.muts[0]];SFX.play('ui');
  show(`<h2 class="pw">Mutation de la horde</h2><p><b>${m.n}</b> : ${m.d}.</p><p>Elle reste active jusqu’à la prochaine mutation (toutes les 5 nuits).</p><button type="button" class="go" data-a="closeov">Fermer</button>`)});
@@ -1060,7 +1060,7 @@ function checkHints(){try{if(!G||!S)return;const fl=Object.values(Z.famLevels(G)
  if(G.grid.some((u,i)=>u&&Z.squad(G,i)))hint('squad');if(Z.unitCount(G)>=Z.unitCap(G))hint('cap');
  if(G.grid.some(u=>u&&Z.U[u.t].cat==='post'))hint('post');if(G.grid.some(u=>u&&Z.eqOf(u).length))hint('equip');
  if((G.bench||[]).some(u=>u.koUntil))hint('ko');if(G.muts&&G.muts.length)hint('mut');if(S.pause)hint('pause');
- if(!S.busy&&ov.hidden){if(Z.bigNight(G))hint('boss');else if(Z.pressure(G.night))hint('red');if(Z.respite(G.night))hint('respite')}}catch(e){}}
+ if(!S.busy&&ov.hidden){if(Z.bigNight(G))hint('boss');else if(Z.pressure(G.night))hint('red');if(Z.respite(G.night,G))hint('respite')}}catch(e){}}
 // fusion ou évolution juste après une pose ou un déplacement : effets, son, et découverte enregistrée dans la collection
 function mergeFx(m){if(!m||typeof m!=='object')return;const p=tc(m.i),now=performance.now();
  const pull=(j,c)=>{const q=tc(j);facing[j]=null;addFX({type:'tracer',x1:q.x,y1:q.y,x2:p.x,y2:p.y,c,w:3,dur:450});burst(q.x,q.y,c,12,.09,2)};
@@ -1134,6 +1134,7 @@ async function night(){
  const fallen=(G.fallen||[]).filter(f=>f.night===G.night);
  const rewardCard=null;
  S.dawn={kills:G.kills-kills0,scrap:G.scrap-scrap0,heal:dawnInfo.heal,mut,rewardCard,relicReward:dawnInfo.relic,tier:dawnInfo.tier,hero:hero?{name:hero.name,t:hero.t,nk:hero.nk}:null,fallen};save();render();
+ if(G.night===Z.WIN_NIGHT&&!G.won)return victory();
  dawn();
 }
 
@@ -1202,6 +1203,16 @@ function nextDay(offer){
  Z.newDay(G,R,offer);S.moveFrom=null;S.busy=false;S.phase=null;S.picks=null;S.dawn=null;V.clear();
  fillHand();save();hide();render();
 }
+// victoire : la nuit 30 est tenue, les secours arrivent. Partir (victoire) ou rester (infini, pour le score)
+function victory(){G.won=1;const m=G.menace||0,pts=G.daily?0:Z.winPoints(m),unl=!G.daily&&m<Z.MENACE_MAX&&(META.menace||0)<=m;
+ if(!G.daily){META.wins=(META.wins||0)+1;META.menaceWon=Math.max(META.menaceWon??-1,m);META.menace=Math.max(META.menace||0,Math.min(Z.MENACE_MAX,m+1));META.points=(META.points||0)+pts;saveMeta(META)}
+ save();SFX.play('dawn');const alive=G.grid.filter(u=>u&&u.name).map(u=>u.name);
+ show(`<h2 class="ok">Les secours sont là !</h2><p>À l’aube de la nuit ${Z.WIN_NIGHT}, un hélicoptère se pose devant l’abri. Tu as tenu.</p><div class="big">Victoire${m?` · Menace ${m}`:''}</div>
+  <p><b>${G.kills}</b> zombies éliminés.${alive.length?` Survivants : ${alive.join(', ')}.`:''}</p>${pts?`<p>+<b>${pts}</b> points de survie (total : ${META.points}).</p>`:''}${unl?`<p class="tipin">🔓 <b>Menace ${m+1} débloquée</b> : ${Z.MENACES[m+1].n}. Choisis-la en préparant ta prochaine partie.</p>`:''}
+  <button type="button" class="go" data-a="win-leave">Partir avec les secours</button><button type="button" class="skip" data-a="win-stay">Rester : une nuit de plus (mode infini, pour le score)</button>
+  <p class="ver">Si tu restes, ta victoire est déjà acquise : la horde grandit chaque nuit, jusqu’à ce qu’elle gagne.</p>`)}
+function leaveWin(){clearSave();const nights=G.night;let pts=0;if(!G.daily){pts=Z.runPoints(nights,G.kills);META.points=(META.points||0)+pts;META.best=Math.max(META.best,nights);META.total+=nights;META.runs++;saveMeta(META)}
+ show(`<h2 class="ok">Victoire</h2><p>L’hélicoptère décolle. Derrière toi, la horde envahit la clairière… mais tu es parti.</p><div class="big">${plural(nights,'nuit survécue','nuits survécues')}</div>${pts?`<p>+<b>${pts}</b> points de survie pour ces ${nights} nuits (total : ${META.points}).</p>`:''}<button type="button" class="go" data-a="title">Accueil</button>`)}
 function end(){
  SFX.play('death');
  clearSave();const nights=G.night-1;
@@ -1272,11 +1283,14 @@ function hide(){ov.hidden=true;requestAnimationFrame(()=>{try{animPiles()}catch(
 function takeLegacy(){G.legacy=[];if(META.legacy&&META.legacy.length){META.legacy=[];saveMeta(META)}}
 const legacyTxt=()=>'';const legacyTxt0=()=>(META.legacy||[]).length?`<p>🎖️ Souvenirs pour cette partie : ${META.legacy.map(l=>`<b>${l.name}</b> (${Z.U[l.t].n}, ${l.kills} zombies) : ton premier ${Z.U[l.t].n} posé aura +1 dégât et +2 PV`).join(' ; ')}.</p>`:'';
 function ensureMeta(){if(!META.cards||!META.cards.length)META.cards=Z.STARTER_CARDS.slice();if(META.points==null)META.points=(META.total||0)*5;
- if(!META.decks)META.decks=[0,1,2].map(()=>Z.STARTER_DECK.slice());if(META.slot==null)META.slot=0;saveMeta(META)}
+ if(!META.decks)META.decks=[0,1,2].map(()=>Z.STARTER_DECK.slice());if(META.slot==null)META.slot=0;if(META.menace==null)META.menace=0;if(META.menaceWon==null)META.menaceWon=-1;if(META.wins==null)META.wins=0;saveMeta(META)}
 ensureMeta();
-const PREP={ch:'surv',pl:'bois'};
+const PREP={ch:'surv',pl:'bois',menace:0};
+// niveaux de Menace : on choisit le niveau avant la partie ; chaque victoire débloque le suivant (jusqu'à 10)
+const menaceTabs=()=>`<div class="tabs wrap menace">${Array.from({length:Z.MENACE_MAX+1},(_,k)=>k<=(META.menace||0)?`<button type="button" class="tab${k===PREP.menace?' on':''}" data-a="prepmen" data-v="${k}">${k}${k<=META.menaceWon?' ✓':''}</button>`:`<button type="button" class="tab" disabled>🔒 ${k}</button>`).join('')}</div>`;
+const menaceTxt=m=>m?`<b>Menace ${m}</b> (tous les niveaux jusqu’au ${m} s’additionnent) :</p><ul class="mlist">${Z.MENACES.slice(1,m+1).map((x,k)=>`<li><b>${k+1}. ${x.n}</b> : ${x.d}.</li>`).join('')}</ul><p>Victoire : +${Z.winPoints(m)} points de survie${m<Z.MENACE_MAX?` et la Menace ${m+1} débloquée`:''}.`:`<b>Menace 0</b> : le jeu normal. Gagne la nuit ${Z.WIN_NIGHT} pour débloquer la Menace 1.`;
 const deckCount=d=>{const c={};d.forEach(t=>c[t]=(c[t]||0)+1);return c};
-function prepScreen(){const u=Z.unlocks(META);if(!u.chars.includes(PREP.ch))PREP.ch='surv';if(!u.places.includes(PREP.pl))PREP.pl='bois';
+function prepScreen(){const u=Z.unlocks(META);PREP.menace=Math.max(0,Math.min(META.menace||0,PREP.menace??META.menaceSel??0));if(!u.chars.includes(PREP.ch))PREP.ch='surv';if(!u.places.includes(PREP.pl))PREP.pl='bois';
  const d=META.decks[META.slot],err=Z.deckError(d,META.cards),fc={};d.forEach(t=>{const f=Z.famOf(t);if(f)fc[f]=(fc[f]||0)+1});
  show(`<h2 class="pw">Préparer la partie</h2>
   <h3>Ton deck</h3><div class="tabs">${META.decks.map((x,k)=>`<button type="button" class="tab${k===META.slot?' on':''}" data-a="prepdeck" data-v="${k}">Deck ${k+1}<small>${x.length} cartes</small></button>`).join('')}</div>
@@ -1286,6 +1300,7 @@ function prepScreen(){const u=Z.unlocks(META);if(!u.chars.includes(PREP.ch))PREP
   <p>${Z.CHARS[PREP.ch].d}</p>
   <h3>Ton lieu</h3><div class="tabs wrap">${Object.keys(Z.PLACES).map(k=>u.places.includes(k)?`<button type="button" class="tab${k===PREP.pl?' on':''}" data-a="preppl" data-v="${k}">${Z.PLACES[k].n}</button>`:`<button type="button" class="tab" disabled>🔒 ${Z.PLACES[k].n}</button>`).join('')}</div>
   <p>${Z.PLACES[PREP.pl].d}</p>
+  <h3>Menace</h3>${menaceTabs()}<p>${menaceTxt(PREP.menace)}</p>
   ${legacyTxt()}<button type="button" class="go" data-a="start" ${err?'disabled':''}>Commencer</button>
   <button type="button" class="skip" data-a="coll">Collection (${META.points} points)</button><button type="button" class="skip" data-a="title">Retour</button>`)}
 /* recherche et tri des cartes (collection et éditeur de deck) */
@@ -1332,7 +1347,10 @@ const ACT={
  prepdeck:v=>{META.slot=+v;saveMeta(META);prepScreen()},
  prepch:v=>{PREP.ch=v;prepScreen()},
  preppl:v=>{PREP.pl=v;prepScreen()},
- start:()=>{const d=META.decks[META.slot];if(Z.deckError(d,META.cards))return;newGame(PREP.ch,PREP.pl,null,d);takeLegacy();save();hide();render()},
+ 'win-leave':()=>leaveWin(),
+ 'win-stay':()=>{G.endless=1;save();SFX.play('ui');dawn()},
+ prepmen:v=>{PREP.menace=+v;META.menaceSel=+v;saveMeta(META);prepScreen()},
+ start:()=>{const d=META.decks[META.slot];if(Z.deckError(d,META.cards))return;newGame(PREP.ch,PREP.pl,null,d);Z.applyMenace(G,PREP.menace,R);takeLegacy();save();hide();render()},
  edit:()=>deckEditor(),
  dkp:v=>{const d=META.decks[META.slot];if(d.length<Z.DECK_MAX&&(deckCount(d)[v]||0)<Z.copyMax(v)&&META.cards.includes(v)){d.push(v);saveMeta(META)}deckEditor(1)},
  dkm:v=>{const d=META.decks[META.slot],k=d.indexOf(v);if(k>=0){d.splice(k,1);saveMeta(META)}deckEditor(1)},
@@ -1400,7 +1418,7 @@ function dailyScreen(){const day=today(),c=dailySetup(day),b=dailyBest(day);
   <ul><li>Personnage : <b>${Z.CHARS[c.ch].n}</b></li><li>Lieu : <b>${Z.PLACES[c.pl].n}</b></li><li>Toutes les cartes sont disponibles.</li></ul>
   ${b!==null?`<p>Ton meilleur score aujourd’hui : <b>${plural(b,'nuit','nuits')}</b>.</p>`:''}<p>Les défis ne comptent pas pour les déblocages.</p>
   <button type="button" class="go" data-a="daily-go">Jouer le défi</button><button type="button" class="skip" data-a="title">Retour</button>`)}
-const rulesHtml=()=>`<ul class="rules"><li>Le jour, dépense tes <b>4 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
+const rulesHtml=()=>`<ul class="rules"><li><b>But</b> : tenir <b>${Z.WIN_NIGHT} nuits</b>. À l’aube de la nuit ${Z.WIN_NIGHT}, après le dernier Colosse, les secours arrivent : tu peux <b>partir</b> (victoire) ou <b>rester</b> en mode infini pour le score. Chaque victoire débloque un niveau de <b>Menace</b> (10 au total) : une règle plus dure de plus, à choisir en préparant la partie.</li><li>Le jour, dépense tes <b>4 énergies</b> en cartes (chaque carte coûte 0 à 3) : défenses, survivants armés, pièges ou objets. Les cartes non jouées restent en main.</li>
 <li>Chaque survivant a un <b>prénom</b> et un trait. La première fois qu’il tombe, il part blessé en réserve pour 3 nuits ; la seconde fois, il est perdu pour de bon.</li>
 <li>Chaque unité a un <b>rôle</b> : ${ink('tank')} <b>Tank</b> (attire les zombies à 3 cases, bloque 1 coup sur 3), ${ink('heal')} <b>Soin</b> (à distance ou sur les 8 cases autour, jamais les murs), ${ink('dps')} <b>DPS</b>. Un Tank, un Soin et un DPS voisins forment une <b>escouade</b> : +1 dégât (ou +1 soin) pour chacun.</li>
 <li>Les unités de <b>corps à corps</b> rendent chaque coup reçu au contact. Des <b>murs</b> côte à côte forment un rempart : chaque mur relié gagne des PV. 2 survivants d’une même faction débloquent son bonus, 5 forment une <b>équipe complète</b>.</li>
@@ -1448,7 +1466,7 @@ const LOGO=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 210" role="
  <path d="M64 128 q4 0 4 5 v9 q0 3 -2.5 3 q-2.5 0 -2.5 -3 v-5 q-3 0 -3 -4 q0 -5 4 -5z" fill="#8e1d12" opacity=".9"/>
  <text x="180" y="206" text-anchor="middle" font-family="'Atkinson Hyperlegible',sans-serif" font-size="12.5" letter-spacing="4" fill="#5a4630">UNE NUIT DE PLUS</text>
 </svg>`;
-function title(){onTitle=true;show(`<h1 class="logo">${LOGO}</h1><p>Pas de secours. Pas de fin. Survis <b>une nuit de plus</b>, encore et encore : chaque nuit, la horde est plus nombreuse et plus coriace.</p>
+function title(){onTitle=true;show(`<h1 class="logo">${LOGO}</h1><p>Tiens <b>${Z.WIN_NIGHT} nuits</b> jusqu’à l’arrivée des secours… ou reste pour <b>une nuit de plus</b>. Chaque nuit, la horde est plus nombreuse et plus coriace.</p>${META.menaceWon>=0?`<p class="mwon">🏆 Menace ${META.menaceWon} vaincue${META.wins>1?` · ${META.wins} victoires`:''}</p>`:''}
 
 ${META.best?`<p>Ton record : <b>${plural(META.best,'nuit survécue','nuits survécues')}</b> · total : <b>${META.total}</b> nuits sur ${plural(META.runs,'partie','parties')}.</p>`:''}${nextUnlockTxt()}
 ${(d=>d?`<button type="button" class="go" data-a="load">Continuer · ${d.s.phase?'Aube':'Jour'} ${d.g.night}</button><button type="button" class="skip" data-a="new">Nouvelle partie</button>`:'<button type="button" class="go" data-a="new">Jouer</button>')(loadSave())}

@@ -29,6 +29,15 @@ for(const k of Z.EVO_KEYS)check(`évolution ${k} : recette valide`,()=>Z.EVO[k].
 check('deck de départ valide',()=>eq(Z.deckError(Z.STARTER_DECK,Z.STARTER_CARDS),''));
 check('les 4 routes sont au bord, hors forêt',()=>Z.ROADS.forEach(i=>ok(Z.isEdge(i)&&!Z.isForest(i))));
 check('chaque type de nuit a un nom, un effet et une phrase courte',()=>Z.EVENTS.forEach(e=>ok(e.n&&e.d&&e.p&&e.p.length<=45)));
+check('Menace : 10 niveaux décrits, règles de départ',()=>{eq(Z.MENACES.length,11);for(let k=1;k<=10;k++)ok(Z.MENACES[k].n&&Z.MENACES[k].d);
+ const a=Z.applyMenace(Z.newState('surv','bois',rng(1)),0,rng(1));eq(a.energy,Z.ENERGY);eq(a.muts.length,0);
+ const b=Z.applyMenace(Z.newState('surv','bois',rng(1)),10,rng(1));eq(b.energy,Z.ENERGY-1);eq(b.muts.length,1);eq(b.maxS,Z.newState('surv','bois',rng(1)).maxS-3)});
+check('Menace : PV, répit, nuits rouges, Colosse, frénésie',()=>{const s0=fresh(),s1=fresh();s1.menace=10;
+ s0.night=s1.night=11;ok(Z.respite(11,s0));ok(!Z.respite(11,s1));
+ s0.night=s1.night=15;const w0=Z.waveList(s0),w1=Z.waveList(s1);ok(w1.walk>w0.walk,'nuit rouge');
+ s0.night=s1.night=10;eq(Z.waveList(s1).boss,Z.waveList(s0).boss+1);
+ ok(Math.abs(Z.hpMult(4,s1)-1.2)<1e-9);eq(Z.hpMult(4,s0),1);
+ const z0=Z.spawn?null:null;eq(Z.killScrap(s1,false)+Z.killScrap(s1,false),1);eq(Z.killScrap(s0,false),1);eq(Z.killScrap(s1,true),15)});
 check('au moins 25 événements d’aube, chacun avec 2 choix qui marchent',()=>{const ks=Object.keys(Z.DAWN);ok(ks.length>=25,'seulement '+ks.length);ks.forEach(k=>Z.DAWN[k].ch.forEach((c,i)=>{for(let s=1;s<=6;s++){const st=fresh();st.scrap=30;Z.place(st,'gun',2*9+4,rng(1),true);Z.place(st,'bar',2*9+5,rng(1),true);const r=Z.resolveDawn(st,k,i,rng(s),['gun','bar','snp']);ok(r&&typeof r.txt==='string'&&r.txt.length,k+' '+i+' sans texte');ok(st.scrap>=0&&st.shelter>=1&&isFinite(st.shelter),k+' '+i+' valeurs');(r.cards||[]).forEach(t=>ok(Z.U[t],k+' carte inconnue '+t))}}))});
 check('événements d’aube : rares, espacés de 3 nuits, sans répétition',()=>{const st=fresh();const r=rng(7);let n=0,last=-99;const seen=[];for(let night=2;night<400;night++){st.night=night;const e=Z.dawnEvent(st,r);if(e){n++;ok(night-last>=3,'trop rapprochés');last=night;seen.push(e)}}
  const ks=Object.keys(Z.DAWN).length;ok(n>20&&n<90,'fréquence '+n+' sur 398 aubes');eq(new Set(seen.slice(0,Math.min(ks,seen.length))).size,Math.min(ks,seen.length),'répétition avant d’avoir tout vu')});
@@ -134,7 +143,7 @@ for(let g=0;g<NIGHTS;g++){const r=rng(1000+g);
  check(`nuit aléatoire n°${g}`,()=>{const st=Z.newState('surv',['bois','ferme','station','centre'][g%4]||'bois',r);st.night=1+Math.floor(r()*60);
   for(let k=0;k<Math.floor(st.night/5);k++)Z.mutate(st,r);
   const n=4+Math.floor(r()*20);for(let k=0;k<n;k++){const t=PLACE[Math.floor(r()*PLACE.length)],cs=freeCells(st).filter(j=>Z.canPlace(st,t,j));if(cs.length)Z.place(st,t,cs[Math.floor(r()*cs.length)],r,true)}
-  if(r()<.5){const e=Z.EVENTS[Math.floor(r()*Z.EVENTS.length)];st.event=e}
+  if(r()<.5){const e=Z.EVENTS[Math.floor(r()*Z.EVENTS.length)];st.event=e}if(r()<.4)Z.applyMenace(st,Math.floor(r()*11),r);
   // une nuit sur deux, abri indestructible : la nuit va jusqu'au bout, même avec une grosse horde
   if(g%2)st.shelter=st.maxS=1e6;
   const t0=Date.now();Z.startNight(st,r);let res,ticks=0;

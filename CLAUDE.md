@@ -1,7 +1,7 @@
 # Dernier Abri
 
 Roguelite de cartes de survie zombie, destiné d'abord à Steam (PC), avec une version mobile ensuite.
-Le jour, le joueur pose des cartes autour de sa maison. La nuit, la horde attaque en temps réel et la défense se joue toute seule. La survie est sans fin : le score est le nombre de nuits survécues.
+Le jour, le joueur pose des cartes autour de sa maison. La nuit, la horde attaque en temps réel et la défense se joue toute seule. Le but est de tenir 30 nuits jusqu’à l’arrivée des secours (victoire, puis 10 niveaux de Menace) ; le joueur peut aussi rester en mode infini pour le score.
 
 Le document de conception complet est dans `docs/GAME_DESIGN.md`. Lis-le avant toute modification de règles.
 

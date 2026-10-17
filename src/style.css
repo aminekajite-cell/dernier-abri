@@ -533,3 +533,9 @@ ul.rules .ink{width:1.1em;height:1.1em}
 html.eco .overlay{backdrop-filter:none}
 html.eco .cf,html.eco .hand .card.sel .cf,html.eco .citem.in .cf,html.eco .cf.gold,html.eco #preview,html.eco .flyc,html.eco .logo svg,html.eco .cf-pop{filter:none!important}
 html.eco .hand .card.guide,html.eco .go.guide{animation:none;outline:3px solid #ffd25a}
+
+/* v116 : niveaux de Menace et victoire */
+.mtag{margin-left:4px;padding:0 4px;border-radius:4px;background:#8e1d12;color:#ffe2d6;font:700 10px/14px var(--f-body);vertical-align:2px}
+.panel p.mwon{text-align:center;font-weight:700;color:#7a4a00}
+.panel ul.mlist{font-size:13px;gap:2px}
+.tabs.menace .tab{flex:0 0 auto;min-width:38px;padding:6px 4px}
