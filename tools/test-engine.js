@@ -29,6 +29,7 @@ for(const k of Z.EVO_KEYS)check(`évolution ${k} : recette valide`,()=>Z.EVO[k].
 check('deck de départ valide',()=>eq(Z.deckError(Z.STARTER_DECK,Z.STARTER_CARDS),''));
 check('les 4 routes sont au bord, hors forêt',()=>Z.ROADS.forEach(i=>ok(Z.isEdge(i)&&!Z.isForest(i))));
 check('chaque type de nuit a un nom, un effet et une phrase courte',()=>Z.EVENTS.forEach(e=>ok(e.n&&e.d&&e.p&&e.p.length<=45)));
+check('chaque illustration de assets/cards_cartoon est déclarée dans CART_FILES (game.js)',()=>{const m=fs.readFileSync(path.join(ROOT,'src/game.js'),'utf8').match(/const CART_FILES=\(([\s\S]*?)\)\.split/);ok(m,'CART_FILES introuvable');const list=m[1].replace(/['+\s]+/g,' ').trim().split(' ');const miss=fs.readdirSync(path.join(ROOT,'assets/cards_cartoon')).map(f=>f.replace(/\.webp$/,'')).filter(f=>!f.endsWith('_pop')&&!f.startsWith('z_')&&Z.U[f]&&!list.includes(f));eq(miss,[])});
 
 /* ---------- 2. pose de chaque carte ---------- */
 for(const t of PLAY){const D=Z.U[t];if(D.react)continue;
