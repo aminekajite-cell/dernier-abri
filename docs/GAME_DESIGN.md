@@ -765,3 +765,5 @@ L'équilibrage est vérifié par simulation (`node tools/simulate.js`). Un bot p
   - M7 Chien de sauvetage (corps à corps, 2) : 2 morsures de 2, soigne 1 PV à un voisin tous les 2 tours.
   - M8 Frappe au napalm (réaction, 2) : 4 dégâts en zone puis feu.
   - M9 Blindé des secours (tank, 3) : 30 PV, 2 dégâts, repousse.
+
+**v122** : plus d’émojis dans le jeu. Toutes les icônes (aide, détail de la nuit, aube, victoire, mémorial, cadenas, options, rôles, factions, équipements sur les pions, compteur de victimes, Colosse sur la piste) sont des pictogrammes à l’encre dessinés en code (`GLY` dans `game.js`), dans le style des pictogrammes des cartes. Restent seulement les signes typographiques ★ (étoiles de fusion), ✦ (évolution) et ✓.

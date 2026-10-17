@@ -553,3 +553,15 @@ html.goldback .pile .pb{box-shadow:0 0 0 2px #f2c23d,1px 2px 0 #c9b68c,2px 3px 0
 html.eco .panel img.heli{animation:none;filter:none}
 .vcard{width:150px;margin:0 auto}
 .citem .vlock{font-size:12px;color:#7a4a00;text-align:center}
+
+/* v122 : icônes à l'encre à la place des émojis */
+.panel p>.ink:first-child,.hint .ink,.tipin .ink{color:#6b3a10}
+.panel p.rip .ink{color:inherit}
+.ztk-i .ink.zw{width:18px;height:18px;margin-top:6px;color:#ffe2d6;stroke-width:2.6}
+.tc .ink{width:14px;height:14px;stroke-width:2.6}
+.recall .ink{width:14px;height:14px;vertical-align:-2px}
+.tab .ink,.char .ink{width:13px;height:13px;vertical-align:-2px;opacity:.75}
+.hint .ink{width:18px;height:18px;vertical-align:-4px;color:#f2c23d}
+.info .ink{width:14px;height:14px;vertical-align:-2px}
+.role .ink{width:14px;height:14px}
+.tab:disabled{flex-direction:row;justify-content:center;align-items:center;gap:4px}
