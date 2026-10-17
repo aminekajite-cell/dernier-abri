@@ -493,3 +493,11 @@ ul.rules .ink{width:1.1em;height:1.1em}
 .panel p.poem{font-style:italic;color:#5a4630;font-size:15px}
 /* v107 : la phrase remplace le nom de la nuit sur la fiche */
 .fiche-top b{white-space:normal;font-size:16px;line-height:1.2}
+
+/* v110 : page des évolutions secrètes */
+.panel .evob{border-color:#7a4fb0;color:#4a2a78;font-weight:700}
+.citem .recipe{font-size:12.5px;text-align:center;color:#3a2a18;font-weight:700}
+.evo-x .cf-art{background:radial-gradient(circle at 50% 45%,#5a3f7a,#24183a 75%)}
+.evo-sil{position:absolute;inset:10%;background:center/contain no-repeat;filter:brightness(0);opacity:.85}
+.evo-x .cf-name{opacity:.6}.evo-x .cf-txt{opacity:.7;font-style:italic}
+.evo-x .recipe{color:#6a4a9a}

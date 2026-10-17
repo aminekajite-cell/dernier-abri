@@ -169,7 +169,7 @@ function cardFace(t,o={}){const U0=Z.U[t],D=o.base?U0:Z.stat(G,t),r=rar(t),st=ca
 const art=t=>{const u=Z.U[t]&&artUrl(t);return u?`<span class="art" style="background-image:url('${u}')"></span>`:svg(t)};
 const cc=t=>`var(--k-${Z.U[t].cat})`;
 // à changer à chaque mise en ligne : permet de vérifier sur le téléphone qu'on a la dernière version
-const VERSION='v109 · 17 oct.';
+const VERSION='v110 · 17 oct.';
 /* mise à jour automatique : version.txt (à la racine) contient le numéro de la dernière version publiée.
    Si la page chargée est plus ancienne (cache du site ou du téléphone), on la recharge avec une adresse neuve,
    ce qui contourne les deux caches. Une seule tentative par version, pour ne jamais boucler. */
@@ -1004,7 +1004,7 @@ function unitLine(u){const tr=Z.TRAITS[u.trait],D=Z.U[u.t],lv=(u.lvA||0)+(u.lvD|
 /* conseils au bon moment : une bulle, une seule fois par joueur, la première fois qu'une situation se présente */
 const HINTS={
  fuse:'⭐ <b>Fusion !</b> 3 unités identiques deviennent une seule unité avec une étoile de plus : plus de PV, +1 dégât, et 2 places libérées.',
- evo:'✦ <b>Évolution !</b> Certaines paires de cartes posées côte à côte se transforment en une unité unique. Il en existe d’autres à découvrir.',
+ evo:'✦ <b>Évolution !</b> Certaines paires de cartes posées côte à côte se transforment en une unité unique. Il en existe d’autres à découvrir : retrouve-les dans la Collection, page Évolutions secrètes.',
  fam1:'🎖️ <b>Bonus de faction.</b> 2 survivants de la même faction débloquent son 1ᵉʳ bonus. À 5 survivants : 2ᵉ bonus et équipe complète (+1 dégât, +2 PV).',
  fam2:'🎖️ <b>Équipe complète !</b> 5 survivants de la même faction : 2ᵉ bonus, +1 dégât et +2 PV pour toute la faction.',
  squad:'🛡️❤️⚔️ <b>Escouade !</b> Un Tank, un Soin et un DPS voisins gagnent chacun +1 dégât (ou +1 soin).',
@@ -1272,12 +1272,15 @@ function deckEditor(keep){const d=META.decks[META.slot],cnt=deckCount(d),err=Z.d
   <button type="button" class="go" data-a="new">Terminé</button><button type="button" class="skip" data-a="dkreset">Remettre le deck de départ</button><button type="button" class="skip" data-a="coll">Collection</button>`,keep);cfSync()}
 function collectionScreen(keep){const own=META.cards;
  show(`<h2 class="pw">Collection</h2><p>Tu as <b>${META.points}</b> points de survie. Chaque partie en rapporte : 10 par nuit survécue, plus 1 tous les 4 zombies. Une carte débloquée l’est pour toujours.</p>
+  <button type="button" class="skip evob" data-a="evo">✦ Évolutions secrètes · ${(META.evo||[]).filter(k=>Z.EVO[k]).length}/${Z.EVO_KEYS.length} découvertes</button>
   ${cfBar(true)}${cfGrid(Z.KEYS.filter(t=>!CF.own||(CF.own==='y')===own.includes(t)),t=>{const has=own.includes(t),pr=Z.CARD_PRICE[Z.RAR[t]||'com'];return `<div class="citem${has?' in':' locked'}">${cardFace(t,{base:1})}<span class="qty">${has?'<b>✓ Débloquée</b>':`<button type="button" class="buy" data-a="unlock" data-v="${t}" ${META.points>=pr?'':'disabled'}>${pr} pts</button>`}</span></div>`})}
-  ${evoHtml()}
   <button type="button" class="go" data-a="new">Préparer une partie</button><button type="button" class="skip" data-a="title">Accueil</button>`,keep);cfSync()}
-// évolutions secrètes : visibles dans la collection une fois découvertes en partie
-function evoHtml(){const ev=META.evo||[];return `<h3>Évolutions secrètes (${ev.length}/${Z.EVO_KEYS.length})</h3><p>Deux cartes précises posées côte à côte se transforment en une unité unique. Elle n’entre jamais dans un deck ; quand elle tombe, ses deux cartes reviennent dans ta défausse.</p>
- <div class="deck">${Z.EVO_KEYS.map(k=>ev.includes(k)?`<div class="dk in" style="--cc:#c58cff">${svg(k)}<span><b>✦ ${Z.U[k].n}</b><em class="ce">${Z.EVO[k].map(t=>Z.U[t].n).join(' + ')}</em><br>${Z.U[k].d}</span></div>`:`<div class="dk locked" style="--cc:var(--muted)">${svg('relic')}<span><b>???</b>Pas encore découverte.</span></div>`).join('')}</div>`}
+// page des évolutions secrètes : les cartes découvertes en grand avec leur recette, les autres en silhouette avec un indice
+function evoScreen(){const ev=META.evo||[],n=Z.EVO_KEYS.filter(k=>ev.includes(k)).length;
+ show(`<h2 class="pw">Évolutions secrètes</h2><p>Deux cartes précises posées <b>côte à côte</b> sur le plateau se transforment en une unité unique. Elle n’entre jamais dans un deck ; quand elle tombe, ses deux cartes reviennent dans ta défausse. Tu en as découvert <b>${n} sur ${Z.EVO_KEYS.length}</b>.</p>
+  <div class="cgrid">${Z.EVO_KEYS.map(k=>{const [a,b]=Z.EVO[k];return ev.includes(k)?`<div class="citem in">${cardFace(k,{base:1})}<span class="qty recipe">${Z.U[a].n} + ${Z.U[b].n}</span></div>`
+   :`<div class="citem evo-x"><span class="cf"><span class="cf-art"><i class="evo-sil" style="background-image:url('assets/sprites_cartoon/${k}.webp')"></i></span><span class="cf-vig"></span><span class="cf-name">???</span><span class="cf-txt"><span>Pas encore découverte</span></span></span><span class="qty recipe">Indice : ${Z.U[a].n} + ?</span></div>`}).join('')}</div>
+  <button type="button" class="go" data-a="coll">Collection</button><button type="button" class="skip" data-a="title">Accueil</button>`)}
 const ACT={
  options:()=>optionsScreen(onTitle?'title':'game'),
  optclose:()=>{if(optBack==='game'){hide();render()}else title()},
@@ -1294,6 +1297,7 @@ const ACT={
  dkm:v=>{const d=META.decks[META.slot],k=d.indexOf(v);if(k>=0){d.splice(k,1);saveMeta(META)}deckEditor(1)},
  dkreset:()=>{META.decks[META.slot]=Z.STARTER_DECK.slice();saveMeta(META);deckEditor()},
  coll:()=>collectionScreen(),
+ evo:()=>evoScreen(),
  unlock:v=>{const pr=Z.CARD_PRICE[Z.RAR[v]||'com'];if(!META.cards.includes(v)&&META.points>=pr){META.points-=pr;META.cards.push(v);saveMeta(META);SFX.play('dawn')}collectionScreen(1)},
  char:v=>{pendingChar=v;placeScreen()},
  place:v=>{newGame(pendingChar,v);save();hide();render()},
