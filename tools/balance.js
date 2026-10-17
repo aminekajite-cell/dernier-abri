@@ -3,7 +3,8 @@
 //  1. Valeur des cartes : chaque carte est ajoutée à une défense de référence (3 barricades + 2 tireurs sur la route du nord),
 //     face à la horde de la nuit 3, 8 et 15. On mesure ce qu'elle apporte (dégâts, zombies tués, PV de l'abri sauvés)
 //     et on le rapporte à son coût en énergie. Les cartes très au-dessus ou très en dessous de la moyenne sont signalées.
-//  2. Courbe de difficulté : un joueur automatique (pioche réelle, 5 énergie par jour, ferme les routes avec des murs,
+//  2. Courbe de difficulté : un joueur automatique (pioche réelle, énergie du moteur, limite d'unités, réserve et convalescence,
+//     cartes tenues par les unités posées, fusion en nouvelle carte ★, ferme les routes avec des murs,
 //     place ses tireurs derrière, ses tanks et ses soigneurs autour) joue des parties complètes. On mesure jusqu'où il tient.
 //  3. Montée en puissance : nombre de zombies et PV totaux de la horde nuit après nuit.
 // Rapport complet : tools/balance-out/rapport.md ; historique des versions : tools/balance-out/historique.csv.
@@ -47,7 +48,7 @@ function evalCard(t,night){let gain=0,kills=0,saved=0,n=0;const D=U[t];
 const TESTED=Object.keys(U).filter(t=>!U[t].evo&&!U[t].react&&!U[t].instant&&!U[t].onUnit);
 // soutien dont l'effet ne se voit pas sur une seule nuit (pioche, ferraille, soins, réparations à l'aube, courant…) :
 // mesuré mais pas classé. Seuls les soutiens qui frappent ou renforcent les attaques sont classés.
-const MEASURABLE=t=>U[t].cat!=='help'||U[t].dmg||U[t].buff||U[t].lead||U[t].chief;
+const MEASURABLE=t=>(U[t].cat!=='help'&&U[t].cat!=='post')||U[t].dmg||U[t].buff||U[t].lead||U[t].chief;
 const NIGHTS=[3,8,15],cards=[];
 for(const t of TESTED){const r={t,cost:Math.max(1,Z.cost(t)),by:{}};let score=0;
  for(const n of NIGHTS){const e=evalCard(t,n);r.by[n]=e;if(e)score+=e.gain+e.kills*5+e.saved*8}
@@ -78,30 +79,43 @@ function defense(st,R){return[...R.front,...R.back].reduce((s,j)=>s+(st.grid[j]?
 // ideal=true : le joueur a toujours tout le deck en main (il choisit librement), repère d'un très bon joueur
 const clone=o=>JSON.parse(JSON.stringify(o));
 // note d'une fin de nuit : PV de l'abri d'abord, puis zombies tués et PV des unités restantes
-const score=st=>st.shelter*30+st.kills*6+st.grid.reduce((a,u)=>a+(u&&U[u.t].block?Math.min(u.hp,20):0),0)*.3;
+// v112 : seuls les PV des unités comptent (avant, les murs gonflaient la note : le joueur automatique bétonnait au lieu de tirer)
+const score=st=>st.shelter*30+st.kills*6+st.grid.reduce((a,u)=>a+(u&&Z.isUnit(u.t)?Math.min(u.hp,20):0),0)*.3;
 // il juge ses poses sur une nuit plus dure que la prochaine (2 nuits plus tard) pour ne pas sous-estimer les tueurs
-function simNight(st,seed){const c=clone(st);c.event=Z.EVENTS.find(e=>e.id===st.event.id)||st.event;c.night+=2;playNight(c,rng(seed));return c}
+function simNight(st,seed){const c=clone(st);c.event=Z.EVENTS.find(e=>e.id===st.event.id)||st.event;playNight(c,rng(seed));return c}
+// v112 : il juge ses poses sur la vraie nuit suivante, en moyenne sur 2 tirages (l'abri peut passer sous 0 : on voit l'écart même dans une nuit perdue)
+const simScore=(st,seed)=>(score(simNight(st,seed))+score(simNight(st,seed+1)))/2
 // pose une carte à la case de son rôle (un mur à tracer est posé en ligne devant la route)
 function playCard(st,t,r){const D=U[t];if(D.instant){Z.place(st,t,Z.C,r);return true}
  const j=slotFor(st,t);if(j==null)return false;
  if(Z.isTrace(t)){const R=ROADS.find(R=>R.front.includes(j));const cells=R?freeIn(st,R.front).filter(c=>Z.canPlace(st,t,c)):[j];
   if(cells.length>1)Z.placeLine(st,t,cells.slice(0,Z.chargesOf(t)),r);else Z.place(st,t,j,r)}
  else Z.place(st,t,j,r);return true}
-function game(seed,ideal){const r=rng(seed);const st=Z.newState('surv','bois',r);let draw=Z.shuffle([...DECK],r),disc=[],hand=[];
+// cartes tenues par les unités posées (comme dans le jeu) : la carte revient en défausse quand l'unité quitte le plateau ;
+// une fusion rend aussitôt les 3 cartes qui la composent (u.fbk) ; une unité absorbée par une évolution ne rend rien tout de suite
+const cardsOf=u=>u.src||(u.gen?[]:[u.t]);
+function syncCards(st,G){const live=new Set(st.grid.filter(Boolean).concat(st.bench||[]));
+ for(const u of live)if(u.fbk){G.disc.push(...u.fbk);delete u.fbk}
+ for(const u of G.board)if(!live.has(u)&&!u.absorbed)G.disc.push(...cardsOf(u));G.board=[...live]}
+// réserve : les blessés guéris (convalescence finie) reviennent sur le plateau, à la case de leur rôle
+function rebench(st){for(let k=(st.bench||[]).length-1;k>=0;k--){const u=st.bench[k];if(u.koUntil)continue;const j=slotFor(st,u.t);if(j!=null&&Z.canPlaceBench(st,k,j))Z.placeBench(st,k,j)}}
+function game(seed,ideal){const r=rng(seed);const st=Z.newState('surv','bois',r);let draw=Z.shuffle([...DECK],r),hand=[];const G={disc:[],board:[]};
  const stats={spawned:0,reached:0,dealt:0};
- for(;;){// pioche
-  if(ideal){hand=[...DECK];}else{const n=Z.drawCount(st);let fresh=0;while((hand.length<n||fresh<1)&&hand.length<Z.HAND_MAX){fresh++;if(!draw.length){draw=Z.shuffle(disc,r);disc=[]}if(!draw.length)break;hand.push(draw.pop())}}
+ for(;;){rebench(st);syncCards(st,G);let disc=G.disc;// pioche
+  if(ideal){hand=[...DECK];}else{const n=Z.drawCount(st);let fresh=0;while((hand.length<n||fresh<1)&&hand.length<Z.HAND_MAX){fresh++;if(!draw.length){draw=Z.shuffle(G.disc,r);G.disc=disc=[]}if(!draw.length)break;hand.push(draw.pop())}}
   // jour : il essaie chaque carte jouable de sa main sur une copie de la nuit à venir et pose la meilleure,
   // tant qu'il reste de l'énergie et qu'une carte améliore le résultat
   const nseed=Math.floor(r()*1e9);
-  for(let guard=0;guard<10;guard++){let best=null;const base=score(simNight(st,nseed));
+  for(let guard=0;guard<10;guard++){let best=null,any=null;const base=simScore(st,nseed);
    for(const t of[...new Set(hand)]){const D=U[t];if(!Z.canPay(st,t)||D.onUnit||D.react)continue;
     if(D.instant&&!((t==='food'&&st.shelter<st.maxS-2)||(t==='rep'&&st.grid.some(u=>u&&U[u.t].block&&u.hp<Z.maxHp(st,u)-2))))continue;
-    const c=clone(st);if(!playCard(c,t,r))continue;const v=score(simNight(c,nseed))-base*0;const gain=v/Math.max(1,Z.costOf(st,t));
-    if(v>base&&(!best||gain>best.gain))best={t,gain}}
-   if(!best)break;playCard(st,best.t,r);const h=hand.indexOf(best.t);disc.push(best.t);hand.splice(h,1)}
-  if(!ideal)while(hand.length>Z.HAND_MAX-1)disc.push(hand.pop());
-  const res=playNight(st,r);Z.endNight(st);stats.dealt+=Object.values(res.dmg).reduce((a,b)=>a+b,0);
+    const c=clone(st);if(!playCard(c,t,r))continue;const v=simScore(c,nseed);const gain=(v-base)/Math.max(1,Z.costOf(st,t));
+    if(v>base&&(!best||gain>best.gain))best={t,gain};if(!D.instant&&(!any||gain>any.gain))any={t,gain}}
+   // rien n'améliore la simulation : il pose quand même la meilleure carte plutôt que de garder son énergie
+   if(!best)best=any;
+   if(!best)break;playCard(st,best.t,r);const h=hand.indexOf(best.t);hand.splice(h,1);if(U[best.t].instant||Z.isTrace(best.t))disc.push(best.t);syncCards(st,G);disc=G.disc}
+  if(!ideal)while(hand.length>Z.HAND_MAX-1)G.disc.push(hand.pop());
+  const res=playNight(st,r);Z.endNight(st);syncCards(st,G);stats.dealt+=Object.values(res.dmg).reduce((a,b)=>a+b,0);
   stats.spawned+=st.spawned||0;stats.reached+=st.reached||0;st.spawned=0;st.reached=0;
   if(st.shelter<=0||st.night>=60)return{night:st.night,fell:st.shelter<=0,...stats};
   // aube : niveaux (dégâts), mutation, relique, troc
@@ -136,12 +150,12 @@ out(`Valeur = apport moyen (dégâts en plus + zombies tués en plus × 5 + PV d
 // classement général : toutes les cartes mesurables, de la plus rentable à la moins rentable (100 = médiane générale)
 {const ms=cards.filter(c=>MEASURABLE(c.t)&&c.t!=='door'),gm=median(ms.map(c=>c.value).filter(v=>v>0))||1;
  out(`### Classement général (rentabilité par point d'énergie, 100 = la carte médiane)\n\n| Rang | Carte | Type | Coût | Score |\n|---|---|---|---|---|`);
- [...ms].sort((a,b)=>b.value-a.value).forEach((c,k)=>out(`| ${k+1} | ${U[c.t].n} | ${({wall:'Défense',shoot:'Tireur',melee:'Corps à corps',help:'Soutien',trap:'Piège'})[U[c.t].cat]} | ${Z.cost(c.t)} | ${Math.round(c.value/gm*100)} |`));out('')}
+ [...ms].sort((a,b)=>b.value-a.value).forEach((c,k)=>out(`| ${k+1} | ${U[c.t].n} | ${({wall:'Défense',shoot:'Tireur',melee:'Corps à corps',help:'Soutien',trap:'Piège',post:'Poste'})[U[c.t].cat]} | ${Z.cost(c.t)} | ${Math.round(c.value/gm*100)} |`));out('')}
 out(`**Trop fortes (≥ 180)** : ${strong.map(c=>`${U[c.t].n} (${Math.round(c.rel*100)})`).join(', ')||'aucune'}\n`);
 out(`**Trop faibles (≤ 40)** : ${weak.map(c=>`${U[c.t].n} (${Math.round(c.rel*100)})`).join(', ')||'aucune'}\n`);
 out(`| Carte | Type | Coût | Valeur | Dégâts en plus (N3 / N8 / N15) | Zombies tués en plus | PV abri sauvés |\n|---|---|---|---|---|---|---|`);
 cards.forEach(c=>{const b=NIGHTS.map(n=>c.by[n]?f1(c.by[n].gain):'—').join(' / ');const k=f1(NIGHTS.reduce((a,n)=>a+(c.by[n]?c.by[n].kills:0),0)/NIGHTS.length);const s=f1(NIGHTS.reduce((a,n)=>a+(c.by[n]?c.by[n].saved:0),0)/NIGHTS.length);
- out(`| ${U[c.t].n} | ${({wall:'Défense',shoot:'Tireur',melee:'Corps à corps',help:'Soutien',trap:'Piège'})[U[c.t].cat]} | ${Z.cost(c.t)} | ${MEASURABLE(c.t)?Math.round(c.rel*100):'non classé'} | ${b} | ${k} | ${s} |`)});
+ out(`| ${U[c.t].n} | ${({wall:'Défense',shoot:'Tireur',melee:'Corps à corps',help:'Soutien',trap:'Piège',post:'Poste'})[U[c.t].cat]} | ${Z.cost(c.t)} | ${MEASURABLE(c.t)?Math.round(c.rel*100):'non classé'} | ${b} | ${k} | ${s} |`)});
 out(`\nNon classées : les soutiens à effet indirect (pioche, ferraille, soins, réparations, courant) et la Porte blindée (collée à l'abri), car une seule nuit sur une seule route ne montre pas leur effet. Non testées : les cartes à effet à la demande ou sur l'abri : ${Object.keys(U).filter(t=>!U[t].evo&&(U[t].react||U[t].instant||U[t].onUnit)).map(t=>U[t].n).join(', ')}.`);
 fs.writeFileSync(path.join(OUT,'rapport.md'),lines.join('\n')+'\n');
 // historique : une ligne par lancement, pour comparer les versions
